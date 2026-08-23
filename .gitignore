@@ -1,0 +1,36 @@
+# Rust build artifacts
+target/
+**/*.rs.bk
+*.pdb
+
+# Meson & Ninja build outputs
+build/
+build-dir/
+_build/
+_flatpak_build/
+subprojects/
+
+# Flatpak Builder
+.flatpak-builder/
+.flatpak/
+
+# Compiled GResources & Gettext Catalogs
+*.gresource
+*.mo
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.directory
+
+# Python caches (scripts)
+__pycache__/
+*.py[cod]
+.venv/
+
+# OS artifacts
+.DS_Store
+Thumbs.db

@@ -1,0 +1,12 @@
+[package]
+name = "gnome-paths-example-plugin"
+version = "0.1.0"
+edition = "2021"
+authors = ["Lewis"]
+description = "Template de plugin nativo (.so) para o GNOME Paths"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# Note: When compiling external plugins, depend on the host application types or C-compatible FFI.

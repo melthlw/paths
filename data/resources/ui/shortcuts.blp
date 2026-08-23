@@ -1,0 +1,86 @@
+using Gtk 4.0;
+using Adw 1;
+
+Gtk.ShortcutsWindow shortcuts_dialog {
+  modal: true;
+
+  Gtk.ShortcutsSection {
+    section-name: "shortcuts";
+    max-height: 10;
+    title: _("Shortcuts");
+
+    Gtk.ShortcutsGroup {
+      title: _("Tools & Navigation");
+
+      Gtk.ShortcutsShortcut {
+        title: _("Select & Move Tool");
+        action-name: "app.tool-select";
+        accelerator: "v";
+      }
+
+      Gtk.ShortcutsShortcut {
+        title: _("Rectangle Tool");
+        action-name: "app.tool-rectangle";
+        accelerator: "r";
+      }
+
+      Gtk.ShortcutsShortcut {
+        title: _("Brush Tool");
+        action-name: "app.tool-brush";
+        accelerator: "b";
+      }
+
+      Gtk.ShortcutsShortcut {
+        title: _("Pen / Path Tool");
+        action-name: "app.tool-pen";
+        accelerator: "p";
+      }
+
+      Gtk.ShortcutsShortcut {
+        title: _("Text Tool");
+        action-name: "app.tool-text";
+        accelerator: "t";
+      }
+    }
+
+    Gtk.ShortcutsGroup {
+      title: _("Document & Operations");
+
+      Gtk.ShortcutsShortcut {
+        title: _("New Document");
+        action-name: "app.new";
+        accelerator: "<Primary>n";
+      }
+
+      Gtk.ShortcutsShortcut {
+        title: _("Open Document");
+        action-name: "app.open";
+        accelerator: "<Primary>o";
+      }
+
+      Gtk.ShortcutsShortcut {
+        title: _("Save Document");
+        action-name: "app.save";
+        accelerator: "<Primary>s";
+      }
+
+      Gtk.ShortcutsShortcut {
+        title: _("Export Document");
+        action-name: "app.export";
+        accelerator: "<Primary>e";
+      }
+
+      Gtk.ShortcutsShortcut {
+        title: _("Undo");
+        action-name: "app.undo";
+        accelerator: "<Primary>z";
+      }
+
+      Gtk.ShortcutsShortcut {
+        title: _("Redo");
+        action-name: "app.redo";
+        accelerator: "<Primary><Shift>z";
+      }
+    }
+  }
+}
