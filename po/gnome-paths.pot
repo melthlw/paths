@@ -1,0 +1,2222 @@
+# Brazilian Portuguese translation for GNOME Paths.
+# Copyright (C) 2026 GNOME Paths Authors
+# This file is distributed under the same license as the gnome-paths package.
+# Lewis <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-paths 0.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/lewis/gnome-paths/issues\n"
+"POT-Creation-Date: 2026-08-22 16:30-0300\n"
+"POT-Creation-Date: 2026-08-22 16:30-0300\n"
+"Last-Translator: Lewis <EMAIL@ADDRESS>\n"
+"Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+
+msgid "0° (Horizontal →)"
+msgstr ""
+
+msgid "10% (Very Subtle)"
+msgstr ""
+
+msgid "100% (Solid)"
+msgstr ""
+
+msgid "135° (Diagonal ↙)"
+msgstr ""
+
+msgid "150 DPI (Medium)"
+msgstr ""
+
+msgid "15° Increments"
+msgstr ""
+
+msgid "180° (Horizontal ←)"
+msgstr ""
+
+msgid "25% (Standard)"
+msgstr ""
+
+msgid "270° (Vertical ↑)"
+msgstr ""
+
+msgid "300 DPI (Print)"
+msgstr ""
+
+msgid "30° Increments"
+msgstr ""
+
+msgid "45° (Diagonal ↘)"
+msgstr ""
+
+msgid "45° Increments"
+msgstr ""
+
+msgid "50% (Medium)"
+msgstr ""
+
+msgid "600 DPI (High Resolution)"
+msgstr ""
+
+msgid "72 DPI (Screen / Web)"
+msgstr ""
+
+msgid "75% (Strong)"
+msgstr ""
+
+msgid "90° (Vertical ↓)"
+msgstr ""
+
+msgid "90° Increments (Orthogonal)"
+msgstr ""
+
+msgid "About"
+msgstr ""
+
+msgid "About GNOME Paths"
+msgstr ""
+
+msgid "Accent Color"
+msgstr ""
+
+msgid "Accent color"
+msgstr ""
+
+msgid "Active Graphics Device"
+msgstr ""
+
+msgid "Active Tool: Artboard / Page"
+msgstr ""
+
+msgid "Active Tool: Selection"
+msgstr ""
+
+msgid "Active Tool: Text"
+msgstr ""
+
+msgid "Active Tool: {}"
+msgstr ""
+
+msgid "Add Fill"
+msgstr ""
+
+msgid "Add Stroke"
+msgstr ""
+
+msgid "Add a new plugin to manage."
+msgstr ""
+
+msgid "Add this tool to a group"
+msgstr ""
+
+msgid "Align Left"
+msgstr ""
+
+msgid "Align Nodes Horizontally"
+msgstr ""
+
+msgid "Align Nodes Vertically"
+msgstr ""
+
+msgid "Align Right"
+msgstr ""
+
+msgid "Align bottom"
+msgstr ""
+
+msgid "Align in Circle"
+msgstr ""
+
+msgid "Align in Grid"
+msgstr ""
+
+msgid "Align left"
+msgstr ""
+
+msgid "Align right"
+msgstr ""
+
+msgid "Align top"
+msgstr ""
+
+msgid "Alignment"
+msgstr ""
+
+msgid "All"
+msgstr ""
+
+msgid "All Nodes on Selected Path"
+msgstr ""
+
+msgid "All Pages"
+msgstr ""
+
+msgid "Always Visible"
+msgstr ""
+
+msgid "Anchor Node Size"
+msgstr ""
+
+msgid "Angle"
+msgstr ""
+
+msgid "Antialiasing"
+msgstr ""
+
+msgid "Appearance"
+msgstr ""
+
+msgid "Application Language"
+msgstr ""
+
+msgid "Application Theme"
+msgstr ""
+
+msgid "Arc"
+msgstr ""
+
+msgid "Area to Export"
+msgstr ""
+
+msgid "Arrange"
+msgstr ""
+
+msgid "Arrange & Order"
+msgstr ""
+
+msgid "Arrange in Circle"
+msgstr ""
+
+msgid "Arrange in Grid"
+msgstr ""
+
+msgid "Artboard"
+msgstr ""
+
+msgid "Artboard / Page"
+msgstr ""
+
+msgid "Auto-Smooth Node"
+msgstr ""
+
+msgid "Background color behind pages and artboards"
+msgstr ""
+
+msgid "Base Name"
+msgstr ""
+
+msgid "Biggest Object"
+msgstr ""
+
+msgid "Blend Mode"
+msgstr ""
+
+msgid "Blur"
+msgstr ""
+
+msgid "Bottom"
+msgstr ""
+
+msgid "Bottom-Left Radius"
+msgstr ""
+
+msgid "Bottom-Right Radius"
+msgstr ""
+
+msgid "Bright Cyan (#00D2FF)"
+msgstr ""
+
+msgid "Bright interface"
+msgstr ""
+
+msgid "Bring Forward"
+msgstr ""
+
+msgid "Bring to Front"
+msgstr ""
+
+msgid "Brush"
+msgstr ""
+
+msgid "Brush Tool"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Canvas Ready • Zoom: 100%"
+msgstr ""
+
+msgid "Canvas and Grid"
+msgstr ""
+
+msgid "Center"
+msgstr ""
+
+msgid "Center horizontally"
+msgstr ""
+
+msgid "Center vertically"
+msgstr ""
+
+msgid "Centimeters (cm)"
+msgstr ""
+
+msgid "Chamfer"
+msgstr ""
+
+msgid "Checkerboard"
+msgstr ""
+
+msgid "Choose quick export format"
+msgstr ""
+
+msgid "Chord"
+msgstr ""
+
+msgid "Circle"
+msgstr ""
+
+msgid "Circle / Ellipse"
+msgstr ""
+
+msgid "Circular"
+msgstr ""
+
+msgid "Click Grab Sensitivity"
+msgstr ""
+
+msgid "Click row to reset shortcut"
+msgstr ""
+
+msgid "Clone"
+msgstr ""
+
+msgid "Close (Esc)"
+msgstr ""
+
+msgid "Close / Open Path"
+msgstr ""
+
+msgid "Color"
+msgstr ""
+
+msgid "Color Burn"
+msgstr ""
+
+msgid "Color Dodge"
+msgstr ""
+
+msgid "Color Scheme"
+msgstr ""
+
+msgid "Columns:"
+msgstr ""
+
+msgid "Complete Document"
+msgstr ""
+
+msgid "Concave"
+msgstr ""
+
+msgid "Content"
+msgstr ""
+
+msgid "Continuous Lines"
+msgstr ""
+
+msgid "Control Handle Size"
+msgstr ""
+
+msgid "Controls how visible the grid overlay appears"
+msgstr ""
+
+msgid "Convert (Ctrl+Shift+C)"
+msgstr ""
+
+msgid "Convert to Path"
+msgstr ""
+
+msgid "Convert to Path (Ctrl+Shift+C)"
+msgstr ""
+
+msgid "Convert to Vector Path"
+msgstr ""
+
+msgid "Copy"
+msgstr ""
+
+msgid "Corner Node"
+msgstr ""
+
+msgid "Corner Node (Cusp)"
+msgstr ""
+
+msgid "Corner Radius"
+msgstr ""
+
+msgid "Corner Rounding"
+msgstr ""
+
+msgid "Corner Type"
+msgstr ""
+
+msgid "Create Clipping Mask"
+msgstr ""
+
+msgid "Create Group"
+msgstr ""
+
+msgid "Create Linked Clone"
+msgstr ""
+
+msgid "Create New Page"
+msgstr ""
+
+msgid "Create New Tool Group"
+msgstr ""
+
+msgid "Create Tool Folder"
+msgstr ""
+
+msgid "Create a file for each page"
+msgstr ""
+
+msgid "Creation and Selection Tools"
+msgstr ""
+
+msgid "Current Page"
+msgstr ""
+
+msgid "Custom"
+msgstr ""
+
+msgid "Customize Toolbar"
+msgstr ""
+
+msgid "Customize Tools and Groups"
+msgstr ""
+
+msgid "Customize..."
+msgstr ""
+
+msgid "Cut"
+msgstr ""
+
+msgid "Cut / Slice (Ctrl+Alt+/)"
+msgstr ""
+
+msgid "Dark"
+msgstr ""
+
+msgid "Dark Paper Sheet (#1E1E1E)"
+msgstr ""
+
+msgid "Dark Studio (#242424)"
+msgstr ""
+
+msgid "Darken"
+msgstr ""
+
+msgid "Dashed"
+msgstr ""
+
+msgid "Default Type for New Nodes"
+msgstr ""
+
+msgid "Default measurement unit"
+msgstr ""
+
+msgid "Default paper color for active document artboards"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Delete Current Page"
+msgstr ""
+
+msgid "Delete Layer"
+msgstr ""
+
+msgid "Delete Selected"
+msgstr ""
+
+msgid "Delete Selected Node(s) (Delete/Backspace)"
+msgstr ""
+
+msgid "Deselect"
+msgstr ""
+
+msgid "Deselect all pages"
+msgstr ""
+
+msgid "Detach into Floating Window"
+msgstr ""
+
+msgid "Detach panel (Floating Window)"
+msgstr ""
+
+msgid "Difference"
+msgstr ""
+
+msgid "Difference (Ctrl+-)"
+msgstr ""
+
+msgid "Differentiate Node Shapes"
+msgstr ""
+
+msgid "Direct Curve Dragging"
+msgstr ""
+
+msgid "Display all tools loose on the toolbar without submenus"
+msgstr ""
+
+msgid "Display precision grid across the canvas"
+msgstr ""
+
+msgid "Distribute Nodes Horizontally"
+msgstr ""
+
+msgid "Distribute Nodes Vertically"
+msgstr ""
+
+msgid "Distribute horizontally"
+msgstr ""
+
+msgid "Distribute vertically"
+msgstr ""
+
+msgid "Divergence"
+msgstr ""
+
+msgid "Divergence Factor"
+msgstr ""
+
+msgid "Division (Ctrl+/)"
+msgstr ""
+
+msgid "Dock into New Section Below"
+msgstr ""
+
+msgid "Dock into Top Bar"
+msgstr ""
+
+msgid "Dock to sidebar"
+msgstr ""
+
+msgid "Document \"{}\" opened"
+msgstr ""
+
+msgid "Document saved to \"{}\""
+msgstr ""
+
+msgid "Dots"
+msgstr ""
+
+msgid "Dotted"
+msgstr ""
+
+msgid "Dotted Grid (Points)"
+msgstr ""
+
+msgid "Drag to reorder, manage folders and tools"
+msgstr ""
+
+msgid "Duplicate"
+msgstr ""
+
+msgid "Edit Mesh Nodes on Screen"
+msgstr ""
+
+msgid "Edit Shortcut: {}"
+msgstr ""
+
+msgid "Edit corners individually"
+msgstr ""
+
+msgid "Edit shortcut"
+msgstr ""
+
+msgid "Editing, Organization and History"
+msgstr ""
+
+msgid "Emerald Green"
+msgstr ""
+
+msgid "End Angle (°)"
+msgstr ""
+
+msgid "English"
+msgstr ""
+
+msgid "Enter Group"
+msgstr ""
+
+msgid "Enter group {}"
+msgstr ""
+
+msgid "Error opening file: {}"
+msgstr ""
+
+msgid "Error reading file {}: {}"
+msgstr ""
+
+msgid "Error reading file: {}"
+msgstr ""
+
+msgid "Error saving file {}: {}"
+msgstr ""
+
+msgid "Error saving: {}"
+msgstr ""
+
+msgid "Exclusion"
+msgstr ""
+
+msgid "Exclusion (Ctrl+^)"
+msgstr ""
+
+msgid "Export"
+msgstr ""
+
+msgid "Export JPG"
+msgstr ""
+
+msgid "Export PDF"
+msgstr ""
+
+msgid "Export PNG"
+msgstr ""
+
+msgid "Export SVG"
+msgstr ""
+
+msgid "Export Separate Files"
+msgstr ""
+
+msgid "Export WebP"
+msgstr ""
+
+msgid "Extension Management"
+msgstr ""
+
+msgid "External extension"
+msgstr ""
+
+msgid "Extra Large (16 px)"
+msgstr ""
+
+msgid "Eyedropper"
+msgstr ""
+
+msgid "Eyedropper (I)"
+msgstr ""
+
+msgid "Failed to parse SVG: {}"
+msgstr ""
+
+msgid "File"
+msgstr ""
+
+msgid "Fill"
+msgstr ""
+
+msgid "Fill Style"
+msgstr ""
+
+msgid "Fine boundary outline highlighting page dimensions"
+msgstr ""
+
+msgid "First Selected"
+msgstr ""
+
+msgid "Fit to Window"
+msgstr ""
+
+msgid "Flat Color"
+msgstr ""
+
+msgid "Flat Mode (No Folders)"
+msgstr ""
+
+msgid "Flip Horizontal"
+msgstr ""
+
+msgid "Flip Vertical"
+msgstr ""
+
+msgid "Follows GNOME"
+msgstr ""
+
+msgid "Font Family (Search or use ↑ / ↓)"
+msgstr ""
+
+msgid "Font Size (pt)"
+msgstr ""
+
+msgid "Font Weight"
+msgstr ""
+
+msgid "Format"
+msgstr ""
+
+msgid "Free / No Snapping (0°)"
+msgstr ""
+
+msgid "Full"
+msgstr ""
+
+msgid "GNOME Blue (#3584E4)"
+msgstr ""
+
+msgid "GNOME Blue (Default)"
+msgstr ""
+
+msgid "GNOME Paths"
+msgstr ""
+
+msgid "GNOME Paths Default"
+msgstr ""
+
+msgid "General and System"
+msgstr ""
+
+msgid "Generous / Touch Friendly (18 px)"
+msgstr ""
+
+msgid "Geometric Pattern"
+msgstr ""
+
+msgid "Gradient"
+msgstr ""
+
+msgid "Graphic pattern displayed for grid subdivisions"
+msgstr ""
+
+msgid "Grid"
+msgstr ""
+
+msgid "Grid (Ctrl+G)"
+msgstr ""
+
+msgid "Grid Color"
+msgstr ""
+
+msgid "Grid Opacity"
+msgstr ""
+
+msgid "Grid Spacing (px)"
+msgstr ""
+
+msgid "Grid Style"
+msgstr ""
+
+msgid "Grid Subdivisions"
+msgstr ""
+
+msgid "Grid and Alignment"
+msgstr ""
+
+msgid "Group"
+msgstr ""
+
+msgid "Group Elements"
+msgstr ""
+
+msgid "Group Name"
+msgstr ""
+
+msgid "Group Selected (Ctrl+G)"
+msgstr ""
+
+msgid "Handle Angle Snapping (Shift)"
+msgstr ""
+
+msgid "Handle Visibility"
+msgstr ""
+
+msgid "Hard Light"
+msgstr ""
+
+msgid "Hardware Accelerated (GPU / Skia Pipeline)"
+msgstr ""
+
+msgid "Hardware Acceleration (GPU)"
+msgstr ""
+
+msgid "Hide"
+msgstr ""
+
+msgid "Hide / Show Selected"
+msgstr ""
+
+msgid "Hide Selection"
+msgstr ""
+
+msgid "Hide fill"
+msgstr ""
+
+msgid "Hide stroke"
+msgstr ""
+
+msgid "High Contrast White (#FFFFFF)"
+msgstr ""
+
+msgid "High Precision / Tight (8 px)"
+msgstr ""
+
+msgid "High Precision Antialiasing"
+msgstr ""
+
+msgid "Highlight Hovered Segments"
+msgstr ""
+
+msgid "Honeycomb"
+msgstr ""
+
+msgid "Hue"
+msgstr ""
+
+msgid "Hue tint used for major and minor grid lines"
+msgstr ""
+
+msgid "Identifier"
+msgstr ""
+
+msgid "Import Image or Vector"
+msgstr ""
+
+msgid "Import plugins (.so)"
+msgstr ""
+
+msgid "Import..."
+msgstr ""
+
+msgid "Inches (in)"
+msgstr ""
+
+msgid "Infinite Dot Pattern"
+msgstr ""
+
+msgid "Inner Radius"
+msgstr ""
+
+msgid "Insert Node into Segment"
+msgstr ""
+
+msgid "Inspector"
+msgstr ""
+
+msgid "Install plugin"
+msgstr ""
+
+msgid "Installed Plugins"
+msgstr ""
+
+msgid "Interaction & Manipulation"
+msgstr ""
+
+msgid "Intersection (Ctrl+*)"
+msgstr ""
+
+msgid "JPG / JPEG (Photography)"
+msgstr ""
+
+msgid "Justify"
+msgstr ""
+
+msgid "Keyboard Shortcuts"
+msgstr ""
+
+msgid "Keyboard scheme"
+msgstr ""
+
+msgid "Language"
+msgstr ""
+
+msgid "Large (12 px)"
+msgstr ""
+
+msgid "Large (8 px)"
+msgstr ""
+
+msgid "Last Selected"
+msgstr ""
+
+msgid "Layers"
+msgstr ""
+
+msgid "Layers Panel"
+msgstr ""
+
+msgid "Layers — GNOME Paths"
+msgstr ""
+
+msgid "Left"
+msgstr ""
+
+msgid "License"
+msgstr ""
+
+msgid "Light"
+msgstr ""
+
+msgid "Light Gray (#E8E8E8)"
+msgstr ""
+
+msgid "Lighten"
+msgstr ""
+
+msgid "Line Height"
+msgstr ""
+
+msgid "Linear"
+msgstr ""
+
+msgid "Linear Gradient"
+msgstr ""
+
+msgid "Linear/Radial Gradient"
+msgstr ""
+
+msgid "Lock"
+msgstr ""
+
+msgid "Lock / Unlock Selected"
+msgstr ""
+
+msgid "Lock Aspect Ratio"
+msgstr ""
+
+msgid "Lock Selection"
+msgstr ""
+
+msgid "Lock aspect ratio"
+msgstr ""
+
+msgid "Low brightness"
+msgstr ""
+
+msgid "Luminosity"
+msgstr ""
+
+msgid "Magnetic Snapping (Ctrl+Shift+')"
+msgstr ""
+
+msgid "Magnetic Snapping and Guides"
+msgstr ""
+
+msgid "Main Menu"
+msgstr ""
+
+msgid "Make Segment Curve"
+msgstr ""
+
+msgid "Make Segment Straight"
+msgstr ""
+
+msgid "Measure"
+msgstr ""
+
+msgid "Measurement Ruler"
+msgstr ""
+
+msgid "Medium (6 px)"
+msgstr ""
+
+msgid "Medium / Standard (9 px)"
+msgstr ""
+
+msgid "Mesh"
+msgstr ""
+
+msgid "Mesh Gradient"
+msgstr ""
+
+msgid "Millimeters (mm)"
+msgstr ""
+
+msgid "Mirror and Layers"
+msgstr ""
+
+msgid "Modern vector design editor accelerated by Skia GPU, built with GTK4, Libadwaita and Rust"
+msgstr ""
+
+msgid "Modern vector design editor accelerated by Skia GPU, built with GTK4, Libadwaita and Rust."
+msgstr ""
+
+msgid "Move Layer Down"
+msgstr ""
+
+msgid "Move Layer Up"
+msgstr ""
+
+msgid "Move down / after"
+msgstr ""
+
+msgid "Move to group:"
+msgstr ""
+
+msgid "Move up / before"
+msgstr ""
+
+msgid "Multiply"
+msgstr ""
+
+msgid "Name:"
+msgstr ""
+
+msgid "Neutral Charcoal (#383838)"
+msgstr ""
+
+msgid "Neutral Gray (#888888)"
+msgstr ""
+
+msgid "New Document"
+msgstr ""
+
+msgid "New Document (Ctrl+N)"
+msgstr ""
+
+msgid "New Group"
+msgstr ""
+
+msgid "New document created"
+msgstr ""
+
+msgid "New key captured successfully!"
+msgstr ""
+
+msgid "No existing groups.\n"
+"Use the '+' button at the top to create a group."
+msgstr ""
+
+msgid "No external plugins installed"
+msgstr ""
+
+msgid "No layers"
+msgstr ""
+
+msgid "Node & Handle Appearance"
+msgstr ""
+
+msgid "Node Editor"
+msgstr ""
+
+msgid "None"
+msgstr ""
+
+msgid "Normal"
+msgstr ""
+
+msgid "Number of Turns"
+msgstr ""
+
+msgid "Number of fine divisions in each cell"
+msgstr ""
+
+msgid "Opacity"
+msgstr ""
+
+msgid "Open Document"
+msgstr ""
+
+msgid "Open Document (Ctrl+O)"
+msgstr ""
+
+msgid "Open Document..."
+msgstr ""
+
+msgid "Open plugins folder"
+msgstr ""
+
+msgid "Orange"
+msgstr ""
+
+msgid "Overlay"
+msgstr ""
+
+msgid "PDF (Portable Document)"
+msgstr ""
+
+msgid "PNG (Raster Image)"
+msgstr ""
+
+msgid "Page 1"
+msgstr ""
+
+msgid "Page Background Color"
+msgstr ""
+
+msgid "Page Drop Shadow"
+msgstr ""
+
+msgid "Page Outline"
+msgstr ""
+
+msgid "Page Tool"
+msgstr ""
+
+msgid "Page and Artboard"
+msgstr ""
+
+msgid "Page {}"
+msgstr ""
+
+msgid "Pages to Export"
+msgstr ""
+
+msgid "Paint Bucket"
+msgstr ""
+
+msgid "Pan Canvas"
+msgstr ""
+
+msgid "Paste"
+msgstr ""
+
+msgid "Path & Node Editor"
+msgstr ""
+
+msgid "Path Editor"
+msgstr ""
+
+msgid "Path Node Editing"
+msgstr ""
+
+msgid "Pattern"
+msgstr ""
+
+msgid "Pattern Type"
+msgstr ""
+
+msgid "Patterns"
+msgstr ""
+
+msgid "Pen"
+msgstr ""
+
+msgid "Pen Tool"
+msgstr ""
+
+msgid "Performance and Hardware Acceleration"
+msgstr ""
+
+msgid "Pixel distance between primary grid lines"
+msgstr ""
+
+msgid "Pixels (px)"
+msgstr ""
+
+msgid "Plugins"
+msgstr ""
+
+msgid "Points"
+msgstr ""
+
+msgid "Points (pt)"
+msgstr ""
+
+msgid "Polygon"
+msgstr ""
+
+msgid "Polygon / Triangle"
+msgstr ""
+
+msgid "Portuguese (Brazil)"
+msgstr ""
+
+msgid "Position and Dimensions"
+msgstr ""
+
+msgid "Preferences"
+msgstr ""
+
+msgid "Preserve alpha transparency"
+msgstr ""
+
+msgid "Press the new key or combination on your keyboard (e.g. <b>Ctrl</b>, <b>Shift</b>, <b>Alt</b> + Key):"
+msgstr ""
+
+msgid "Pure Black (#000000)"
+msgstr ""
+
+msgid "Pure White (#FFFFFF)"
+msgstr ""
+
+msgid "Pure White Paper (#FFFFFF)"
+msgstr ""
+
+msgid "Purple"
+msgstr ""
+
+msgid "Quality"
+msgstr ""
+
+msgid "Quick Export"
+msgstr ""
+
+msgid "Quick Export ({})"
+msgstr ""
+
+msgid "Quick Repositioning Tip"
+msgstr ""
+
+msgid "Radial"
+msgstr ""
+
+msgid "Radial Gradient"
+msgstr ""
+
+msgid "Radius"
+msgstr ""
+
+msgid "Radius (px):"
+msgstr ""
+
+msgid "Radius Ratio"
+msgstr ""
+
+msgid "Ratio"
+msgstr ""
+
+msgid "Realistic elevation shadow around page boundaries"
+msgstr ""
+
+msgid "Rectangle"
+msgstr ""
+
+msgid "Redo"
+msgstr ""
+
+msgid "Redo (Ctrl+Y)"
+msgstr ""
+
+msgid "Remove fill"
+msgstr ""
+
+msgid "Remove from group (Move outside)"
+msgstr ""
+
+msgid "Remove stroke"
+msgstr ""
+
+msgid "Reset Zoom (1:1)"
+msgstr ""
+
+msgid "Resolution (DPI)"
+msgstr ""
+
+msgid "Restore"
+msgstr ""
+
+msgid "Restore Default"
+msgstr ""
+
+msgid "Restore Factory Default"
+msgstr ""
+
+msgid "Restore all shortcuts"
+msgstr ""
+
+msgid "Reverse Path Direction"
+msgstr ""
+
+msgid "Right"
+msgstr ""
+
+msgid "Rotate 90° CCW"
+msgstr ""
+
+msgid "Rotate 90° CW"
+msgstr ""
+
+msgid "Round"
+msgstr ""
+
+msgid "Rounded Corner"
+msgstr ""
+
+msgid "Rows:"
+msgstr ""
+
+msgid "Ruby Red"
+msgstr ""
+
+msgid "Ruler / Measure"
+msgstr ""
+
+msgid "Rulers (Ctrl+R)"
+msgstr ""
+
+msgid "SVG (Scalable Vector)"
+msgstr ""
+
+msgid "SVG Vector Graphics (*.svg)"
+msgstr ""
+
+msgid "Same Fill Color"
+msgstr ""
+
+msgid "Same Object Type"
+msgstr ""
+
+msgid "Same Stroke Color"
+msgstr ""
+
+msgid "Saturation"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Save (Ctrl+S)"
+msgstr ""
+
+msgid "Save As..."
+msgstr ""
+
+msgid "Save Document"
+msgstr ""
+
+msgid "Save Exported File"
+msgstr ""
+
+msgid "Save Shortcut"
+msgstr ""
+
+msgid "Saved to {}"
+msgstr ""
+
+msgid "Scale"
+msgstr ""
+
+msgid "Scope"
+msgstr ""
+
+msgid "Screen"
+msgstr ""
+
+msgid "Select"
+msgstr ""
+
+msgid "Select All"
+msgstr ""
+
+msgid "Select Folder to Export Files"
+msgstr ""
+
+msgid "Select Native Plugin (.so)"
+msgstr ""
+
+msgid "Select Same"
+msgstr ""
+
+msgid "Select Tools to Group"
+msgstr ""
+
+msgid "Select all pages"
+msgstr ""
+
+msgid "Select and Transform"
+msgstr ""
+
+msgid "Select light, dark or automatic system synchronization"
+msgstr ""
+
+msgid "Selected Nodes Only"
+msgstr ""
+
+msgid "Selected Pages"
+msgstr ""
+
+msgid "Selection"
+msgstr ""
+
+msgid "Selection Only"
+msgstr ""
+
+msgid "Send Backward"
+msgstr ""
+
+msgid "Send to Back"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Shared Library (*.so)"
+msgstr ""
+
+msgid "Sharp Corner"
+msgstr ""
+
+msgid "Shortcut Scheme"
+msgstr ""
+
+msgid "Shortcut: {}"
+msgstr ""
+
+msgid "Show"
+msgstr ""
+
+msgid "Show Grid"
+msgstr ""
+
+msgid "Show Path Direction Arrows"
+msgstr ""
+
+msgid "Show fill"
+msgstr ""
+
+msgid "Show rulers and guides"
+msgstr ""
+
+msgid "Show stroke"
+msgstr ""
+
+msgid "Show subtle ambient dot pattern across workspace"
+msgstr ""
+
+msgid "Show/Hide Grid"
+msgstr ""
+
+msgid "Show/Hide Guides"
+msgstr ""
+
+msgid "Show/Hide Rulers"
+msgstr ""
+
+msgid "Sides"
+msgstr ""
+
+msgid "Size of Bézier handle endpoints"
+msgstr ""
+
+msgid "Size of Bézier handle endpoints"
+msgstr ""
+
+msgid "Skia Graphics Pipeline"
+msgstr ""
+
+msgid "Slate"
+msgstr ""
+
+msgid "Slice"
+msgstr ""
+
+msgid "Small (4 px)"
+msgstr ""
+
+msgid "Small (6 px)"
+msgstr ""
+
+msgid "Smallest Object"
+msgstr ""
+
+msgid "Smooth Node"
+msgstr ""
+
+msgid "Smooth edge rendering"
+msgstr ""
+
+msgid "Snap to grid"
+msgstr ""
+
+msgid "Snap to other objects"
+msgstr ""
+
+msgid "Snap to page"
+msgstr ""
+
+msgid "Soft Light"
+msgstr ""
+
+msgid "Software Fallback (CPU Raster)"
+msgstr ""
+
+msgid "Solid"
+msgstr ""
+
+msgid "Source Code"
+msgstr ""
+
+msgid "Spiral"
+msgstr ""
+
+msgid "Split into New Section Below"
+msgstr ""
+
+msgid "Standard (12 px)"
+msgstr ""
+
+msgid "Star"
+msgstr ""
+
+msgid "Start Angle (°)"
+msgstr ""
+
+msgid "Start Angle:"
+msgstr ""
+
+msgid "Stripes"
+msgstr ""
+
+msgid "Stroke"
+msgstr ""
+
+msgid "Symmetric Node"
+msgstr ""
+
+msgid "System Default"
+msgstr ""
+
+msgid "System Default (Theme Auto)"
+msgstr ""
+
+msgid "Tabs in Floating Windows"
+msgstr ""
+
+msgid "Technologies"
+msgstr ""
+
+msgid "Text"
+msgstr ""
+
+msgid "Text Box Width (0 = Auto)"
+msgstr ""
+
+msgid "Toggle Magnetic Snapping"
+msgstr ""
+
+msgid "Tolerance distance for selecting nodes and handles"
+msgstr ""
+
+msgid "Tool Options Position"
+msgstr ""
+
+msgid "Toolbar Customization"
+msgstr ""
+
+msgid "Toolbar Options and Customization"
+msgstr ""
+
+msgid "Toolbar Position"
+msgstr ""
+
+msgid "Toolbars"
+msgstr ""
+
+msgid "Tools"
+msgstr ""
+
+msgid "Top"
+msgstr ""
+
+msgid "Top (Default)"
+msgstr ""
+
+msgid "Top-Left Radius"
+msgstr ""
+
+msgid "Top-Right Radius"
+msgstr ""
+
+msgid "Transform"
+msgstr ""
+
+msgid "Transparent (No Background)"
+msgstr ""
+
+msgid "Transparent Background"
+msgstr ""
+
+msgid "Triangle"
+msgstr ""
+
+msgid "Turns"
+msgstr ""
+
+msgid "Typography Text"
+msgstr ""
+
+msgid "Undo"
+msgstr ""
+
+msgid "Undo (Ctrl+Z)"
+msgstr ""
+
+msgid "Ungroup"
+msgstr ""
+
+msgid "Ungroup (Shift+Ctrl+G)"
+msgstr ""
+
+msgid "Ungroup and separate all tools"
+msgstr ""
+
+msgid "Union (Ctrl++)"
+msgstr ""
+
+msgid "Units and Measurements"
+msgstr ""
+
+msgid "Unlock"
+msgstr ""
+
+msgid "Unsaved changes — GNOME Paths"
+msgstr ""
+
+msgid "Untitled"
+msgstr ""
+
+msgid "Vector Pen"
+msgstr ""
+
+msgid "Version"
+msgstr ""
+
+msgid "Very Generous (24 px)"
+msgstr ""
+
+msgid "Vibrant Magenta (#FF007A)"
+msgstr ""
+
+msgid "View and Zoom"
+msgstr ""
+
+msgid "Visual size of anchor points on canvas"
+msgstr ""
+
+msgid "Waiting for keys..."
+msgstr ""
+
+msgid "Warm Cream / Sepia (#FCF9F2)"
+msgstr ""
+
+msgid "WebP (Compact Web)"
+msgstr ""
+
+msgid "When to show Bézier control arms and handles"
+msgstr ""
+
+msgid "When to show Bézier control arms and handles"
+msgstr ""
+
+msgid "Width"
+msgstr ""
+
+msgid "Word Spacing (px)"
+msgstr ""
+
+msgid "Workspace Background"
+msgstr ""
+
+msgid "Workspace Color"
+msgstr ""
+
+msgid "X Spacing (px):"
+msgstr ""
+
+msgid "Y Spacing (px):"
+msgstr ""
+
+msgid "Zoom"
+msgstr ""
+
+msgid "Zoom 100%"
+msgstr ""
+
+msgid "Zoom 100% (1:1)"
+msgstr ""
+
+msgid "Zoom All"
+msgstr ""
+
+msgid "Zoom In (+)"
+msgstr ""
+
+msgid "Zoom Out (-)"
+msgstr ""
+
+msgid "Zoom Page"
+msgstr ""
+
+msgid "Zoom Selection"
+msgstr ""
+
+msgid "Zoom Tool"
+msgstr ""
+
+msgid "Zoom to All Objects"
+msgstr ""
+
+msgid "Zoom to Page"
+msgstr ""
+
+msgid "Zoom to Selection"
+msgstr ""
+
+msgid "{} (Drag to reorder, split or float)"
+msgstr ""
+
+msgid "{} — Inspector"
+msgstr ""
+
+
+msgid "Clone of {}"
+msgstr ""
+
+msgid "Select Linked Clones"
+msgstr ""
+
+msgid "Select Original"
+msgstr ""
+
+msgid "Unlink Clone"
+msgstr ""
+
+msgid "Panels"
+msgstr ""
+
+msgid "Add Panel"
+msgstr ""
+
+msgid "Close Panel"
+msgstr ""
+
+msgid "Close Other Panels"
+msgstr ""
+
+msgid "Open All Panels"
+msgstr ""
+
+msgid "Restore All Panels"
+msgstr ""
+
+msgid "No Panels Open"
+msgstr ""
+
+msgid "Click '+' above to open panels like\nAppearance, Alignment, Transform or Export."
+msgstr ""
+
+msgid "Drag a floating tab here\nto dock it back."
+msgstr ""
+
+msgid "Dock into Top Bar"
+msgstr ""
+
+msgid "Dock into New Section Below"
+msgstr ""
+
+msgid "Move to Section Above"
+msgstr ""
+
+msgid "Move to New Section Below"
+msgstr ""
+
+msgid "Move Tab Left"
+msgstr ""
+
+msgid "Move Tab Right"
+msgstr ""
+
+msgid "Drag to sidebar or right click to dock/close"
+msgstr ""
+
+msgid "Paste Here"
+msgstr ""
+
+msgid "Paste in Place"
+msgstr ""
+
+msgid "Insert Object"
+msgstr ""
+
+msgid "Guides & Grid"
+msgstr ""
+
+msgid "Show Grid"
+msgstr ""
+
+msgid "Snap to Grid"
+msgstr ""
+
+msgid "Show Guides"
+msgstr ""
+
+msgid "Snap to Guides"
+msgstr ""
+
+msgid "Clear All Guides"
+msgstr ""
+
+msgid "Actual Size (100%)"
+msgstr ""
+
+msgid "Add New Page"
+msgstr ""
+
+msgid "Circle / Ellipse"
+msgstr ""
+
+msgid "Triangle / Polygon"
+msgstr ""
+
+msgid "Bézier Pen"
+msgstr ""
+
+msgid "Select Language"
+msgstr ""
+
+msgid "Choose application interface language"
+msgstr ""
+
+msgid "Search language or country..."
+msgstr ""
+
+msgid "Select language..."
+msgstr ""
+
+msgid "Application interface language"
+msgstr ""
+
+msgid "Change user interface language and regional translation"
+msgstr ""
+
+msgid "Vector Design & Illustration Studio"
+msgstr ""
+
+msgid "Spanish"
+msgstr ""
+
+msgid "French"
+msgstr ""
+
+msgid "German"
+msgstr ""
+
+msgid "Italian"
+msgstr ""
+
+msgid "Japanese"
+msgstr ""
+
+msgid "Chinese (Simplified)"
+msgstr ""
+
+msgid "Russian"
+msgstr ""
+
+msgid "Automatic (GNOME)"
+msgstr ""
+
+msgid "International"
+msgstr ""
+
+msgid "Brasil"
+msgstr ""
+
+msgid "España / Latinoamérica"
+msgstr ""
+
+msgid "France / Canada"
+msgstr ""
+
+msgid "Deutschland"
+msgstr ""
+
+msgid "Italia"
+msgstr ""
+
+msgid "日本"
+msgstr ""
+
+msgid "中国"
+msgstr ""
+
+msgid "Россия"
+msgstr ""
+
+msgid "Choose the highlight color for selectors and active elements"
+msgstr ""
+
+msgid "Applies chromatic highlight to selectors, badges and focus elements"
+msgstr ""
+
+msgid "GNOME Blue (Default)"
+msgstr ""
+
+msgid "Emerald Green"
+msgstr ""
+
+msgid "Ruby Red"
+msgstr ""
+
+msgid "Amber Gold"
+msgstr ""
+
+msgid "Slate"
+msgstr ""
+
+msgid "Magenta Pink"
+msgstr ""
+
+msgid "Customize workspace canvas background color and pattern"
+msgstr ""
+
+msgid "Workspace Color"
+msgstr ""
+
+msgid "Background color behind pages and artboards"
+msgstr ""
+
+msgid "Dark Studio (#242424)"
+msgstr ""
+
+msgid "Neutral Charcoal (#383838)"
+msgstr ""
+
+msgid "Light Gray (#E8E8E8)"
+msgstr ""
+
+msgid "Pure Black (#000000)"
+msgstr ""
+
+msgid "Pure White (#FFFFFF)"
+msgstr ""
+
+msgid "Visual styling for artboard paper color, drop shadow, and borders"
+msgstr ""
+
+msgid "Page Background Color"
+msgstr ""
+
+msgid "Default paper color for active document artboards"
+msgstr ""
+
+msgid "White Paper"
+msgstr ""
+
+msgid "Warm Cream"
+msgstr ""
+
+msgid "Dark Paper"
+msgstr ""
+
+msgid "Page Drop Shadow"
+msgstr ""
+
+msgid "Realistic elevation shadow around page boundaries"
+msgstr ""
+
+msgid "Page Outline"
+msgstr ""
+
+msgid "Fine boundary outline highlighting page dimensions"
+msgstr ""
+
+msgid "Visual configuration of precision grid and points"
+msgstr ""
+
+msgid "Display precision grid across the canvas"
+msgstr ""
+
+msgid "Grid Style"
+msgstr ""
+
+msgid "Graphic pattern displayed for grid subdivisions"
+msgstr ""
+
+msgid "Grid Spacing (px)"
+msgstr ""
+
+msgid "Pixel distance between primary grid lines"
+msgstr ""
+
+msgid "Grid Subdivisions"
+msgstr ""
+
+msgid "Number of fine divisions in each cell"
+msgstr ""
+
+msgid "Grid Opacity"
+msgstr ""
+
+msgid "Controls how visible the grid overlay appears"
+msgstr ""
+
+msgid "Grid Color"
+msgstr ""
+
+msgid "Hue tint used for major and minor grid lines"
+msgstr ""
+
+msgid "GNOME Blue"
+msgstr ""
+
+msgid "Neutral Gray"
+msgstr ""
+
+msgid "Bright Cyan"
+msgstr ""
+
+msgid "Vibrant Magenta"
+msgstr ""
+
+msgid "High Contrast White"
+msgstr ""
+
+msgid "Units and Measurements"
+msgstr ""
+
+msgid "Define coordinate system and default studio unit"
+msgstr ""
+
+msgid "Default measurement unit"
+msgstr ""
+
+msgid "Used in dimension inspector, rulers, and transformations"
+msgstr ""
+
+msgid "Magnetic Snapping and Guides"
+msgstr ""
+
+msgid "Snapping rules and precision visual guides"
+msgstr ""
+
+msgid "Snap to other objects"
+msgstr ""
+
+msgid "Displays smart alignment guides between elements"
+msgstr ""
+
+msgid "Snap to page"
+msgstr ""
+
+msgid "Snaps objects to artboard margins and center"
+msgstr ""
+
+msgid "Show rulers and guides"
+msgstr ""
+
+msgid "Shows alignment guides and measurement rulers"
+msgstr ""
+
+msgid "Node & Handle Appearance"
+msgstr ""
+
+msgid "Configure the visual sizing, shapes, and handles for vector editing"
+msgstr ""
+
+msgid "Anchor Node Size"
+msgstr ""
+
+msgid "Visual size of anchor points on canvas"
+msgstr ""
+
+msgid "Handle Visibility"
+msgstr ""
+
+msgid "When to show Bézier control arms and handles"
+msgstr ""
+
+msgid "Selected Nodes"
+msgstr ""
+
+msgid "Active Path"
+msgstr ""
+
+msgid "Always Visible"
+msgstr ""
+
+msgid "Control Handle Size"
+msgstr ""
+
+msgid "Size of Bézier handle endpoints"
+msgstr ""
+
+msgid "Differentiate Node Shapes"
+msgstr ""
+
+msgid "Show Squares for Corners, Diamonds for Smooth, and Circles for Symmetric/Auto"
+msgstr ""
+
+msgid "Show Path Direction Arrows"
+msgstr ""
+
+msgid "Display tangent direction arrows along vector segments"
+msgstr ""
+
+msgid "Highlight Hovered Segments"
+msgstr ""
+
+msgid "Show dynamic add-point cross and segment highlight under cursor"
+msgstr ""
+
+msgid "Interaction & Manipulation"
+msgstr ""
+
+msgid "Configure behavior and sensitivities for vector path editing"
+msgstr ""
+
+msgid "Direct Curve Dragging"
+msgstr ""
+
+msgid "Click and drag anywhere on a curve to reshape Bézier curvature directly"
+msgstr ""
+
+msgid "Click Grab Sensitivity"
+msgstr ""
+
+msgid "Tolerance distance for selecting nodes and handles"
+msgstr ""
+
+msgid "Handle Angle Snapping (Shift)"
+msgstr ""
+
+msgid "Constrain handle rotation angle when holding Shift"
+msgstr ""
+
+msgid "Default Type for New Nodes"
+msgstr ""
+
+msgid "Node type assigned when creating or inserting new anchor points"
+msgstr ""
+
+msgid "Corner"
+msgstr ""
+
+msgid "Smooth"
+msgstr ""
+
+msgid "Symmetric"
+msgstr ""
+
+msgid "Auto"
+msgstr ""
+
+msgid "Search panel..."
+msgstr ""
+
+msgid "Design & Editing"
+msgstr ""
+
+msgid "Plugins & Tools"
+msgstr ""
+
+msgid "Open All"
+msgstr ""
+
+msgid "Close All"
+msgstr ""
+
+msgid "Hardware Acceleration"
+msgstr ""
+
+msgid "Render canvas using GPU"
+msgstr ""
+
+msgid "Antialiasing"
+msgstr ""
+
+msgid "Smooth vector paths and curves"
+msgstr ""
+
+msgid "Follows GNOME"
+msgstr ""
+
+msgid "Bright interface"
+msgstr ""
+
+msgid "Low brightness"
+msgstr ""
+
+msgid "Select light, dark or automatic system synchronization"
+msgstr ""
+
+msgid "Application Theme"
+msgstr ""
+
+msgid "Choose interface color scheme and visual theme"
+msgstr ""
+
+msgid "Toolbar Customization"
+msgstr ""
+
+msgid "Manage on-screen tools, folders, and layout arrangement"
+msgstr ""
+
+msgid "Customize Tools and Groups"
+msgstr ""
+
+msgid "Add, remove, reorder tools, or organize them into folders"
+msgstr ""
+
+msgid "Quick Repositioning Tip"
+msgstr ""
+
+msgid "You can drag the toolbar handle on the canvas or right-click it to quickly dock it to the top, bottom, left, or right edges."
+msgstr ""
+
+msgid "Shortcut Scheme"
+msgstr ""
+
+msgid "Keyboard compatibility presets — click any shortcut to customize it"
+msgstr ""
+
+msgid "Keyboard scheme"
+msgstr ""
+
+msgid "Adapts shortcut keys to your preferred software"
+msgstr ""
+
+msgid "Search shortcuts..."
+msgstr ""
+
+msgid "Creation and Selection Tools"
+msgstr ""
+
+msgid "Click row to customize shortcut"
+msgstr ""
+
+msgid "Editing, Organization and History"
+msgstr ""
+
+msgid "View and Zoom"
+msgstr ""
+
+msgid "Restore Default"
+msgstr ""
+
+msgid "Restore all shortcuts"
+msgstr ""
+
+msgid "Reverts all keys to the default GNOME Paths scheme"
+msgstr ""
+
+msgid "Installed Plugins"
+msgstr ""
+
+msgid "Manage external extensions added to the studio"
+msgstr ""
+
+msgid "No external plugins installed"
+msgstr ""
+
+msgid "Add a new plugin to manage."
+msgstr ""
+
+msgid "Extension Management"
+msgstr ""
+
+msgid "Install plugin"
+msgstr ""
+
+msgid "Import plugins (.so)"
+msgstr ""
+
+
+

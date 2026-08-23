@@ -1,0 +1,18 @@
+# List of source files containing translatable strings for GNOME Paths / Weblate
+src/main.rs
+src/core/i18n.rs
+src/core/shortcuts.rs
+src/core/io.rs
+src/core/document.rs
+src/core/element.rs
+src/core/path_editor_config.rs
+src/ui/window.rs
+src/ui/preferences.rs
+src/ui/toolbar.rs
+src/ui/tool_options.rs
+src/ui/inspector.rs
+src/ui/layers.rs
+src/ui/color_picker.rs
+src/ui/color_bar.rs
+src/ui/context_menu.rs
+src/ui/canvas.rs

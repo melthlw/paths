@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.lewis.GnomePaths</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>GNOME Paths</name>
+  <summary>Create and edit vector graphics and illustrations</summary>
+  <description>
+    <p>
+      GNOME Paths is a modern, high-performance vector design and illustration studio designed specifically for the GNOME desktop. Powered by the Skia 2D GPU rendering engine and written in Rust with GTK4 and Libadwaita, it delivers an intuitive and responsive creative environment.
+    </p>
+    <p>Key features include:</p>
+    <ul>
+      <li>Precision Bézier curve editing and node manipulation</li>
+      <li>Geometric shape primitives (rectangles, stars, spirals, polygons, circles)</li>
+      <li>Boolean path operations: Union, Difference, Intersection, Exclusion, Division, and Slice</li>
+      <li>Linear, radial, and multi-point mesh gradients with live on-canvas handles</li>
+      <li>Multi-page artboard workflows with individual page export in SVG, PNG, PDF, JPG, and WebP</li>
+      <li>Interactive magnetic snapping to grids, objects, guides, and artboard centers</li>
+      <li>Customizable floating and docked HUD toolbars with modular plugin architecture</li>
+      <li>Seamless dark and light theme integration following GNOME human interface guidelines</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">io.github.lewis.GnomePaths.desktop</launchable>
+  <url type="homepage">https://github.com/lewis/gnome-paths</url>
+  <url type="bugtracker">https://github.com/lewis/gnome-paths/issues</url>
+  <url type="vcs-browser">https://github.com/lewis/gnome-paths</url>
+  <developer id="io.github.lewis">
+    <name>Lewis</name>
+  </developer>
+  <branding>
+    <color type="primary" scheme_preference="light">#3584e4</color>
+    <color type="primary" scheme_preference="dark">#1c71d8</color>
+  </branding>
+  <provides>
+    <mediatype>image/svg+xml</mediatype>
+    <mediatype>image/svg+xml-compressed</mediatype>
+  </provides>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="0.1.0" date="2026-08-22">
+      <description>
+        <p>Initial release of GNOME Paths vector design studio featuring Skia GPU acceleration, Libadwaita modular UI, and comprehensive SVG workflows.</p>
+      </description>
+    </release>
+  </releases>
+</component>
