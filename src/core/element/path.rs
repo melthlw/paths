@@ -363,22 +363,50 @@ impl PathElement {
     }
 
     pub fn translate(&mut self, dx: f32, dy: f32) {
+        self.translate_with_options(dx, dy, &crate::core::TransformOptions::default());
+    }
+
+    pub fn translate_with_options(
+        &mut self,
+        dx: f32,
+        dy: f32,
+        options: &crate::core::TransformOptions,
+    ) {
         if let Some(r) = &mut self.shape_rect {
-            r.x = (r.x + dx).round();
-            r.y = (r.y + dy).round();
+            r.x += dx;
+            r.y += dy;
         }
         for n in &mut self.nodes {
             n.translate(dx, dy);
         }
-        if let Some(g) = &mut self.gradient {
-            g.translate(dx, dy);
-        }
-        if let Some(m) = &mut self.mesh_gradient {
-            m.translate(dx, dy);
+        if options.move_gradients {
+            if let Some(g) = &mut self.gradient {
+                g.translate(dx, dy);
+            }
+            if let Some(m) = &mut self.mesh_gradient {
+                m.translate(dx, dy);
+            }
+            for fill in &mut self.fills {
+                if let Some(m) = &mut fill.mesh {
+                    m.translate(dx, dy);
+                }
+            }
         }
     }
 
     pub fn scale(&mut self, origin: Point, sx: f32, sy: f32) {
+        self.scale_with_options(origin, sx, sy, &crate::core::TransformOptions::default());
+    }
+
+    pub fn scale_with_options(
+        &mut self,
+        origin: Point,
+        sx: f32,
+        sy: f32,
+        options: &crate::core::TransformOptions,
+    ) {
+        let avg_scale = (sx.abs() + sy.abs()) / 2.0;
+
         if let Some(r) = &mut self.shape_rect {
             let new_x = origin.x + (r.x - origin.x) * sx;
             let new_y = origin.y + (r.y - origin.y) * sy;
@@ -398,11 +426,32 @@ impl PathElement {
                 h.y = origin.y + (h.y - origin.y) * sy;
             }
         }
-        if let Some(g) = &mut self.gradient {
-            g.scale(origin, sx, sy);
+
+        if options.scale_stroke_width {
+            self.stroke_width = (self.stroke_width * avg_scale).max(0.1);
+            for stroke in &mut self.strokes {
+                stroke.width = (stroke.width * avg_scale).max(0.1);
+            }
         }
-        if let Some(m) = &mut self.mesh_gradient {
-            m.scale(origin, sx, sy);
+
+        if options.move_gradients {
+            if let Some(g) = &mut self.gradient {
+                g.scale(origin, sx, sy);
+            }
+            if let Some(m) = &mut self.mesh_gradient {
+                m.scale(origin, sx, sy);
+            }
+            for fill in &mut self.fills {
+                if let Some(m) = &mut fill.mesh {
+                    m.scale(origin, sx, sy);
+                }
+            }
+        }
+
+        if options.move_patterns {
+            for fill in &mut self.fills {
+                fill.pattern_scale = (fill.pattern_scale * avg_scale).clamp(4.0, 1024.0);
+            }
         }
     }
 
@@ -1122,8 +1171,12 @@ mod tests {
             PathNode::new(Point::new(25.0, 75.0)),
         ];
 
+        let subpaths = vec![outer, inner];
+        let subpath_lengths: Vec<usize> = subpaths.iter().map(|s| s.len()).collect();
+        let nodes: Vec<PathNode> = subpaths.into_iter().flatten().collect();
+
         let compound =
-            PathElement::new_from_subpaths(vec![outer, inner], true, Some(Color::BLACK), None, 1.0);
+            PathElement::new_compound(nodes, subpath_lengths, true, Some(Color::BLACK), None, 1.0);
 
         assert_eq!(compound.subpath_lengths, vec![4, 4]);
         assert_eq!(compound.nodes.len(), 8);

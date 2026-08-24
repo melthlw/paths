@@ -55,21 +55,36 @@ impl GroupElement {
         self.children.iter().any(|c| c.hit_test(p))
     }
 
-    pub fn translate(&mut self, dx: f32, dy: f32) {
+    pub fn translate_with_options(
+        &mut self,
+        dx: f32,
+        dy: f32,
+        options: &crate::core::TransformOptions,
+    ) {
         for child in &mut self.children {
-            child.translate(dx, dy);
+            child.translate_with_options(dx, dy, options);
         }
         if let Some(clip) = &mut self.clip_element {
-            clip.translate(dx, dy);
+            clip.translate_with_options(dx, dy, options);
         }
     }
 
     pub fn scale(&mut self, origin: Point, sx: f32, sy: f32) {
+        self.scale_with_options(origin, sx, sy, &crate::core::TransformOptions::default());
+    }
+
+    pub fn scale_with_options(
+        &mut self,
+        origin: Point,
+        sx: f32,
+        sy: f32,
+        options: &crate::core::TransformOptions,
+    ) {
         for child in &mut self.children {
-            child.scale(origin, sx, sy);
+            child.scale_with_options(origin, sx, sy, options);
         }
         if let Some(clip) = &mut self.clip_element {
-            clip.scale(origin, sx, sy);
+            clip.scale_with_options(origin, sx, sy, options);
         }
     }
 

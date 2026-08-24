@@ -75,8 +75,6 @@ Development roadmap structured by version milestones.
   - [x] **Typography & Hierarchy Presets**:
     - [x] Display Hero (48pt Bold), Heading 1 (32pt Bold), Heading 2 (24pt SemiBold), Body (16pt Regular), Monospace Code (14pt), and Caption (11pt).
     - [x] Instant font family, size, and weight application to selected text elements.
-  - [ ] **Effects & Shadows**:
-    - [ ] Soft Elevation, Floating Card, Glassmorphism, and Neon Ambient Glow blur presets.
 
 ### Icon Precision & Compound Subpath Parsing
 - [x] **Compound SVG Subpath Separation**:
@@ -93,6 +91,37 @@ Development roadmap structured by version milestones.
 
 ---
 
+## v0.2.3 — Transform Modes, Fill Inspector Layout & Studio Polish
+> **Focus**: Interactive transform modes, two-row fill inspector layout, toolbar contextual interaction, and zero-warning codebase cleanup.
+
+### Transform Modes & Proportional Scaling
+- [x] **Interactive Transform Mode Toggles**:
+  - [x] **Scale Stroke Width**: Proportional scaling of stroke width (`stroke_width`) and multi-stroke layer widths when resizing objects via selection handles or width/height inspector controls (`TransformOptions.scale_stroke_width`).
+  - [x] **Scale Corner Radii**: Proportional scaling of rectangle corner radii (`corner_radius` and per-corner `CornerRadii`) when resizing rounded rectangles (`TransformOptions.scale_corner_radii`).
+  - [x] **Move & Scale Gradients**: Synchronized translation and proportional scaling of linear, radial, and mesh gradient handles with object transforms (`TransformOptions.move_gradients`).
+  - [x] **Move & Scale Patterns**: Synchronized translation and proportional scaling of geometric pattern texture scale with object transforms (`TransformOptions.move_patterns`).
+  - [x] Dedicated toggle buttons in Select Tool options bar (`btn_scale_stroke`, `btn_scale_corners`, `btn_move_gradients`, `btn_move_patterns`).
+
+### Appearance Inspector & Layout
+- [x] **Two-Row Fill Layer Architecture**:
+  - [x] Streamlined multi-row layout for complex fills (Linear, Radial, Pattern, Mesh):
+    - *Row 1 (Controls & Actions)*: Layer grip `[::]`, fill style dropdown, angle/options dropdown, opacity percentage, visibility toggle, and delete layer.
+    - *Row 2 (Colors & Swatches)*: Dual color swatches with hex code inputs with adaptive wrapping to eliminate horizontal clipping in narrow inspector sidebars.
+  - [x] Compact single-row layout preserved for solid color fills.
+
+### Toolbar & Interaction Polish
+- [x] **Secondary Click (Right-Click) Grip Menu**:
+  - [x] Restrict toolbar position menu (Top, Bottom, Left, Right) to secondary click (right-click / button 3) on the drag grip, preventing accidental popup opening during left-click dock navigation.
+- [x] **Pencil vs. Vector Pen Symbolic Differentiation**:
+  - [x] Clear symbolic iconography separating Vector Pen and Freehand Pencil/Brush in the main toolbox and options bar.
+
+### Code Quality & Compiler Cleanliness
+- [x] **Zero-Warning Codebase Cleanliness**:
+  - [x] Eliminated all dead code warnings and unused methods across 19 modules without resorting to `#[allow(dead_code)]`.
+  - [x] Wrapped all dynamic plugin loading symbols in explicit `unsafe` blocks for Rust 2024 compliance.
+
+---
+
 ## v0.3.0 — Gradients, Meshes & Pattern Engine
 > **Focus**: Advanced fill rendering, interactive meshes, pattern geometry, and universal selection.
 
@@ -104,9 +133,9 @@ Development roadmap structured by version milestones.
 
 ### Pattern Engine Geometry
 - [x] **Authentic Pattern Geometry**:
-  - [x] *Honeycomb (Colmeia)*: 120° shared-wall hexagonal tessellation with exact aspect ratio ($H = W \cdot \sqrt{3}$) and continuous polygon borders without horizontal gaps.
-  - [x] *Brick Wall (Parede de Tijolos)*: Interlocking 50% staggered courses with alternating vertical mortar joints.
-  - [x] *Seigaiha Scales (Escamas / Ondas)*: Concentric 180° semicircular arcs centered at grid transition points.
+  - [x] *Honeycomb*: 120° shared-wall hexagonal tessellation with exact aspect ratio ($H = W \cdot \sqrt{3}$) and continuous polygon borders without horizontal gaps.
+  - [x] *Brick Wall*: Interlocking 50% staggered courses with alternating vertical mortar joints.
+  - [x] *Seigaiha Scales*: Concentric 180° semicircular arcs centered at grid transition points.
   - [x] Synchronized SVG export and Skia renderers for all patterns.
 - [ ] **Custom Pattern Management**:
   - [ ] On-canvas interactive scaling, rotation, and offset handles for pattern fills.

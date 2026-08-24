@@ -94,24 +94,43 @@ impl Element {
     }
 
     pub fn translate(&mut self, dx: f32, dy: f32) {
+        self.translate_with_options(dx, dy, &crate::core::TransformOptions::default());
+    }
+
+    pub fn translate_with_options(
+        &mut self,
+        dx: f32,
+        dy: f32,
+        options: &crate::core::TransformOptions,
+    ) {
         match self {
-            Element::Rect(r) => r.translate(dx, dy),
-            Element::Brush(b) => b.translate(dx, dy),
-            Element::Path(p) => p.translate(dx, dy),
+            Element::Rect(r) => r.translate_with_options(dx, dy, options),
+            Element::Brush(b) => b.translate_with_options(dx, dy, options),
+            Element::Path(p) => p.translate_with_options(dx, dy, options),
             Element::Text(t) => t.translate(dx, dy),
-            Element::Group(g) => g.translate(dx, dy),
+            Element::Group(g) => g.translate_with_options(dx, dy, options),
             Element::Image(i) => i.translate(dx, dy),
             Element::Clone(c) => c.translate(dx, dy),
         }
     }
 
     pub fn scale(&mut self, origin: Point, sx: f32, sy: f32) {
+        self.scale_with_options(origin, sx, sy, &crate::core::TransformOptions::default());
+    }
+
+    pub fn scale_with_options(
+        &mut self,
+        origin: Point,
+        sx: f32,
+        sy: f32,
+        options: &crate::core::TransformOptions,
+    ) {
         match self {
-            Element::Rect(r) => r.scale(origin, sx, sy),
-            Element::Brush(b) => b.scale(origin, sx, sy),
-            Element::Path(p) => p.scale(origin, sx, sy),
+            Element::Rect(r) => r.scale_with_options(origin, sx, sy, options),
+            Element::Brush(b) => b.scale_with_options(origin, sx, sy, options),
+            Element::Path(p) => p.scale_with_options(origin, sx, sy, options),
             Element::Text(t) => t.scale(origin, sx, sy),
-            Element::Group(g) => g.scale(origin, sx, sy),
+            Element::Group(g) => g.scale_with_options(origin, sx, sy, options),
             Element::Image(i) => i.scale(origin, sx, sy),
             Element::Clone(c) => c.scale(origin, sx, sy),
         }

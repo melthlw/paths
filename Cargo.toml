@@ -1,6 +1,6 @@
 [package]
 name = "gnome-paths"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 authors = ["Lewis"]
 description = "Vector graphics and illustration design studio for GNOME built with GTK4, Libadwaita, Skia and Rust"

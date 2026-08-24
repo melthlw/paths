@@ -353,7 +353,7 @@ impl FeaturePlugin for SelectFeature {
                 for (id, initial_el) in initial_elements.iter() {
                     if let Some(el) = ctx.document.elements.iter_mut().find(|e| e.id() == *id) {
                         let mut modified = initial_el.clone();
-                        modified.scale(*origin, sx, sy);
+                        modified.scale_with_options(*origin, sx, sy, ctx.transform_options);
                         *el = modified;
                     }
                 }
@@ -422,7 +422,7 @@ impl FeaturePlugin for SelectFeature {
                 for (id, initial_el) in initial_elements.iter() {
                     if let Some(el) = ctx.document.elements.iter_mut().find(|e| e.id() == *id) {
                         let mut modified = initial_el.clone();
-                        modified.translate(final_dx, final_dy);
+                        modified.translate_with_options(final_dx, final_dy, ctx.transform_options);
                         *el = modified;
                     }
                 }

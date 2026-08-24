@@ -152,19 +152,33 @@ impl BrushStroke {
         false
     }
 
-    pub fn translate(&mut self, dx: f32, dy: f32) {
+    pub fn translate_with_options(
+        &mut self,
+        dx: f32,
+        dy: f32,
+        _options: &crate::core::TransformOptions,
+    ) {
         for p in &mut self.points {
             p.x += dx;
             p.y += dy;
         }
     }
 
-    pub fn scale(&mut self, origin: Point, sx: f32, sy: f32) {
+    pub fn scale_with_options(
+        &mut self,
+        origin: Point,
+        sx: f32,
+        sy: f32,
+        options: &crate::core::TransformOptions,
+    ) {
         for p in &mut self.points {
             p.x = origin.x + (p.x - origin.x) * sx;
             p.y = origin.y + (p.y - origin.y) * sy;
         }
-        self.width *= ((sx.abs() + sy.abs()) / 2.0).max(0.1);
+        if options.scale_stroke_width {
+            let avg_scale = (sx.abs() + sy.abs()) / 2.0;
+            self.width = (self.width * avg_scale).max(0.1);
+        }
     }
 
     pub fn rotate(&mut self, center: Point, angle_rad: f32) {

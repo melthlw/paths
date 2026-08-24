@@ -62,6 +62,16 @@ impl CornerRadii {
             bottom_left: self.bottom_left.min(max_r),
         }
     }
+
+    pub fn scaled(&self, s: f32) -> Self {
+        let factor = s.abs();
+        Self {
+            top_left: (self.top_left * factor).max(0.0),
+            top_right: (self.top_right * factor).max(0.0),
+            bottom_right: (self.bottom_right * factor).max(0.0),
+            bottom_left: (self.bottom_left * factor).max(0.0),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -139,18 +149,36 @@ impl RectElement {
         self.bounds().contains(p)
     }
 
-    pub fn translate(&mut self, dx: f32, dy: f32) {
+    pub fn translate_with_options(
+        &mut self,
+        dx: f32,
+        dy: f32,
+        options: &crate::core::TransformOptions,
+    ) {
         self.rect.x = (self.rect.x + dx).round();
         self.rect.y = (self.rect.y + dy).round();
-        if let Some(g) = &mut self.gradient {
-            g.translate(dx, dy);
-        }
-        if let Some(m) = &mut self.mesh_gradient {
-            m.translate(dx, dy);
+        if options.move_gradients {
+            if let Some(g) = &mut self.gradient {
+                g.translate(dx, dy);
+            }
+            if let Some(m) = &mut self.mesh_gradient {
+                m.translate(dx, dy);
+            }
+            for fill in &mut self.fills {
+                if let Some(m) = &mut fill.mesh {
+                    m.translate(dx, dy);
+                }
+            }
         }
     }
 
-    pub fn scale(&mut self, origin: Point, sx: f32, sy: f32) {
+    pub fn scale_with_options(
+        &mut self,
+        origin: Point,
+        sx: f32,
+        sy: f32,
+        options: &crate::core::TransformOptions,
+    ) {
         let mut min_x = origin.x + (self.rect.x - origin.x) * sx;
         let mut min_y = origin.y + (self.rect.y - origin.y) * sy;
         let mut max_x = origin.x + (self.rect.x + self.rect.width - origin.x) * sx;
@@ -167,11 +195,39 @@ impl RectElement {
             (max_x - min_x).round().max(1.0),
             (max_y - min_y).round().max(1.0),
         );
-        if let Some(g) = &mut self.gradient {
-            g.scale(origin, sx, sy);
+
+        let avg_scale = (sx.abs() + sy.abs()) / 2.0;
+
+        if options.scale_stroke_width {
+            self.stroke_width = (self.stroke_width * avg_scale).max(0.1);
+            for stroke in &mut self.strokes {
+                stroke.width = (stroke.width * avg_scale).max(0.1);
+            }
         }
-        if let Some(m) = &mut self.mesh_gradient {
-            m.scale(origin, sx, sy);
+
+        if options.scale_corner_radii {
+            self.corner_radius = (self.corner_radius * avg_scale).max(0.0);
+            self.corner_radii = self.corner_radii.scaled(avg_scale);
+        }
+
+        if options.move_gradients {
+            if let Some(g) = &mut self.gradient {
+                g.scale(origin, sx, sy);
+            }
+            if let Some(m) = &mut self.mesh_gradient {
+                m.scale(origin, sx, sy);
+            }
+            for fill in &mut self.fills {
+                if let Some(m) = &mut fill.mesh {
+                    m.scale(origin, sx, sy);
+                }
+            }
+        }
+
+        if options.move_patterns {
+            for fill in &mut self.fills {
+                fill.pattern_scale = (fill.pattern_scale * avg_scale).clamp(4.0, 1024.0);
+            }
         }
     }
 
