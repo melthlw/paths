@@ -61,6 +61,7 @@ pub struct CanvasState {
     pub render_options: crate::core::RenderOptions,
     pub path_editor_config: crate::core::PathEditorConfig,
     pub transform_options: crate::core::TransformOptions,
+    pub is_universal_selecting: bool,
     is_switching_tool: bool,
     pub current_file_path: Option<std::path::PathBuf>,
     pub is_dirty: bool,
@@ -92,6 +93,7 @@ impl CanvasState {
             render_options: crate::core::RenderOptions::default(),
             path_editor_config: crate::core::PathEditorConfig::default(),
             transform_options: crate::core::TransformOptions::default(),
+            is_universal_selecting: false,
             active_fill_color: Color::new(0.2, 0.55, 0.95, 1.0),
             active_stroke_color: None,
             active_stroke_width: 2.0,
@@ -326,6 +328,21 @@ impl CanvasState {
             }
         }
 
+        let is_selecting_active = self.plugin_manager.active_id() == "select";
+        let hit_handle = if !is_selecting_active {
+            self.document
+                .selection_bounds()
+                .and_then(|b| crate::core::hit_transform_handle(b, world_pos, self.viewport.zoom))
+        } else {
+            None
+        };
+
+        if (ctrl_pressed || hit_handle.is_some()) && !is_selecting_active {
+            self.is_universal_selecting = true;
+        } else {
+            self.is_universal_selecting = false;
+        }
+
         let (redraw, cursor) = {
             let mut ctx = PluginContext {
                 document: &mut self.document,
@@ -343,7 +360,11 @@ impl CanvasState {
                 cursor_name: None,
             };
 
-            if let Some(feat) = self.plugin_manager.active_feature_mut() {
+            if self.is_universal_selecting {
+                if let Some(feat) = self.plugin_manager.feature_by_id_mut("select") {
+                    feat.on_pointer_down(&mut ctx, &event);
+                }
+            } else if let Some(feat) = self.plugin_manager.active_feature_mut() {
                 feat.on_pointer_down(&mut ctx, &event);
             }
 
@@ -486,7 +507,11 @@ impl CanvasState {
                 cursor_name: None,
             };
 
-            if let Some(feat) = self.plugin_manager.active_feature_mut() {
+            if self.is_universal_selecting {
+                if let Some(feat) = self.plugin_manager.feature_by_id_mut("select") {
+                    feat.on_pointer_move(&mut ctx, &event);
+                }
+            } else if let Some(feat) = self.plugin_manager.active_feature_mut() {
                 feat.on_pointer_move(&mut ctx, &event);
             }
 
@@ -580,7 +605,12 @@ impl CanvasState {
                 cursor_name: None,
             };
 
-            if let Some(feat) = self.plugin_manager.active_feature_mut() {
+            if self.is_universal_selecting {
+                if let Some(feat) = self.plugin_manager.feature_by_id_mut("select") {
+                    feat.on_pointer_up(&mut ctx, &event);
+                }
+                self.is_universal_selecting = false;
+            } else if let Some(feat) = self.plugin_manager.active_feature_mut() {
                 feat.on_pointer_up(&mut ctx, &event);
             }
 
@@ -1008,8 +1038,9 @@ impl CanvasState {
         });
 
         let active_tool = self.plugin_manager.active_id();
-        let show_selection_bbox =
-            active_tool != "path_editor" && active_tool != "pen" && active_tool != "brush";
+        let show_selection_bbox = active_tool != "path_editor"
+            && (active_tool != "pen" || self.is_universal_selecting)
+            && (active_tool != "brush" || self.is_universal_selecting || !self.document.selected_ids.is_empty());
 
         let mut renderer = std::mem::take(&mut self.renderer);
         let result = renderer.render(
@@ -1035,6 +1066,11 @@ impl CanvasState {
                     path_editor_config: &self.path_editor_config,
                 };
                 self.plugin_manager.render_overlay(&render_ctx, canvas, vp);
+                if self.is_universal_selecting && active_tool != "select" {
+                    if let Some(feat) = self.plugin_manager.feature_by_id("select") {
+                        feat.render_overlay(&render_ctx, canvas, vp);
+                    }
+                }
             },
         );
         self.renderer = renderer;

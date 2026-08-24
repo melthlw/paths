@@ -795,7 +795,11 @@ impl ColorPaletteBar {
             // 1. Copy Hex
             if let Some(col) = color_opt {
                 let copy_btn = gtk4::Button::builder()
-                    .label(&format!("{}: {}", crate::core::gettext("Copy Hex"), col.to_hex()))
+                    .label(&format!(
+                        "{}: {}",
+                        crate::core::gettext("Copy Hex"),
+                        col.to_hex()
+                    ))
                     .icon_name("edit-copy-symbolic")
                     .css_classes(["flat"])
                     .halign(gtk4::Align::Start)

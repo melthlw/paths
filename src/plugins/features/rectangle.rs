@@ -242,25 +242,21 @@ impl FeaturePlugin for RectangleFeature {
             }
         }
 
-        // 2. Check if clicking on an existing rectangle element
-        let hit_rect = ctx.document.elements.iter().rev().find_map(|e| {
-            if let Element::Rect(r) = e {
-                if r.rect.normalize().contains(event.world_pos) {
-                    return Some((e.id(), r.corner_radius, r.corner_radii, r.corner_style, r.rect.normalize()));
-                }
-            }
-            None
-        });
-
-        if let Some((id, r_radius, r_radii, r_style, r_rect)) = hit_rect {
-            ctx.document.select(id, false);
-            self.corner_radius = r_radius;
-            self.corner_radii = r_radii;
-            self.corner_style = r_style;
+        // 2. Check if clicking on ANY existing element to select it
+        if let Some(hit_id) = ctx.document.hit_test(event.world_pos) {
+            ctx.document.select(hit_id, event.shift_pressed);
+            let initial_rect = if let Some(Element::Rect(r)) = ctx.document.find_element(hit_id) {
+                self.corner_radius = r.corner_radius;
+                self.corner_radii = r.corner_radii;
+                self.corner_style = r.corner_style;
+                r.rect.normalize()
+            } else {
+                ctx.document.find_element(hit_id).map(|e| e.bounds()).unwrap_or(Rect::ZERO)
+            };
             self.state = RectToolState::MovingElement {
                 start_world: event.world_pos,
-                initial_rect: r_rect,
-                elem_id: id,
+                initial_rect,
+                elem_id: hit_id,
                 has_dragged: false,
             };
             ctx.set_cursor("move");

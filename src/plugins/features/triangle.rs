@@ -253,32 +253,25 @@ impl FeaturePlugin for TriangleFeature {
             }
         }
 
-        // 2. Check if clicking on an existing triangle to select it
-        let hit_tri = ctx.document.elements.iter().rev().find_map(|e| {
-            if let Element::Path(p) = e {
+        // 2. Check if clicking on ANY existing element to select it
+        if let Some(hit_id) = ctx.document.hit_test(event.world_pos) {
+            ctx.document.select(hit_id, event.shift_pressed);
+            if let Some(Element::Path(p)) = ctx.document.find_element(hit_id) {
                 if let Some(ShapeOrigin::Triangle {
                     sides,
                     corner_radius,
                 }) = p.shape_origin
                 {
-                    if p.bounds().contains(event.world_pos) {
-                        return Some((e.id(), sides, corner_radius));
-                    }
+                    self.sides = sides;
+                    self.corner_radius = corner_radius;
                 }
             }
-            None
-        });
-
-        if let Some((id, s, r_rad)) = hit_tri {
-            ctx.document.select(id, false);
-            self.sides = s;
-            self.corner_radius = r_rad;
             self.state = TriangleToolState::MovingElement {
                 start_world: event.world_pos,
-                elem_id: id,
+                elem_id: hit_id,
                 has_dragged: false,
             };
-            ctx.set_cursor("pointer");
+            ctx.set_cursor("move");
             ctx.request_redraw();
             return;
         }

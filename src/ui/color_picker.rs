@@ -20,13 +20,13 @@ pub struct ColorPickerPopover {
     alpha_area: gtk4::DrawingArea,
     hex_entry: gtk4::Entry,
     is_updating: Rc<Cell<bool>>,
-    #[allow(dead_code)]
+
     mode_buttons: Vec<gtk4::Button>,
-    #[allow(dead_code)]
+
     title_lbl: gtk4::Label,
-    #[allow(dead_code)]
+
     mesh_panel: gtk4::Box,
-    #[allow(dead_code)]
+
     pattern_panel: gtk4::Box,
 }
 
@@ -927,7 +927,6 @@ impl ColorPickerPopover {
         *self.on_mode_change.borrow_mut() = Some(Box::new(callback));
     }
 
-    #[allow(dead_code)]
     pub fn set_mode(&self, mode: usize) {
         for (k, b) in self.mode_buttons.iter().enumerate() {
             if k == mode {

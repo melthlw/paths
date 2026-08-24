@@ -111,21 +111,31 @@ pub enum FillStyle {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, serde::Serialize, serde::Deserialize)]
 pub enum PatternType {
     #[default]
-    Checkerboard = 0,
+    Grid = 0,
     Dots = 1,
     Stripes = 2,
-    Grid = 3,
+    Checkerboard = 3,
     Hexagon = 4,
+    Crosshatch = 5,
+    Brick = 6,
+    Scales = 7,
+    Houndstooth = 8,
+    Basketweave = 9,
 }
 
 impl PatternType {
     pub fn label(&self) -> String {
         match self {
+            PatternType::Grid => crate::core::gettext("Technical Grid"),
+            PatternType::Dots => crate::core::gettext("Halftone Dots"),
+            PatternType::Stripes => crate::core::gettext("Diagonal Stripes"),
             PatternType::Checkerboard => crate::core::gettext("Checkerboard"),
-            PatternType::Dots => crate::core::gettext("Dots"),
-            PatternType::Stripes => crate::core::gettext("Stripes"),
-            PatternType::Grid => crate::core::gettext("Grid"),
             PatternType::Hexagon => crate::core::gettext("Honeycomb"),
+            PatternType::Crosshatch => crate::core::gettext("Crosshatch"),
+            PatternType::Brick => crate::core::gettext("Brick Wall"),
+            PatternType::Scales => crate::core::gettext("Seigaiha Scales"),
+            PatternType::Houndstooth => crate::core::gettext("Houndstooth"),
+            PatternType::Basketweave => crate::core::gettext("Basketweave"),
         }
     }
 }
@@ -165,11 +175,46 @@ impl FillLayer {
             style: FillStyle::Solid,
             color,
             secondary_color: Color::WHITE,
-            angle: 90.0,
-            opacity: color.a,
+            angle: 0.0,
+            opacity: 1.0,
             enabled: true,
             pattern_type: PatternType::Checkerboard,
             pattern_scale: 16.0,
+            mesh: None,
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn new_gradient(
+        style: FillStyle,
+        color: Color,
+        secondary_color: Color,
+        angle: f32,
+    ) -> Self {
+        Self {
+            style,
+            color,
+            secondary_color,
+            angle,
+            opacity: 1.0,
+            enabled: true,
+            pattern_type: PatternType::Checkerboard,
+            pattern_scale: 16.0,
+            mesh: None,
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn new_pattern(pattern_type: PatternType, scale: f32, c1: Color, c2: Color) -> Self {
+        Self {
+            style: FillStyle::Pattern,
+            color: c1,
+            secondary_color: c2,
+            angle: 0.0,
+            opacity: 1.0,
+            enabled: true,
+            pattern_type,
+            pattern_scale: scale,
             mesh: None,
         }
     }
@@ -182,16 +227,25 @@ pub fn create_pattern_shader(
     scale: f32,
     angle: f32,
 ) -> Option<skia::Shader> {
-    let size = (scale.clamp(4.0, 256.0)).round() as i32;
-    let mut surface = skia::surfaces::raster_n32_premul((size, size))?;
-    let canvas = surface.canvas();
-    canvas.clear(c1.to_skia());
+    let sz = scale.clamp(4.0, 1024.0);
+    let (tile_w, tile_h) = match pattern_type {
+        PatternType::Hexagon => (sz, (sz * 1.7320508).max(4.0)),
+        PatternType::Brick | PatternType::Scales => (sz, (sz * 0.5).max(4.0)),
+        _ => (sz, sz),
+    };
+    let tile_rect = skia::Rect::from_xywh(0.0, 0.0, tile_w, tile_h);
+    let mut recorder = skia::PictureRecorder::new();
+    let canvas = recorder.begin_recording(tile_rect, false);
+
+    let mut bg_paint = skia::Paint::default();
+    bg_paint.set_color4f(c1.to_skia(), None);
+    bg_paint.set_style(skia::PaintStyle::Fill);
+    canvas.draw_rect(tile_rect, &bg_paint);
 
     let mut paint = skia::Paint::default();
     paint.set_color4f(c2.to_skia(), None);
     paint.set_anti_alias(true);
 
-    let sz = size as f32;
     match pattern_type {
         PatternType::Checkerboard => {
             let half = sz * 0.5;
@@ -223,37 +277,122 @@ pub fn create_pattern_shader(
             canvas.draw_rect(skia::Rect::from_xywh(0.0, 0.0, sz, sz), &paint);
         }
         PatternType::Hexagon => {
-            paint.set_stroke_width((sz * 0.1).max(1.0));
+            // True seamless regular hexagonal honeycomb lattice (120° shared walls)
+            paint.set_stroke_width((sz * 0.08).max(1.0));
             paint.set_style(skia::PaintStyle::Stroke);
-            let cx = sz * 0.5;
-            let cy = sz * 0.5;
-            let r = sz * 0.45;
-            let mut path = skia::PathBuilder::new();
-            for i in 0..6 {
-                let a = (i as f32) * std::f32::consts::PI / 3.0;
-                let px = cx + r * a.cos();
-                let py = cy + r * a.sin();
-                if i == 0 {
-                    path.move_to(skia::Point::new(px, py));
-                } else {
-                    path.line_to(skia::Point::new(px, py));
+            let w = tile_w;
+            let h = tile_h;
+            let half_w = w * 0.5;
+            let h_6 = h / 6.0;
+            let h_2 = h * 0.5;
+            let h_23 = h * (2.0 / 3.0);
+
+            let mut p1 = skia::PathBuilder::new();
+            p1.move_to(skia::Point::new(0.0, 0.0));
+            p1.line_to(skia::Point::new(half_w, h_6));
+            p1.line_to(skia::Point::new(half_w, h_2));
+            p1.line_to(skia::Point::new(0.0, h_23));
+            p1.line_to(skia::Point::new(0.0, h));
+            canvas.draw_path(&p1.detach(), &paint);
+
+            let mut p2 = skia::PathBuilder::new();
+            p2.move_to(skia::Point::new(w, 0.0));
+            p2.line_to(skia::Point::new(half_w, h_6));
+            canvas.draw_path(&p2.detach(), &paint);
+
+            let mut p3 = skia::PathBuilder::new();
+            p3.move_to(skia::Point::new(half_w, h_2));
+            p3.line_to(skia::Point::new(w, h_23));
+            p3.line_to(skia::Point::new(w, h));
+            canvas.draw_path(&p3.detach(), &paint);
+        }
+        PatternType::Brick => {
+            // True 50% staggered running bond brick wall
+            paint.set_stroke_width((sz * 0.08).max(1.0));
+            paint.set_style(skia::PaintStyle::Stroke);
+            let w = tile_w;
+            let h = tile_h;
+            let half_h = h * 0.5;
+
+            // 1. Horizontal course mortar lines
+            canvas.draw_line(skia::Point::new(0.0, 0.0), skia::Point::new(w, 0.0), &paint);
+            canvas.draw_line(skia::Point::new(0.0, half_h), skia::Point::new(w, half_h), &paint);
+
+            // 2. Vertical joints: top course at 0 and W
+            canvas.draw_line(skia::Point::new(0.0, 0.0), skia::Point::new(0.0, half_h), &paint);
+            canvas.draw_line(skia::Point::new(w, 0.0), skia::Point::new(w, half_h), &paint);
+
+            // 3. Vertical joint: bottom course staggered by 50% at W/2
+            canvas.draw_line(skia::Point::new(w * 0.5, half_h), skia::Point::new(w * 0.5, h), &paint);
+        }
+        PatternType::Crosshatch => {
+            paint.set_stroke_width((sz * 0.12).max(1.0));
+            paint.set_style(skia::PaintStyle::Stroke);
+            canvas.draw_line(skia::Point::new(0.0, 0.0), skia::Point::new(sz, sz), &paint);
+            canvas.draw_line(skia::Point::new(0.0, sz), skia::Point::new(sz, 0.0), &paint);
+        }
+        PatternType::Scales => {
+            // Authentic Japanese Seigaiha (concentric wave/fan fish scales)
+            paint.set_stroke_width((sz * 0.07).max(1.0));
+            paint.set_style(skia::PaintStyle::Stroke);
+            let w = tile_w;
+            let h = tile_h;
+            let r_base = w * 0.5;
+            let radii = [r_base, r_base * 0.70, r_base * 0.40];
+
+            let draw_arcs = |canvas: &skia::Canvas, cx: f32, cy: f32| {
+                for &r in &radii {
+                    let oval = skia::Rect::from_xywh(cx - r, cy - r, r * 2.0, r * 2.0);
+                    let mut path = skia::PathBuilder::new();
+                    path.add_arc(oval, 180.0, 180.0);
+                    canvas.draw_path(&path.detach(), &paint);
                 }
-            }
+            };
+
+            // Bottom row center fan
+            draw_arcs(canvas, w * 0.5, h);
+            // Top row side fans
+            draw_arcs(canvas, 0.0, 0.0);
+            draw_arcs(canvas, w, 0.0);
+            // Corner helper fans
+            draw_arcs(canvas, 0.0, h);
+            draw_arcs(canvas, w, h);
+        }
+        PatternType::Houndstooth => {
+            let half = sz * 0.5;
+            let mut path = skia::PathBuilder::new();
+            path.move_to(skia::Point::new(0.0, 0.0));
+            path.line_to(skia::Point::new(half, 0.0));
+            path.line_to(skia::Point::new(sz, half));
+            path.line_to(skia::Point::new(half, half));
+            path.line_to(skia::Point::new(half, sz));
+            path.line_to(skia::Point::new(0.0, half));
             path.close();
             canvas.draw_path(&path.detach(), &paint);
         }
+        PatternType::Basketweave => {
+            let half = sz * 0.5;
+            let mut p_h = paint.clone();
+            p_h.set_stroke_width((sz * 0.15).max(1.0));
+            p_h.set_style(skia::PaintStyle::Stroke);
+            canvas.draw_line(skia::Point::new(0.0, half * 0.5), skia::Point::new(half, half * 0.5), &p_h);
+            canvas.draw_line(skia::Point::new(half * 0.5, half), skia::Point::new(half * 0.5, sz), &p_h);
+            canvas.draw_line(skia::Point::new(half, sz * 0.75), skia::Point::new(sz, sz * 0.75), &p_h);
+            canvas.draw_line(skia::Point::new(sz * 0.75, 0.0), skia::Point::new(sz * 0.75, half), &p_h);
+        }
     }
 
-    let image = surface.image_snapshot();
+    let picture = recorder.finish_recording_as_picture(None)?;
     let mut matrix = skia::Matrix::default();
     if angle.abs() > 0.01 {
-        matrix.set_rotate(angle, Some(skia::Point::new(sz * 0.5, sz * 0.5)));
+        matrix.set_rotate(angle, Some(skia::Point::new(tile_w * 0.5, tile_h * 0.5)));
     }
-    image.to_shader(
-        Some((skia::TileMode::Repeat, skia::TileMode::Repeat)),
-        skia::SamplingOptions::default(),
+    Some(picture.to_shader(
+        (skia::TileMode::Repeat, skia::TileMode::Repeat),
+        skia::FilterMode::Linear,
         Some(&matrix),
-    )
+        Some(&tile_rect),
+    ))
 }
 
 pub fn create_fill_paint(fill: &FillLayer, bounds: Rect) -> skia::Paint {

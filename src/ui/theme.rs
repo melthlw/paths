@@ -251,7 +251,6 @@ fn generate_theme_css(t: &ThemeTokens) -> String {
          preferences-window > split-view > sidebar headerbar, preferences-window > split-view > sidebar headerbar:backdrop, preferences-window split-view > sidebar headerbar, preferences-window split-view > sidebar headerbar:backdrop {{ background-color: @sidebar_bg_color; color: @sidebar_fg_color; border-bottom: none; box-shadow: none; }} \
          \
          .boxed-list, .boxed-list:backdrop, card, card:backdrop, preferencesgroup > listbox, preferencesgroup > listbox:backdrop {{ background-color: @card_bg_color; color: @card_fg_color; }} \
-         .floating-panel, .color-palette-capsule, .toolbar-floating, .tool-capsule, .inspector-panel {{ background-color: @card_bg_color; color: @card_fg_color; border-color: alpha(currentColor, 0.12); }} \
          button.suggested-action, .suggested-action, .pill.suggested-action {{ background-color: @accent_bg_color; color: @accent_fg_color; }} \
          button.suggested-action:hover, .suggested-action:hover {{ background-color: alpha(@accent_bg_color, 0.88); }} \
          .linked button.active, .toolbar button.active, button.toggle.active {{ background-color: alpha(@accent_color, 0.20); color: @accent_color; }} \

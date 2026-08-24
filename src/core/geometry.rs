@@ -311,7 +311,7 @@ pub fn hit_transform_handle(bounds: Rect, p: Point, zoom: f32) -> Option<Transfo
         TransformHandle::BottomLeft,
         TransformHandle::Left,
     ];
-    let radius = (8.0 / zoom).max(6.0);
+    let radius = 8.0 / zoom.max(0.001);
     for h in handles {
         let pos = h.position(bounds, zoom);
         if p.distance_to(pos) <= radius {

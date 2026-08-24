@@ -496,6 +496,7 @@ pub fn parse_svg_path_data(d: &str) -> Vec<PathNode> {
     let mut last_cmd = 'M';
 
     while i < tokens.len() {
+        let start_idx = i;
         let cmd = match &tokens[i] {
             PathToken::Command(c) => {
                 last_cmd = *c;
@@ -675,10 +676,33 @@ pub fn parse_svg_path_data(d: &str) -> Vec<PathNode> {
                     nodes.push(PathNode::with_handles(current_point, Some(cp2), None));
                 }
             }
+            'A' | 'a' => {
+                if let (Some(_rx), Some(_ry), Some(_rot), Some(_large_arc), Some(_sweep), Some(x_raw), Some(y_raw)) = (
+                    get_num(&tokens, &mut i),
+                    get_num(&tokens, &mut i),
+                    get_num(&tokens, &mut i),
+                    get_num(&tokens, &mut i),
+                    get_num(&tokens, &mut i),
+                    get_num(&tokens, &mut i),
+                    get_num(&tokens, &mut i),
+                ) {
+                    let end = if cmd == 'a' {
+                        Point::new(current_point.x + x_raw, current_point.y + y_raw)
+                    } else {
+                        Point::new(x_raw, y_raw)
+                    };
+                    current_point = end;
+                    nodes.push(PathNode::new(current_point));
+                }
+            }
             'Z' | 'z' => {
                 current_point = start_point;
             }
             _ => {}
+        }
+
+        if i <= start_idx {
+            i += 1;
         }
     }
 

@@ -33,7 +33,7 @@ impl TextBoxHandle {
 }
 
 pub fn hit_text_box_handle(bounds: Rect, p: Point, zoom: f32) -> Option<TextBoxHandle> {
-    let hit_r = (18.0 / zoom).max(12.0);
+    let hit_r = 18.0 / zoom.max(0.001);
     let handles = [
         TextBoxHandle::Right,
         TextBoxHandle::Bottom,

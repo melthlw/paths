@@ -5,6 +5,7 @@ pub mod clones;
 pub mod dock;
 pub mod export;
 pub mod floating;
+pub mod libraries;
 pub mod swatch;
 pub mod transform;
 
@@ -20,6 +21,7 @@ use self::alignment::build_alignment_section;
 use self::appearance::{rebuild_fill_list, rebuild_stroke_list};
 use self::clones::build_clones_section;
 use self::export::build_export_tab;
+use self::libraries::build_libraries_section;
 use self::swatch::PillSlider;
 use self::transform::build_transform_section;
 use crate::core::{Color, FillLayer, StrokeLayer};
@@ -439,6 +441,9 @@ impl InspectorSidebar {
         // 5. EXPORT SECTION
         let (export_body, update_export_pages) = build_export_tab(&canvas, &main_win_holder);
 
+        // 6. LIBRARIES SECTION
+        let libraries_body = build_libraries_section(&canvas);
+
         // Setup Dynamic Multi-Section Tab Bar & Split System
         let tab_locations = Rc::new(RefCell::new([
             TabLocation::Docked(0), // 0: Appearance
@@ -446,18 +451,20 @@ impl InspectorSidebar {
             TabLocation::Closed,    // 2: Transform
             TabLocation::Closed,    // 3: Clones
             TabLocation::Closed,    // 4: Export
+            TabLocation::Closed,    // 5: Libraries (Closed by default)
         ]));
-        let tab_order = Rc::new(RefCell::new(vec![0usize, 1usize, 2usize, 3usize, 4usize]));
-        let active_section_tabs = Rc::new(RefCell::new([0usize, 1usize, 2usize, 3usize, 4usize]));
-        let floating_wins: Rc<RefCell<[Option<adw::Window>; 5]>> =
-            Rc::new(RefCell::new([None, None, None, None, None]));
+        let tab_order = Rc::new(RefCell::new(vec![0usize, 1usize, 2usize, 3usize, 4usize, 5usize]));
+        let active_section_tabs = Rc::new(RefCell::new([0usize, 1usize, 2usize, 3usize, 4usize, 5usize]));
+        let floating_wins: Rc<RefCell<[Option<adw::Window>; 6]>> =
+            Rc::new(RefCell::new([None, None, None, None, None, None]));
 
-        let tab_widgets: [gtk4::Widget; 5] = [
+        let tab_widgets: [gtk4::Widget; 6] = [
             fill_stroke_body.upcast(),
             align_container.upcast(),
             transform_body.upcast(),
             clones_body,
             export_body,
+            libraries_body,
         ];
 
         let refresh_tabs: Rc<RefCell<Option<Rc<dyn Fn()>>>> = Rc::new(RefCell::new(None));
@@ -507,9 +514,9 @@ impl InspectorSidebar {
                 if let Ok(s) = value.get::<String>() {
                     if let Some(idx_str) = s.strip_prefix("tab:") {
                         if let Ok(idx) = idx_str.parse::<usize>() {
-                            if idx < 5 {
+                            if idx < 6 {
                                 let cur_locs = *locs_drop.borrow();
-                                let max_sec = (0..5)
+                                let max_sec = (0..6)
                                     .filter_map(|k| {
                                         if let TabLocation::Docked(s) = cur_locs[k] {
                                             Some(s)
@@ -525,7 +532,7 @@ impl InspectorSidebar {
                                     if y < 80.0 {
                                         // Insert section at top
                                         let mut new_locs = cur_locs;
-                                        for k in 0..5 {
+                                        for k in 0..6 {
                                             if let TabLocation::Docked(s) = new_locs[k] {
                                                 new_locs[k] = TabLocation::Docked(s + 1);
                                             }
@@ -576,7 +583,7 @@ impl InspectorSidebar {
             let canvas_c = canvas.clone();
 
             Rc::new(move || {
-                let tab_info: [(String, Option<&'static str>, &'static str); 5] = [
+                let tab_info: [(String, Option<&'static str>, &'static str); 6] = [
                     (
                         crate::core::gettext("Appearance"),
                         Some("/io/github/lewis/GnomePaths/icons/panel-appearance.svg"),
@@ -602,12 +609,17 @@ impl InspectorSidebar {
                         None,
                         "document-save-symbolic",
                     ),
+                    (
+                        crate::core::gettext("Libraries"),
+                        None,
+                        "starred-symbolic",
+                    ),
                 ];
 
                 let locs = *tab_locations.borrow();
 
                 // 1. Clean up floating windows that are no longer floating before building docked sections
-                for i in 0..5 {
+                for i in 0..6 {
                     if locs[i] != TabLocation::Floating {
                         let maybe_w = floating_wins.borrow_mut()[i].take();
                         if let Some(w) = maybe_w {
@@ -631,7 +643,7 @@ impl InspectorSidebar {
                 );
 
                 // 5. Floating Windows Management
-                for i in 0..5 {
+                for i in 0..6 {
                     if locs[i] == TabLocation::Floating {
                         if floating_wins.borrow()[i].is_none() {
                             let (title, icon_res, icon_name) = &tab_info[i];

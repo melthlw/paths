@@ -152,7 +152,7 @@ pub fn build_export_tab(
                     p.name.clone()
                 };
                 let row = adw::ActionRow::builder()
-                    .title(&name)
+                    .title(glib::markup_escape_text(&name))
                     .subtitle(format!("{:.0} × {:.0} px", p.rect.width, p.rect.height))
                     .build();
 

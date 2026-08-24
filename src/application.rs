@@ -69,6 +69,7 @@ impl DesignApplication {
 
         self.app.connect_activate(|app| {
             if let Some(window) = app.active_window() {
+                window.set_visible(true);
                 window.present();
             } else {
                 let window = DesignWindow::new(app);

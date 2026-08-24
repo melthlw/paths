@@ -327,7 +327,9 @@ pub fn show_customize_toolbar_dialog(
 
                 if item.sub_tools.is_empty() {
                     // STANDALONE TOOL ROW
-                    let row = adw::ActionRow::builder().title(&item.name).build();
+                    let row = adw::ActionRow::builder()
+                        .title(glib::markup_escape_text(&item.name))
+                        .build();
                     row.add_controller(drop_target);
                     row.add_prefix(&drag_handle);
 
@@ -455,7 +457,7 @@ pub fn show_customize_toolbar_dialog(
                 } else {
                     // TOOL GROUP (EXPANDER ROW)
                     let exp_row = adw::ExpanderRow::builder()
-                        .title(&item.name)
+                        .title(glib::markup_escape_text(&item.name))
                         .subtitle(&format!("Grupo com {} ferramentas", item.sub_tools.len()))
                         .show_enable_switch(false)
                         .build();
@@ -511,7 +513,9 @@ pub fn show_customize_toolbar_dialog(
 
                     // Render Subtools inside Group
                     for (sub_idx, sub) in item.sub_tools.iter().enumerate() {
-                        let sub_row = adw::ActionRow::builder().title(&sub.name).build();
+                        let sub_row = adw::ActionRow::builder()
+                            .title(glib::markup_escape_text(&sub.name))
+                            .build();
 
                         let sub_icon = if let Some(r) = sub.icon_resource {
                             crate::ui::icons::make_symbolic_image(r, 18)
@@ -675,7 +679,9 @@ pub fn show_customize_toolbar_dialog(
         let checked_indices = Rc::new(RefCell::new(Vec::<usize>::new()));
 
         for (orig_idx, tool) in &standalone_items {
-            let chk_row = adw::ActionRow::builder().title(&tool.name).build();
+            let chk_row = adw::ActionRow::builder()
+                .title(glib::markup_escape_text(&tool.name))
+                .build();
 
             let row_icon = if let Some(r) = tool.icon_resource {
                 crate::ui::icons::make_symbolic_image(r, 20)

@@ -249,6 +249,7 @@ impl DesignWindow {
     }
 
     pub fn present(&self) {
+        self.window.set_visible(true);
         self.window.present();
     }
 
@@ -280,13 +281,12 @@ impl DesignWindow {
             .build();
         bottom_dock.append(color_bar_ref.widget());
 
-        let toolbar = FloatingToolbar::new(
+        let _toolbar = FloatingToolbar::new(
             canvas.clone(),
             bottom_dock.clone(),
             (*color_bar_ref).clone(),
             tool_options.clone(),
         );
-        bottom_dock.append(toolbar.widget());
 
         let inspector = InspectorSidebar::new(canvas.clone(), main_win_holder.clone());
         let inspector_ref = Rc::new(inspector);

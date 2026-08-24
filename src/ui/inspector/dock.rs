@@ -9,11 +9,11 @@ use super::TabLocation;
 use crate::ui::canvas::CanvasWidget;
 
 pub fn render_dock_sections(
-    tab_info: &[(String, Option<&'static str>, &'static str); 5],
-    tab_locations: &Rc<RefCell<[TabLocation; 5]>>,
-    active_section_tabs: &Rc<RefCell<[usize; 5]>>,
+    tab_info: &[(String, Option<&'static str>, &'static str); 6],
+    tab_locations: &Rc<RefCell<[TabLocation; 6]>>,
+    active_section_tabs: &Rc<RefCell<[usize; 6]>>,
     tab_order: &Rc<RefCell<Vec<usize>>>,
-    tab_widgets: &[gtk4::Widget; 5],
+    tab_widgets: &[gtk4::Widget; 6],
     sections_container: &gtk4::Box,
     canvas: &CanvasWidget,
     refresh_fn: Rc<dyn Fn()>,
@@ -30,7 +30,7 @@ pub fn render_dock_sections(
 
     // 3. Collect active docked section indices in sorted order
     let mut active_sections: Vec<usize> = Vec::new();
-    for i in 0..5 {
+    for i in 0..6 {
         if let TabLocation::Docked(sec) = locs[i] {
             if !active_sections.contains(&sec) {
                 active_sections.push(sec);
@@ -41,7 +41,7 @@ pub fn render_dock_sections(
 
     // Compact section IDs to 0..num_sections
     let mut remapped_locs = locs;
-    for i in 0..5 {
+    for i in 0..6 {
         if let TabLocation::Docked(sec) = locs[i] {
             let new_sec = active_sections.iter().position(|&s| s == sec).unwrap_or(0);
             remapped_locs[i] = TabLocation::Docked(new_sec);
@@ -55,7 +55,7 @@ pub fn render_dock_sections(
 
     // If no sections are docked
     if num_sections == 0 {
-        let has_floating = (0..5).any(|k| locs[k] == TabLocation::Floating);
+        let has_floating = (0..6).any(|k| locs[k] == TabLocation::Floating);
         let empty_box = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Vertical)
             .spacing(12)
@@ -98,31 +98,9 @@ pub fn render_dock_sections(
             .css_classes(["dim-label", "caption"])
             .build();
 
-        let open_all_pill_btn = gtk4::Button::builder()
-            .label(crate::core::gettext("Open All Panels"))
-            .css_classes(["pill", "suggested-action"])
-            .halign(gtk4::Align::Center)
-            .margin_top(8)
-            .build();
-        let locs_all = tab_locations.clone();
-        let re_all = refresh_fn.clone();
-        open_all_pill_btn.connect_clicked(move |_| {
-            *locs_all.borrow_mut() = [
-                TabLocation::Docked(0),
-                TabLocation::Docked(0),
-                TabLocation::Docked(0),
-                TabLocation::Docked(0),
-                TabLocation::Docked(0),
-            ];
-            re_all();
-        });
-
         empty_box.append(&empty_icon);
         empty_box.append(&empty_lbl);
         empty_box.append(&empty_sub);
-        if !has_floating {
-            empty_box.append(&open_all_pill_btn);
-        }
         sections_container.append(&empty_box);
     } else {
         for sec_idx in 0..num_sections {
@@ -173,7 +151,7 @@ pub fn render_dock_sections(
                 if let Ok(s) = value.get::<String>() {
                     if let Some(idx_str) = s.strip_prefix("tab:") {
                         if let Ok(idx) = idx_str.parse::<usize>() {
-                            if idx < 5 {
+                            if idx < 6 {
                                 locs_drop_bar.borrow_mut()[idx] = TabLocation::Docked(sec_idx);
 
                                 let mut order = tab_order_drop_bar.borrow().clone();
@@ -330,7 +308,7 @@ pub fn render_dock_sections(
                     if let Ok(s) = value.get::<String>() {
                         if let Some(idx_str) = s.strip_prefix("tab:") {
                             if let Ok(idx) = idx_str.parse::<usize>() {
-                                if idx < 5 {
+                                if idx < 6 {
                                     locs_drop_btn.borrow_mut()[idx] = TabLocation::Docked(sec_idx);
 
                                     let mut order = tab_order_drop_btn.borrow().clone();
@@ -579,34 +557,6 @@ pub fn render_dock_sections(
                     re_c();
                 });
                 menu_box.append(&btn_close_others);
-
-                // Unify / Restore all tabs
-                let total_docked = (0..4)
-                    .filter(|&k| matches!(locs[k], TabLocation::Docked(_)))
-                    .count();
-                if num_sections > 1 || total_docked < 4 {
-                    let (btn_merge_all, _) = create_menu_item(
-                        "view-grid-symbolic",
-                        &crate::core::gettext("Restore All Panels"),
-                    );
-                    let locs_c = tab_locations.clone();
-                    let act_sec_tabs_c = active_section_tabs.clone();
-                    let re_c = refresh_fn.clone();
-                    let pop_c = popover.clone();
-                    btn_merge_all.connect_clicked(move |_| {
-                        pop_c.popdown();
-                        *locs_c.borrow_mut() = [
-                            TabLocation::Docked(0),
-                            TabLocation::Docked(0),
-                            TabLocation::Docked(0),
-                            TabLocation::Docked(0),
-                            TabLocation::Docked(0),
-                        ];
-                        act_sec_tabs_c.borrow_mut()[0] = tab_i;
-                        re_c();
-                    });
-                    menu_box.append(&btn_merge_all);
-                }
 
                 popover.set_child(Some(&menu_box));
 

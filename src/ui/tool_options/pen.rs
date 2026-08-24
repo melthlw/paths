@@ -6,10 +6,11 @@ use crate::plugins::features::pen::PenMode;
 use crate::ui::canvas::CanvasWidget;
 
 #[derive(Clone)]
-#[allow(dead_code)]
 pub struct PenControls {
     pub pen_box: gtk4::Box,
+    #[allow(dead_code)]
     pub btn_mode_bezier: gtk4::ToggleButton,
+    #[allow(dead_code)]
     pub btn_mode_lines: gtk4::ToggleButton,
     pub btn_undo_node: gtk4::Button,
     pub btn_close_path: gtk4::Button,
@@ -35,7 +36,9 @@ pub fn build_pen_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) ->
 
     let btn_mode_bezier = gtk4::ToggleButton::builder()
         .label(&crate::core::gettext("Bézier"))
-        .tooltip_text(&crate::core::gettext("Bézier Curves (Click & Drag for tangent handles)"))
+        .tooltip_text(&crate::core::gettext(
+            "Bézier Curves (Click & Drag for tangent handles)",
+        ))
         .active(true)
         .css_classes(["flat"])
         .build();
@@ -133,7 +136,9 @@ pub fn build_pen_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) ->
     // 4. Finish Path Button
     let btn_finish_path = gtk4::Button::builder()
         .icon_name("emblem-ok-symbolic")
-        .tooltip_text(&crate::core::gettext("Finish Open Path (Enter / Right-Click)"))
+        .tooltip_text(&crate::core::gettext(
+            "Finish Open Path (Enter / Right-Click)",
+        ))
         .css_classes(["flat", "suggested-action"])
         .valign(gtk4::Align::Center)
         .build();
@@ -156,7 +161,9 @@ pub fn build_pen_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) ->
     // 5. Resume Path Button
     let btn_resume_path = gtk4::Button::builder()
         .icon_name("edit-find-replace-symbolic")
-        .tooltip_text(&crate::core::gettext("Continue / Resume Selected Open Path"))
+        .tooltip_text(&crate::core::gettext(
+            "Continue / Resume Selected Open Path",
+        ))
         .css_classes(["flat"])
         .valign(gtk4::Align::Center)
         .build();

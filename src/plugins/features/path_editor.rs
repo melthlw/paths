@@ -180,11 +180,11 @@ impl PathEditorFeature {
     }
 
     fn find_hit_target(&self, ctx: &PluginContext, world_pos: Point) -> Option<EditTarget> {
-        let zoom = ctx.viewport.zoom;
+        let zoom = ctx.viewport.zoom.max(0.001);
         let tolerance = ctx.path_editor_config.hit_tolerance;
-        let handle_threshold = (tolerance * 1.2 / zoom).max(8.0);
-        let node_threshold = (tolerance * 1.3 / zoom).max(10.0);
-        let segment_threshold = (tolerance / zoom).max(7.0);
+        let handle_threshold = (tolerance * 1.2) / zoom;
+        let node_threshold = (tolerance * 1.3) / zoom;
+        let segment_threshold = tolerance / zoom;
         let handle_mode = ctx.path_editor_config.handle_display_mode;
 
         // 1. Check Handles of candidate nodes
@@ -829,14 +829,14 @@ impl FeaturePlugin for PathEditorFeature {
         canvas: &skia::Canvas,
         viewport: &Viewport,
     ) {
-        let zoom = viewport.zoom;
+        let zoom = viewport.zoom.max(0.001);
         let config = ctx.path_editor_config;
 
-        let node_size = (config.node_size / zoom).max(6.0);
+        let node_size = config.node_size / zoom;
         let half = node_size / 2.0;
-        let corner_radius = (2.2 / zoom).max(1.5);
-        let handle_radius = ((config.handle_size * 0.95) / zoom).max(4.0);
-        let stroke_w = (1.5 / zoom).max(1.1);
+        let corner_radius = 2.0 / zoom;
+        let handle_radius = (config.handle_size * 0.95) / zoom;
+        let stroke_w = 1.5 / zoom;
 
         // Paints
         let mut shadow_paint = skia::Paint::default();
@@ -847,7 +847,7 @@ impl FeaturePlugin for PathEditorFeature {
         let mut path_outline_paint = skia::Paint::default();
         path_outline_paint.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.85), None);
         path_outline_paint.set_style(skia::PaintStyle::Stroke);
-        path_outline_paint.set_stroke_width((1.2 / zoom).max(0.9));
+        path_outline_paint.set_stroke_width(1.2 / zoom);
         path_outline_paint.set_anti_alias(true);
 
         let mut node_fill = skia::Paint::default();
@@ -863,7 +863,7 @@ impl FeaturePlugin for PathEditorFeature {
         let mut node_selected_stroke = skia::Paint::default();
         node_selected_stroke.set_color4f(skia::Color4f::new(1.0, 1.0, 1.0, 1.0), None);
         node_selected_stroke.set_style(skia::PaintStyle::Stroke);
-        node_selected_stroke.set_stroke_width((1.6 / zoom).max(1.2));
+        node_selected_stroke.set_stroke_width(1.6 / zoom);
         node_selected_stroke.set_anti_alias(true);
 
         let mut node_stroke = skia::Paint::default();
@@ -875,25 +875,25 @@ impl FeaturePlugin for PathEditorFeature {
         let mut hover_ring = skia::Paint::default();
         hover_ring.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.40), None);
         hover_ring.set_style(skia::PaintStyle::Stroke);
-        hover_ring.set_stroke_width((3.5 / zoom).max(2.2));
+        hover_ring.set_stroke_width(3.0 / zoom);
         hover_ring.set_anti_alias(true);
 
         let mut selected_glow = skia::Paint::default();
         selected_glow.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.28), None);
         selected_glow.set_style(skia::PaintStyle::Stroke);
-        selected_glow.set_stroke_width((4.0 / zoom).max(2.5));
+        selected_glow.set_stroke_width(3.5 / zoom);
         selected_glow.set_anti_alias(true);
 
         let mut handle_line_halo = skia::Paint::default();
         handle_line_halo.set_color4f(skia::Color4f::new(0.0, 0.0, 0.0, 0.40), None);
         handle_line_halo.set_style(skia::PaintStyle::Stroke);
-        handle_line_halo.set_stroke_width((2.4 / zoom).max(1.8));
+        handle_line_halo.set_stroke_width(2.5 / zoom);
         handle_line_halo.set_anti_alias(true);
 
         let mut handle_line = skia::Paint::default();
         handle_line.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.95), None);
         handle_line.set_style(skia::PaintStyle::Stroke);
-        handle_line.set_stroke_width((1.2 / zoom).max(0.85));
+        handle_line.set_stroke_width(1.2 / zoom);
         handle_line.set_anti_alias(true);
 
         let mut handle_circle_fill = skia::Paint::default();
@@ -904,7 +904,7 @@ impl FeaturePlugin for PathEditorFeature {
         let mut handle_circle_stroke = skia::Paint::default();
         handle_circle_stroke.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 1.0), None);
         handle_circle_stroke.set_style(skia::PaintStyle::Stroke);
-        handle_circle_stroke.set_stroke_width((1.6 / zoom).max(1.2));
+        handle_circle_stroke.set_stroke_width(1.6 / zoom);
         handle_circle_stroke.set_anti_alias(true);
 
         let shadow_offset = Point::new(0.8 / zoom, 1.2 / zoom);
@@ -938,7 +938,7 @@ impl FeaturePlugin for PathEditorFeature {
                             let mut seg_glow = skia::Paint::default();
                             seg_glow.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.5), None);
                             seg_glow.set_style(skia::PaintStyle::Stroke);
-                            seg_glow.set_stroke_width((4.0 / zoom).max(2.5));
+                            seg_glow.set_stroke_width(3.5 / zoom);
                             seg_glow.set_anti_alias(true);
                             canvas.draw_path(&seg_path.detach(), &seg_glow);
                         }
@@ -1130,7 +1130,7 @@ impl FeaturePlugin for PathEditorFeature {
                 let mut cross_paint = skia::Paint::default();
                 cross_paint.set_color4f(skia::Color4f::new(1.0, 1.0, 1.0, 1.0), None);
                 cross_paint.set_style(skia::PaintStyle::Stroke);
-                cross_paint.set_stroke_width((1.5 / zoom).max(1.1));
+                cross_paint.set_stroke_width(1.5 / zoom);
                 cross_paint.set_anti_alias(true);
                 let cross_len = half * 0.55;
                 canvas.draw_line(
@@ -1157,7 +1157,7 @@ impl FeaturePlugin for PathEditorFeature {
             let mut stroke_paint = skia::Paint::default();
             stroke_paint.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.85), None);
             stroke_paint.set_style(skia::PaintStyle::Stroke);
-            stroke_paint.set_stroke_width((1.0 / viewport.zoom).max(1.0));
+            stroke_paint.set_stroke_width(1.0 / zoom);
             stroke_paint.set_anti_alias(true);
 
             canvas.draw_rect(r.to_skia(), &fill_paint);

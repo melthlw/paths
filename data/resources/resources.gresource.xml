@@ -146,5 +146,11 @@
     <file>icons/transform.svg</file>
     <file>icons/ungroup-symbolic.svg</file>
     <file>icons/ungroup.svg</file>
+    <file>icons/lib-swatches-symbolic.svg</file>
+    <file>icons/lib-patterns-symbolic.svg</file>
+    <file>icons/lib-icons-symbolic.svg</file>
+    <file>icons/lib-shapes-symbolic.svg</file>
+    <file>icons/lib-strokes-symbolic.svg</file>
+    <file>icons/lib-typography-symbolic.svg</file>
   </gresource>
 </gresources>

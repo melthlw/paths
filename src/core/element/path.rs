@@ -72,12 +72,10 @@ impl PathNode {
         }
     }
 
-    #[allow(dead_code)]
     pub fn is_smooth(&self) -> bool {
         self.node_type == NodeType::Smooth
     }
 
-    #[allow(dead_code)]
     pub fn is_symmetric(&self) -> bool {
         self.node_type == NodeType::Symmetric
     }
@@ -87,7 +85,6 @@ impl PathNode {
         self.node_type == NodeType::Corner
     }
 
-    #[allow(dead_code)]
     pub fn is_auto(&self) -> bool {
         self.node_type == NodeType::Auto
     }

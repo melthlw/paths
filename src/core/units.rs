@@ -28,12 +28,12 @@ impl Unit {
     pub fn to_px_factor(self) -> f64 {
         match self {
             Unit::Px => 1.0,
-            Unit::Mm => 96.0 / 25.4,                  // ≈ 3.779527559
-            Unit::Cm => 96.0 / 2.54,                   // ≈ 37.79527559
-            Unit::M => (96.0 / 2.54) * 100.0,          // ≈ 3779.527559
-            Unit::In => 96.0,                          // 96.0
-            Unit::Pt => 96.0 / 72.0,                   // 4/3 ≈ 1.333333333
-            Unit::Pc => 16.0,                          // 12 pt = 16.0 px
+            Unit::Mm => 96.0 / 25.4,          // ≈ 3.779527559
+            Unit::Cm => 96.0 / 2.54,          // ≈ 37.79527559
+            Unit::M => (96.0 / 2.54) * 100.0, // ≈ 3779.527559
+            Unit::In => 96.0,                 // 96.0
+            Unit::Pt => 96.0 / 72.0,          // 4/3 ≈ 1.333333333
+            Unit::Pc => 16.0,                 // 12 pt = 16.0 px
         }
     }
 
@@ -411,7 +411,11 @@ impl Parser {
 /// assert_eq!(eval_math_expression("100 + 50", Unit::Px, None).unwrap(), 150.0);
 /// assert_eq!(eval_math_expression("10 * 5", Unit::Px, None).unwrap(), 50.0);
 /// ```
-pub fn eval_math_expression(input: &str, default_unit: Unit, base_val: Option<f32>) -> Result<f32, String> {
+pub fn eval_math_expression(
+    input: &str,
+    default_unit: Unit,
+    base_val: Option<f32>,
+) -> Result<f32, String> {
     let trimmed = input.trim();
     if trimmed.is_empty() {
         return Err("Entrada vazia".to_string());
@@ -470,19 +474,43 @@ mod tests {
 
     #[test]
     fn test_eval_simple_math() {
-        assert_eq!(eval_math_expression("100 + 50", Unit::Px, None).unwrap(), 150.0);
-        assert_eq!(eval_math_expression("200 - 35", Unit::Px, None).unwrap(), 165.0);
-        assert_eq!(eval_math_expression("50 * 3", Unit::Px, None).unwrap(), 150.0);
-        assert_eq!(eval_math_expression("1920 / 2", Unit::Px, None).unwrap(), 960.0);
+        assert_eq!(
+            eval_math_expression("100 + 50", Unit::Px, None).unwrap(),
+            150.0
+        );
+        assert_eq!(
+            eval_math_expression("200 - 35", Unit::Px, None).unwrap(),
+            165.0
+        );
+        assert_eq!(
+            eval_math_expression("50 * 3", Unit::Px, None).unwrap(),
+            150.0
+        );
+        assert_eq!(
+            eval_math_expression("1920 / 2", Unit::Px, None).unwrap(),
+            960.0
+        );
         assert_eq!(eval_math_expression("2 ^ 3", Unit::Px, None).unwrap(), 8.0);
     }
 
     #[test]
     fn test_eval_operator_precedence_and_parentheses() {
-        assert_eq!(eval_math_expression("10 + 20 * 2", Unit::Px, None).unwrap(), 50.0);
-        assert_eq!(eval_math_expression("(10 + 20) * 2", Unit::Px, None).unwrap(), 60.0);
-        assert_eq!(eval_math_expression("100 / (2 + 3)", Unit::Px, None).unwrap(), 20.0);
-        assert_eq!(eval_math_expression("-50 + 20", Unit::Px, None).unwrap(), -30.0);
+        assert_eq!(
+            eval_math_expression("10 + 20 * 2", Unit::Px, None).unwrap(),
+            50.0
+        );
+        assert_eq!(
+            eval_math_expression("(10 + 20) * 2", Unit::Px, None).unwrap(),
+            60.0
+        );
+        assert_eq!(
+            eval_math_expression("100 / (2 + 3)", Unit::Px, None).unwrap(),
+            20.0
+        );
+        assert_eq!(
+            eval_math_expression("-50 + 20", Unit::Px, None).unwrap(),
+            -30.0
+        );
     }
 
     #[test]
