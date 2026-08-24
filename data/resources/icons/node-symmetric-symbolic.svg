@@ -1,44 +1,12 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-
-
-<svg
-   width="4.2333331mm"
-   height="4.2333331mm"
-   viewBox="0 0 4.2333331 4.2333331"
-   version="1.1"
-   id="svg1"
-   xml:space="preserve"
-   sodipodi:docname="node-symmetric.svg"
-   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"><defs
-     id="defs1" /><g
-     id="layer1"
-     transform="matrix(0.41243261,0,0,0.41243261,7.9487365,-74.681626)"><g
-       id="g70"><g
-         id="g67"><path
-           style="fill:none;fill-opacity:1;stroke:currentColor;stroke-width:0.886901;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
-           id="path50"
-           d="m -11.234112,183.99518 a 3.0090814,3.0090814 0 0 1 -1.180611,3.2437 3.0090814,3.0090814 0 0 1 -3.451876,0 3.0090814,3.0090814 0 0 1 -1.180612,-3.2437" /><g
-           id="g52"
-           transform="translate(0.69874309,7.9349487)"><path
-             id="path51"
-             style="fill:currentColor;fill-opacity:1;stroke-width:2.21284;stroke-linecap:round;stroke-linejoin:round"
-             d="m -14.839405,178.85833 a 1.0356066,1.0356066 0 0 0 -1.035595,1.03559 1.0356066,1.0356066 0 0 0 1.035595,1.0356 1.0356066,1.0356066 0 0 0 1.035596,-1.0356 1.0356066,1.0356066 0 0 0 -1.035596,-1.03559 z m 0,0.51624 a 0.51909363,0.51909363 0 0 1 0.519349,0.51935 0.51909363,0.51909363 0 0 1 -0.519349,0.51883 0.51909363,0.51909363 0 0 1 -0.518831,-0.51883 0.51909363,0.51909363 0 0 1 0.518831,-0.51935 z" /><path
-             style="fill:currentColor;fill-opacity:0.45;stroke-width:2.21284;stroke-linecap:round;stroke-linejoin:round"
-             d="m -14.839405,179.37457 a 0.51909363,0.51909363 0 0 1 0.519349,0.51935 0.51909363,0.51909363 0 0 1 -0.519349,0.51883 0.51909363,0.51909363 0 0 1 -0.518831,-0.51883 0.51909363,0.51909363 0 0 1 0.518831,-0.51935 z"
-             id="path52" /></g><path
-           style="fill:none;fill-opacity:1;stroke:currentColor;stroke-width:0.565;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-           d="m -13.105066,187.82887 h 2.554806"
-           id="path53" /><path
-           style="fill:none;fill-opacity:1;stroke:currentColor;stroke-width:0.565;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-           d="m -17.731063,187.82887 h 2.554806"
-           id="path54" /><path
-           style="fill:currentColor;fill-opacity:1;stroke-width:2.21284;stroke-linecap:round;stroke-linejoin:round"
-           d="m -10.169378,187.30952 a 0.51909363,0.51909363 0 0 1 0.5193491,0.51935 0.51909363,0.51909363 0 0 1 -0.5193491,0.51883 0.51909363,0.51909363 0 0 1 -0.518831,-0.51883 0.51909363,0.51909363 0 0 1 0.518831,-0.51935 z"
-           id="path56" /><path
-           style="fill:currentColor;fill-opacity:1;stroke-width:2.21284;stroke-linecap:round;stroke-linejoin:round"
-           d="m -18.112463,187.30952 a 0.51909363,0.51909363 0 0 1 0.519349,0.51935 0.51909363,0.51909363 0 0 1 -0.519349,0.51883 0.51909363,0.51909363 0 0 1 -0.518831,-0.51883 0.51909363,0.51909363 0 0 1 0.518831,-0.51935 z"
-           id="path57" /></g></g></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <!-- Smooth curve underneath -->
+  <path fill="currentColor" opacity="0.45" d="M 2 13 C 4 8.5, 6 7.5, 8 7.5 C 10 7.5, 12 8.5, 14 13 L 12.6 13.6 C 11 9.8, 9.6 8.9, 8 8.9 C 6.4 8.9, 5 9.8, 3.4 13.6 Z"/>
+  <!-- Tangent handle bar -->
+  <rect x="2" y="6.75" width="12" height="1.5" rx="0.75" fill="currentColor"/>
+  <!-- Equal symmetric square handles -->
+  <rect x="1" y="6" width="3" height="3" rx="0.5" fill="currentColor"/>
+  <rect x="12" y="6" width="3" height="3" rx="0.5" fill="currentColor"/>
+  <!-- Center diamond node -->
+  <rect x="6" y="5.5" width="4" height="4" transform="rotate(45 8 7.5)" fill="currentColor"/>
+  <circle cx="8" cy="7.5" r="1" fill="#ffffff"/>
+</svg>

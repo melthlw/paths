@@ -1,5 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-  <line x1="5" y1="19" x2="19" y2="5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-  <rect x="3" y="17" width="4" height="4" fill="currentColor"/>
-  <rect x="17" y="3" width="4" height="4" fill="currentColor"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <!-- Straight connecting bar -->
+  <path fill="currentColor" d="M 3.8 13.2 L 2.8 12.2 L 12.2 2.8 L 13.2 3.8 Z"/>
+  <!-- Bottom-left node -->
+  <rect x="1" y="10" width="5" height="5" rx="0.75" fill="currentColor"/>
+  <!-- Top-right node -->
+  <rect x="10" y="1" width="5" height="5" rx="0.75" fill="currentColor"/>
 </svg>
