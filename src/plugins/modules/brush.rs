@@ -18,7 +18,8 @@ impl Default for BrushStudioPlugin {
                 Some("/io/github/lewis/GnomePaths/icons/tool-pen.svg"),
                 "Pencil & Brush (B)",
                 18,
-            ),
+            )
+            .with_group("pen-brush"),
         }
     }
 }
