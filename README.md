@@ -171,6 +171,7 @@ We champion transparency and open collaboration. If you prefer traditional hand-
 
 ## Contributing and Community
 
+- **Changelog**: See **[CHANGELOG.md](CHANGELOG.md)** for release notes and version history.
 - **Bug Reports and Feedback**: Open an issue on our [GitLab Issue Tracker](https://gitlab.com/lewisHeart/gnome-paths/-/issues).
 - **Translations**: Help translate GNOME Paths into your language! See **[TRANSLATING.md](TRANSLATING.md)**.
 - **Plugins**: Check out the example plugin template in [`examples/plugin-template`](examples/plugin-template/).

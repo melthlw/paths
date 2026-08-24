@@ -171,6 +171,7 @@ Prezamos pela transparência e colaboração aberta. Caso você prefira o fluxo 
 
 ## Contribuição e Comunidade
 
+- **Histórico de Alterações**: Consulte o **[CHANGELOG.md](CHANGELOG.md)** para detalhes das versões e notas de lançamento.
 - **Relatórios de Bugs e Sugestões**: Abra uma issue no [Rastreador de Issues do GitLab](https://gitlab.com/lewisHeart/gnome-paths/-/issues).
 - **Traduções**: Ajude a traduzir o GNOME Paths para outros idiomas! Veja **[TRANSLATING.md](TRANSLATING.md)**.
 - **Plugins**: Veja o modelo de plugin em [`examples/plugin-template`](examples/plugin-template/).
