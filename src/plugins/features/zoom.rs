@@ -244,7 +244,7 @@ impl FeaturePlugin for ZoomFitAllFeature {
 pub struct Zoom100Feature;
 impl FeaturePlugin for Zoom100Feature {
     fn on_activate(&mut self, ctx: &mut PluginContext) {
-        ctx.viewport.zoom = 1.0;
+        ctx.viewport.reset();
         ctx.request_redraw();
     }
     fn on_pointer_down(&mut self, _ctx: &mut PluginContext, _event: &PointerEvent) {}
