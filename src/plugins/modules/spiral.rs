@@ -14,8 +14,8 @@ impl Default for SpiralStudioPlugin {
             ui: ToolUiItem::new(
                 "spiral",
                 "Spiral",
-                "media-record-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-spiral.svg"),
+                "tool-spiral-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-spiral-symbolic.svg"),
                 "Spiral (W)",
                 18,
             )

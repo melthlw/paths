@@ -9,7 +9,7 @@ pub fn build_catalog_popover(
     tab_info: &[(String, Option<&'static str>, &'static str); 6],
     tab_locations: &Rc<RefCell<[TabLocation; 6]>>,
     active_section_tabs: &Rc<RefCell<[usize; 6]>>,
-    canvas: &CanvasWidget,
+    _canvas: &CanvasWidget,
     refresh_fn: Rc<dyn Fn()>,
 ) -> gtk4::Popover {
     let add_pop = gtk4::Popover::builder()
@@ -84,7 +84,7 @@ pub fn build_catalog_popover(
         row.append(&lbl);
 
         if is_open {
-            let check = gtk4::Image::from_icon_name("object-select-symbolic");
+            let check = gtk4::Image::from_icon_name("check-symbolic");
             check.set_pixel_size(14);
             check.add_css_class("accent");
             row.append(&check);
@@ -116,12 +116,9 @@ pub fn build_catalog_popover(
         filterable_items.push((title.to_lowercase(), item_btn.upcast()));
     }
 
-    let external_plugins = canvas
-        .state()
-        .try_borrow()
-        .map(|s| s.plugin_manager.external_plugins())
-        .unwrap_or_default();
-    if !external_plugins.is_empty() {
+    // Placeholder/Hook for plugin & tool panels (panels only, not general plugin toggles)
+    let plugin_panels: Vec<(&str, &str, &str)> = Vec::new();
+    if !plugin_panels.is_empty() {
         let plug_title = gtk4::Label::builder()
             .label(crate::core::gettext("Plugins & Tools"))
             .css_classes(["caption", "dim-label"])
@@ -135,7 +132,7 @@ pub fn build_catalog_popover(
             plug_title.upcast(),
         ));
 
-        for (plug_id, plug_name, enabled) in external_plugins {
+        for (_id, name, icon) in plugin_panels {
             let p_btn = gtk4::Button::builder()
                 .css_classes(["flat", "menu-item-btn"])
                 .build();
@@ -147,27 +144,18 @@ pub fn build_catalog_popover(
                 .margin_top(4)
                 .margin_bottom(4)
                 .build();
-            let p_icon = gtk4::Image::from_icon_name("system-software-install-symbolic");
+            let p_icon = gtk4::Image::from_icon_name(icon);
             p_icon.set_pixel_size(16);
             let p_lbl = gtk4::Label::builder()
-                .label(&plug_name[..])
+                .label(name)
                 .hexpand(true)
                 .halign(gtk4::Align::Start)
                 .build();
             p_row.append(&p_icon);
             p_row.append(&p_lbl);
-            if enabled {
-                let check = gtk4::Image::from_icon_name("object-select-symbolic");
-                check.set_pixel_size(14);
-                check.add_css_class("accent");
-                p_row.append(&check);
-            }
             p_btn.set_child(Some(&p_row));
             list_box.append(&p_btn);
-            filterable_items.push((
-                format!("{} {}", plug_name.to_lowercase(), plug_id.to_lowercase()),
-                p_btn.upcast(),
-            ));
+            filterable_items.push((name.to_lowercase(), p_btn.upcast()));
         }
     }
 
@@ -195,39 +183,6 @@ pub fn build_catalog_popover(
         .child(&list_box)
         .build();
     pop_wrapper.append(&scroll);
-
-    pop_wrapper.append(&gtk4::Separator::new(gtk4::Orientation::Horizontal));
-
-    let bottom_btns_box = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(6)
-        .build();
-
-    let close_all_btn = gtk4::Button::builder()
-        .label(crate::core::gettext("Close All"))
-        .icon_name("window-close-symbolic")
-        .css_classes(["flat", "menu-item-btn"])
-        .hexpand(true)
-        .build();
-
-    let locs_close_all = tab_locations.clone();
-    let re_close_all = refresh_fn.clone();
-    let pop_ca = add_pop.clone();
-    close_all_btn.connect_clicked(move |_| {
-        pop_ca.popdown();
-        *locs_close_all.borrow_mut() = [
-            TabLocation::Closed,
-            TabLocation::Closed,
-            TabLocation::Closed,
-            TabLocation::Closed,
-            TabLocation::Closed,
-            TabLocation::Closed,
-        ];
-        re_close_all();
-    });
-
-    bottom_btns_box.append(&close_all_btn);
-    pop_wrapper.append(&bottom_btns_box);
 
     add_pop.set_child(Some(&pop_wrapper));
     add_pop

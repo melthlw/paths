@@ -29,7 +29,7 @@ pub fn build_general_page(window: &adw::Window, canvas: &CanvasWidget) -> gtk4::
         .activatable(true)
         .build();
 
-    let lang_icon = gtk4::Image::from_icon_name("preferences-desktop-locale-symbolic");
+    let lang_icon = gtk4::Image::from_icon_name("prefs-language-symbolic");
     lang_icon.set_pixel_size(18);
     lang_row.add_prefix(&lang_icon);
 
@@ -49,7 +49,7 @@ pub fn build_general_page(window: &adw::Window, canvas: &CanvasWidget) -> gtk4::
         .css_classes(["dim-label", "numeric"])
         .build();
 
-    let chevron_icon = gtk4::Image::from_icon_name("go-next-symbolic");
+    let chevron_icon = gtk4::Image::from_icon_name("tab-move-right-symbolic");
     chevron_icon.set_pixel_size(14);
     chevron_icon.add_css_class("dim-label");
 

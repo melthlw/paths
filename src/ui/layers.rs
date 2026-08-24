@@ -70,7 +70,7 @@ impl LayersSidebar {
             .build();
 
         let btn_up = gtk4::Button::builder()
-            .icon_name("go-up-symbolic")
+            .icon_name("layer-move-up-symbolic")
             .tooltip_text(&crate::core::gettext("Move Layer Up"))
             .css_classes(["flat"])
             .focus_on_click(false)
@@ -78,7 +78,7 @@ impl LayersSidebar {
             .build();
 
         let btn_down = gtk4::Button::builder()
-            .icon_name("go-down-symbolic")
+            .icon_name("layer-move-down-symbolic")
             .tooltip_text(&crate::core::gettext("Move Layer Down"))
             .css_classes(["flat"])
             .focus_on_click(false)
@@ -176,7 +176,7 @@ impl LayersSidebar {
             .margin_bottom(48)
             .build();
 
-        let empty_icon = gtk4::Image::from_icon_name("view-paged-symbolic");
+        let empty_icon = gtk4::Image::from_icon_name("sidebar-layers-symbolic");
         empty_icon.set_pixel_size(48);
         empty_icon.set_opacity(0.35);
 
@@ -347,7 +347,7 @@ impl LayersSidebar {
         if layer.is_group {
             let is_exp = self.expanded_groups.borrow().contains(&layer.id);
             let arrow_icon = if is_exp {
-                "pan-down-symbolic"
+                "dropdown-arrow-symbolic"
             } else {
                 "pan-end-symbolic"
             };
@@ -457,9 +457,9 @@ impl LayersSidebar {
 
         // 3a. Lock Toggle Button
         let lock_icon = if layer.locked {
-            "changes-prevent-symbolic"
+            "lock-aspect-ratio-symbolic"
         } else {
-            "changes-allow-symbolic"
+            "unlock-aspect-ratio-symbolic"
         };
         let lock_tooltip = if layer.locked {
             crate::core::gettext("Unlock")

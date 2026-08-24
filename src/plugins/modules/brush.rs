@@ -14,8 +14,8 @@ impl Default for BrushStudioPlugin {
             ui: ToolUiItem::new(
                 "brush",
                 "Pencil & Brush",
-                "applications-graphics-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-pen.svg"),
+                "tool-pen-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-pen-symbolic.svg"),
                 "Pencil & Brush (B)",
                 18,
             )

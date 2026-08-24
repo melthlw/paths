@@ -133,21 +133,27 @@ pub fn rebuild_toolbar_items(
         let is_grouped = !item.sub_tools.is_empty();
 
         let icon_img = if let Some(res) = item.icon_resource {
-            crate::ui::icons::make_symbolic_image(res, 22)
+            crate::ui::icons::make_symbolic_image(res, 20)
         } else {
-            crate::ui::icons::make_symbolic_image(item.icon_name, 22)
+            crate::ui::icons::make_symbolic_image(item.icon_name, 20)
         };
 
         let button_child: gtk4::Widget = if is_grouped {
             let overlay = gtk4::Overlay::new();
+            overlay.set_size_request(24, 24);
+            overlay.set_halign(gtk4::Align::Center);
+            overlay.set_valign(gtk4::Align::Center);
+
+            icon_img.set_halign(gtk4::Align::Center);
+            icon_img.set_valign(gtk4::Align::Center);
             overlay.set_child(Some(&icon_img));
 
-            let indicator = crate::ui::icons::make_symbolic_image("tool-options", 7);
+            let indicator = crate::ui::icons::make_symbolic_image("tool-options-symbolic", 6);
             indicator.set_halign(gtk4::Align::End);
             indicator.set_valign(gtk4::Align::End);
-            indicator.set_margin_end(1);
-            indicator.set_margin_bottom(1);
-            indicator.set_opacity(0.65);
+            indicator.set_margin_end(0);
+            indicator.set_margin_bottom(0);
+            indicator.set_opacity(0.9);
             overlay.add_overlay(&indicator);
 
             overlay.upcast()

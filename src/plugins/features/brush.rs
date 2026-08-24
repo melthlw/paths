@@ -71,6 +71,7 @@ impl BrushFeature {
         Self::default()
     }
 
+    #[allow(dead_code)]
     pub fn point_count(&self) -> usize {
         self.current_points.len()
     }

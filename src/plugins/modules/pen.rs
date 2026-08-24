@@ -14,8 +14,8 @@ impl Default for PenStudioPlugin {
             ui: ToolUiItem::new(
                 "pen",
                 "Vector Pen",
-                "document-edit-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-vector-pen.svg"),
+                "tool-vector-pen-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-vector-pen-symbolic.svg"),
                 "Vector Pen (P)",
                 16,
             )

@@ -16,7 +16,6 @@ pub struct PenControls {
     pub btn_close_path: gtk4::Button,
     pub btn_finish_path: gtk4::Button,
     pub btn_resume_path: gtk4::Button,
-    pub status_lbl: gtk4::Label,
 }
 
 pub fn build_pen_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) -> PenControls {
@@ -28,26 +27,24 @@ pub fn build_pen_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) ->
         .build();
 
     // 1. Mode Segmented Capsule (Bézier vs Linhas Retas)
-    let mode_seg_box = gtk4::Box::builder()
+    let mode_box = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Horizontal)
-        .spacing(2)
         .css_classes(["linked"])
+        .valign(gtk4::Align::Center)
         .build();
 
     let btn_mode_bezier = gtk4::ToggleButton::builder()
-        .label(&crate::core::gettext("Bézier"))
-        .tooltip_text(&crate::core::gettext(
-            "Bézier Curves (Click & Drag for tangent handles)",
-        ))
+        .icon_name("tool-vector-pen-symbolic")
+        .tooltip_text(&crate::core::gettext("Bézier Mode (Smooth Curves & Angles)"))
         .active(true)
         .css_classes(["flat"])
         .build();
 
     let btn_mode_lines = gtk4::ToggleButton::builder()
-        .label(&crate::core::gettext("Lines"))
-        .tooltip_text(&crate::core::gettext("Straight Line Segments"))
-        .group(&btn_mode_bezier)
+        .icon_name("segment-line-symbolic")
+        .tooltip_text(&crate::core::gettext("Polygon Mode (Straight Lines)"))
         .css_classes(["flat"])
+        .group(&btn_mode_bezier)
         .build();
 
     {
@@ -90,9 +87,9 @@ pub fn build_pen_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) ->
         });
     }
 
-    mode_seg_box.append(&btn_mode_bezier);
-    mode_seg_box.append(&btn_mode_lines);
-    pen_box.append(&mode_seg_box);
+    mode_box.append(&btn_mode_bezier);
+    mode_box.append(&btn_mode_lines);
+    pen_box.append(&mode_box);
 
     let sep1 = gtk4::Separator::builder()
         .orientation(gtk4::Orientation::Vertical)
@@ -104,7 +101,7 @@ pub fn build_pen_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) ->
     // 2. Undo Last Node Button
     let btn_undo_node = gtk4::Button::builder()
         .icon_name("edit-undo-symbolic")
-        .tooltip_text(&crate::core::gettext("Undo Last Node (Ctrl+Z / Backspace)"))
+        .tooltip_text(&crate::core::gettext("Delete / Undo Last Placed Node (Backspace)"))
         .css_classes(["flat"])
         .valign(gtk4::Align::Center)
         .build();
@@ -119,8 +116,8 @@ pub fn build_pen_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) ->
 
     // 3. Close Path Button
     let btn_close_path = gtk4::Button::builder()
-        .icon_name("media-playlist-repeat-symbolic")
-        .tooltip_text(&crate::core::gettext("Close & Finish Path (C)"))
+        .icon_name("path-close-symbolic")
+        .tooltip_text(&crate::core::gettext("Close Path & Connect to Start (C)"))
         .css_classes(["flat"])
         .valign(gtk4::Align::Center)
         .build();
@@ -133,13 +130,11 @@ pub fn build_pen_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) ->
     }
     pen_box.append(&btn_close_path);
 
-    // 4. Finish Path Button
+    // 4. Finish / Terminate Path Button
     let btn_finish_path = gtk4::Button::builder()
-        .icon_name("emblem-ok-symbolic")
-        .tooltip_text(&crate::core::gettext(
-            "Finish Open Path (Enter / Right-Click)",
-        ))
-        .css_classes(["flat", "suggested-action"])
+        .icon_name("check-symbolic")
+        .tooltip_text(&crate::core::gettext("Finish Path (Enter / Esc)"))
+        .css_classes(["flat"])
         .valign(gtk4::Align::Center)
         .build();
 
@@ -160,7 +155,7 @@ pub fn build_pen_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) ->
 
     // 5. Resume Path Button
     let btn_resume_path = gtk4::Button::builder()
-        .icon_name("edit-find-replace-symbolic")
+        .icon_name("pen-simplify-symbolic")
         .tooltip_text(&crate::core::gettext(
             "Continue / Resume Selected Open Path",
         ))
@@ -176,16 +171,6 @@ pub fn build_pen_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) ->
     }
     pen_box.append(&btn_resume_path);
 
-    // 6. Status Label
-    let status_lbl = gtk4::Label::builder()
-        .label(&crate::core::gettext("Ready to draw"))
-        .css_classes(["dim-label", "caption"])
-        .margin_start(6)
-        .margin_end(4)
-        .valign(gtk4::Align::Center)
-        .build();
-    pen_box.append(&status_lbl);
-
     PenControls {
         pen_box,
         btn_mode_bezier,
@@ -194,6 +179,5 @@ pub fn build_pen_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) ->
         btn_close_path,
         btn_finish_path,
         btn_resume_path,
-        status_lbl,
     }
 }

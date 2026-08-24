@@ -14,8 +14,8 @@ impl Default for SelectStudioPlugin {
             ui: ToolUiItem::new(
                 "select",
                 "Select & Move",
-                "edit-select-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-select.svg"),
+                "tool-select-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-select-symbolic.svg"),
                 "Select & Move (V)",
                 10,
             ),

@@ -47,7 +47,7 @@ pub fn build_main_menu(
     main_win_holder: &Rc<RefCell<Option<adw::ApplicationWindow>>>,
 ) -> gtk4::MenuButton {
     let menu_btn = gtk4::MenuButton::builder()
-        .icon_name("open-menu-symbolic")
+        .icon_name("app-menu-symbolic")
         .tooltip_text(&crate::core::gettext("Main Menu"))
         .css_classes(["flat"])
         .build();
@@ -140,14 +140,14 @@ pub fn build_main_menu(
 
     // 5. Preferences Item
     let pref_btn = create_menu_btn(
-        "preferences-system-symbolic",
+        "prefs-general-symbolic",
         &crate::core::gettext("Preferences"),
         Some("Ctrl+,"),
     );
 
     // 6. Keyboard Shortcuts Item
     let shortcuts_btn = create_menu_btn(
-        "input-keyboard-symbolic",
+        "prefs-shortcuts-symbolic",
         &crate::core::gettext("Keyboard Shortcuts"),
         Some("Ctrl+?"),
     );
@@ -161,7 +161,7 @@ pub fn build_main_menu(
 
     // 8. About Item
     let about_btn = create_menu_btn(
-        "help-about-symbolic",
+        "prefs-about-symbolic",
         &crate::core::gettext("About GNOME Paths"),
         None,
     );

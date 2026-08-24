@@ -14,8 +14,8 @@ impl Default for PathEditorStudioPlugin {
             ui: ToolUiItem::new(
                 "path_editor",
                 "Path Node Editor",
-                "pointer-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-path-editor.svg"),
+                "tool-path-editor-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-path-editor-symbolic.svg"),
                 "Path Node Editor (A)",
                 12,
             ),

@@ -144,6 +144,8 @@ pub struct PathElement {
     pub id: ElementId,
     pub nodes: Vec<PathNode>,
     pub is_closed: bool,
+    #[serde(default)]
+    pub subpath_lengths: Vec<usize>,
     pub fills: Vec<FillLayer>,
     pub strokes: Vec<StrokeLayer>,
     pub fill_color: Option<Color>,
@@ -183,6 +185,7 @@ impl PathElement {
             id: ElementId::new(),
             nodes,
             is_closed,
+            subpath_lengths: Vec::new(),
             fills,
             strokes,
             fill_color,
@@ -201,39 +204,102 @@ impl PathElement {
         }
     }
 
+    pub fn new_compound(
+        nodes: Vec<PathNode>,
+        subpath_lengths: Vec<usize>,
+        is_closed: bool,
+        fill_color: Option<Color>,
+        stroke_color: Option<Color>,
+        stroke_width: f32,
+    ) -> Self {
+        let mut elem = Self::new(nodes, is_closed, fill_color, stroke_color, stroke_width);
+        elem.subpath_lengths = subpath_lengths;
+        elem
+    }
+
+    #[allow(dead_code)]
+    pub fn new_from_subpaths(
+        subpaths: Vec<Vec<PathNode>>,
+        is_closed: bool,
+        fill_color: Option<Color>,
+        stroke_color: Option<Color>,
+        stroke_width: f32,
+    ) -> Self {
+        let subpath_lengths = subpaths.iter().map(|s| s.len()).collect();
+        let nodes = subpaths.into_iter().flatten().collect();
+        Self::new_compound(nodes, subpath_lengths, is_closed, fill_color, stroke_color, stroke_width)
+    }
+
     pub fn to_skia_path(&self) -> skia::Path {
         if self.nodes.is_empty() {
             return skia::PathBuilder::new().detach();
         }
 
         let mut builder = skia::PathBuilder::new();
-        builder.move_to(self.nodes[0].point.to_skia());
 
-        let count = self.nodes.len();
-        let loop_count = if self.is_closed { count } else { count - 1 };
+        if !self.subpath_lengths.is_empty() {
+            let mut offset = 0;
+            for &len in &self.subpath_lengths {
+                if len == 0 || offset >= self.nodes.len() {
+                    continue;
+                }
+                let end = (offset + len).min(self.nodes.len());
+                let sub = &self.nodes[offset..end];
+                offset = end;
 
-        for i in 0..loop_count {
-            let n1 = &self.nodes[i];
-            let n2 = &self.nodes[(i + 1) % count];
-
-            match (n1.handle_out, n2.handle_in) {
-                (Some(h1), Some(h2)) => {
-                    builder.cubic_to(h1.to_skia(), h2.to_skia(), n2.point.to_skia());
+                builder.move_to(sub[0].point.to_skia());
+                let count = sub.len();
+                let loop_count = if self.is_closed { count } else { count.saturating_sub(1) };
+                for i in 0..loop_count {
+                    let n1 = &sub[i];
+                    let n2 = &sub[(i + 1) % count];
+                    match (n1.handle_out, n2.handle_in) {
+                        (Some(h1), Some(h2)) => {
+                            builder.cubic_to(h1.to_skia(), h2.to_skia(), n2.point.to_skia());
+                        }
+                        (Some(h1), None) => {
+                            builder.quad_to(h1.to_skia(), n2.point.to_skia());
+                        }
+                        (None, Some(h2)) => {
+                            builder.quad_to(h2.to_skia(), n2.point.to_skia());
+                        }
+                        (None, None) => {
+                            builder.line_to(n2.point.to_skia());
+                        }
+                    }
                 }
-                (Some(h1), None) => {
-                    builder.quad_to(h1.to_skia(), n2.point.to_skia());
-                }
-                (None, Some(h2)) => {
-                    builder.quad_to(h2.to_skia(), n2.point.to_skia());
-                }
-                (None, None) => {
-                    builder.line_to(n2.point.to_skia());
+                if self.is_closed {
+                    builder.close();
                 }
             }
-        }
+        } else {
+            builder.move_to(self.nodes[0].point.to_skia());
+            let count = self.nodes.len();
+            let loop_count = if self.is_closed { count } else { count.saturating_sub(1) };
 
-        if self.is_closed {
-            builder.close();
+            for i in 0..loop_count {
+                let n1 = &self.nodes[i];
+                let n2 = &self.nodes[(i + 1) % count];
+
+                match (n1.handle_out, n2.handle_in) {
+                    (Some(h1), Some(h2)) => {
+                        builder.cubic_to(h1.to_skia(), h2.to_skia(), n2.point.to_skia());
+                    }
+                    (Some(h1), None) => {
+                        builder.quad_to(h1.to_skia(), n2.point.to_skia());
+                    }
+                    (None, Some(h2)) => {
+                        builder.quad_to(h2.to_skia(), n2.point.to_skia());
+                    }
+                    (None, None) => {
+                        builder.line_to(n2.point.to_skia());
+                    }
+                }
+            }
+
+            if self.is_closed {
+                builder.close();
+            }
         }
 
         builder.detach()
@@ -823,7 +889,7 @@ impl PathElement {
         stroke_color: Option<Color>,
         stroke_width: f32,
     ) -> Vec<PathElement> {
-        let mut elements = Vec::new();
+        let mut subpaths: Vec<Vec<PathNode>> = Vec::new();
         let mut current_nodes = Vec::new();
         let mut is_closed = false;
 
@@ -833,14 +899,7 @@ impl PathElement {
             match verb {
                 skia::path::Verb::Move => {
                     if !current_nodes.is_empty() {
-                        elements.push(PathElement::new(
-                            std::mem::take(&mut current_nodes),
-                            is_closed,
-                            fill_color,
-                            stroke_color,
-                            stroke_width,
-                        ));
-                        is_closed = false;
+                        subpaths.push(std::mem::take(&mut current_nodes));
                     }
                     if !points.is_empty() {
                         current_nodes.push(PathNode::new(Point::new(points[0].x, points[0].y)));
@@ -924,22 +983,42 @@ impl PathElement {
                             }
                         }
                     }
+                    if !current_nodes.is_empty() {
+                        subpaths.push(std::mem::take(&mut current_nodes));
+                    }
                 }
                 skia::path::Verb::Done => break,
             }
         }
 
         if !current_nodes.is_empty() {
-            elements.push(PathElement::new(
-                current_nodes,
+            subpaths.push(current_nodes);
+        }
+
+        if subpaths.is_empty() {
+            return Vec::new();
+        }
+
+        if subpaths.len() == 1 {
+            vec![PathElement::new(
+                subpaths.into_iter().next().unwrap(),
                 is_closed,
                 fill_color,
                 stroke_color,
                 stroke_width,
-            ));
+            )]
+        } else {
+            let subpath_lengths = subpaths.iter().map(|s| s.len()).collect();
+            let nodes = subpaths.into_iter().flatten().collect();
+            vec![PathElement::new_compound(
+                nodes,
+                subpath_lengths,
+                is_closed,
+                fill_color,
+                stroke_color,
+                stroke_width,
+            )]
         }
-
-        elements
     }
 
     pub fn render(&self, canvas: &skia::Canvas) {
@@ -1041,4 +1120,44 @@ pub fn dist_to_segment(p: Point, a: Point, b: Point) -> f32 {
     let t = (((p.x - a.x) * (b.x - a.x) + (p.y - a.y) * (b.y - a.y)) / l2).clamp(0.0, 1.0);
     let projection = Point::new(a.x + t * (b.x - a.x), a.y + t * (b.y - a.y));
     p.distance_to(projection)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_compound_path_to_skia_and_bounds() {
+        // Outer square 0..100, inner cutout 25..75
+        let outer = vec![
+            PathNode::new(Point::new(0.0, 0.0)),
+            PathNode::new(Point::new(100.0, 0.0)),
+            PathNode::new(Point::new(100.0, 100.0)),
+            PathNode::new(Point::new(0.0, 100.0)),
+        ];
+        let inner = vec![
+            PathNode::new(Point::new(25.0, 25.0)),
+            PathNode::new(Point::new(75.0, 25.0)),
+            PathNode::new(Point::new(75.0, 75.0)),
+            PathNode::new(Point::new(25.0, 75.0)),
+        ];
+
+        let compound = PathElement::new_from_subpaths(
+            vec![outer, inner],
+            true,
+            Some(Color::BLACK),
+            None,
+            1.0,
+        );
+
+        assert_eq!(compound.subpath_lengths, vec![4, 4]);
+        assert_eq!(compound.nodes.len(), 8);
+
+        let sk_path = compound.to_skia_path();
+        assert!(!sk_path.is_empty());
+
+        let b = compound.bounds();
+        assert!(b.width >= 100.0);
+        assert!(b.height >= 100.0);
+    }
 }

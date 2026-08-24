@@ -56,7 +56,7 @@ impl ColorControlBar {
             .valign(gtk4::Align::Center)
             .build();
 
-        let current_fill = Rc::new(Cell::new(Some(gdk::RGBA::new(0.2, 0.5, 0.9, 1.0))));
+        let current_fill = Rc::new(Cell::new(Some(gdk::RGBA::new(0.0, 0.0, 0.0, 1.0))));
 
         let fill_area = gtk4::DrawingArea::builder()
             .content_width(22)
@@ -114,7 +114,7 @@ impl ColorControlBar {
             .build();
 
         let fill_picker =
-            ColorPickerPopover::new(canvas.clone(), Color::new(0.2, 0.5, 0.9, 1.0), 0);
+            ColorPickerPopover::new(canvas.clone(), Color::BLACK, 0);
         fill_picker.attach_to(&fill_btn);
 
         let current_fill_inner = current_fill.clone();

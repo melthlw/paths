@@ -183,7 +183,7 @@ pub fn build_alignment_section(canvas: &CanvasWidget) -> AlignmentSection {
         &align_box,
         Some("align"),
         &crate::core::gettext("Alignment"),
-        "format-justify-left-symbolic",
+        "text-align-left-symbolic",
     );
 
     // Sub-page 2: Multi-Object Grid Arrangement
@@ -319,7 +319,7 @@ pub fn build_alignment_section(canvas: &CanvasWidget) -> AlignmentSection {
         .margin_start(10)
         .margin_end(10)
         .build();
-    let circ_icon = gtk4::Image::from_icon_name("media-optical-symbolic");
+    let circ_icon = gtk4::Image::from_icon_name("align-artboard-symbolic");
     circ_icon.set_pixel_size(16);
     circ_header.append(&circ_icon);
     circ_header.append(
@@ -365,7 +365,7 @@ pub fn build_alignment_section(canvas: &CanvasWidget) -> AlignmentSection {
 
     let apply_circ_btn = gtk4::Button::builder()
         .label(crate::core::gettext("Arrange in Circle"))
-        .icon_name("media-optical-symbolic")
+        .icon_name("align-artboard-symbolic")
         .css_classes(["suggested-action"])
         .margin_start(12)
         .margin_end(12)
@@ -385,7 +385,7 @@ pub fn build_alignment_section(canvas: &CanvasWidget) -> AlignmentSection {
         &circ_box,
         Some("circular"),
         &crate::core::gettext("Circular"),
-        "media-optical-symbolic",
+        "align-artboard-symbolic",
     );
 
     container.append(&align_stack);

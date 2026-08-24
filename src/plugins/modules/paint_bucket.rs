@@ -14,8 +14,8 @@ impl Default for PaintBucketStudioPlugin {
             ui: ToolUiItem::new(
                 "paint_bucket",
                 "Paint Bucket",
-                "format-fill-color-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-paint-bucket.svg"),
+                "tool-paint-bucket-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-paint-bucket-symbolic.svg"),
                 "Paint Bucket (K)",
                 35,
             )

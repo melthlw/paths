@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-  <!-- Smooth S-curve ribbon -->
-  <path fill="currentColor" opacity="0.65" d="M 2 12.5 C 4 5, 7 5, 8 8 C 9 11, 12 11, 14 3.5 L 12.6 3.1 C 11 9.5, 9.2 9.5, 8 6.5 C 6.8 3.5, 4.8 3.5, 3.4 12.1 Z"/>
-  <!-- Center auto-smooth circular node -->
-  <circle cx="8" cy="7.5" r="3.2" fill="currentColor"/>
-  <circle cx="8" cy="7.5" r="1.4" fill="#ffffff"/>
-  <!-- Auto 'A' badge / indicator at top-left -->
-  <path fill="currentColor" d="M 2 5.5 L 3.2 2 L 4.4 5.5 H 3.75 L 3.45 4.5 H 2.95 L 2.65 5.5 Z M 3.05 3.8 H 3.35 L 3.2 3.1 Z"/>
-</svg>

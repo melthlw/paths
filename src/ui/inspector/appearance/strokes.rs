@@ -39,7 +39,7 @@ impl StrokeRow {
             .build();
 
         let drag_handle = gtk4::Image::builder()
-            .icon_name("list-drag-handle-symbolic")
+            .icon_name("drag-handle-symbolic")
             .opacity(0.35)
             .valign(gtk4::Align::Center)
             .build();
@@ -193,7 +193,7 @@ impl StrokeRow {
         });
 
         let chevron = gtk4::Image::builder()
-            .icon_name("pan-down-symbolic")
+            .icon_name("dropdown-arrow-symbolic")
             .valign(gtk4::Align::Center)
             .build();
 

@@ -50,33 +50,40 @@ Development roadmap structured by version milestones.
 
 ---
 
-## v0.2.2 — Asset Libraries & Design System Panel
-> **Focus**: Integrated multi-category asset libraries panel, live dynamic language switching, and design system presets.
+## v0.2.2 — Asset Libraries, Design System & Icon Geometry
+> **Focus**: Integrated multi-category asset libraries panel, live dynamic language switching, design system presets, and compound path parsing.
 
 ### Asset Libraries (Studio Modular Panel)
 - [x] **New "Libraries" Inspector Tab (Closed by default)**:
   - [x] **Live Search & Filter**: Real-time cross-library search bar (`SearchEntry`) for immediate discovery of assets and styles.
-  - [x] **Category Pill Switcher**: Smooth animated category transitions between Swatches, Patterns, Icons, Shapes, Strokes, Typography, and Effects.
+  - [x] **Category Pill Switcher**: Smooth animated category transitions between Swatches, Patterns, Icons, Shapes, Strokes, and Typography.
   - [x] **Color Swatches & Palettes**:
     - [x] Curated palettes: GNOME Adwaita Core, Tailwind Modern, Cyberpunk & Neon, and Pastel & Soft.
     - [x] Antialiased rounded swatch tiles with tooltips and one-click fill application to active selection or canvas fill.
   - [x] **Pattern & Texture Presets**:
-    - [x] Visual cards for Technical Grid, Halftone Dots, Diagonal Stripes, Checkerboard, and Hexagonal Honeycomb.
+    - [x] Visual cards for Technical Grid, Halftone Dots, Diagonal Stripes, Checkerboard, Hexagonal Honeycomb, Brick Wall, and Seigaiha Scales.
     - [x] One-click pattern fill layer attachment to selected vector objects.
   - [x] **Vector Symbolic Icons Library**:
-    - [x] Rich categorized vector icon collection (Home, User, Search, Settings, Heart, Star, Check, Close, Folder, Cloud, Trash, Edit, Play, Pause, Camera, Lock, Globe, Code).
+    - [x] Rich categorized vector icon collection (Home, User, Search, Settings, Heart, Star, Check, Close, Folder, Cloud, Trash, Edit, Play, Pause, Camera, Lock, Globe, Code, Audio Volume, etc.).
     - [x] Click-to-insert vector icons directly onto canvas as editable Bézier paths.
   - [x] **Geometric Shapes & Badges Library**:
     - [x] Ready-to-use vector shapes: Shield, 8-Point Badge, Ribbon, Speech Bubble, Lightning Bolt, Hexagon, Octagon, Price Tag, Directional Arrow, and Diamond.
     - [x] Click-to-insert vector shapes with instant node editing and styling support.
   - [x] **Stroke Styles & Dash Presets**:
-    - [x] Solid, Dashed, Dotted, and future engine placeholder presets (Calligraphic, Tapered, Rough Sketch).
+    - [x] Solid, Dashed, Dotted, and stroke preset library.
     - [x] One-click stroke layer application to selected elements.
   - [x] **Typography & Hierarchy Presets**:
     - [x] Display Hero (48pt Bold), Heading 1 (32pt Bold), Heading 2 (24pt SemiBold), Body (16pt Regular), Monospace Code (14pt), and Caption (11pt).
     - [x] Instant font family, size, and weight application to selected text elements.
-  - [x] **Effects & Shadows**:
-    - [x] Soft Elevation, Floating Card, Glassmorphism, and Neon Ambient Glow blur presets.
+  - [ ] **Effects & Shadows**:
+    - [ ] Soft Elevation, Floating Card, Glassmorphism, and Neon Ambient Glow blur presets.
+
+### Icon Precision & Compound Subpath Parsing
+- [x] **Compound SVG Subpath Separation**:
+  - [x] Multi-contour SVG path parser (`parse_svg_path_to_elements` and `parse_svg_path_data_subpaths`) leveraging Skia Safe to decompose compound SVG icons (`M ... Z M ... Z`) into clean distinct contours.
+  - [x] Eliminate bridging artifacts and diagonal distortion in library icons and dropped SVG assets.
+  - [x] Full support for cutouts/holes with opposite winding and EvenOdd fill rule in compound paths (`PathElement`).
+  - [x] Complete standalone bundle in `data/resources/icons/` with all UI icons and symlink aliases (`ln -s`).
 
 ### Localization & UX
 - [x] **Prominent Language Selection Radio Group**:
@@ -87,33 +94,62 @@ Development roadmap structured by version milestones.
 ---
 
 ## v0.3.0 — Gradients, Meshes & Pattern Engine
-> **Focus**: Advanced fill rendering, interactive meshes, and asset ecosystem.
+> **Focus**: Advanced fill rendering, interactive meshes, pattern geometry, and universal selection.
+
+### Universal Selection Across Tools
+- [x] **Universal Canvas Selection**:
+  - [x] Direct clicking on any existing element in creation tools (Rectangle, Circle, Star, Triangle, Spiral, Brush) selects the clicked element immediately.
+  - [x] Holding `Ctrl` in any tool temporarily activates the selection marquee, element dragging, and transform handles without tool switching.
+  - [x] Shift+click additive multi-selection support preserved across all tools.
+
+### Pattern Engine Geometry
+- [x] **Authentic Pattern Geometry**:
+  - [x] *Honeycomb (Colmeia)*: 120° shared-wall hexagonal tessellation with exact aspect ratio ($H = W \cdot \sqrt{3}$) and continuous polygon borders without horizontal gaps.
+  - [x] *Brick Wall (Parede de Tijolos)*: Interlocking 50% staggered courses with alternating vertical mortar joints.
+  - [x] *Seigaiha Scales (Escamas / Ondas)*: Concentric 180° semicircular arcs centered at grid transition points.
+  - [x] Synchronized SVG export and Skia renderers for all patterns.
+- [ ] **Custom Pattern Management**:
+  - [ ] On-canvas interactive scaling, rotation, and offset handles for pattern fills.
+  - [ ] Load custom SVG/raster patterns from user asset folder (`~/.config/gnome-paths/patterns/`).
 
 ### Gradients & Mesh
-- [ ] **Interactive Gradient Toolbar & On-Canvas HUD**:
-  - [ ] On-canvas interactive controls for linear, radial, and sweep/angular gradients.
-  - [ ] Precise addition, removal, and interpolation of color stops.
-- [ ] **Fully Functional Mesh Gradients**:
-  - [ ] Dedicated toolbar to configure mesh grid dimensions (rows × columns).
-  - [ ] Visual editing of mesh nodes, Bézier patch curvature handles, and per-vertex color assignment.
-
-### Patterns & Assets
-- [ ] **Advanced Pattern Fill & Stroke Engine**:
-  - [ ] Dynamic repeating and tiling patterns for fills and strokes.
-  - [ ] On-canvas interactive scaling, rotation, and offset adjustments.
-  - [ ] **Pattern Asset Management**: Load custom patterns from user asset folders (`~/.config/gnome-paths/patterns/`) and embed them into project files.
+- [x] **Multi-Stop Linear & Radial Gradients**:
+  - [x] Color stop addition, deletion, opacity, and interpolation in Appearance Inspector.
+- [x] **Mesh Gradient Grid**:
+  - [x] Interactive mesh gradient grids with patch deformation and per-vertex color assignment.
+- [ ] **On-Canvas Interactive Gradient Tool**:
+  - [ ] On-canvas interactive gizmo handles for linear, radial, and sweep gradients.
+- [ ] **Dedicated Mesh Dimensions Toolbar**:
+  - [ ] Dynamic row × column dimension spinbuttons and patch curvature handle editing.
 
 ---
 
-## v0.4.0 — Artistic Brushes, Vectorization & Typography
-> **Focus**: Expressive freehand drawing tools, text-on-path, and professional typography.
+## v0.4.0 — Artistic Brushes, Vectorization & Tool Grouping
+> **Focus**: Expressive freehand drawing tools, dedicated Studio toolbar, and tool palette grouping.
 
 ### Vector Pen & Brushes
-- [ ] **Advanced Vector Brush & Pen Engine**:
-  - [ ] Real-time stroke smoothing with stabilizer (*Streamline / Lazy Mouse*).
-  - [ ] Customizable stroke profiles: taper in, pressure/velocity dynamic thickness, and taper out.
+- [x] **Advanced Vector Brush & Pencil Engine**:
+  - [x] Real-time stroke smoothing with stabilizer filter (moving average / Chaikin corner smoothing).
+  - [x] Customizable stroke profiles: start taper, end taper, pressure/velocity dynamic thickness tapering.
+  - [x] **Dual Mode Architecture**:
+    - [x] *Pencil Mode*: Real-time Catmull-Rom cubic Bézier curve fitting to generate clean, node-editable vector paths (`Element::Path`).
+    - [x] *Brush Mode*: Rich expressive freehand strokes (`BrushStroke`) supporting 6 styles: Solid Round, Pencil, Calligraphy (45° chisel ribbon), Inking Pen, Highlighter Marker (multiplicative blending), and Soft Airbrush.
+  - [x] Instant stroke-to-path conversion (`to_path_element()` and `convert_selected_to_path`).
+  - [x] Auto-close path when closing loop within threshold distance.
+- [x] **Dedicated Pencil & Brush Tool Options Bar**:
+  - [x] Segmented mode switch (Pencil / Brush), style dropdown, stroke width, stabilizer spinbutton, calligraphy angle, pressure dynamics, taper start/end, auto-close, and cap styles.
+- [x] **Toolbox Grouping & Flyout Popovers**:
+  - [x] Grouped **Vector Pen & Pencil Brush** (`pen-brush`) with Vector Pen as primary default.
+  - [x] Grouped Shapes (`shapes`), Fill Tools (`fill-tools`), Zoom Tools (`zoom-tools`), and Booleans (`boolean`).
+  - [x] Dynamic tool icon switching and flyout popover on long-press / right-click.
+- [ ] **Clipboard to Brush & Asset Presets**:
   - [ ] Create custom brushes directly from clipboard path data (*Clipboard to Brush*).
-  - [ ] **Brush Asset Presets**: Built-in library of brush presets with support for importing user asset collections.
+  - [ ] Built-in and user-imported brush presets folder (`~/.config/gnome-paths/brushes/`).
+
+### Zoom 1:1 Standardization
+- [x] **Zoom 1:1 Action & Official Badge**:
+  - [x] Synchronized `Zoom 1:1 (1)` tool action with `ctx.viewport.reset()`, matching the floating HUD button.
+  - [x] Standardized Adwaita `zoom-original-symbolic` badge icon with centered numeral `1`.
 
 ### Typography & Text
 - [ ] **Text on Path**:
@@ -161,3 +197,4 @@ Development roadmap structured by version milestones.
 - [ ] **Skia 2D Stress Testing**: Performance validation on complex, high-node-count vector artwork.
 - [ ] **SVG 2.0 Interoperability**: Full bidirectional import/export fidelity with Inkscape and Adobe Illustrator.
 - [ ] **Accessibility (a11y)**: Complete keyboard navigation and AT-SPI screen reader support (Orca).
+

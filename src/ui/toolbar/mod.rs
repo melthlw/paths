@@ -119,22 +119,22 @@ impl FloatingToolbar {
             (
                 crate::core::gettext("Bottom"),
                 BarPosition::Bottom,
-                "go-down-symbolic",
+                "layer-move-down-symbolic",
             ),
             (
                 crate::core::gettext("Top"),
                 BarPosition::Top,
-                "go-up-symbolic",
+                "layer-move-up-symbolic",
             ),
             (
                 crate::core::gettext("Left"),
                 BarPosition::Left,
-                "go-previous-symbolic",
+                "tab-move-left-symbolic",
             ),
             (
                 crate::core::gettext("Right"),
                 BarPosition::Right,
-                "go-next-symbolic",
+                "tab-move-right-symbolic",
             ),
         ];
 
@@ -286,7 +286,7 @@ impl FloatingToolbar {
             .margin_start(4)
             .margin_end(4)
             .build();
-        let cust_icon = gtk4::Image::from_icon_name("preferences-other-symbolic");
+        let cust_icon = gtk4::Image::from_icon_name("prefs-toolbars-symbolic");
         cust_icon.set_pixel_size(16);
         let cust_label = gtk4::Label::new(Some("Personalizar Ferramentas..."));
         cust_box.append(&cust_icon);

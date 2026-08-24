@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-  <!-- Triangular closed loop path -->
-  <path fill="currentColor" d="M 8 2 L 14 13 L 2 13 Z M 8 5 L 4.2 11.5 H 11.8 Z"/>
-  <rect x="6.5" y="1" width="3" height="3" rx="0.5" fill="currentColor"/>
-  <rect x="1" y="11.5" width="3" height="3" rx="0.5" fill="currentColor"/>
-  <rect x="12" y="11.5" width="3" height="3" rx="0.5" fill="currentColor"/>
-</svg>

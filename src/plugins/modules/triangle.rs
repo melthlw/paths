@@ -14,8 +14,8 @@ impl Default for TriangleStudioPlugin {
             ui: ToolUiItem::new(
                 "triangle",
                 "Triangle",
-                "media-record-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-triangle.svg"),
+                "tool-triangle-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-triangle-symbolic.svg"),
                 "Triangle (Y)",
                 17,
             )

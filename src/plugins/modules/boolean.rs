@@ -15,8 +15,8 @@ impl Default for BooleanUnionStudioPlugin {
             ui: ToolUiItem::new(
                 "boolean-union",
                 "Union",
-                "insert-object-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/bool-union.svg"),
+                "bool-union-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/bool-union-symbolic.svg"),
                 "Union (Ctrl++)",
                 30,
             )
@@ -65,8 +65,8 @@ impl Default for BooleanDifferenceStudioPlugin {
             ui: ToolUiItem::new(
                 "boolean-difference",
                 "Difference",
-                "insert-object-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/bool-difference.svg"),
+                "bool-difference-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/bool-difference-symbolic.svg"),
                 "Difference (Ctrl+-)",
                 31,
             )
@@ -115,8 +115,8 @@ impl Default for BooleanIntersectionStudioPlugin {
             ui: ToolUiItem::new(
                 "boolean-intersection",
                 "Intersection",
-                "insert-object-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/bool-intersection.svg"),
+                "bool-intersection-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/bool-intersection-symbolic.svg"),
                 "Intersection (Ctrl+*)",
                 32,
             )
@@ -165,8 +165,8 @@ impl Default for BooleanExclusionStudioPlugin {
             ui: ToolUiItem::new(
                 "boolean-exclusion",
                 "Exclusion",
-                "insert-object-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/bool-exclusion.svg"),
+                "bool-exclusion-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/bool-exclusion-symbolic.svg"),
                 "Exclusion (Ctrl+^)",
                 33,
             )
@@ -211,8 +211,8 @@ impl Default for BooleanDivisionStudioPlugin {
             ui: ToolUiItem::new(
                 "boolean-division",
                 "Division",
-                "insert-object-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/bool-division.svg"),
+                "bool-division-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/bool-division-symbolic.svg"),
                 "Division (Ctrl+/)",
                 34,
             )
@@ -257,8 +257,8 @@ impl Default for BooleanCutStudioPlugin {
             ui: ToolUiItem::new(
                 "boolean-cut",
                 "Cut / Slice",
-                "insert-object-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/bool-cut.svg"),
+                "bool-cut-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/bool-cut-symbolic.svg"),
                 "Cut / Slice (Ctrl+Alt+/)",
                 35,
             )

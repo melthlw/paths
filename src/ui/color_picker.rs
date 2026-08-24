@@ -235,7 +235,7 @@ impl ColorPickerPopover {
             .spacing(6)
             .halign(gtk4::Align::Center)
             .build();
-        let edit_icon = gtk4::Image::from_icon_name("find-location-symbolic");
+        let edit_icon = gtk4::Image::from_icon_name("eyedropper-pick-symbolic");
         let edit_lbl = gtk4::Label::builder()
             .label(&crate::core::gettext("Edit Mesh Nodes on Screen"))
             .build();
@@ -324,10 +324,10 @@ impl ColorPickerPopover {
 
         let pattern_types = [
             (crate::core::gettext("Checkerboard"), "view-grid-symbolic"),
-            (crate::core::gettext("Dots"), "media-record-symbolic"),
-            (crate::core::gettext("Stripes"), "view-dual-symbolic"),
-            (crate::core::gettext("Grid"), "view-paged-symbolic"),
-            (crate::core::gettext("Honeycomb"), "starred-symbolic"),
+            (crate::core::gettext("Dots"), "format-fill-symbolic"),
+            (crate::core::gettext("Stripes"), "distribute-vertical-symbolic"),
+            (crate::core::gettext("Grid"), "view-grid-symbolic"),
+            (crate::core::gettext("Honeycomb"), "lib-patterns-symbolic"),
         ];
 
         for (pt_name, pt_icon) in pattern_types {
@@ -644,7 +644,7 @@ impl ColorPickerPopover {
         hex_box.append(&hex_entry);
 
         let eyedropper_btn = gtk4::Button::builder()
-            .icon_name("color-select-symbolic")
+            .icon_name("color-picker-symbolic")
             .css_classes(["flat", "circular", "color-picker-eyedropper"])
             .valign(gtk4::Align::Center)
             .tooltip_text(&crate::core::gettext("Eyedropper"))

@@ -4,153 +4,663 @@
     <file preprocess="xml-stripblanks">ui/window.ui</file>
     <file preprocess="xml-stripblanks">ui/shortcuts.ui</file>
     <file>style.css</file>
+    <file>icons/about-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/about-symbolic.svg">icons/about-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/about-symbolic.svg">icons/about-symbolic.svg</file>
+    <file>icons/action-unavailable-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/action-unavailable-symbolic.svg">icons/action-unavailable-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/action-unavailable-symbolic.svg">icons/action-unavailable-symbolic.svg</file>
+    <file>icons/add-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/add-symbolic.svg">icons/add-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/add-symbolic.svg">icons/add-symbolic.svg</file>
+    <file>icons/align-artboard-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/align-artboard-symbolic.svg">icons/align-artboard-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/align-artboard-symbolic.svg">icons/align-artboard-symbolic.svg</file>
     <file>icons/align-bottom-symbolic.svg</file>
-    <file>icons/align-bottom.svg</file>
+    <file alias="icons/hicolor/scalable/actions/align-bottom-symbolic.svg">icons/align-bottom-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/align-bottom-symbolic.svg">icons/align-bottom-symbolic.svg</file>
     <file>icons/align-center-h-symbolic.svg</file>
-    <file>icons/align-center-h.svg</file>
+    <file alias="icons/hicolor/scalable/actions/align-center-h-symbolic.svg">icons/align-center-h-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/align-center-h-symbolic.svg">icons/align-center-h-symbolic.svg</file>
     <file>icons/align-center-v-symbolic.svg</file>
-    <file>icons/align-center-v.svg</file>
+    <file alias="icons/hicolor/scalable/actions/align-center-v-symbolic.svg">icons/align-center-v-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/align-center-v-symbolic.svg">icons/align-center-v-symbolic.svg</file>
     <file>icons/align-left-symbolic.svg</file>
-    <file>icons/align-left.svg</file>
+    <file alias="icons/hicolor/scalable/actions/align-left-symbolic.svg">icons/align-left-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/align-left-symbolic.svg">icons/align-left-symbolic.svg</file>
     <file>icons/align-right-symbolic.svg</file>
-    <file>icons/align-right.svg</file>
+    <file alias="icons/hicolor/scalable/actions/align-right-symbolic.svg">icons/align-right-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/align-right-symbolic.svg">icons/align-right-symbolic.svg</file>
     <file>icons/align-top-symbolic.svg</file>
-    <file>icons/align-top.svg</file>
+    <file alias="icons/hicolor/scalable/actions/align-top-symbolic.svg">icons/align-top-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/align-top-symbolic.svg">icons/align-top-symbolic.svg</file>
+    <file>icons/app-menu-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/app-menu-symbolic.svg">icons/app-menu-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/app-menu-symbolic.svg">icons/app-menu-symbolic.svg</file>
+    <file>icons/applications-graphics-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/applications-graphics-symbolic.svg">icons/applications-graphics-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/applications-graphics-symbolic.svg">icons/applications-graphics-symbolic.svg</file>
+    <file>icons/avatar-default-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/avatar-default-symbolic.svg">icons/avatar-default-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/avatar-default-symbolic.svg">icons/avatar-default-symbolic.svg</file>
     <file>icons/blend-mode-symbolic.svg</file>
-    <file>icons/blend-mode.svg</file>
+    <file alias="icons/hicolor/scalable/actions/blend-mode-symbolic.svg">icons/blend-mode-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/blend-mode-symbolic.svg">icons/blend-mode-symbolic.svg</file>
+    <file>icons/bookmark-new-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/bookmark-new-symbolic.svg">icons/bookmark-new-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/bookmark-new-symbolic.svg">icons/bookmark-new-symbolic.svg</file>
     <file>icons/bool-cut-symbolic.svg</file>
-    <file>icons/bool-cut.svg</file>
+    <file alias="icons/hicolor/scalable/actions/bool-cut-symbolic.svg">icons/bool-cut-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/bool-cut-symbolic.svg">icons/bool-cut-symbolic.svg</file>
     <file>icons/bool-difference-symbolic.svg</file>
-    <file>icons/bool-difference.svg</file>
+    <file alias="icons/hicolor/scalable/actions/bool-difference-symbolic.svg">icons/bool-difference-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/bool-difference-symbolic.svg">icons/bool-difference-symbolic.svg</file>
     <file>icons/bool-division-symbolic.svg</file>
-    <file>icons/bool-division.svg</file>
+    <file alias="icons/hicolor/scalable/actions/bool-division-symbolic.svg">icons/bool-division-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/bool-division-symbolic.svg">icons/bool-division-symbolic.svg</file>
     <file>icons/bool-exclusion-symbolic.svg</file>
-    <file>icons/bool-exclusion.svg</file>
+    <file alias="icons/hicolor/scalable/actions/bool-exclusion-symbolic.svg">icons/bool-exclusion-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/bool-exclusion-symbolic.svg">icons/bool-exclusion-symbolic.svg</file>
     <file>icons/bool-intersection-symbolic.svg</file>
-    <file>icons/bool-intersection.svg</file>
+    <file alias="icons/hicolor/scalable/actions/bool-intersection-symbolic.svg">icons/bool-intersection-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/bool-intersection-symbolic.svg">icons/bool-intersection-symbolic.svg</file>
     <file>icons/bool-union-symbolic.svg</file>
-    <file>icons/bool-union.svg</file>
+    <file alias="icons/hicolor/scalable/actions/bool-union-symbolic.svg">icons/bool-union-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/bool-union-symbolic.svg">icons/bool-union-symbolic.svg</file>
+    <file>icons/brush-pressure-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/brush-pressure-symbolic.svg">icons/brush-pressure-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/brush-pressure-symbolic.svg">icons/brush-pressure-symbolic.svg</file>
+    <file>icons/camera-photo-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/camera-photo-symbolic.svg">icons/camera-photo-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/camera-photo-symbolic.svg">icons/camera-photo-symbolic.svg</file>
+    <file>icons/changes-allow-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/changes-allow-symbolic.svg">icons/changes-allow-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/changes-allow-symbolic.svg">icons/changes-allow-symbolic.svg</file>
+    <file>icons/changes-prevent-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/changes-prevent-symbolic.svg">icons/changes-prevent-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/changes-prevent-symbolic.svg">icons/changes-prevent-symbolic.svg</file>
+    <file>icons/check-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/check-symbolic.svg">icons/check-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/check-symbolic.svg">icons/check-symbolic.svg</file>
+    <file>icons/clear-palette-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/clear-palette-symbolic.svg">icons/clear-palette-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/clear-palette-symbolic.svg">icons/clear-palette-symbolic.svg</file>
+    <file>icons/clone-jump-master-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/clone-jump-master-symbolic.svg">icons/clone-jump-master-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/clone-jump-master-symbolic.svg">icons/clone-jump-master-symbolic.svg</file>
+    <file>icons/clone-master-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/clone-master-symbolic.svg">icons/clone-master-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/clone-master-symbolic.svg">icons/clone-master-symbolic.svg</file>
     <file>icons/clone-symbolic.svg</file>
-    <file>icons/clone.svg</file>
+    <file alias="icons/hicolor/scalable/actions/clone-symbolic.svg">icons/clone-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/clone-symbolic.svg">icons/clone-symbolic.svg</file>
+    <file>icons/close-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/close-symbolic.svg">icons/close-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/close-symbolic.svg">icons/close-symbolic.svg</file>
+    <file>icons/color-picker-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/color-picker-symbolic.svg">icons/color-picker-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/color-picker-symbolic.svg">icons/color-picker-symbolic.svg</file>
+    <file>icons/color-select-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/color-select-symbolic.svg">icons/color-select-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/color-select-symbolic.svg">icons/color-select-symbolic.svg</file>
     <file>icons/corner-round-symbolic.svg</file>
-    <file>icons/corner-round.svg</file>
+    <file alias="icons/hicolor/scalable/actions/corner-round-symbolic.svg">icons/corner-round-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/corner-round-symbolic.svg">icons/corner-round-symbolic.svg</file>
     <file>icons/corner-sharp-symbolic.svg</file>
-    <file>icons/corner-sharp.svg</file>
+    <file alias="icons/hicolor/scalable/actions/corner-sharp-symbolic.svg">icons/corner-sharp-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/corner-sharp-symbolic.svg">icons/corner-sharp-symbolic.svg</file>
+    <file>icons/delete-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/delete-symbolic.svg">icons/delete-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/delete-symbolic.svg">icons/delete-symbolic.svg</file>
+    <file>icons/dialog-information-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/dialog-information-symbolic.svg">icons/dialog-information-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/dialog-information-symbolic.svg">icons/dialog-information-symbolic.svg</file>
+    <file>icons/disabled-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/disabled-symbolic.svg">icons/disabled-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/disabled-symbolic.svg">icons/disabled-symbolic.svg</file>
     <file>icons/distribute-horizontal-symbolic.svg</file>
-    <file>icons/distribute-horizontal.svg</file>
+    <file alias="icons/hicolor/scalable/actions/distribute-horizontal-symbolic.svg">icons/distribute-horizontal-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/distribute-horizontal-symbolic.svg">icons/distribute-horizontal-symbolic.svg</file>
     <file>icons/distribute-vertical-symbolic.svg</file>
-    <file>icons/distribute-vertical.svg</file>
+    <file alias="icons/hicolor/scalable/actions/distribute-vertical-symbolic.svg">icons/distribute-vertical-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/distribute-vertical-symbolic.svg">icons/distribute-vertical-symbolic.svg</file>
+    <file>icons/document-edit-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/document-edit-symbolic.svg">icons/document-edit-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/document-edit-symbolic.svg">icons/document-edit-symbolic.svg</file>
+    <file>icons/document-new-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/document-new-symbolic.svg">icons/document-new-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/document-new-symbolic.svg">icons/document-new-symbolic.svg</file>
+    <file>icons/document-open-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/document-open-symbolic.svg">icons/document-open-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/document-open-symbolic.svg">icons/document-open-symbolic.svg</file>
+    <file>icons/document-page-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/document-page-symbolic.svg">icons/document-page-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/document-page-symbolic.svg">icons/document-page-symbolic.svg</file>
+    <file>icons/document-save-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/document-save-symbolic.svg">icons/document-save-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/document-save-symbolic.svg">icons/document-save-symbolic.svg</file>
+    <file>icons/drag-handle-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/drag-handle-symbolic.svg">icons/drag-handle-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/drag-handle-symbolic.svg">icons/drag-handle-symbolic.svg</file>
+    <file>icons/dropdown-arrow-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/dropdown-arrow-symbolic.svg">icons/dropdown-arrow-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/dropdown-arrow-symbolic.svg">icons/dropdown-arrow-symbolic.svg</file>
     <file>icons/duplicate-symbolic.svg</file>
-    <file>icons/duplicate.svg</file>
+    <file alias="icons/hicolor/scalable/actions/duplicate-symbolic.svg">icons/duplicate-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/duplicate-symbolic.svg">icons/duplicate-symbolic.svg</file>
+    <file>icons/edit-clear-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/edit-clear-symbolic.svg">icons/edit-clear-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/edit-clear-symbolic.svg">icons/edit-clear-symbolic.svg</file>
+    <file>icons/edit-copy-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/edit-copy-symbolic.svg">icons/edit-copy-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/edit-copy-symbolic.svg">icons/edit-copy-symbolic.svg</file>
+    <file>icons/edit-cut-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/edit-cut-symbolic.svg">icons/edit-cut-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/edit-cut-symbolic.svg">icons/edit-cut-symbolic.svg</file>
+    <file>icons/edit-find-replace-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/edit-find-replace-symbolic.svg">icons/edit-find-replace-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/edit-find-replace-symbolic.svg">icons/edit-find-replace-symbolic.svg</file>
+    <file>icons/edit-find-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/edit-find-symbolic.svg">icons/edit-find-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/edit-find-symbolic.svg">icons/edit-find-symbolic.svg</file>
     <file>icons/edit-redo-symbolic.svg</file>
-    <file>icons/edit-redo.svg</file>
+    <file alias="icons/hicolor/scalable/actions/edit-redo-symbolic.svg">icons/edit-redo-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/edit-redo-symbolic.svg">icons/edit-redo-symbolic.svg</file>
+    <file>icons/edit-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/edit-symbolic.svg">icons/edit-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/edit-symbolic.svg">icons/edit-symbolic.svg</file>
     <file>icons/edit-undo-symbolic.svg</file>
-    <file>icons/edit-undo.svg</file>
+    <file alias="icons/hicolor/scalable/actions/edit-undo-symbolic.svg">icons/edit-undo-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/edit-undo-symbolic.svg">icons/edit-undo-symbolic.svg</file>
+    <file>icons/emblem-default-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/emblem-default-symbolic.svg">icons/emblem-default-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/emblem-default-symbolic.svg">icons/emblem-default-symbolic.svg</file>
+    <file>icons/emblem-favorite-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/emblem-favorite-symbolic.svg">icons/emblem-favorite-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/emblem-favorite-symbolic.svg">icons/emblem-favorite-symbolic.svg</file>
+    <file>icons/emblem-ok-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/emblem-ok-symbolic.svg">icons/emblem-ok-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/emblem-ok-symbolic.svg">icons/emblem-ok-symbolic.svg</file>
+    <file>icons/emblem-system-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/emblem-system-symbolic.svg">icons/emblem-system-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/emblem-system-symbolic.svg">icons/emblem-system-symbolic.svg</file>
+    <file>icons/export-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/export-symbolic.svg">icons/export-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/export-symbolic.svg">icons/export-symbolic.svg</file>
+    <file>icons/external-link-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/external-link-symbolic.svg">icons/external-link-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/external-link-symbolic.svg">icons/external-link-symbolic.svg</file>
+    <file>icons/eyedropper-pick-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/eyedropper-pick-symbolic.svg">icons/eyedropper-pick-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/eyedropper-pick-symbolic.svg">icons/eyedropper-pick-symbolic.svg</file>
+    <file>icons/favorite-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/favorite-symbolic.svg">icons/favorite-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/favorite-symbolic.svg">icons/favorite-symbolic.svg</file>
+    <file>icons/find-location-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/find-location-symbolic.svg">icons/find-location-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/find-location-symbolic.svg">icons/find-location-symbolic.svg</file>
+    <file>icons/find-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/find-symbolic.svg">icons/find-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/find-symbolic.svg">icons/find-symbolic.svg</file>
+    <file>icons/flip-horizontal-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/flip-horizontal-symbolic.svg">icons/flip-horizontal-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/flip-horizontal-symbolic.svg">icons/flip-horizontal-symbolic.svg</file>
+    <file>icons/flip-vertical-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/flip-vertical-symbolic.svg">icons/flip-vertical-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/flip-vertical-symbolic.svg">icons/flip-vertical-symbolic.svg</file>
+    <file>icons/folder-new-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/folder-new-symbolic.svg">icons/folder-new-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/folder-new-symbolic.svg">icons/folder-new-symbolic.svg</file>
+    <file>icons/folder-open-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/folder-open-symbolic.svg">icons/folder-open-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/folder-open-symbolic.svg">icons/folder-open-symbolic.svg</file>
+    <file>icons/folder-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/folder-symbolic.svg">icons/folder-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/folder-symbolic.svg">icons/folder-symbolic.svg</file>
     <file>icons/format-fill-symbolic.svg</file>
-    <file>icons/format-fill.svg</file>
+    <file alias="icons/hicolor/scalable/actions/format-fill-symbolic.svg">icons/format-fill-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/format-fill-symbolic.svg">icons/format-fill-symbolic.svg</file>
+    <file>icons/format-justify-center-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/format-justify-center-symbolic.svg">icons/format-justify-center-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/format-justify-center-symbolic.svg">icons/format-justify-center-symbolic.svg</file>
+    <file>icons/format-justify-fill-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/format-justify-fill-symbolic.svg">icons/format-justify-fill-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/format-justify-fill-symbolic.svg">icons/format-justify-fill-symbolic.svg</file>
+    <file>icons/format-justify-left-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/format-justify-left-symbolic.svg">icons/format-justify-left-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/format-justify-left-symbolic.svg">icons/format-justify-left-symbolic.svg</file>
+    <file>icons/format-justify-right-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/format-justify-right-symbolic.svg">icons/format-justify-right-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/format-justify-right-symbolic.svg">icons/format-justify-right-symbolic.svg</file>
     <file>icons/format-stroke-symbolic.svg</file>
-    <file>icons/format-stroke.svg</file>
+    <file alias="icons/hicolor/scalable/actions/format-stroke-symbolic.svg">icons/format-stroke-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/format-stroke-symbolic.svg">icons/format-stroke-symbolic.svg</file>
+    <file>icons/go-down-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/go-down-symbolic.svg">icons/go-down-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/go-down-symbolic.svg">icons/go-down-symbolic.svg</file>
+    <file>icons/go-jump-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/go-jump-symbolic.svg">icons/go-jump-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/go-jump-symbolic.svg">icons/go-jump-symbolic.svg</file>
+    <file>icons/go-next-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/go-next-symbolic.svg">icons/go-next-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/go-next-symbolic.svg">icons/go-next-symbolic.svg</file>
+    <file>icons/go-previous-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/go-previous-symbolic.svg">icons/go-previous-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/go-previous-symbolic.svg">icons/go-previous-symbolic.svg</file>
+    <file>icons/go-up-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/go-up-symbolic.svg">icons/go-up-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/go-up-symbolic.svg">icons/go-up-symbolic.svg</file>
+    <file>icons/grid-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/grid-symbolic.svg">icons/grid-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/grid-symbolic.svg">icons/grid-symbolic.svg</file>
     <file>icons/group-symbolic.svg</file>
-    <file>icons/group.svg</file>
+    <file alias="icons/hicolor/scalable/actions/group-symbolic.svg">icons/group-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/group-symbolic.svg">icons/group-symbolic.svg</file>
+    <file>icons/help-about-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/help-about-symbolic.svg">icons/help-about-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/help-about-symbolic.svg">icons/help-about-symbolic.svg</file>
+    <file>icons/info-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/info-symbolic.svg">icons/info-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/info-symbolic.svg">icons/info-symbolic.svg</file>
+    <file>icons/input-keyboard-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/input-keyboard-symbolic.svg">icons/input-keyboard-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/input-keyboard-symbolic.svg">icons/input-keyboard-symbolic.svg</file>
+    <file>icons/input-tablet-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/input-tablet-symbolic.svg">icons/input-tablet-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/input-tablet-symbolic.svg">icons/input-tablet-symbolic.svg</file>
+    <file>icons/insert-object-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/insert-object-symbolic.svg">icons/insert-object-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/insert-object-symbolic.svg">icons/insert-object-symbolic.svg</file>
+    <file>icons/io.github.lewis.GnomePaths-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/io.github.lewis.GnomePaths-symbolic.svg">icons/io.github.lewis.GnomePaths-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/io.github.lewis.GnomePaths-symbolic.svg">icons/io.github.lewis.GnomePaths-symbolic.svg</file>
+    <file>icons/io.github.lewis.GnomePaths.svg</file>
+    <file>icons/isolate-panel-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/isolate-panel-symbolic.svg">icons/isolate-panel-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/isolate-panel-symbolic.svg">icons/isolate-panel-symbolic.svg</file>
     <file>icons/layer-bring-forward-symbolic.svg</file>
-    <file>icons/layer-bring-forward.svg</file>
+    <file alias="icons/hicolor/scalable/actions/layer-bring-forward-symbolic.svg">icons/layer-bring-forward-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/layer-bring-forward-symbolic.svg">icons/layer-bring-forward-symbolic.svg</file>
     <file>icons/layer-bring-to-front-symbolic.svg</file>
-    <file>icons/layer-bring-to-front.svg</file>
+    <file alias="icons/hicolor/scalable/actions/layer-bring-to-front-symbolic.svg">icons/layer-bring-to-front-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/layer-bring-to-front-symbolic.svg">icons/layer-bring-to-front-symbolic.svg</file>
+    <file>icons/layer-move-down-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/layer-move-down-symbolic.svg">icons/layer-move-down-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/layer-move-down-symbolic.svg">icons/layer-move-down-symbolic.svg</file>
+    <file>icons/layer-move-up-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/layer-move-up-symbolic.svg">icons/layer-move-up-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/layer-move-up-symbolic.svg">icons/layer-move-up-symbolic.svg</file>
     <file>icons/layer-send-backward-symbolic.svg</file>
-    <file>icons/layer-send-backward.svg</file>
+    <file alias="icons/hicolor/scalable/actions/layer-send-backward-symbolic.svg">icons/layer-send-backward-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/layer-send-backward-symbolic.svg">icons/layer-send-backward-symbolic.svg</file>
     <file>icons/layer-send-to-back-symbolic.svg</file>
-    <file>icons/layer-send-to-back.svg</file>
+    <file alias="icons/hicolor/scalable/actions/layer-send-to-back-symbolic.svg">icons/layer-send-to-back-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/layer-send-to-back-symbolic.svg">icons/layer-send-to-back-symbolic.svg</file>
+    <file>icons/library-insert-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/library-insert-symbolic.svg">icons/library-insert-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/library-insert-symbolic.svg">icons/library-insert-symbolic.svg</file>
+    <file>icons/link-external-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/link-external-symbolic.svg">icons/link-external-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/link-external-symbolic.svg">icons/link-external-symbolic.svg</file>
+    <file>icons/list-add-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/list-add-symbolic.svg">icons/list-add-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/list-add-symbolic.svg">icons/list-add-symbolic.svg</file>
+    <file>icons/list-drag-handle-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/list-drag-handle-symbolic.svg">icons/list-drag-handle-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/list-drag-handle-symbolic.svg">icons/list-drag-handle-symbolic.svg</file>
+    <file>icons/list-remove-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/list-remove-symbolic.svg">icons/list-remove-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/list-remove-symbolic.svg">icons/list-remove-symbolic.svg</file>
+    <file>icons/lock-aspect-ratio-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/lock-aspect-ratio-symbolic.svg">icons/lock-aspect-ratio-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/lock-aspect-ratio-symbolic.svg">icons/lock-aspect-ratio-symbolic.svg</file>
     <file>icons/magnet-symbolic.svg</file>
-    <file>icons/magnet.svg</file>
+    <file alias="icons/hicolor/scalable/actions/magnet-symbolic.svg">icons/magnet-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/magnet-symbolic.svg">icons/magnet-symbolic.svg</file>
+    <file>icons/mail-unread-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/mail-unread-symbolic.svg">icons/mail-unread-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/mail-unread-symbolic.svg">icons/mail-unread-symbolic.svg</file>
+    <file>icons/media-optical-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/media-optical-symbolic.svg">icons/media-optical-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/media-optical-symbolic.svg">icons/media-optical-symbolic.svg</file>
+    <file>icons/media-playback-pause-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/media-playback-pause-symbolic.svg">icons/media-playback-pause-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/media-playback-pause-symbolic.svg">icons/media-playback-pause-symbolic.svg</file>
+    <file>icons/media-playback-start-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/media-playback-start-symbolic.svg">icons/media-playback-start-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/media-playback-start-symbolic.svg">icons/media-playback-start-symbolic.svg</file>
     <file>icons/mirror-horizontal-symbolic.svg</file>
-    <file>icons/mirror-horizontal.svg</file>
+    <file alias="icons/hicolor/scalable/actions/mirror-horizontal-symbolic.svg">icons/mirror-horizontal-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/mirror-horizontal-symbolic.svg">icons/mirror-horizontal-symbolic.svg</file>
     <file>icons/mirror-vertical-symbolic.svg</file>
-    <file>icons/mirror-vertical.svg</file>
+    <file alias="icons/hicolor/scalable/actions/mirror-vertical-symbolic.svg">icons/mirror-vertical-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/mirror-vertical-symbolic.svg">icons/mirror-vertical-symbolic.svg</file>
+    <file>icons/network-wireless-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/network-wireless-symbolic.svg">icons/network-wireless-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/network-wireless-symbolic.svg">icons/network-wireless-symbolic.svg</file>
     <file>icons/node-add-symbolic.svg</file>
-    <file>icons/node-add.svg</file>
+    <file alias="icons/hicolor/scalable/actions/node-add-symbolic.svg">icons/node-add-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/node-add-symbolic.svg">icons/node-add-symbolic.svg</file>
     <file>icons/node-auto-symbolic.svg</file>
-    <file>icons/node-auto.svg</file>
+    <file alias="icons/hicolor/scalable/actions/node-auto-symbolic.svg">icons/node-auto-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/node-auto-symbolic.svg">icons/node-auto-symbolic.svg</file>
     <file>icons/node-corner-symbolic.svg</file>
-    <file>icons/node-corner.svg</file>
+    <file alias="icons/hicolor/scalable/actions/node-corner-symbolic.svg">icons/node-corner-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/node-corner-symbolic.svg">icons/node-corner-symbolic.svg</file>
     <file>icons/node-delete-symbolic.svg</file>
-    <file>icons/node-delete.svg</file>
-    <file>icons/node-join-symbolic.svg</file>
-    <file>icons/node-join.svg</file>
+    <file alias="icons/hicolor/scalable/actions/node-delete-symbolic.svg">icons/node-delete-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/node-delete-symbolic.svg">icons/node-delete-symbolic.svg</file>
     <file>icons/node-smooth-symbolic.svg</file>
-    <file>icons/node-smooth.svg</file>
-    <file>icons/node-split-symbolic.svg</file>
-    <file>icons/node-split.svg</file>
+    <file alias="icons/hicolor/scalable/actions/node-smooth-symbolic.svg">icons/node-smooth-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/node-smooth-symbolic.svg">icons/node-smooth-symbolic.svg</file>
     <file>icons/node-symmetric-symbolic.svg</file>
-    <file>icons/node-symmetric.svg</file>
+    <file alias="icons/hicolor/scalable/actions/node-symmetric-symbolic.svg">icons/node-symmetric-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/node-symmetric-symbolic.svg">icons/node-symmetric-symbolic.svg</file>
+    <file>icons/object-flip-horizontal-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/object-flip-horizontal-symbolic.svg">icons/object-flip-horizontal-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/object-flip-horizontal-symbolic.svg">icons/object-flip-horizontal-symbolic.svg</file>
+    <file>icons/object-flip-vertical-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/object-flip-vertical-symbolic.svg">icons/object-flip-vertical-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/object-flip-vertical-symbolic.svg">icons/object-flip-vertical-symbolic.svg</file>
+    <file>icons/object-rotate-right-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/object-rotate-right-symbolic.svg">icons/object-rotate-right-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/object-rotate-right-symbolic.svg">icons/object-rotate-right-symbolic.svg</file>
+    <file>icons/object-select-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/object-select-symbolic.svg">icons/object-select-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/object-select-symbolic.svg">icons/object-select-symbolic.svg</file>
     <file>icons/object-to-path-symbolic.svg</file>
-    <file>icons/object-to-path.svg</file>
+    <file alias="icons/hicolor/scalable/actions/object-to-path-symbolic.svg">icons/object-to-path-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/object-to-path-symbolic.svg">icons/object-to-path-symbolic.svg</file>
+    <file>icons/object-ungroup-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/object-ungroup-symbolic.svg">icons/object-ungroup-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/object-ungroup-symbolic.svg">icons/object-ungroup-symbolic.svg</file>
+    <file>icons/open-menu-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/open-menu-symbolic.svg">icons/open-menu-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/open-menu-symbolic.svg">icons/open-menu-symbolic.svg</file>
+    <file>icons/options-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/options-symbolic.svg">icons/options-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/options-symbolic.svg">icons/options-symbolic.svg</file>
+    <file>icons/page-export-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/page-export-symbolic.svg">icons/page-export-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/page-export-symbolic.svg">icons/page-export-symbolic.svg</file>
+    <file>icons/palette-more-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/palette-more-symbolic.svg">icons/palette-more-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/palette-more-symbolic.svg">icons/palette-more-symbolic.svg</file>
+    <file>icons/pan-down-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/pan-down-symbolic.svg">icons/pan-down-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/pan-down-symbolic.svg">icons/pan-down-symbolic.svg</file>
     <file>icons/panel-appearance-symbolic.svg</file>
-    <file>icons/panel-appearance.svg</file>
+    <file alias="icons/hicolor/scalable/actions/panel-appearance-symbolic.svg">icons/panel-appearance-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/panel-appearance-symbolic.svg">icons/panel-appearance-symbolic.svg</file>
+    <file>icons/panel-restore-dock-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/panel-restore-dock-symbolic.svg">icons/panel-restore-dock-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/panel-restore-dock-symbolic.svg">icons/panel-restore-dock-symbolic.svg</file>
     <file>icons/path-close-symbolic.svg</file>
-    <file>icons/path-close.svg</file>
+    <file alias="icons/hicolor/scalable/actions/path-close-symbolic.svg">icons/path-close-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/path-close-symbolic.svg">icons/path-close-symbolic.svg</file>
     <file>icons/path-reverse-symbolic.svg</file>
-    <file>icons/path-reverse.svg</file>
+    <file alias="icons/hicolor/scalable/actions/path-reverse-symbolic.svg">icons/path-reverse-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/path-reverse-symbolic.svg">icons/path-reverse-symbolic.svg</file>
+    <file>icons/pen-simplify-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/pen-simplify-symbolic.svg">icons/pen-simplify-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/pen-simplify-symbolic.svg">icons/pen-simplify-symbolic.svg</file>
+    <file>icons/preferences-desktop-display-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/preferences-desktop-display-symbolic.svg">icons/preferences-desktop-display-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/preferences-desktop-display-symbolic.svg">icons/preferences-desktop-display-symbolic.svg</file>
+    <file>icons/preferences-desktop-locale-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/preferences-desktop-locale-symbolic.svg">icons/preferences-desktop-locale-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/preferences-desktop-locale-symbolic.svg">icons/preferences-desktop-locale-symbolic.svg</file>
+    <file>icons/preferences-other-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/preferences-other-symbolic.svg">icons/preferences-other-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/preferences-other-symbolic.svg">icons/preferences-other-symbolic.svg</file>
+    <file>icons/preferences-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/preferences-symbolic.svg">icons/preferences-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/preferences-symbolic.svg">icons/preferences-symbolic.svg</file>
+    <file>icons/preferences-system-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/preferences-system-symbolic.svg">icons/preferences-system-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/preferences-system-symbolic.svg">icons/preferences-system-symbolic.svg</file>
+    <file>icons/prefs-about-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/prefs-about-symbolic.svg">icons/prefs-about-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/prefs-about-symbolic.svg">icons/prefs-about-symbolic.svg</file>
+    <file>icons/prefs-canvas-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/prefs-canvas-symbolic.svg">icons/prefs-canvas-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/prefs-canvas-symbolic.svg">icons/prefs-canvas-symbolic.svg</file>
+    <file>icons/prefs-general-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/prefs-general-symbolic.svg">icons/prefs-general-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/prefs-general-symbolic.svg">icons/prefs-general-symbolic.svg</file>
+    <file>icons/prefs-language-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/prefs-language-symbolic.svg">icons/prefs-language-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/prefs-language-symbolic.svg">icons/prefs-language-symbolic.svg</file>
+    <file>icons/prefs-plugins-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/prefs-plugins-symbolic.svg">icons/prefs-plugins-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/prefs-plugins-symbolic.svg">icons/prefs-plugins-symbolic.svg</file>
+    <file>icons/prefs-shortcuts-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/prefs-shortcuts-symbolic.svg">icons/prefs-shortcuts-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/prefs-shortcuts-symbolic.svg">icons/prefs-shortcuts-symbolic.svg</file>
+    <file>icons/prefs-toolbars-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/prefs-toolbars-symbolic.svg">icons/prefs-toolbars-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/prefs-toolbars-symbolic.svg">icons/prefs-toolbars-symbolic.svg</file>
+    <file>icons/printer-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/printer-symbolic.svg">icons/printer-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/printer-symbolic.svg">icons/printer-symbolic.svg</file>
+    <file>icons/reload-library-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/reload-library-symbolic.svg">icons/reload-library-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/reload-library-symbolic.svg">icons/reload-library-symbolic.svg</file>
+    <file>icons/remove-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/remove-symbolic.svg">icons/remove-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/remove-symbolic.svg">icons/remove-symbolic.svg</file>
+    <file>icons/rotate-right-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/rotate-right-symbolic.svg">icons/rotate-right-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/rotate-right-symbolic.svg">icons/rotate-right-symbolic.svg</file>
+    <file>icons/ruler-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/ruler-symbolic.svg">icons/ruler-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/ruler-symbolic.svg">icons/ruler-symbolic.svg</file>
+    <file>icons/search-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/search-symbolic.svg">icons/search-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/search-symbolic.svg">icons/search-symbolic.svg</file>
     <file>icons/segment-curve-symbolic.svg</file>
-    <file>icons/segment-curve.svg</file>
+    <file alias="icons/hicolor/scalable/actions/segment-curve-symbolic.svg">icons/segment-curve-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/segment-curve-symbolic.svg">icons/segment-curve-symbolic.svg</file>
     <file>icons/segment-line-symbolic.svg</file>
-    <file>icons/segment-line.svg</file>
+    <file alias="icons/hicolor/scalable/actions/segment-line-symbolic.svg">icons/segment-line-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/segment-line-symbolic.svg">icons/segment-line-symbolic.svg</file>
+    <file>icons/selection-options-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/selection-options-symbolic.svg">icons/selection-options-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/selection-options-symbolic.svg">icons/selection-options-symbolic.svg</file>
+    <file>icons/sidebar-inspector-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/sidebar-inspector-symbolic.svg">icons/sidebar-inspector-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/sidebar-inspector-symbolic.svg">icons/sidebar-inspector-symbolic.svg</file>
+    <file>icons/sidebar-layers-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/sidebar-layers-symbolic.svg">icons/sidebar-layers-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/sidebar-layers-symbolic.svg">icons/sidebar-layers-symbolic.svg</file>
+    <file>icons/sidebar-show-right-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/sidebar-show-right-symbolic.svg">icons/sidebar-show-right-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/sidebar-show-right-symbolic.svg">icons/sidebar-show-right-symbolic.svg</file>
+    <file>icons/sidebar-show-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/sidebar-show-symbolic.svg">icons/sidebar-show-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/sidebar-show-symbolic.svg">icons/sidebar-show-symbolic.svg</file>
+    <file>icons/snap-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/snap-symbolic.svg">icons/snap-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/snap-symbolic.svg">icons/snap-symbolic.svg</file>
+    <file>icons/starred-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/starred-symbolic.svg">icons/starred-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/starred-symbolic.svg">icons/starred-symbolic.svg</file>
+    <file>icons/system-software-install-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/system-software-install-symbolic.svg">icons/system-software-install-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/system-software-install-symbolic.svg">icons/system-software-install-symbolic.svg</file>
+    <file>icons/tab-move-left-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tab-move-left-symbolic.svg">icons/tab-move-left-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tab-move-left-symbolic.svg">icons/tab-move-left-symbolic.svg</file>
+    <file>icons/tab-move-right-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tab-move-right-symbolic.svg">icons/tab-move-right-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tab-move-right-symbolic.svg">icons/tab-move-right-symbolic.svg</file>
+    <file>icons/text-align-center-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/text-align-center-symbolic.svg">icons/text-align-center-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/text-align-center-symbolic.svg">icons/text-align-center-symbolic.svg</file>
+    <file>icons/text-align-justify-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/text-align-justify-symbolic.svg">icons/text-align-justify-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/text-align-justify-symbolic.svg">icons/text-align-justify-symbolic.svg</file>
+    <file>icons/text-align-left-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/text-align-left-symbolic.svg">icons/text-align-left-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/text-align-left-symbolic.svg">icons/text-align-left-symbolic.svg</file>
+    <file>icons/text-align-right-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/text-align-right-symbolic.svg">icons/text-align-right-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/text-align-right-symbolic.svg">icons/text-align-right-symbolic.svg</file>
     <file>icons/tool-circle-symbolic.svg</file>
-    <file>icons/tool-circle.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-circle-symbolic.svg">icons/tool-circle-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-circle-symbolic.svg">icons/tool-circle-symbolic.svg</file>
     <file>icons/tool-drag-symbolic.svg</file>
-    <file>icons/tool-drag.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-drag-symbolic.svg">icons/tool-drag-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-drag-symbolic.svg">icons/tool-drag-symbolic.svg</file>
+    <file>icons/tool-ellipse-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-ellipse-symbolic.svg">icons/tool-ellipse-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-ellipse-symbolic.svg">icons/tool-ellipse-symbolic.svg</file>
     <file>icons/tool-eyedropper-symbolic.svg</file>
-    <file>icons/tool-eyedropper.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-eyedropper-symbolic.svg">icons/tool-eyedropper-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-eyedropper-symbolic.svg">icons/tool-eyedropper-symbolic.svg</file>
     <file>icons/tool-gradient-symbolic.svg</file>
-    <file>icons/tool-gradient.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-gradient-symbolic.svg">icons/tool-gradient-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-gradient-symbolic.svg">icons/tool-gradient-symbolic.svg</file>
     <file>icons/tool-measure-symbolic.svg</file>
-    <file>icons/tool-measure.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-measure-symbolic.svg">icons/tool-measure-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-measure-symbolic.svg">icons/tool-measure-symbolic.svg</file>
     <file>icons/tool-mesh-symbolic.svg</file>
-    <file>icons/tool-mesh.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-mesh-symbolic.svg">icons/tool-mesh-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-mesh-symbolic.svg">icons/tool-mesh-symbolic.svg</file>
     <file>icons/tool-options-symbolic.svg</file>
-    <file>icons/tool-options.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-options-symbolic.svg">icons/tool-options-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-options-symbolic.svg">icons/tool-options-symbolic.svg</file>
     <file>icons/tool-page-symbolic.svg</file>
-    <file>icons/tool-page.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-page-symbolic.svg">icons/tool-page-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-page-symbolic.svg">icons/tool-page-symbolic.svg</file>
     <file>icons/tool-paint-bucket-symbolic.svg</file>
-    <file>icons/tool-paint-bucket.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-paint-bucket-symbolic.svg">icons/tool-paint-bucket-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-paint-bucket-symbolic.svg">icons/tool-paint-bucket-symbolic.svg</file>
     <file>icons/tool-path-editor-symbolic.svg</file>
-    <file>icons/tool-path-editor.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-path-editor-symbolic.svg">icons/tool-path-editor-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-path-editor-symbolic.svg">icons/tool-path-editor-symbolic.svg</file>
     <file>icons/tool-pen-symbolic.svg</file>
-    <file>icons/tool-pen.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-pen-symbolic.svg">icons/tool-pen-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-pen-symbolic.svg">icons/tool-pen-symbolic.svg</file>
+    <file>icons/tool-rectangle-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-rectangle-symbolic.svg">icons/tool-rectangle-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-rectangle-symbolic.svg">icons/tool-rectangle-symbolic.svg</file>
     <file>icons/tool-select-symbolic.svg</file>
-    <file>icons/tool-select.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-select-symbolic.svg">icons/tool-select-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-select-symbolic.svg">icons/tool-select-symbolic.svg</file>
     <file>icons/tool-selection-options-symbolic.svg</file>
-    <file>icons/tool-selection-options.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-selection-options-symbolic.svg">icons/tool-selection-options-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-selection-options-symbolic.svg">icons/tool-selection-options-symbolic.svg</file>
     <file>icons/tool-spiral-symbolic.svg</file>
-    <file>icons/tool-spiral.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-spiral-symbolic.svg">icons/tool-spiral-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-spiral-symbolic.svg">icons/tool-spiral-symbolic.svg</file>
     <file>icons/tool-square-symbolic.svg</file>
-    <file>icons/tool-square.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-square-symbolic.svg">icons/tool-square-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-square-symbolic.svg">icons/tool-square-symbolic.svg</file>
     <file>icons/tool-star-symbolic.svg</file>
-    <file>icons/tool-star.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-star-symbolic.svg">icons/tool-star-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-star-symbolic.svg">icons/tool-star-symbolic.svg</file>
     <file>icons/tool-text-symbolic.svg</file>
-    <file>icons/tool-text.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-text-symbolic.svg">icons/tool-text-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-text-symbolic.svg">icons/tool-text-symbolic.svg</file>
     <file>icons/tool-triangle-symbolic.svg</file>
-    <file>icons/tool-triangle.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-triangle-symbolic.svg">icons/tool-triangle-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-triangle-symbolic.svg">icons/tool-triangle-symbolic.svg</file>
     <file>icons/tool-vector-pen-symbolic.svg</file>
-    <file>icons/tool-vector-pen.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-vector-pen-symbolic.svg">icons/tool-vector-pen-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-vector-pen-symbolic.svg">icons/tool-vector-pen-symbolic.svg</file>
     <file>icons/tool-zoom-100-symbolic.svg</file>
-    <file>icons/tool-zoom-100.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-zoom-100-symbolic.svg">icons/tool-zoom-100-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-zoom-100-symbolic.svg">icons/tool-zoom-100-symbolic.svg</file>
     <file>icons/tool-zoom-fit-all-symbolic.svg</file>
-    <file>icons/tool-zoom-fit-all.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-zoom-fit-all-symbolic.svg">icons/tool-zoom-fit-all-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-zoom-fit-all-symbolic.svg">icons/tool-zoom-fit-all-symbolic.svg</file>
     <file>icons/tool-zoom-page-symbolic.svg</file>
-    <file>icons/tool-zoom-page.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-zoom-page-symbolic.svg">icons/tool-zoom-page-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-zoom-page-symbolic.svg">icons/tool-zoom-page-symbolic.svg</file>
     <file>icons/tool-zoom-selection-symbolic.svg</file>
-    <file>icons/tool-zoom-selection.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-zoom-selection-symbolic.svg">icons/tool-zoom-selection-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-zoom-selection-symbolic.svg">icons/tool-zoom-selection-symbolic.svg</file>
     <file>icons/tool-zoom-symbolic.svg</file>
-    <file>icons/tool-zoom.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-zoom-symbolic.svg">icons/tool-zoom-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-zoom-symbolic.svg">icons/tool-zoom-symbolic.svg</file>
+    <file>icons/transform-move-gradient-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/transform-move-gradient-symbolic.svg">icons/transform-move-gradient-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/transform-move-gradient-symbolic.svg">icons/transform-move-gradient-symbolic.svg</file>
+    <file>icons/transform-move-pattern-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/transform-move-pattern-symbolic.svg">icons/transform-move-pattern-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/transform-move-pattern-symbolic.svg">icons/transform-move-pattern-symbolic.svg</file>
+    <file>icons/transform-scale-corners-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/transform-scale-corners-symbolic.svg">icons/transform-scale-corners-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/transform-scale-corners-symbolic.svg">icons/transform-scale-corners-symbolic.svg</file>
+    <file>icons/transform-scale-stroke-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/transform-scale-stroke-symbolic.svg">icons/transform-scale-stroke-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/transform-scale-stroke-symbolic.svg">icons/transform-scale-stroke-symbolic.svg</file>
     <file>icons/transform-symbolic.svg</file>
-    <file>icons/transform.svg</file>
+    <file alias="icons/hicolor/scalable/actions/transform-symbolic.svg">icons/transform-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/transform-symbolic.svg">icons/transform-symbolic.svg</file>
     <file>icons/ungroup-symbolic.svg</file>
-    <file>icons/ungroup.svg</file>
-    <file>icons/lib-swatches-symbolic.svg</file>
-    <file>icons/lib-patterns-symbolic.svg</file>
-    <file>icons/lib-icons-symbolic.svg</file>
-    <file>icons/lib-shapes-symbolic.svg</file>
-    <file>icons/lib-strokes-symbolic.svg</file>
-    <file>icons/lib-typography-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/ungroup-symbolic.svg">icons/ungroup-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/ungroup-symbolic.svg">icons/ungroup-symbolic.svg</file>
+    <file>icons/unlock-aspect-ratio-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/unlock-aspect-ratio-symbolic.svg">icons/unlock-aspect-ratio-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/unlock-aspect-ratio-symbolic.svg">icons/unlock-aspect-ratio-symbolic.svg</file>
+    <file>icons/user-home-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/user-home-symbolic.svg">icons/user-home-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/user-home-symbolic.svg">icons/user-home-symbolic.svg</file>
+    <file>icons/user-trash-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/user-trash-symbolic.svg">icons/user-trash-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/user-trash-symbolic.svg">icons/user-trash-symbolic.svg</file>
+    <file>icons/view-grid-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/view-grid-symbolic.svg">icons/view-grid-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/view-grid-symbolic.svg">icons/view-grid-symbolic.svg</file>
+    <file>icons/view-more-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/view-more-symbolic.svg">icons/view-more-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/view-more-symbolic.svg">icons/view-more-symbolic.svg</file>
+    <file>icons/view-paged-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/view-paged-symbolic.svg">icons/view-paged-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/view-paged-symbolic.svg">icons/view-paged-symbolic.svg</file>
+    <file>icons/view-refresh-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/view-refresh-symbolic.svg">icons/view-refresh-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/view-refresh-symbolic.svg">icons/view-refresh-symbolic.svg</file>
+    <file>icons/view-restore-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/view-restore-symbolic.svg">icons/view-restore-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/view-restore-symbolic.svg">icons/view-restore-symbolic.svg</file>
+    <file>icons/view-ruler-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/view-ruler-symbolic.svg">icons/view-ruler-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/view-ruler-symbolic.svg">icons/view-ruler-symbolic.svg</file>
+    <file>icons/weather-clear-night-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/weather-clear-night-symbolic.svg">icons/weather-clear-night-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/weather-clear-night-symbolic.svg">icons/weather-clear-night-symbolic.svg</file>
+    <file>icons/weather-clear-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/weather-clear-symbolic.svg">icons/weather-clear-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/weather-clear-symbolic.svg">icons/weather-clear-symbolic.svg</file>
+    <file>icons/window-close-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/window-close-symbolic.svg">icons/window-close-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/window-close-symbolic.svg">icons/window-close-symbolic.svg</file>
+    <file>icons/zoom-100-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/zoom-100-symbolic.svg">icons/zoom-100-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/zoom-100-symbolic.svg">icons/zoom-100-symbolic.svg</file>
+    <file>icons/zoom-fit-all-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/zoom-fit-all-symbolic.svg">icons/zoom-fit-all-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/zoom-fit-all-symbolic.svg">icons/zoom-fit-all-symbolic.svg</file>
+    <file>icons/zoom-fit-page-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/zoom-fit-page-symbolic.svg">icons/zoom-fit-page-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/zoom-fit-page-symbolic.svg">icons/zoom-fit-page-symbolic.svg</file>
+    <file>icons/zoom-in-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/zoom-in-symbolic.svg">icons/zoom-in-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/zoom-in-symbolic.svg">icons/zoom-in-symbolic.svg</file>
+    <file>icons/zoom-original-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/zoom-original-symbolic.svg">icons/zoom-original-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/zoom-original-symbolic.svg">icons/zoom-original-symbolic.svg</file>
+    <file>icons/zoom-out-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/zoom-out-symbolic.svg">icons/zoom-out-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/zoom-out-symbolic.svg">icons/zoom-out-symbolic.svg</file>
+    <file>icons/zoom-selection-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/zoom-selection-symbolic.svg">icons/zoom-selection-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/zoom-selection-symbolic.svg">icons/zoom-selection-symbolic.svg</file>
+    <file>icons/zoom-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/zoom-symbolic.svg">icons/zoom-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/zoom-symbolic.svg">icons/zoom-symbolic.svg</file>
   </gresource>
 </gresources>

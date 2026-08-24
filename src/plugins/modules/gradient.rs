@@ -14,8 +14,8 @@ impl Default for GradientStudioPlugin {
             ui: ToolUiItem::new(
                 "gradient",
                 "Gradient",
-                "weather-clear-night-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-gradient.svg"),
+                "tool-gradient-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-gradient-symbolic.svg"),
                 "Gradient (G)",
                 36,
             )

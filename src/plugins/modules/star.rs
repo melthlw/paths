@@ -14,8 +14,8 @@ impl Default for StarStudioPlugin {
             ui: ToolUiItem::new(
                 "star",
                 "Star",
-                "starred-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-star.svg"),
+                "tool-star-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-star-symbolic.svg"),
                 "Star (S)",
                 16,
             )

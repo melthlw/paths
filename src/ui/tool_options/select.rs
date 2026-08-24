@@ -26,7 +26,7 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
 
     // 2. Rotate CCW (90° Anti-horário)
     let btn_rot_ccw = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/edit-undo.svg",
+        "edit-undo-symbolic",
         &crate::core::gettext("Rotate 90° CCW"),
     );
     let canvas_ccw = canvas.clone();
@@ -37,7 +37,7 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
 
     // 3. Rotate CW (90° Horário)
     let btn_rot_cw = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/edit-redo.svg",
+        "edit-redo-symbolic",
         &crate::core::gettext("Rotate 90° CW"),
     );
     let canvas_cw = canvas.clone();
@@ -54,7 +54,7 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
         .build();
 
     let btn_front = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/layer-bring-to-front.svg",
+        "layer-bring-to-front-symbolic",
         &crate::core::gettext("Bring to Front"),
     );
     let canvas_front = canvas.clone();
@@ -64,7 +64,7 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
     layer_box.append(&btn_front);
 
     let btn_fwd = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/layer-bring-forward.svg",
+        "layer-bring-forward-symbolic",
         &crate::core::gettext("Bring Forward"),
     );
     let canvas_fwd = canvas.clone();
@@ -74,7 +74,7 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
     layer_box.append(&btn_fwd);
 
     let btn_back = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/layer-send-backward.svg",
+        "layer-send-backward-symbolic",
         &crate::core::gettext("Send Backward"),
     );
     let canvas_back = canvas.clone();
@@ -84,7 +84,7 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
     layer_box.append(&btn_back);
 
     let btn_bottom = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/layer-send-to-back.svg",
+        "layer-send-to-back-symbolic",
         &crate::core::gettext("Send to Back"),
     );
     let canvas_bottom = canvas.clone();
@@ -97,7 +97,7 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
 
     // Convert to Path button
     let btn_convert_path = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/object-to-path.svg",
+        "object-to-path-symbolic",
         &crate::core::gettext("Convert to Path (Ctrl+Shift+C)"),
     );
     let canvas_conv = canvas.clone();
@@ -118,7 +118,7 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
 
     // 1. Scale Stroke Width
     let btn_scale_stroke = create_resource_toggle_btn(
-        "/io/github/lewis/GnomePaths/icons/corner-sharp.svg",
+        "transform-scale-stroke-symbolic",
         &crate::core::gettext("When scaling objects, scale the stroke width in the same proportion"),
         cur_opts.scale_stroke_width,
     );
@@ -130,7 +130,7 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
 
     // 2. Scale Corner Radii
     let btn_scale_corners = create_resource_toggle_btn(
-        "/io/github/lewis/GnomePaths/icons/corner-round.svg",
+        "transform-scale-corners-symbolic",
         &crate::core::gettext("When scaling rectangles, scale the radii of rounded corners in the same proportion"),
         cur_opts.scale_corner_radii,
     );
@@ -142,7 +142,7 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
 
     // 3. Move Gradients
     let btn_move_gradients = create_resource_toggle_btn(
-        "/io/github/lewis/GnomePaths/icons/tool-gradient.svg",
+        "transform-move-gradient-symbolic",
         &crate::core::gettext("Move gradients (in fill or stroke) along with the objects"),
         cur_opts.move_gradients,
     );
@@ -154,7 +154,7 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
 
     // 4. Move Patterns
     let btn_move_patterns = create_resource_toggle_btn(
-        "/io/github/lewis/GnomePaths/icons/format-fill.svg",
+        "transform-move-pattern-symbolic",
         &crate::core::gettext("Move patterns (in fill or stroke) along with the objects"),
         cur_opts.move_patterns,
     );
@@ -215,7 +215,7 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
 
     // Espelhar Horizontalmente (Mirror Horizontal)
     let btn_flip_h = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/mirror-horizontal.svg",
+        "mirror-horizontal-symbolic",
         &crate::core::gettext("Flip Horizontal"),
     );
     let canvas_fliph = canvas.clone();
@@ -226,7 +226,7 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
 
     // Espelhar Verticalmente (Mirror Vertical)
     let btn_flip_v = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/mirror-vertical.svg",
+        "mirror-vertical-symbolic",
         &crate::core::gettext("Flip Vertical"),
     );
     let canvas_flipv = canvas.clone();
@@ -240,7 +240,7 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
     let canvas_w = canvas.clone();
 
     // Aspect Ratio Lock Toggle
-    let img_lock = gtk4::Image::from_icon_name("changes-prevent-symbolic");
+    let img_lock = gtk4::Image::from_icon_name("lock-aspect-ratio-symbolic");
     img_lock.set_pixel_size(18);
     let lock_btn = gtk4::ToggleButton::builder()
         .child(&img_lock)

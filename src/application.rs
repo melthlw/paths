@@ -92,6 +92,7 @@ impl DesignApplication {
             let icon_theme = gtk4::IconTheme::for_display(&display);
             icon_theme.add_resource_path(RESOURCE_PATH);
             icon_theme.add_resource_path(&format!("{}/icons", RESOURCE_PATH));
+            icon_theme.add_resource_path(&format!("{}/icons/hicolor", RESOURCE_PATH));
         }
     }
 

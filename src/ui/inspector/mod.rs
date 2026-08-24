@@ -81,7 +81,7 @@ impl InspectorSidebar {
 
         let header_bar = adw::HeaderBar::builder()
             .show_start_title_buttons(false)
-            .show_end_title_buttons(true)
+            .show_end_title_buttons(false)
             .build();
 
         let title_lbl = gtk4::Label::builder()
@@ -89,6 +89,16 @@ impl InspectorSidebar {
             .css_classes(["heading"])
             .build();
         header_bar.set_title_widget(Some(&title_lbl));
+
+        let header_add_btn = gtk4::MenuButton::builder()
+            .icon_name("list-add-symbolic")
+            .tooltip_text(crate::core::gettext("Add Panel"))
+            .css_classes(["flat"])
+            .valign(gtk4::Align::Center)
+            .focus_on_click(false)
+            .visible(false)
+            .build();
+        header_bar.pack_end(&header_add_btn);
 
         toolbar_view.add_top_bar(&header_bar);
 
@@ -125,7 +135,7 @@ impl InspectorSidebar {
             .halign(gtk4::Align::Center)
             .css_classes(["dock-preview-overlay"])
             .build();
-        drop_preview_top_box.append(&gtk4::Image::from_icon_name("sidebar-show-right-symbolic"));
+        drop_preview_top_box.append(&gtk4::Image::from_icon_name("sidebar-inspector-symbolic"));
         drop_preview_top_box.append(&gtk4::Label::new(Some(&crate::core::gettext(
             "Drop to Dock at Top",
         ))));
@@ -142,7 +152,7 @@ impl InspectorSidebar {
             .halign(gtk4::Align::Center)
             .css_classes(["dock-preview-overlay"])
             .build();
-        drop_preview_bottom_box.append(&gtk4::Image::from_icon_name("go-down-symbolic"));
+        drop_preview_bottom_box.append(&gtk4::Image::from_icon_name("layer-move-down-symbolic"));
         drop_preview_bottom_box.append(&gtk4::Label::new(Some(&crate::core::gettext(
             "Drop to Create New Section Below",
         ))));
@@ -193,7 +203,7 @@ impl InspectorSidebar {
         fill_header.append(&fill_h_spacer);
 
         let fill_eyedropper_btn = gtk4::Button::builder()
-            .icon_name("color-select-symbolic")
+            .icon_name("color-picker-symbolic")
             .css_classes(["flat", "circular"])
             .tooltip_text(crate::core::gettext("Eyedropper (I)"))
             .valign(gtk4::Align::Center)
@@ -269,7 +279,7 @@ impl InspectorSidebar {
         stroke_header.append(&stroke_h_spacer);
 
         let stroke_eyedropper_btn = gtk4::Button::builder()
-            .icon_name("color-select-symbolic")
+            .icon_name("color-picker-symbolic")
             .css_classes(["flat", "circular"])
             .tooltip_text(crate::core::gettext("Eyedropper (I)"))
             .valign(gtk4::Align::Center)
@@ -592,7 +602,7 @@ impl InspectorSidebar {
                     (
                         crate::core::gettext("Alignment"),
                         None,
-                        "format-justify-left-symbolic",
+                        "text-align-left-symbolic",
                     ),
                     (
                         crate::core::gettext("Transform"),
@@ -602,7 +612,7 @@ impl InspectorSidebar {
                     (
                         crate::core::gettext("Clones"),
                         Some("/io/github/lewis/GnomePaths/icons/clone.svg"),
-                        "object-select-symbolic",
+                        "check-symbolic",
                     ),
                     (
                         crate::core::gettext("Export"),
@@ -612,7 +622,7 @@ impl InspectorSidebar {
                     (
                         crate::core::gettext("Libraries"),
                         None,
-                        "starred-symbolic",
+                        "clone-master-symbolic",
                     ),
                 ];
 
@@ -638,6 +648,7 @@ impl InspectorSidebar {
                     &tab_order,
                     &tab_widgets,
                     &sections_container,
+                    &header_add_btn,
                     &canvas_c,
                     refresh_tabs_cell.borrow().as_ref().unwrap().clone(),
                 );
@@ -683,7 +694,7 @@ impl InspectorSidebar {
             &container,
             Some("properties"),
             &crate::core::gettext("Properties"),
-            "preferences-other-symbolic",
+            "prefs-toolbars-symbolic",
         );
 
         let tab_switcher = adw::ViewSwitcher::builder()

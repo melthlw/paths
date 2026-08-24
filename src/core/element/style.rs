@@ -157,7 +157,7 @@ impl Default for FillLayer {
     fn default() -> Self {
         Self {
             style: FillStyle::Solid,
-            color: Color::new(0.2, 0.5, 0.9, 1.0),
+            color: Color::BLACK,
             secondary_color: Color::WHITE,
             angle: 90.0,
             opacity: 1.0,

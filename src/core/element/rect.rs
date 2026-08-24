@@ -369,6 +369,7 @@ impl RectElement {
             id: self.id,
             nodes,
             is_closed: true,
+            subpath_lengths: Vec::new(),
             fills: self.fills.clone(),
             strokes: self.strokes.clone(),
             fill_color: self.fill_color,

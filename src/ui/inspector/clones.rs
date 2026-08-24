@@ -68,7 +68,7 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
                     .margin_end(10)
                     .build();
 
-                let icon = gtk4::Image::from_icon_name("starred-symbolic");
+                let icon = gtk4::Image::from_icon_name("clone-master-symbolic");
                 icon.set_pixel_size(18);
                 icon.add_css_class("accent");
                 top_row.append(&icon);
@@ -139,7 +139,7 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
 
                 let btn_select_all = gtk4::Button::builder()
                     .label(crate::core::gettext("Select Clones"))
-                    .icon_name("object-select-symbolic")
+                    .icon_name("check-symbolic")
                     .css_classes(["flat", "pill-button"])
                     .tooltip_text(crate::core::gettext("Select all instances linked to this master"))
                     .build();
@@ -192,12 +192,12 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
                         .activatable(true)
                         .build();
 
-                    let icon = gtk4::Image::from_icon_name("object-select-symbolic");
+                    let icon = gtk4::Image::from_icon_name("check-symbolic");
                     icon.set_pixel_size(16);
                     row.add_prefix(&icon);
 
                     let btn_select = gtk4::Button::builder()
-                        .icon_name("find-location-symbolic")
+                        .icon_name("eyedropper-pick-symbolic")
                         .css_classes(["flat", "circular"])
                         .tooltip_text(crate::core::gettext("Focus & Select on Canvas"))
                         .valign(gtk4::Align::Center)
@@ -275,7 +275,7 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
                     .margin_end(10)
                     .build();
 
-                let icon = gtk4::Image::from_icon_name("object-select-symbolic");
+                let icon = gtk4::Image::from_icon_name("check-symbolic");
                 icon.set_pixel_size(18);
                 icon.add_css_class("accent");
                 top_row.append(&icon);
@@ -328,7 +328,7 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
 
                 let btn_select_master = gtk4::Button::builder()
                     .label(crate::core::gettext("Go to Master"))
-                    .icon_name("go-jump-symbolic")
+                    .icon_name("clone-jump-master-symbolic")
                     .css_classes(["flat", "pill-button"])
                     .tooltip_text(crate::core::gettext("Select and edit the master element"))
                     .build();
@@ -405,7 +405,7 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
                             .build();
 
                         let btn_sel = gtk4::Button::builder()
-                            .icon_name("find-location-symbolic")
+                            .icon_name("eyedropper-pick-symbolic")
                             .css_classes(["flat", "circular"])
                             .valign(gtk4::Align::Center)
                             .build();
@@ -449,7 +449,7 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
                 .margin_end(16)
                 .build();
 
-            let empty_icon = gtk4::Image::from_icon_name("object-select-symbolic");
+            let empty_icon = gtk4::Image::from_icon_name("check-symbolic");
             empty_icon.set_pixel_size(48);
             empty_icon.set_opacity(0.35);
 
@@ -508,7 +508,7 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
 
                 let m_id = master_id;
                 let btn_select_m = gtk4::Button::builder()
-                    .icon_name("starred-symbolic")
+                    .icon_name("clone-master-symbolic")
                     .css_classes(["flat", "circular"])
                     .tooltip_text(crate::core::gettext("Select Master Object"))
                     .valign(gtk4::Align::Center)
@@ -536,7 +536,7 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
                         .build();
 
                     let btn_select_c = gtk4::Button::builder()
-                        .icon_name("find-location-symbolic")
+                        .icon_name("eyedropper-pick-symbolic")
                         .css_classes(["flat", "circular"])
                         .tooltip_text(crate::core::gettext("Focus & Select on Canvas"))
                         .valign(gtk4::Align::Center)

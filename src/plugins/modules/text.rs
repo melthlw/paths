@@ -14,8 +14,8 @@ impl Default for TextStudioPlugin {
             ui: ToolUiItem::new(
                 "text",
                 "Text",
-                "insert-text-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-text.svg"),
+                "tool-text-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-text-symbolic.svg"),
                 "Text (T)",
                 20,
             ),

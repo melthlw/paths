@@ -14,8 +14,8 @@ impl Default for MeasureStudioPlugin {
             ui: ToolUiItem::new(
                 "measure",
                 "Ruler / Measure",
-                "edit-find-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-measure.svg"),
+                "tool-measure-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-measure-symbolic.svg"),
                 "Ruler / Measure (M)",
                 41,
             ),

@@ -14,8 +14,8 @@ impl Default for EyedropperStudioPlugin {
             ui: ToolUiItem::new(
                 "eyedropper",
                 "Eyedropper",
-                "color-select-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-eyedropper.svg"),
+                "tool-eyedropper-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-eyedropper-symbolic.svg"),
                 "Eyedropper (I)",
                 40,
             ),
