@@ -36,7 +36,7 @@ impl MeasureFeature {
 
 impl FeaturePlugin for MeasureFeature {
     fn on_activate(&mut self, ctx: &mut PluginContext) {
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:measure");
     }
 
     fn on_pointer_down(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
@@ -49,7 +49,7 @@ impl FeaturePlugin for MeasureFeature {
             start_pos: start,
             current_pos: start,
         };
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:measure");
         ctx.request_redraw();
     }
 
@@ -59,11 +59,11 @@ impl FeaturePlugin for MeasureFeature {
                 let empty_exclude = std::collections::HashSet::new();
                 let snapped = ctx.snap_point(event.world_pos, &empty_exclude).round();
                 *current_pos = snapped;
-                ctx.set_cursor("crosshair");
+                ctx.set_cursor("tool:measure");
                 ctx.request_redraw();
             }
             _ => {
-                ctx.set_cursor("crosshair");
+                ctx.set_cursor("tool:measure");
             }
         }
     }

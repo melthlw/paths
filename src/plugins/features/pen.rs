@@ -135,9 +135,8 @@ impl PenFeature {
 }
 
 impl FeaturePlugin for PenFeature {
-    fn on_activate(&mut self, _ctx: &mut PluginContext) {
-        // Do NOT automatically resume drawing on tool activation.
-        // Drawing should only start or resume when the user clicks on canvas.
+    fn on_activate(&mut self, ctx: &mut PluginContext) {
+        ctx.set_cursor("tool:pen");
     }
 
     fn on_pointer_down(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
@@ -169,7 +168,7 @@ impl FeaturePlugin for PenFeature {
                                 self.nodes = p.nodes.clone();
                                 self.resuming_path_id = Some(p.id);
                                 self.is_dragging_handle = self.mode == PenMode::Bezier;
-                                ctx.set_cursor("crosshair");
+                                ctx.set_cursor("tool:pen");
                                 ctx.request_redraw();
                                 resumed = true;
                                 break;
@@ -188,7 +187,7 @@ impl FeaturePlugin for PenFeature {
                                 self.nodes = reversed;
                                 self.resuming_path_id = Some(p.id);
                                 self.is_dragging_handle = self.mode == PenMode::Bezier;
-                                ctx.set_cursor("crosshair");
+                                ctx.set_cursor("tool:pen");
                                 ctx.request_redraw();
                                 resumed = true;
                                 break;
@@ -197,7 +196,7 @@ impl FeaturePlugin for PenFeature {
                                 self.nodes = p.nodes.clone();
                                 self.resuming_path_id = Some(p.id);
                                 self.is_dragging_handle = self.mode == PenMode::Bezier;
-                                ctx.set_cursor("crosshair");
+                                ctx.set_cursor("tool:pen");
                                 ctx.request_redraw();
                                 resumed = true;
                                 break;
@@ -222,7 +221,7 @@ impl FeaturePlugin for PenFeature {
         let new_node = PathNode::new(snapped);
         self.nodes.push(new_node);
         self.is_dragging_handle = self.mode == PenMode::Bezier;
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:pen");
         ctx.request_redraw();
     }
 
@@ -230,6 +229,17 @@ impl FeaturePlugin for PenFeature {
         let empty_exclude = std::collections::HashSet::new();
         let snapped = ctx.snap_point(event.world_pos, &empty_exclude);
         self.current_cursor = Some(snapped);
+
+        let tolerance = 16.0 / ctx.viewport.zoom;
+        if let Some(first) = self.nodes.first() {
+            if self.nodes.len() >= 3 && first.point.distance_to(snapped) <= tolerance {
+                ctx.set_cursor("tool:pen_close");
+            } else {
+                ctx.set_cursor("tool:pen");
+            }
+        } else {
+            ctx.set_cursor("tool:pen");
+        }
 
         if self.is_dragging_handle && self.mode == PenMode::Bezier {
             if let Some(last) = self.nodes.last_mut() {

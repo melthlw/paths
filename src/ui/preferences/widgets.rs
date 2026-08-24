@@ -165,10 +165,13 @@ pub fn show_language_chooser_dialog(
         .build();
 
     let cur_lang = crate::core::get_language();
-    let mut search_items: Vec<(String, adw::ActionRow, gtk4::Image)> = Vec::new();
+    let mut search_items: Vec<(String, adw::ActionRow, gtk4::CheckButton)> = Vec::new();
+    let mut first_radio: Option<gtk4::CheckButton> = None;
 
     let all_languages = crate::core::Language::all_info();
     for info in all_languages {
+        let is_current = info.lang == cur_lang;
+
         let title_str = if info.lang == crate::core::Language::System {
             crate::core::gettext("System Default")
         } else {
@@ -185,6 +188,20 @@ pub fn show_language_chooser_dialog(
             .activatable(true)
             .build();
 
+        let radio = gtk4::CheckButton::builder()
+            .valign(gtk4::Align::Center)
+            .active(is_current)
+            .can_focus(false)
+            .build();
+
+        if let Some(ref first) = first_radio {
+            radio.set_group(Some(first));
+        } else {
+            first_radio = Some(radio.clone());
+        }
+
+        row.add_prefix(&radio);
+
         let icon = gtk4::Image::from_icon_name("preferences-desktop-locale-symbolic");
         icon.set_pixel_size(18);
         row.add_prefix(&icon);
@@ -196,11 +213,13 @@ pub fn show_language_chooser_dialog(
             .build();
         row.add_suffix(&badge);
 
-        let check_icon = gtk4::Image::from_icon_name("emblem-ok-symbolic");
-        check_icon.set_pixel_size(16);
-        check_icon.add_css_class("accent");
-        check_icon.set_visible(info.lang == cur_lang);
-        row.add_suffix(&check_icon);
+        if is_current {
+            let check_icon = gtk4::Image::from_icon_name("object-select-symbolic");
+            check_icon.set_pixel_size(16);
+            check_icon.add_css_class("accent");
+            row.add_suffix(&check_icon);
+            row.add_css_class("accent");
+        }
 
         list_box.append(&row);
 
@@ -211,13 +230,16 @@ pub fn show_language_chooser_dialog(
             info.region.to_lowercase(),
             info.code.to_lowercase()
         );
-        search_items.push((search_text, row.clone(), check_icon.clone()));
+        search_items.push((search_text, row.clone(), radio.clone()));
 
         let target_lang = info.lang;
         let lbl_update = current_lang_label.clone();
         let bdg_update = current_lang_badge.clone();
         let win_close = window.clone();
+        let radio_toggle = radio.clone();
+
         row.connect_activated(move |_| {
+            radio_toggle.set_active(true);
             crate::core::set_language(target_lang);
             crate::core::AppSettings::set_language(target_lang.code());
             let updated_info = target_lang.info();

@@ -172,6 +172,10 @@ impl TriangleFeature {
 }
 
 impl FeaturePlugin for TriangleFeature {
+    fn on_activate(&mut self, ctx: &mut PluginContext) {
+        ctx.set_cursor("tool:triangle");
+    }
+
     fn on_pointer_down(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
         if event.button != Some(PointerButton::Primary) {
             return;
@@ -292,7 +296,7 @@ impl FeaturePlugin for TriangleFeature {
             is_square_locked: event.shift_pressed,
             is_center_anchored: event.alt_pressed,
         };
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:triangle");
         ctx.request_redraw();
     }
 
@@ -309,7 +313,7 @@ impl FeaturePlugin for TriangleFeature {
                 *current_pos = snapped;
                 *is_square_locked = event.shift_pressed;
                 *is_center_anchored = event.alt_pressed;
-                ctx.set_cursor("crosshair");
+                ctx.set_cursor("tool:triangle");
                 ctx.request_redraw();
             }
             TriangleToolState::DraggingHandle { elem_id, rect, .. } => {
@@ -461,7 +465,7 @@ impl FeaturePlugin for TriangleFeature {
                     if is_hovering {
                         ctx.set_cursor("pointer");
                     } else {
-                        ctx.set_cursor("crosshair");
+                        ctx.set_cursor("tool:triangle");
                     }
                 }
             }
@@ -492,7 +496,7 @@ impl FeaturePlugin for TriangleFeature {
 
         self.state = TriangleToolState::Idle;
         ctx.clear_snap_guides();
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:triangle");
         ctx.request_redraw();
     }
 

@@ -26,6 +26,7 @@ pub struct CanvasState {
     pub active_stroke_width: f32,
     pub widget_size: (f32, f32),
     pub cursor_pos: Point,
+    pub active_cursor: Option<&'static str>,
     pub is_space_down: bool,
     pub is_panning: bool,
     pub pan_last_pos: Point,
@@ -96,6 +97,7 @@ impl CanvasState {
             active_stroke_width: 2.0,
             widget_size: (800.0, 600.0),
             cursor_pos: Point::ZERO,
+            active_cursor: None,
             is_space_down: false,
             is_panning: false,
             pan_last_pos: Point::ZERO,
@@ -228,6 +230,8 @@ impl CanvasState {
         };
 
         self.plugin_manager.set_active_tool(tool_id, &mut ctx);
+
+        self.active_cursor = ctx.cursor_name;
 
         if let Some(cb) = &self.on_tool_change {
             cb(tool_id);

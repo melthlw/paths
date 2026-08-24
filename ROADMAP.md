@@ -23,6 +23,33 @@ Development roadmap structured by version milestones.
 
 ---
 
+## v0.2.1 — Node Usability & Precision Tool Cursors
+> **Focus**: Vector node visual beautification, direct manipulation engine, and dedicated tool cursors.
+
+### Vector Node System & Aesthetics
+- [x] **Node System Beautification & High-Contrast Design**:
+  - [x] Antialiased anchor points with subtle drop shadows and contrast halos for crisp visibility across dark/light canvas backgrounds and colorful artwork.
+  - [x] Distinct geometric shapes per node type: modern rounded rectangles for Corner/Cusp nodes, smooth antialiased circles for Smooth nodes, and center-cored circles for Symmetric/Auto nodes.
+  - [x] Elegant Bézier control handles with solid white cores, accent borders, drop shadows, and high-contrast dual-stroke connection lines.
+  - [x] Glowing outer selection rings, hover glow rings for nodes/handles, curve segment glowing highlights, and (+) node insert indicator.
+  - [x] Distinct directional start point indicator on open paths.
+
+### Usability & Direct Manipulation
+- [x] **Direct Manipulation & Intuitive Interactions**:
+  - [x] Direct curve segment dragging to bend and deform Bézier curves in real time.
+  - [x] Double-click on node to toggle between Smooth (tangent handles) and Corner (retracted handles).
+  - [x] Double-click on segment to insert a new node cleanly using De Casteljau subdivision without distorting the curve.
+  - [x] `Alt + Drag` on control handle to break symmetry and independently adjust tangent angles (converts to Corner/Cusp).
+  - [x] `Shift + Drag` on handle for 45° angle snapping.
+  - [x] `Delete` / `Backspace` key to cleanly remove selected nodes.
+
+### Canvas Tool Cursors
+- [x] **Dedicated High-DPI Tool Cursors**:
+  - [x] Skia-rendered hardware cursor generator and cache with pixel-perfect hotspots.
+  - [x] Contextual cursors for active tools: Pen (`tool:pen`, `tool:pen_add`, `tool:pen_remove`, `tool:pen_close`), Node Editor (`tool:node`, `tool:node_add`, `tool:node_curve`), Rectangle, Circle, Star, Spiral, Triangle, Brush, Eraser, Text, Gradient, Eyedropper, Measure, Page, Rotate, Zoom.
+
+---
+
 ## v0.3.0 — Gradients, Meshes & Pattern Engine
 > **Focus**: Advanced fill rendering, interactive meshes, and asset ecosystem.
 

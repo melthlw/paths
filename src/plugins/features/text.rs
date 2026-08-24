@@ -135,6 +135,10 @@ impl TextFeature {
 }
 
 impl FeaturePlugin for TextFeature {
+    fn on_activate(&mut self, ctx: &mut PluginContext) {
+        ctx.set_cursor("tool:text");
+    }
+
     fn is_editing(&self) -> bool {
         self.editing_id.is_some()
     }
@@ -218,7 +222,7 @@ impl FeaturePlugin for TextFeature {
             current: event.world_pos,
         };
         ctx.document.deselect_all();
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:text");
         ctx.request_redraw();
     }
 
@@ -336,7 +340,7 @@ impl FeaturePlugin for TextFeature {
                 if is_hovering_text {
                     ctx.set_cursor("text");
                 } else {
-                    ctx.set_cursor("crosshair");
+                    ctx.set_cursor("tool:text");
                 }
             }
         }

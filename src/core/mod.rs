@@ -31,7 +31,11 @@ pub use geometry::{
     calculate_resize_scales, hit_transform_handle, Point, Rect, TransformHandle, Viewport,
 };
 pub use grid::{GridConfig, GridStyle};
-pub use i18n::{get_language, gettext, init as init_i18n, set_language, Language};
+#[allow(unused_imports)]
+pub use i18n::{
+    get_language, gettext, init as init_i18n, on_language_change, on_language_change_local,
+    set_language, Language,
+};
 pub use io::{load_document_from_file, save_document_to_file};
 pub use page::PageId;
 pub use path_editor_config::{HandleDisplayMode, NodeType, PathEditorConfig};

@@ -66,7 +66,7 @@ impl GradientFeature {
 
 impl FeaturePlugin for GradientFeature {
     fn on_activate(&mut self, ctx: &mut PluginContext) {
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:gradient");
     }
 
     fn on_pointer_down(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
@@ -139,7 +139,7 @@ impl FeaturePlugin for GradientFeature {
 
     fn on_pointer_move(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
         if !self.is_dragging {
-            ctx.set_cursor("crosshair");
+            ctx.set_cursor("tool:gradient");
             return;
         }
 

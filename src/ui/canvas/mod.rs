@@ -1,9 +1,11 @@
+pub mod cursors;
 pub mod events;
 pub mod ops_document;
 pub mod ops_style;
 pub mod ops_transform;
 pub mod state;
 
+pub use cursors::CursorCache;
 pub use state::CanvasState;
 
 use gtk4::prelude::*;
@@ -16,6 +18,7 @@ pub struct CanvasWidget {
     pub(crate) state: Rc<RefCell<CanvasState>>,
     pub(crate) unit: Rc<std::cell::Cell<crate::core::Unit>>,
     pub(crate) enabled_plugins: Rc<RefCell<std::collections::HashSet<String>>>,
+    pub(crate) cursor_cache: Rc<CursorCache>,
 }
 
 impl CanvasWidget {
@@ -31,18 +34,28 @@ impl CanvasWidget {
         let state = Rc::new(RefCell::new(CanvasState::new()));
         let unit = Rc::new(std::cell::Cell::new(crate::core::Unit::Px));
         let enabled_plugins = Rc::new(RefCell::new(std::collections::HashSet::new()));
+        let cursor_cache = Rc::new(CursorCache::new());
 
         let widget = Self {
             drawing_area,
             state,
             unit,
             enabled_plugins,
+            cursor_cache,
         };
 
         widget.setup_drawing();
         widget.setup_event_controllers();
 
         widget
+    }
+
+    pub fn apply_cursor(area: &gtk4::DrawingArea, cache: &CursorCache, cursor_name: &str) {
+        if let Some(cursor) = cache.get_cursor(cursor_name) {
+            area.set_cursor(Some(&cursor));
+        } else {
+            area.set_cursor_from_name(Some(cursor_name));
+        }
     }
 
     pub fn widget(&self) -> &gtk4::DrawingArea {
@@ -77,6 +90,9 @@ impl CanvasWidget {
     pub fn set_active_tool(&self, tool_id: &'static str) {
         if let Ok(mut state) = self.state.try_borrow_mut() {
             state.set_active_tool(tool_id);
+            if let Some(cursor) = state.active_cursor {
+                Self::apply_cursor(&self.drawing_area, &self.cursor_cache, cursor);
+            }
         }
         self.drawing_area.queue_draw();
     }

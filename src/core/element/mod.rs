@@ -974,5 +974,19 @@ mod tests {
 
         path.delete_nodes(&[0]);
         assert_eq!(path.nodes.len(), initial_count);
+
+        // Test toggle_node_smooth_corner
+        path.toggle_node_smooth_corner(0);
+        assert_eq!(path.nodes[0].node_type, NodeType::Smooth);
+        assert!(path.nodes[0].handle_in.is_some() || path.nodes[0].handle_out.is_some());
+
+        path.toggle_node_smooth_corner(0);
+        assert_eq!(path.nodes[0].node_type, NodeType::Corner);
+        assert!(path.nodes[0].handle_in.is_none() && path.nodes[0].handle_out.is_none());
+
+        // Test bend_segment
+        path.bend_segment(0, Point::new(10.0, 20.0), 0.5);
+        assert!(path.nodes[0].handle_out.is_some());
+        assert!(path.nodes[1].handle_in.is_some());
     }
 }

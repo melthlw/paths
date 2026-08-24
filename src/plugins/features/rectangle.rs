@@ -156,6 +156,10 @@ impl RectangleFeature {
 }
 
 impl FeaturePlugin for RectangleFeature {
+    fn on_activate(&mut self, ctx: &mut PluginContext) {
+        ctx.set_cursor("tool:rectangle");
+    }
+
     fn on_pointer_down(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
         if event.button != Some(PointerButton::Primary) {
             return;
@@ -232,7 +236,7 @@ impl FeaturePlugin for RectangleFeature {
                     rect: norm_rect,
                     elem_id,
                 };
-                ctx.set_cursor("crosshair");
+                ctx.set_cursor("tool:rectangle");
                 ctx.request_redraw();
                 return;
             }
@@ -468,7 +472,7 @@ impl FeaturePlugin for RectangleFeature {
                 if is_hovering_rect {
                     ctx.set_cursor("pointer");
                 } else {
-                    ctx.set_cursor("crosshair");
+                    ctx.set_cursor("tool:rectangle");
                 }
             }
         }
@@ -494,9 +498,24 @@ impl FeaturePlugin for RectangleFeature {
                     }
                 }
             }
-            RectToolState::MovingElement {
+            RectToolState::Idle => {
+                let hit = ctx.document.elements.iter().rev().find_map(|e| {
+                    if let Element::Rect(r) = e {
+                        if r.rect.normalize().contains(event.world_pos) {
+                            return Some(r.id);
+                        }
+                    }
+                    None
+                });
+
+                if let Some(id) = hit {
+                    ctx.document.select(id, event.shift_pressed);
+                } else if !event.shift_pressed {
+                    ctx.document.selected_ids.clear();
+                }
+            }
+            RectToolState::DraggingCornerRadius {
                 elem_id,
-                has_dragged: false,
                 ..
             } => {
                 if !event.shift_pressed {
@@ -508,7 +527,7 @@ impl FeaturePlugin for RectangleFeature {
 
         self.state = RectToolState::Idle;
         ctx.clear_snap_guides();
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:rectangle");
         ctx.request_redraw();
     }
 

@@ -337,6 +337,10 @@ impl StarFeature {
 }
 
 impl FeaturePlugin for StarFeature {
+    fn on_activate(&mut self, ctx: &mut PluginContext) {
+        ctx.set_cursor("tool:star");
+    }
+
     fn on_pointer_down(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
         if event.button != Some(PointerButton::Primary) {
             return;
@@ -466,7 +470,7 @@ impl FeaturePlugin for StarFeature {
             is_square_locked: event.shift_pressed,
             is_center_anchored: event.alt_pressed,
         };
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:star");
         ctx.request_redraw();
     }
 
@@ -483,7 +487,7 @@ impl FeaturePlugin for StarFeature {
                 *current_pos = snapped;
                 *is_square_locked = event.shift_pressed;
                 *is_center_anchored = event.alt_pressed;
-                ctx.set_cursor("crosshair");
+                ctx.set_cursor("tool:star");
                 ctx.request_redraw();
             }
             StarToolState::DraggingHandle {
@@ -658,7 +662,7 @@ impl FeaturePlugin for StarFeature {
                     if is_hovering {
                         ctx.set_cursor("pointer");
                     } else {
-                        ctx.set_cursor("crosshair");
+                        ctx.set_cursor("tool:star");
                     }
                 }
             }
@@ -698,7 +702,7 @@ impl FeaturePlugin for StarFeature {
 
         self.state = StarToolState::Idle;
         ctx.clear_snap_guides();
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:star");
         ctx.request_redraw();
     }
 

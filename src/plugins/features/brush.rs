@@ -22,13 +22,17 @@ impl BrushFeature {
 }
 
 impl FeaturePlugin for BrushFeature {
+    fn on_activate(&mut self, ctx: &mut PluginContext) {
+        ctx.set_cursor("tool:brush");
+    }
+
     fn on_pointer_down(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
         if event.button != Some(PointerButton::Primary) {
             return;
         }
         self.current_points.clear();
         self.current_points.push(event.world_pos);
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:brush");
         ctx.request_redraw();
     }
 
@@ -40,7 +44,7 @@ impl FeaturePlugin for BrushFeature {
                 ctx.request_redraw();
             }
         } else {
-            ctx.set_cursor("crosshair");
+            ctx.set_cursor("tool:brush");
         }
     }
 
@@ -58,7 +62,7 @@ impl FeaturePlugin for BrushFeature {
             }
 
             self.current_points.clear();
-            ctx.set_cursor("crosshair");
+            ctx.set_cursor("tool:brush");
             ctx.request_redraw();
         }
     }
