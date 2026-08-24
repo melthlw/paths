@@ -60,32 +60,22 @@
   </tr>
   <tr>
     <td width="50%">
-      <h3>Multi-Page Artboards</h3>
+      <h3>Multi-Page</h3>
       <p>Multi-page environment supporting multiple independent artboards in a single document. Individual dimension controls, page reordering, overview navigation, and selective or batch export.</p>
     </td>
+    <td width="50%">
+      <h3>Linked Clones</h3>
+      <p>Instantiate linked object clones with automatic transformation and style propagation from master elements, supporting selective unlinking for non-destructive design workflows.</p>
+    </td>
+  </tr>
+  <tr>
     <td width="50%">
       <h3>Boolean Path Operations</h3>
       <p>Real-time geometric path combinations: <b>Union</b>, <b>Difference</b>, <b>Intersection</b>, <b>Exclusion</b>, <b>Division</b>, and <b>Slice/Cut</b>.</p>
     </td>
-  </tr>
-  <tr>
     <td width="50%">
-      <h3>Mesh and Multi-Stop Gradients</h3>
-      <p>Advanced vector painting with linear and radial gradients featuring multiple color stops, plus on-canvas 2D mesh gradient grids for complex vector lighting.</p>
-    </td>
-    <td width="50%">
-      <h3>Linked Clones</h3>
-      <p>Instantiate linked object clones with automatic transformation and style propagation from master elements, supporting selective unlinking for pattern design.</p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <h3>Parametric Geometric Shapes</h3>
-      <p>Dynamically editable primitives: rectangles with independent corner radii, circles, ellipses, regular polygons with side controls, stars, and spirals.</p>
-    </td>
-    <td width="50%">
-      <h3>Smart Magnetic Snapping and Guides</h3>
-      <p>Magnetic alignment to artboard centers, object bounding boxes, adjacent nodes, customizable origin rulers, and draggable guide lines.</p>
+      <h3>Modular Native Plugin Ecosystem</h3>
+      <p>Dynamic native shared library architecture (<code>.so</code>) enabling custom tools, new geometric primitives, and deep editor integrations.</p>
     </td>
   </tr>
 </table>
@@ -97,10 +87,10 @@
 | Format | Export | Import | Key Capabilities |
 | :--- | :---: | :---: | :--- |
 | **SVG** | Yes | Yes | Lossless project data, standard W3C vector curves, gradients and metadata |
-| **PNG** | Yes | No | High-DPI rasterization with alpha transparency |
+| **PNG** | Yes | Yes | High-DPI rasterization with alpha transparency and bitmap layer import |
+| **JPG / JPEG** | Yes | Yes | Compressed raster images for textures, background canvas, and references |
+| **WebP** | Yes | Yes | Modern lightweight web graphics import and export |
 | **PDF** | Yes | No | Vector print-ready document pages |
-| **JPG** | Yes | No | Compressed raster images for web and preview |
-| **WebP** | Yes | No | Lightweight lossless and lossy web graphics |
 
 ---
 

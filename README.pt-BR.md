@@ -55,37 +55,27 @@
     </td>
     <td width="50%">
       <h3>Customização de Interface e Espaço de Trabalho</h3>
-      <p>Barra de ferramentas HUD flutuante ou acoplada com reorganização de ferramentas, painéis laterais retráteis (Inspetor de Propriedades, Camadas e Bibliotecas) e integração com tema claro e escuro do GNOME.</p>
+      <p>Barra de ferramentas HUD flutuante ou acoplada com reorganização de ferramentas, painéis laterais retráteis (Inspetor de Propriedades, Camadas e Bibliotecas) e integração nativa com tema claro e escuro do GNOME.</p>
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <h3>Pranchetas Multipáginas (Artboards)</h3>
+      <h3>Pranchetas Multipáginas</h3>
       <p>Ambiente multipágina com suporte a múltiplas pranchetas independentes em um único documento. Controle de dimensões por prancheta, reordenação de páginas, navegação e exportação individual ou em lote.</p>
     </td>
+    <td width="50%">
+      <h3>Clones Vinculados (Linked Clones)</h3>
+      <p>Instanciação de objetos vinculados com sincronização automática do elemento mestre e opção de desvinculação seletiva para fluxos de trabalho não-destrutivos.</p>
+    </td>
+  </tr>
+  <tr>
     <td width="50%">
       <h3>Operações Booleanas em Vetores</h3>
       <p>Combinação geométrica de caminhos em tempo real com algoritmos de <b>União</b>, <b>Diferença</b>, <b>Interseção</b>, <b>Exclusão</b>, <b>Divisão</b> e <b>Fatiamento / Corte</b>.</p>
     </td>
-  </tr>
-  <tr>
     <td width="50%">
-      <h3>Gradientes em Malha (Mesh Gradient)</h3>
-      <p>Pintura vetorial avançada com gradientes lineares, radiais com múltiplos pontos de parada e grades de malha 2D editáveis diretamente sobre os objetos no canvas.</p>
-    </td>
-    <td width="50%">
-      <h3>Clones Vinculados (Linked Clones)</h3>
-      <p>Instanciação de objetos vinculados com sincronização automática do elemento mestre e opção de desvinculação seletiva para criação de padrões complexos.</p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <h3>Formas Geométricas Paramétricas</h3>
-      <p>Primitivas editáveis dinamicamente: retângulos com raios de canto independentes, círculos, elipses, polígonos regulares com ajuste de lados, estrelas e espirais.</p>
-    </td>
-    <td width="50%">
-      <h3>Ajuste Magnético e Guias Inteligentes</h3>
-      <p>Encaixe magnético com alinhamento dinâmico a centros de pranchetas, caixas delimitadoras de objetos, nós vizinhos, réguas com origem configurável e linhas-guia.</p>
+      <h3>Ecossistema de Plugins Nativos</h3>
+      <p>Arquitetura modular para carregamento dinâmico de bibliotecas nativas (<code>.so</code>), permitindo a extensão de ferramentas, novas primitivas e integrações com o editor.</p>
     </td>
   </tr>
 </table>
@@ -97,10 +87,10 @@
 | Formato | Exportação | Importação | Características Principais |
 | :--- | :---: | :---: | :--- |
 | **SVG** | Sim | Sim | Preservação total de dados de projeto, curvas W3C padrão, gradientes e metadados |
-| **PNG** | Sim | Não | Rasterização em alta resolução com canal alfa (transparência) |
+| **PNG** | Sim | Sim | Rasterização em alta resolução com canal alfa (transparência) e importação bitmap |
+| **JPG / JPEG** | Sim | Sim | Imagens rasterizadas compactadas para texturas, fundos e referências |
+| **WebP** | Sim | Sim | Formato moderno de alta fidelidade e baixo consumo de dados |
 | **PDF** | Sim | Não | Páginas vetoriais prontas para impressão e publicação |
-| **JPG** | Sim | Não | Imagens rasterizadas compactadas para web e pré-visualização |
-| **WebP** | Sim | Não | Formato moderno de alta fidelidade para gráficos na web |
 
 ---
 
