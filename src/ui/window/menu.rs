@@ -218,8 +218,8 @@ pub fn build_main_menu(
                     .developer_name("Lewis")
                     .developers(["Lewis"])
                     .artists(["Lewis"])
-                    .issue_url("https://github.com/lewis/gnome-paths/issues")
-                    .website("https://github.com/lewis/gnome-paths")
+                    .issue_url("https://gitlab.com/lewisHeart/gnome-paths/-/issues")
+                    .website("https://gitlab.com/lewisHeart/gnome-paths")
                     .license_type(gtk4::License::Gpl30)
                     .comments(&crate::core::gettext("Modern vector design editor accelerated by Skia GPU, built with GTK4, Libadwaita and Rust."))
                     .build();

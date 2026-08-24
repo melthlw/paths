@@ -92,6 +92,6 @@ msgmerge --update po/es.po po/gnome-paths.pot
 
 ## Submitting Translations
 
-1. Fork the repository on GitLab: `https://gitlab.gnome.org/lewisHeart/gnome-paths` (or GitHub).
+1. Fork the repository on GitLab: `https://gitlab.com/lewisHeart/gnome-paths`.
 2. Commit your new or updated `po/<language_code>.po` file.
-3. Open a Merge Request / Pull Request.
+3. Open a Merge Request.

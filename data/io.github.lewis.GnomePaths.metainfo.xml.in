@@ -22,9 +22,9 @@
     </ul>
   </description>
   <launchable type="desktop-id">io.github.lewis.GnomePaths.desktop</launchable>
-  <url type="homepage">https://github.com/lewis/gnome-paths</url>
-  <url type="bugtracker">https://github.com/lewis/gnome-paths/issues</url>
-  <url type="vcs-browser">https://github.com/lewis/gnome-paths</url>
+  <url type="homepage">https://gitlab.com/lewisHeart/gnome-paths</url>
+  <url type="bugtracker">https://gitlab.com/lewisHeart/gnome-paths/-/issues</url>
+  <url type="vcs-browser">https://gitlab.com/lewisHeart/gnome-paths</url>
   <developer id="io.github.lewis">
     <name>Lewis</name>
   </developer>

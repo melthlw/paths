@@ -66,7 +66,7 @@ pub fn build_about_page() -> gtk4::ScrolledWindow {
 
     let repo_row = adw::ActionRow::builder()
         .title(crate::core::gettext("Source Code"))
-        .subtitle("https://github.com/lewis/gnome-paths")
+        .subtitle("https://gitlab.com/lewisHeart/gnome-paths")
         .activatable(true)
         .build();
     let link_icon = gtk4::Image::builder()
@@ -78,7 +78,7 @@ pub fn build_about_page() -> gtk4::ScrolledWindow {
     {
         repo_row.connect_activated(|_| {
             let _ = gtk4::gio::AppInfo::launch_default_for_uri(
-                "https://github.com/lewis/gnome-paths",
+                "https://gitlab.com/lewisHeart/gnome-paths",
                 None::<&gtk4::gio::AppLaunchContext>,
             );
         });
