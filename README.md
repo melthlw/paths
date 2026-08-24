@@ -162,4 +162,3 @@ Detailed instructions on contributing and managing translations can be found in 
 ## License
 
 GNOME Paths is licensed under the [GNU General Public License v3.0 or later (GPL-3.0-or-later)](LICENSE).
->>>>>>> b2f4e7b (feat: initialize project structure with core modules, UI components, and asset library)
