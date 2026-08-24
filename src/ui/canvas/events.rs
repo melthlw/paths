@@ -10,10 +10,11 @@ impl CanvasWidget {
         let state_clone = self.state.clone();
         self.drawing_area
             .set_draw_func(move |_area, cr, width, height| {
-                let mut state = state_clone.borrow_mut();
-                if let Some(surface) = state.render_frame(width, height) {
-                    let _ = cr.set_source_surface(&surface, 0.0, 0.0);
-                    let _ = cr.paint();
+                if let Ok(mut state) = state_clone.try_borrow_mut() {
+                    if let Some(surface) = state.render_frame(width, height) {
+                        let _ = cr.set_source_surface(&surface, 0.0, 0.0);
+                        let _ = cr.paint();
+                    }
                 }
             });
     }
@@ -132,13 +133,17 @@ impl CanvasWidget {
                     e.modifier_state().contains(gdk::ModifierType::ALT_MASK)
                 });
 
-                let (redraw, cursor) = state_drag.borrow_mut().pointer_down(
-                    Point::new(x as f32, y as f32),
-                    current_btn,
-                    shift,
-                    ctrl,
-                    alt,
-                );
+                let (redraw, cursor) = if let Ok(mut state) = state_drag.try_borrow_mut() {
+                    state.pointer_down(
+                        Point::new(x as f32, y as f32),
+                        current_btn,
+                        shift,
+                        ctrl,
+                        alt,
+                    )
+                } else {
+                    (false, None)
+                };
 
                 if let Some(cursor_name) = cursor {
                     Self::apply_cursor(&area_drag, &cc_drag, cursor_name);
@@ -170,12 +175,16 @@ impl CanvasWidget {
                         e.modifier_state().contains(gdk::ModifierType::ALT_MASK)
                     });
 
-                    let (redraw, cursor) = state_update.borrow_mut().pointer_move(
-                        Point::new(cur_x as f32, cur_y as f32),
-                        shift,
-                        ctrl,
-                        alt,
-                    );
+                    let (redraw, cursor) = if let Ok(mut state) = state_update.try_borrow_mut() {
+                        state.pointer_move(
+                            Point::new(cur_x as f32, cur_y as f32),
+                            shift,
+                            ctrl,
+                            alt,
+                        )
+                    } else {
+                        (false, None)
+                    };
 
                     if let Some(cursor_name) = cursor {
                         Self::apply_cursor(&area_update, &cc_update, cursor_name);
@@ -214,13 +223,17 @@ impl CanvasWidget {
                         e.modifier_state().contains(gdk::ModifierType::ALT_MASK)
                     });
 
-                    let (redraw, cursor) = state_end.borrow_mut().pointer_up(
-                        Point::new(cur_x as f32, cur_y as f32),
-                        current_btn,
-                        shift,
-                        ctrl,
-                        alt,
-                    );
+                    let (redraw, cursor) = if let Ok(mut state) = state_end.try_borrow_mut() {
+                        state.pointer_up(
+                            Point::new(cur_x as f32, cur_y as f32),
+                            current_btn,
+                            shift,
+                            ctrl,
+                            alt,
+                        )
+                    } else {
+                        (false, None)
+                    };
 
                     if let Some(cursor_name) = cursor {
                         Self::apply_cursor(&area_end, &cc_end, cursor_name);
@@ -255,12 +268,16 @@ impl CanvasWidget {
                     e.modifier_state().contains(gdk::ModifierType::ALT_MASK)
                 });
 
-                let (redraw, cursor) = state_motion.borrow_mut().pointer_move(
-                    Point::new(x as f32, y as f32),
-                    shift,
-                    ctrl,
-                    alt,
-                );
+                let (redraw, cursor) = if let Ok(mut state) = state_motion.try_borrow_mut() {
+                    state.pointer_move(
+                        Point::new(x as f32, y as f32),
+                        shift,
+                        ctrl,
+                        alt,
+                    )
+                } else {
+                    (false, None)
+                };
 
                 if let Some(cursor_name) = cursor {
                     Self::apply_cursor(&area_motion, &cc_motion, cursor_name);
@@ -422,18 +439,29 @@ pub fn handle_asset_drop(state: &mut super::state::CanvasState, payload: &str, w
             "Scales" => PatternType::Scales,
             "Houndstooth" => PatternType::Houndstooth,
             "Basketweave" => PatternType::Basketweave,
+            "Custom" => PatternType::Custom,
             _ => PatternType::Grid,
         };
         let scale: f32 = parts.get(1).and_then(|s| s.parse().ok()).unwrap_or(16.0);
+        let custom_pattern_path = if pt == PatternType::Custom {
+            let pattern_name = parts.get(2).copied().unwrap_or("");
+            let all_custom = crate::core::scan_user_patterns();
+            all_custom.into_iter().find(|cp| cp.name == pattern_name).map(|cp| cp.file_path)
+        } else {
+            None
+        };
         let p_layer = FillLayer {
             style: FillStyle::Pattern,
             color: state.active_fill_color,
             secondary_color: Color::new(0.12, 0.14, 0.18, 1.0),
+            stops: Vec::new(),
             angle: 0.0,
             opacity: 1.0,
             enabled: true,
             pattern_type: pt,
             pattern_scale: scale,
+            pattern_offset: crate::core::Point::ZERO,
+            custom_pattern_path,
             mesh: None,
         };
         state.document.snapshot();

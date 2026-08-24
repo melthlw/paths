@@ -1,12 +1,9 @@
 pub mod customizer;
 pub mod items;
 
-#[allow(unused_imports)]
 pub use customizer::{show_customize_toolbar_dialog, show_customize_toolbar_dialog_standalone};
-#[allow(unused_imports)]
-pub use items::{
-    generate_default_items, get_tool_meta, rebuild_toolbar_items, SubToolItem, ToolItem,
-};
+
+pub use items::{generate_default_items, rebuild_toolbar_items};
 
 use gtk4::prelude::*;
 use std::cell::{Cell, RefCell};

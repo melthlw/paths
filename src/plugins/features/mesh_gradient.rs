@@ -9,6 +9,8 @@ pub struct MeshGradientFeature {
     target_id: Option<ElementId>,
     selected_node_idx: Option<usize>,
     is_dragging: bool,
+    last_click_time: Option<std::time::Instant>,
+    last_click_pos: Option<Point>,
 }
 
 impl Default for MeshGradientFeature {
@@ -23,6 +25,8 @@ impl MeshGradientFeature {
             target_id: None,
             selected_node_idx: None,
             is_dragging: false,
+            last_click_time: None,
+            last_click_pos: None,
         }
     }
 
@@ -56,6 +60,15 @@ impl FeaturePlugin for MeshGradientFeature {
             return;
         }
 
+        let now = std::time::Instant::now();
+        let is_double_click = if let (Some(last_t), Some(last_p)) = (self.last_click_time, self.last_click_pos) {
+            now.duration_since(last_t).as_millis() < 350 && last_p.distance_to(event.world_pos) < (10.0 / ctx.viewport.zoom)
+        } else {
+            false
+        };
+        self.last_click_time = Some(now);
+        self.last_click_pos = Some(event.world_pos);
+
         let target_id = match self.find_target(ctx, event.world_pos) {
             Some(id) => id,
             None => {
@@ -71,7 +84,6 @@ impl FeaturePlugin for MeshGradientFeature {
         // Check if target already has mesh gradient
         let mut has_mesh = false;
         let mut bounds = crate::core::Rect::ZERO;
-        let mut hit_idx = None;
 
         for el in &ctx.document.elements {
             if el.id() == target_id {
@@ -82,15 +94,8 @@ impl FeaturePlugin for MeshGradientFeature {
                     _ => &None,
                 };
 
-                if let Some(mesh) = mesh_opt {
+                if let Some(_mesh) = mesh_opt {
                     has_mesh = true;
-                    let hit_dist = 10.0 / ctx.viewport.zoom;
-                    for (i, node) in mesh.nodes.iter().enumerate() {
-                        if node.point.distance_to(event.world_pos) <= hit_dist {
-                            hit_idx = Some(i);
-                            break;
-                        }
-                    }
                 }
                 break;
             }
@@ -110,12 +115,77 @@ impl FeaturePlugin for MeshGradientFeature {
                         Element::Path(p) => p.mesh_gradient = Some(new_mesh.clone()),
                         _ => {}
                     }
+                    let mut fills = el.fills();
+                    if fills.is_empty() {
+                        fills.push(crate::core::FillLayer::default());
+                    }
+                    if let Some(f0) = fills.first_mut() {
+                        f0.style = crate::core::FillStyle::Mesh;
+                        f0.mesh = Some(new_mesh.clone());
+                    }
+                    el.set_fills(fills);
                     break;
                 }
             }
             self.selected_node_idx = Some(0);
-        } else if let Some(idx) = hit_idx {
-            self.selected_node_idx = Some(idx);
+        } else if is_double_click || event.alt_pressed {
+            // Double click or Alt-click: Subdivide mesh at click position
+            ctx.document.snapshot();
+            let mut new_node_idx = None;
+            for el in &mut ctx.document.elements {
+                if el.id() == target_id {
+                    let mesh_mut = match el {
+                        Element::Rect(r) => &mut r.mesh_gradient,
+                        Element::Path(p) => &mut p.mesh_gradient,
+                        _ => &mut None,
+                    };
+                    let mut updated_mesh = None;
+                    if let Some(mesh) = mesh_mut {
+                        let idx = mesh.subdivide_at(event.world_pos, Some(ctx.active_fill_color));
+                        new_node_idx = Some(idx);
+                        updated_mesh = Some(mesh.clone());
+                    }
+                    if let Some(um) = updated_mesh {
+                        let mut fills = el.fills();
+                        if let Some(f0) = fills.first_mut() {
+                            f0.style = crate::core::FillStyle::Mesh;
+                            f0.mesh = Some(um);
+                        }
+                        el.set_fills(fills);
+                    }
+                    break;
+                }
+            }
+            self.selected_node_idx = new_node_idx;
+            self.is_dragging = true;
+        } else {
+            // Single click: Select closest node and enable dragging / coloring
+            let mut closest_idx = 0;
+            let mut min_dist = f32::MAX;
+            for el in &ctx.document.elements {
+                if el.id() == target_id {
+                    let mesh_opt = match el {
+                        Element::Rect(r) => &r.mesh_gradient,
+                        Element::Path(p) => &p.mesh_gradient,
+                        _ => &None,
+                    };
+                    if let Some(mesh) = mesh_opt {
+                        for (i, node) in mesh.nodes.iter().enumerate() {
+                            let d = node.point.distance_to(event.world_pos);
+                            if d < min_dist {
+                                min_dist = d;
+                                closest_idx = i;
+                            }
+                        }
+                        if closest_idx < mesh.nodes.len() {
+                            ctx.active_fill_color = mesh.nodes[closest_idx].color;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            self.selected_node_idx = Some(closest_idx);
             self.is_dragging = true;
 
             // If Shift is pressed, apply active fill color to this node!
@@ -128,17 +198,25 @@ impl FeaturePlugin for MeshGradientFeature {
                             Element::Path(p) => &mut p.mesh_gradient,
                             _ => &mut None,
                         };
+                        let mut updated_mesh = None;
                         if let Some(mesh) = mesh_mut {
-                            if idx < mesh.nodes.len() {
-                                mesh.nodes[idx].color = ctx.active_fill_color;
+                            if closest_idx < mesh.nodes.len() {
+                                mesh.nodes[closest_idx].color = ctx.active_fill_color;
+                                updated_mesh = Some(mesh.clone());
                             }
+                        }
+                        if let Some(um) = updated_mesh {
+                            let mut fills = el.fills();
+                            if let Some(f0) = fills.first_mut() {
+                                f0.style = crate::core::FillStyle::Mesh;
+                                f0.mesh = Some(um);
+                            }
+                            el.set_fills(fills);
                         }
                         break;
                     }
                 }
             }
-        } else {
-            self.selected_node_idx = None;
         }
 
         ctx.request_redraw();
@@ -154,10 +232,20 @@ impl FeaturePlugin for MeshGradientFeature {
                             Element::Path(p) => &mut p.mesh_gradient,
                             _ => &mut None,
                         };
+                        let mut updated_mesh = None;
                         if let Some(mesh) = mesh_mut {
                             if idx < mesh.nodes.len() {
                                 mesh.nodes[idx].point = event.world_pos;
+                                updated_mesh = Some(mesh.clone());
                             }
+                        }
+                        if let Some(um) = updated_mesh {
+                            let mut fills = el.fills();
+                            if let Some(f0) = fills.first_mut() {
+                                f0.style = crate::core::FillStyle::Mesh;
+                                f0.mesh = Some(um);
+                            }
+                            el.set_fills(fills);
                         }
                         break;
                     }

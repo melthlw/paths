@@ -1079,7 +1079,7 @@ fn build_patterns_page(canvas: &CanvasWidget, patterns: &[PatternDef]) -> (gtk4:
         vbox.append(&lbl);
         card_btn.set_child(Some(&vbox));
 
-        let payload = format!("gnome-paths:pattern:{}:{:.1}", pt.key, pt.scale);
+        let payload = format!("gnome-paths:pattern:{}:{:.1}:{}", pt.key, pt.scale, pt.name);
         attach_drag_with_icon(&card_btn, &preview_area, payload.clone(), 42, 24);
 
         let canvas_c = canvas.clone();

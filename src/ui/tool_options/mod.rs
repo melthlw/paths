@@ -823,6 +823,10 @@ impl ToolOptionsBar {
                 "tool-mesh-symbolic",
                 crate::core::gettext("Mesh Gradient"),
             ),
+            "pattern" => (
+                "transform-move-pattern-symbolic",
+                crate::core::gettext("Pattern Tool"),
+            ),
             "eyedropper" => (
                 "tool-eyedropper-symbolic",
                 crate::core::gettext("Eyedropper"),

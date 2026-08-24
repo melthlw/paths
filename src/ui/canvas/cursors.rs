@@ -58,6 +58,7 @@ impl CursorCache {
             "tool:eraser" => Self::make_eraser_cursor(),
             "tool:text" => Self::make_text_cursor(),
             "tool:gradient" => Self::make_gradient_cursor(),
+            "tool:pattern" => Self::make_pattern_cursor(),
             "tool:eyedropper" => Self::make_eyedropper_cursor(),
             "tool:measure" => Self::make_measure_cursor(),
             "tool:page" => Self::make_page_cursor(),
@@ -491,6 +492,34 @@ impl CursorCache {
                 grad_paint.set_shader(shader);
             }
             canvas.draw_round_rect(badge_rect, 2.5, 2.5, &grad_paint);
+            canvas.draw_round_rect(badge_rect, 2.5, 2.5, &border);
+        })
+    }
+
+    fn make_pattern_cursor() -> Option<gdk::Cursor> {
+        Self::create_cursor_from_skia(32, 32, 6, 6, |canvas| {
+            Self::draw_precision_crosshair(canvas, 6.0, 6.0);
+
+            // Pattern grid / checkerboard square badge
+            let badge_rect = skia::Rect::from_xywh(14.0, 14.0, 15.0, 15.0);
+            let mut bg = skia::Paint::default();
+            bg.set_color4f(skia::Color4f::new(0.95, 0.96, 0.98, 1.0), None);
+            bg.set_style(skia::PaintStyle::Fill);
+            bg.set_anti_alias(true);
+            canvas.draw_round_rect(badge_rect, 2.5, 2.5, &bg);
+
+            let mut fill_tile = skia::Paint::default();
+            fill_tile.set_color4f(skia::Color4f::new(0.2, 0.55, 0.95, 1.0), None);
+            fill_tile.set_style(skia::PaintStyle::Fill);
+            fill_tile.set_anti_alias(true);
+            canvas.draw_rect(skia::Rect::from_xywh(14.0, 14.0, 7.5, 7.5), &fill_tile);
+            canvas.draw_rect(skia::Rect::from_xywh(21.5, 21.5, 7.5, 7.5), &fill_tile);
+
+            let mut border = skia::Paint::default();
+            border.set_color4f(skia::Color4f::new(0.2, 0.25, 0.35, 0.9), None);
+            border.set_style(skia::PaintStyle::Stroke);
+            border.set_stroke_width(1.2);
+            border.set_anti_alias(true);
             canvas.draw_round_rect(badge_rect, 2.5, 2.5, &border);
         })
     }

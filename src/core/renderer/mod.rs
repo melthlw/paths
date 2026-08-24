@@ -1,18 +1,17 @@
 pub mod draw;
 pub mod export;
 
-#[allow(unused_imports)]
 pub use draw::{
     draw_alignment_grid, draw_corner_origin_drag, draw_element_node, draw_infinite_dot_grid,
     draw_pages, draw_rulers, draw_selection_highlight, draw_snap_guides, draw_user_guides,
 };
-#[allow(unused_imports)]
+
 pub use export::{
-    export_document, render_rect_to_skia_surface, ExportConfig, ExportFormat, ExportScope,
+    ExportConfig, ExportFormat, ExportScope, export_document,
 };
 
 use cairo::{Format, ImageSurface};
-use skia_safe::{self as skia, surfaces, Color4f};
+use skia_safe::{self as skia, Color4f, surfaces};
 use std::cell::RefCell;
 
 use crate::core::color::Color;
@@ -148,7 +147,8 @@ impl SkiaRenderer {
         let is_dark = libadwaita::StyleManager::default().is_dark();
         if let Some(c) = render_options.canvas_bg_color {
             canvas.clear(c.to_skia());
-        } else if let Some(theme_bg) = crate::ui::theme::current_visual_theme().workspace_bg_color() {
+        } else if let Some(theme_bg) = crate::ui::theme::current_visual_theme().workspace_bg_color()
+        {
             canvas.clear(theme_bg.to_skia());
         } else if is_dark {
             canvas.clear(Color4f::new(0.14, 0.14, 0.15, 1.0));

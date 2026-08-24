@@ -276,15 +276,26 @@ fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
     let (tile_w, tile_h) = match fill.pattern_type {
         PatternType::Hexagon => (sz, (sz * 1.7320508).max(4.0)),
         PatternType::Brick | PatternType::Scales => (sz, (sz * 0.5).max(4.0)),
-        _ => (sz, sz),
+            _ => (sz, sz),
     };
     let c1 = color_to_svg(fill.color);
     let c2 = color_to_svg(fill.secondary_color);
 
+    let mut transform_attrs = String::new();
+    let has_trans = fill.pattern_offset.x.abs() > 0.001 || fill.pattern_offset.y.abs() > 0.001;
+    let has_rot = fill.angle.abs() > 0.01;
+    if has_trans && has_rot {
+        transform_attrs = format!(" patternTransform=\"translate({:.2} {:.2}) rotate({:.2})\"", fill.pattern_offset.x, fill.pattern_offset.y, fill.angle);
+    } else if has_trans {
+        transform_attrs = format!(" patternTransform=\"translate({:.2} {:.2})\"", fill.pattern_offset.x, fill.pattern_offset.y);
+    } else if has_rot {
+        transform_attrs = format!(" patternTransform=\"rotate({:.2})\"", fill.angle);
+    }
+
     let _ = writeln!(
         defs,
-        "    <pattern id=\"{}\" width=\"{:.2}\" height=\"{:.2}\" patternUnits=\"userSpaceOnUse\">",
-        id, tile_w, tile_h
+        "    <pattern id=\"{}\" width=\"{:.2}\" height=\"{:.2}\" patternUnits=\"userSpaceOnUse\"{}>",
+        id, tile_w, tile_h, transform_attrs
     );
     let _ = writeln!(
         defs,
@@ -321,8 +332,10 @@ fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
             let w = (sz * 0.35).max(1.0);
             let _ = writeln!(
                 defs,
-                "      <line x1=\"0\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                sz, sz, c2, w
+                "      <line x1=\"0\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>\n      <line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>\n      <line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                sz, sz, c2, w,
+                -sz * 0.5, sz * 0.5, sz * 0.5, sz * 1.5, c2, w,
+                sz * 0.5, -sz * 0.5, sz * 1.5, sz * 0.5, c2, w
             );
         }
         PatternType::Grid => {
@@ -334,78 +347,84 @@ fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
             );
         }
         PatternType::Hexagon => {
-            let w = (sz * 0.08).max(1.0);
-            let half_w = tile_w * 0.5;
+            let w = tile_w;
             let h = tile_h;
+            let half_w = w * 0.5;
             let h_6 = h / 6.0;
             let h_2 = h * 0.5;
             let h_23 = h * (2.0 / 3.0);
+            let stroke_w = (sz * 0.08).max(1.0);
             let _ = writeln!(
                 defs,
-                "      <polyline points=\"0,0 {:.2},{:.2} {:.2},{:.2} 0,{:.2} 0,{:.2}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                half_w, h_6, half_w, h_2, h_23, h, c2, w
+                "      <path d=\"M 0 0 L {:.2} {:.2} L {:.2} {:.2} L 0 {:.2} L 0 {:.2}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                half_w, h_6, half_w, h_2, h_23, h, c2, stroke_w
             );
             let _ = writeln!(
                 defs,
-                "      <line x1=\"{:.2}\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                tile_w, half_w, h_6, c2, w
+                "      <path d=\"M {:.2} 0 L {:.2} {:.2}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                w, half_w, h_6, c2, stroke_w
             );
             let _ = writeln!(
                 defs,
-                "      <polyline points=\"{:.2},{:.2} {:.2},{:.2} {:.2},{:.2}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                half_w, h_2, tile_w, h_23, tile_w, h, c2, w
+                "      <path d=\"M {:.2} {:.2} L {:.2} {:.2} L {:.2} {:.2}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                half_w, h_2, w, h_23, w, h, c2, stroke_w
             );
         }
         PatternType::Brick => {
-            let w = (sz * 0.08).max(1.0);
-            let half_h = tile_h * 0.5;
+            let w = tile_w;
+            let h = tile_h;
+            let half_h = h * 0.5;
+            let half_w = w * 0.5;
+            let stroke_w = (sz * 0.08).max(1.0);
             let _ = writeln!(
                 defs,
-                "      <line x1=\"0\" y1=\"0\" x2=\"{:.2}\" y2=\"0\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                tile_w, c2, w
+                "      <line x1=\"0\" y1=\"0\" x2=\"{:.2}\" y2=\"0\" stroke=\"{}\" stroke-width=\"{:.2}\"/>\n      <line x1=\"0\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                w, c2, stroke_w,
+                half_h, w, half_h, c2, stroke_w
             );
             let _ = writeln!(
                 defs,
-                "      <line x1=\"0\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                half_h, tile_w, half_h, c2, w
-            );
-            let _ = writeln!(
-                defs,
-                "      <line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                half_h, c2, w
-            );
-            let _ = writeln!(
-                defs,
-                "      <line x1=\"{:.2}\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                tile_w, tile_w, half_h, c2, w
+                "      <line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>\n      <line x1=\"{:.2}\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                half_h, c2, stroke_w,
+                w, w, half_h, c2, stroke_w
             );
             let _ = writeln!(
                 defs,
                 "      <line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                tile_w * 0.5, half_h, tile_w * 0.5, tile_h, c2, w
+                half_w, half_h, half_w, h, c2, stroke_w
             );
         }
         PatternType::Crosshatch => {
             let w = (sz * 0.12).max(1.0);
             let _ = writeln!(
                 defs,
-                "      <line x1=\"0\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/><line x1=\"0\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"0\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                sz, sz, c2, w, sz, sz, c2, w
+                "      <line x1=\"0\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>\n      <line x1=\"0\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"0\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                sz, sz, c2, w,
+                sz, sz, c2, w
             );
         }
         PatternType::Scales => {
-            let w = (sz * 0.07).max(1.0);
-            let r_base = tile_w * 0.5;
+            let w = tile_w;
+            let h = tile_h;
+            let stroke_w = (sz * 0.07).max(1.0);
+            let r_base = w * 0.5;
             let radii = [r_base, r_base * 0.70, r_base * 0.40];
-            let centers = [(tile_w * 0.5, tile_h), (0.0, 0.0), (tile_w, 0.0), (0.0, tile_h), (tile_w, tile_h)];
-            for (cx, cy) in centers {
-                for r in radii {
-                    let _ = writeln!(
-                        defs,
-                        "      <path d=\"M {:.2},{:.2} A {:.2},{:.2} 0 0,1 {:.2},{:.2}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                        cx - r, cy, r, r, cx + r, cy, c2, w
-                    );
-                }
+            for &r in &radii {
+                let _ = writeln!(
+                    defs,
+                    "      <path d=\"M {:.2} {:.2} A {:.2} {:.2} 0 0 1 {:.2} {:.2}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                    (w * 0.5) - r, h, r, r, (w * 0.5) + r, h, c2, stroke_w
+                );
+                let _ = writeln!(
+                    defs,
+                    "      <path d=\"M {:.2} 0 A {:.2} {:.2} 0 0 1 {:.2} 0\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                    -r, r, r, r, c2, stroke_w
+                );
+                let _ = writeln!(
+                    defs,
+                    "      <path d=\"M {:.2} 0 A {:.2} {:.2} 0 0 1 {:.2} 0\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                    w - r, r, r, w + r, c2, stroke_w
+                );
             }
         }
         PatternType::Houndstooth => {
@@ -424,6 +443,41 @@ fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
                 "      <line x1=\"0\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/><line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/><line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/><line x1=\"{:.2}\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
                 half * 0.5, half, half * 0.5, c2, w, half * 0.5, half, half * 0.5, sz, c2, w, half, sz * 0.75, sz, sz * 0.75, c2, w, sz * 0.75, sz * 0.75, half, c2, w
             );
+        }
+        PatternType::Custom => {
+            let mut custom_drawn = false;
+            if let Some(ref path_str) = fill.custom_pattern_path {
+                let p = std::path::Path::new(path_str);
+                if p.exists() {
+                    let ext = p.extension().and_then(|e| e.to_str()).map(|s| s.to_ascii_lowercase()).unwrap_or_default();
+                    if ext == "svg" {
+                        if let Ok(svg_content) = std::fs::read_to_string(p) {
+                            if let Ok(imported) = crate::core::svg_import::parse_svg(&svg_content) {
+                                for elem in &imported.elements {
+                                    match elem {
+                                        crate::core::Element::Path(pe) => {
+                                            let d = path_nodes_to_svg_d(&pe.nodes, pe.is_closed);
+                                            let col = pe.fill_color.map(color_to_svg).unwrap_or_else(|| c2.clone());
+                                            let _ = writeln!(defs, "      <path d=\"{}\" fill=\"{}\"/>", d, col);
+                                        }
+                                        _ => {}
+                                    }
+                                }
+                                custom_drawn = true;
+                            }
+                        }
+                    }
+                }
+            }
+            if !custom_drawn {
+                let half = sz * 0.5;
+                let stroke_w = (sz * 0.1).max(1.0);
+                let _ = writeln!(
+                    defs,
+                    "      <polygon points=\"{:.2},0 {:.2},{:.2} {:.2},{:.2} 0,{:.2}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                    half, sz, half, half, sz, half, c2, stroke_w
+                );
+            }
         }
     }
     let _ = writeln!(defs, "    </pattern>");

@@ -121,6 +121,7 @@ pub enum PatternType {
     Scales = 7,
     Houndstooth = 8,
     Basketweave = 9,
+    Custom = 10,
 }
 
 impl PatternType {
@@ -136,6 +137,7 @@ impl PatternType {
             PatternType::Scales => crate::core::gettext("Seigaiha Scales"),
             PatternType::Houndstooth => crate::core::gettext("Houndstooth"),
             PatternType::Basketweave => crate::core::gettext("Basketweave"),
+            PatternType::Custom => crate::core::gettext("Custom Pattern"),
         }
     }
 }
@@ -145,11 +147,17 @@ pub struct FillLayer {
     pub style: FillStyle,
     pub color: Color,
     pub secondary_color: Color,
+    #[serde(default)]
+    pub stops: Vec<GradientStop>,
     pub angle: f32,
     pub opacity: f32,
     pub enabled: bool,
     pub pattern_type: PatternType,
     pub pattern_scale: f32,
+    #[serde(default)]
+    pub pattern_offset: Point,
+    #[serde(default)]
+    pub custom_pattern_path: Option<String>,
     pub mesh: Option<MeshGradient>,
 }
 
@@ -159,11 +167,14 @@ impl Default for FillLayer {
             style: FillStyle::Solid,
             color: Color::BLACK,
             secondary_color: Color::WHITE,
+            stops: Vec::new(),
             angle: 90.0,
             opacity: 1.0,
             enabled: true,
             pattern_type: PatternType::Checkerboard,
             pattern_scale: 16.0,
+            pattern_offset: Point::ZERO,
+            custom_pattern_path: None,
             mesh: None,
         }
     }
@@ -175,12 +186,26 @@ impl FillLayer {
             style: FillStyle::Solid,
             color,
             secondary_color: Color::WHITE,
+            stops: Vec::new(),
             angle: 0.0,
             opacity: 1.0,
             enabled: true,
             pattern_type: PatternType::Checkerboard,
             pattern_scale: 16.0,
+            pattern_offset: Point::ZERO,
+            custom_pattern_path: None,
             mesh: None,
+        }
+    }
+
+    pub fn effective_stops(&self) -> Vec<GradientStop> {
+        if self.stops.len() >= 2 {
+            self.stops.clone()
+        } else {
+            vec![
+                GradientStop::new(0.0, self.color),
+                GradientStop::new(1.0, self.secondary_color),
+            ]
         }
     }
 }
@@ -191,8 +216,17 @@ pub fn create_pattern_shader(
     c2: Color,
     scale: f32,
     angle: f32,
+    offset: Point,
+    custom_path: Option<&str>,
 ) -> Option<skia::Shader> {
-    let sz = scale.clamp(4.0, 1024.0);
+    if pattern_type == PatternType::Custom || custom_path.is_some() {
+        if let Some(cp) = custom_path {
+            if let Some(shader) = crate::core::create_custom_pattern_shader(cp, c1, c2, scale, angle, offset) {
+                return Some(shader);
+            }
+        }
+    }
+    let sz = scale.clamp(4.0, 2048.0);
     let (tile_w, tile_h) = match pattern_type {
         PatternType::Hexagon => (sz, (sz * 1.7320508).max(4.0)),
         PatternType::Brick | PatternType::Scales => (sz, (sz * 0.5).max(4.0)),
@@ -377,12 +411,27 @@ pub fn create_pattern_shader(
                 &p_h,
             );
         }
+        PatternType::Custom => {
+            paint.set_stroke_width((sz * 0.1).max(1.0));
+            paint.set_style(skia::PaintStyle::Stroke);
+            canvas.draw_line(skia::Point::new(sz * 0.5, 0.0), skia::Point::new(sz, sz * 0.5), &paint);
+            canvas.draw_line(skia::Point::new(sz, sz * 0.5), skia::Point::new(sz * 0.5, sz), &paint);
+            canvas.draw_line(skia::Point::new(sz * 0.5, sz), skia::Point::new(0.0, sz * 0.5), &paint);
+            canvas.draw_line(skia::Point::new(0.0, sz * 0.5), skia::Point::new(sz * 0.5, 0.0), &paint);
+        }
     }
 
     let picture = recorder.finish_recording_as_picture(None)?;
     let mut matrix = skia::Matrix::default();
+    matrix.pre_translate((offset.x, offset.y));
     if angle.abs() > 0.01 {
-        matrix.set_rotate(angle, Some(skia::Point::new(tile_w * 0.5, tile_h * 0.5)));
+        matrix.post_rotate(
+            angle,
+            Some(skia::Point::new(
+                offset.x + tile_w * 0.5,
+                offset.y + tile_h * 0.5,
+            )),
+        );
     }
     Some(picture.to_shader(
         (skia::TileMode::Repeat, skia::TileMode::Repeat),
@@ -415,8 +464,13 @@ pub fn create_fill_paint(fill: &FillLayer, bounds: Rect) -> skia::Paint {
             let start = skia::Point::new(cx - dx, cy - dy);
             let end = skia::Point::new(cx + dx, cy + dy);
 
-            let colors = [c1.to_skia(), c2.to_skia()];
-            let pos = [0.0f32, 1.0f32];
+            let eff_stops = fill.effective_stops();
+            let colors: Vec<skia::Color4f> = eff_stops
+                .iter()
+                .map(|s| s.color.with_alpha(s.color.a * fill.opacity).to_skia())
+                .collect();
+            let pos: Vec<f32> = eff_stops.iter().map(|s| s.offset.clamp(0.0, 1.0)).collect();
+
             let colors_desc = skia::gradient::Colors::new(
                 &colors[..],
                 Some(&pos[..]),
@@ -441,8 +495,13 @@ pub fn create_fill_paint(fill: &FillLayer, bounds: Rect) -> skia::Paint {
             let center = skia::Point::new(cx, cy);
             let radius = (bounds.width.max(bounds.height) * 0.5).max(1.0);
 
-            let colors = [c1.to_skia(), c2.to_skia()];
-            let pos = [0.0f32, 1.0f32];
+            let eff_stops = fill.effective_stops();
+            let colors: Vec<skia::Color4f> = eff_stops
+                .iter()
+                .map(|s| s.color.with_alpha(s.color.a * fill.opacity).to_skia())
+                .collect();
+            let pos: Vec<f32> = eff_stops.iter().map(|s| s.offset.clamp(0.0, 1.0)).collect();
+
             let colors_desc = skia::gradient::Colors::new(
                 &colors[..],
                 Some(&pos[..]),
@@ -462,9 +521,15 @@ pub fn create_fill_paint(fill: &FillLayer, bounds: Rect) -> skia::Paint {
             }
         }
         FillStyle::Pattern => {
-            if let Some(shader) =
-                create_pattern_shader(fill.pattern_type, c1, c2, fill.pattern_scale, fill.angle)
-            {
+            if let Some(shader) = create_pattern_shader(
+                fill.pattern_type,
+                c1,
+                c2,
+                fill.pattern_scale,
+                fill.angle,
+                fill.pattern_offset,
+                fill.custom_pattern_path.as_deref(),
+            ) {
                 paint.set_shader(shader);
             } else {
                 paint.set_color4f(c1.to_skia(), None);
@@ -660,6 +725,120 @@ impl MeshGradient {
             n.point.y = origin.y + (n.point.y - origin.y) * sy;
         }
     }
+
+    pub fn apply_theme(&mut self, c1: Color, c2: Color) {
+        if self.rows < 2 || self.cols < 2 || self.nodes.len() != self.rows * self.cols {
+            return;
+        }
+        for r in 0..self.rows {
+            let v = r as f32 / (self.rows - 1) as f32;
+            for c in 0..self.cols {
+                let u = c as f32 / (self.cols - 1) as f32;
+                let t = (u + v) / 2.0;
+                let col = Color::new(
+                    c1.r + t * (c2.r - c1.r),
+                    c1.g + t * (c2.g - c1.g),
+                    c1.b + t * (c2.b - c1.b),
+                    c1.a + t * (c2.a - c1.a),
+                );
+                self.nodes[r * self.cols + c].color = col;
+            }
+        }
+    }
+
+    pub fn subdivide_at(&mut self, pt: Point, new_color: Option<Color>) -> usize {
+        if self.rows < 2 || self.cols < 2 || self.nodes.len() != self.rows * self.cols {
+            return 0;
+        }
+
+        // Find which column interval pt.x falls into
+        let mut insert_c = 1;
+        for c in 0..self.cols - 1 {
+            let x0 = self.nodes[c].point.x;
+            let x1 = self.nodes[c + 1].point.x;
+            let (min_x, max_x) = if x0 < x1 { (x0, x1) } else { (x1, x0) };
+            if pt.x >= min_x && pt.x <= max_x {
+                insert_c = c + 1;
+                break;
+            }
+        }
+        let insert_c = insert_c.clamp(1, self.cols - 1);
+
+        // Find which row interval pt.y falls into
+        let mut insert_r = 1;
+        for r in 0..self.rows - 1 {
+            let y0 = self.nodes[r * self.cols].point.y;
+            let y1 = self.nodes[(r + 1) * self.cols].point.y;
+            let (min_y, max_y) = if y0 < y1 { (y0, y1) } else { (y1, y0) };
+            if pt.y >= min_y && pt.y <= max_y {
+                insert_r = r + 1;
+                break;
+            }
+        }
+        let insert_r = insert_r.clamp(1, self.rows - 1);
+
+        // 1. Insert new column at insert_c
+        let mut new_nodes = Vec::with_capacity(self.rows * (self.cols + 1));
+        for r in 0..self.rows {
+            for c in 0..self.cols {
+                if c == insert_c {
+                    let left_node = &self.nodes[r * self.cols + (c - 1)];
+                    let right_node = &self.nodes[r * self.cols + c];
+                    let span_x = (right_node.point.x - left_node.point.x).abs().max(1.0);
+                    let t = ((pt.x - left_node.point.x).abs() / span_x).clamp(0.0, 1.0);
+                    let py = left_node.point.y + t * (right_node.point.y - left_node.point.y);
+                    let col = Color::new(
+                        left_node.color.r + t * (right_node.color.r - left_node.color.r),
+                        left_node.color.g + t * (right_node.color.g - left_node.color.g),
+                        left_node.color.b + t * (right_node.color.b - left_node.color.b),
+                        left_node.color.a + t * (right_node.color.a - left_node.color.a),
+                    );
+                    new_nodes.push(MeshNode::new(Point::new(pt.x, py), col));
+                }
+                new_nodes.push(self.nodes[r * self.cols + c].clone());
+            }
+        }
+        self.cols += 1;
+        self.nodes = new_nodes;
+
+        // 2. Insert new row at insert_r
+        let mut final_nodes = Vec::with_capacity((self.rows + 1) * self.cols);
+        for r in 0..self.rows {
+            if r == insert_r {
+                for c in 0..self.cols {
+                    let top_node = &self.nodes[(r - 1) * self.cols + c];
+                    let bot_node = &self.nodes[r * self.cols + c];
+                    let span_y = (bot_node.point.y - top_node.point.y).abs().max(1.0);
+                    let t = ((pt.y - top_node.point.y).abs() / span_y).clamp(0.0, 1.0);
+                    let px = top_node.point.x + t * (bot_node.point.x - top_node.point.x);
+                    let col = if c == insert_c && new_color.is_some() {
+                        new_color.unwrap()
+                    } else {
+                        Color::new(
+                            top_node.color.r + t * (bot_node.color.r - top_node.color.r),
+                            top_node.color.g + t * (bot_node.color.g - top_node.color.g),
+                            top_node.color.b + t * (bot_node.color.b - top_node.color.b),
+                            top_node.color.a + t * (bot_node.color.a - top_node.color.a),
+                        )
+                    };
+                    final_nodes.push(MeshNode::new(Point::new(px, pt.y), col));
+                }
+            }
+            for c in 0..self.cols {
+                final_nodes.push(self.nodes[r * self.cols + c].clone());
+            }
+        }
+        self.rows += 1;
+        self.nodes = final_nodes;
+
+        let selected_idx = insert_r * self.cols + insert_c;
+        if let Some(col) = new_color {
+            if selected_idx < self.nodes.len() {
+                self.nodes[selected_idx].color = col;
+            }
+        }
+        selected_idx
+    }
 }
 
 pub fn render_mesh_gradient(canvas: &skia::Canvas, clip_path: &skia::Path, mesh: &MeshGradient) {
@@ -711,7 +890,43 @@ pub fn render_mesh_gradient(canvas: &skia::Canvas, clip_path: &skia::Path, mesh:
     );
     let mut paint = skia::Paint::default();
     paint.set_anti_alias(true);
-    canvas.draw_vertices(&vertices, skia::BlendMode::SrcOver, &paint);
+    canvas.draw_vertices(&vertices, skia::BlendMode::Dst, &paint);
 
     canvas.restore();
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::core::geometry::Rect;
+
+    #[test]
+    fn test_render_mesh_gradient_execution() {
+        let mut surface = skia::surfaces::raster_n32_premul((200, 200)).unwrap();
+        let canvas = surface.canvas();
+        let path = skia::Path::rect(skia::Rect::from_xywh(0.0, 0.0, 100.0, 100.0), None);
+        let mesh = MeshGradient::new_grid(
+            Rect::new(0.0, 0.0, 100.0, 100.0),
+            3,
+            3,
+            Color::RED,
+            Color::BLUE,
+        );
+        render_mesh_gradient(canvas, &path, &mesh);
+
+        let image = surface.image_snapshot();
+        let mut pixel = [0u8; 4];
+        let info = skia::ImageInfo::new(
+            (1, 1),
+            skia::ColorType::RGBA8888,
+            skia::AlphaType::Premul,
+            None,
+        );
+        let success = image.read_pixels(&info, &mut pixel, 4, (5, 5), skia::image::CachingHint::Disallow);
+        assert!(success);
+        // Pixel at (5,5) near top-left should be reddish, NOT black (0,0,0,255)
+        println!("Rendered pixel at (5,5): RGBA({}, {}, {}, {})", pixel[0], pixel[1], pixel[2], pixel[3]);
+        assert!(pixel[0] > 100, "Red channel should be > 100, got {}", pixel[0]);
+    }
+}
+

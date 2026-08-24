@@ -170,6 +170,11 @@ impl RectElement {
                 }
             }
         }
+        if options.move_patterns {
+            for fill in &mut self.fills {
+                fill.pattern_offset.translate(dx, dy);
+            }
+        }
     }
 
     pub fn scale_with_options(
@@ -226,7 +231,9 @@ impl RectElement {
 
         if options.move_patterns {
             for fill in &mut self.fills {
-                fill.pattern_scale = (fill.pattern_scale * avg_scale).clamp(4.0, 1024.0);
+                fill.pattern_scale = (fill.pattern_scale * avg_scale).clamp(4.0, 2048.0);
+                fill.pattern_offset.x = origin.x + (fill.pattern_offset.x - origin.x) * sx;
+                fill.pattern_offset.y = origin.y + (fill.pattern_offset.y - origin.y) * sy;
             }
         }
     }

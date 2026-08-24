@@ -121,19 +121,15 @@ impl LibrariesData {
             }
         }
 
-        // Scan for additional .svg pattern files in ~/.config/gnome-paths/libraries/patterns/
-        if patterns_subdir.is_dir() {
-            if let Ok(entries) = std::fs::read_dir(&patterns_subdir) {
-                for entry in entries.flatten() {
-                    let path = entry.path();
-                    if path.extension().and_then(|s| s.to_str()) == Some("svg") {
-                        let stem = path.file_stem().and_then(|s| s.to_str()).unwrap_or("Custom Pattern");
-                        let name = stem.replace('-', " ");
-                        if !patterns.iter().any(|p| p.name == name) {
-                            patterns.push(PatternDef { key: "Grid".to_string(), name, scale: 20.0 });
-                        }
-                    }
-                }
+        // Scan for user custom pattern files in ~/.config/gnome-paths/patterns/ and libraries/patterns/
+        let user_patterns = crate::core::scan_user_patterns();
+        for up in user_patterns {
+            if !patterns.iter().any(|p| p.name == up.name) {
+                patterns.push(PatternDef {
+                    key: "Custom".to_string(),
+                    name: up.name,
+                    scale: 24.0,
+                });
             }
         }
 

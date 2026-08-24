@@ -469,6 +469,42 @@
     background-color: alpha(currentColor, 0.12);
 }
 
+.color-stop-btn {
+    border-radius: 8px;
+    padding: 4px 8px;
+    border: 1.5px solid alpha(currentColor, 0.12);
+    background-color: alpha(currentColor, 0.04);
+    transition: all 120ms ease;
+}
+
+.color-stop-btn:hover {
+    background-color: alpha(currentColor, 0.08);
+    border-color: alpha(currentColor, 0.25);
+}
+
+.color-stop-btn.active {
+    border-color: @accent_color;
+    background-color: alpha(@accent_color, 0.14);
+}
+
+.color-stop-btn.active label {
+    color: @accent_color;
+    font-weight: bold;
+}
+
+.angle-badge {
+    background-color: alpha(currentColor, 0.08);
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: bold;
+    min-width: 38px;
+}
+
+.angle-dial {
+    border-radius: 50%;
+}
+
 /* Card header bar and Card full-width action button (exact matching dimensions) */
 .card-header-bar {
     min-height: 48px;
@@ -904,4 +940,27 @@
 
 .pattern-preset-btn:hover {
     background-color: alpha(currentColor, 0.06);
+}
+
+.pattern-popover-tile {
+    border-radius: 8px;
+    padding: 4px;
+    min-width: 104px;
+    transition: background-color 120ms ease, border-color 120ms ease, transform 100ms ease;
+    border: 1.5px solid transparent;
+}
+
+.pattern-popover-tile:hover {
+    background-color: alpha(currentColor, 0.08);
+    transform: translateY(-1px);
+}
+
+.pattern-popover-tile.active {
+    border-color: @accent_color;
+    background-color: alpha(@accent_color, 0.12);
+}
+
+.pattern-popover-tile.active label {
+    font-weight: bold;
+    color: @accent_color;
 }

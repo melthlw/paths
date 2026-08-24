@@ -1,6 +1,6 @@
-use gtk4::prelude::*;
-use crate::core::{Color, Element};
 use super::CanvasWidget;
+use crate::core::{Color, Element};
+use gtk4::prelude::*;
 
 impl CanvasWidget {
     pub fn active_fill_color(&self) -> Color {
@@ -55,6 +55,175 @@ impl CanvasWidget {
             }
         }
         state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn get_selected_fills_and_strokes(
+        &self,
+    ) -> Option<(Vec<crate::core::FillLayer>, Vec<crate::core::StrokeLayer>)> {
+        if let Ok(state) = self.state.try_borrow() {
+            state.document.get_selected_fills_and_strokes()
+        } else {
+            None
+        }
+    }
+
+    pub fn get_selected_mesh(&self) -> Option<crate::core::MeshGradient> {
+        if let Ok(state) = self.state.try_borrow() {
+            for el in &state.document.elements {
+                if state.document.selected_ids.contains(&el.id()) {
+                    let mesh_opt = match el {
+                        crate::core::Element::Rect(r) => &r.mesh_gradient,
+                        crate::core::Element::Path(p) => &p.mesh_gradient,
+                        _ => &None,
+                    };
+                    if let Some(m) = mesh_opt {
+                        return Some(m.clone());
+                    }
+                    if let Some(f0) = el.fills().first() {
+                        if let Some(m) = &f0.mesh {
+                            return Some(m.clone());
+                        }
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    pub fn reset_selected_mesh_grid(
+        &self,
+        rows: usize,
+        cols: usize,
+        c1: Option<Color>,
+        c2: Option<Color>,
+    ) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            let def_c1 = state.active_fill_color;
+            let def_c2 = state
+                .active_stroke_color
+                .unwrap_or(Color::from_hex("#ff2a6d").unwrap());
+            let c1 = c1.unwrap_or(def_c1);
+            let c2 = c2.unwrap_or(def_c2);
+
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let bounds = el.bounds();
+                    let mesh = crate::core::MeshGradient::new_grid(bounds, rows, cols, c1, c2);
+                    match el {
+                        crate::core::Element::Rect(r) => r.mesh_gradient = Some(mesh.clone()),
+                        crate::core::Element::Path(p) => p.mesh_gradient = Some(mesh.clone()),
+                        _ => {}
+                    }
+                    let mut fills = el.fills();
+                    if fills.is_empty() {
+                        fills.push(crate::core::FillLayer::default());
+                    }
+                    if let Some(f0) = fills.first_mut() {
+                        f0.style = crate::core::FillStyle::Mesh;
+                        f0.mesh = Some(mesh.clone());
+                    }
+                    el.set_fills(fills);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn apply_selected_mesh_theme(&self, c1: Color, c2: Color) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let mut updated_mesh = None;
+                    let mesh_mut = match el {
+                        crate::core::Element::Rect(r) => &mut r.mesh_gradient,
+                        crate::core::Element::Path(p) => &mut p.mesh_gradient,
+                        _ => &mut None,
+                    };
+                    if let Some(m) = mesh_mut {
+                        m.apply_theme(c1, c2);
+                        updated_mesh = Some(m.clone());
+                    }
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        if let Some(um) = updated_mesh.clone() {
+                            f0.mesh = Some(um);
+                        } else if let Some(m) = &mut f0.mesh {
+                            m.apply_theme(c1, c2);
+                            updated_mesh = Some(m.clone());
+                        }
+                    }
+                    if updated_mesh.is_none() {
+                        let bounds = el.bounds();
+                        let new_m = crate::core::MeshGradient::new_grid(bounds, 3, 3, c1, c2);
+                        match el {
+                            crate::core::Element::Rect(r) => r.mesh_gradient = Some(new_m.clone()),
+                            crate::core::Element::Path(p) => p.mesh_gradient = Some(new_m.clone()),
+                            _ => {}
+                        }
+                        if fills.is_empty() {
+                            fills.push(crate::core::FillLayer::default());
+                        }
+                        if let Some(f0) = fills.first_mut() {
+                            f0.style = crate::core::FillStyle::Mesh;
+                            f0.mesh = Some(new_m);
+                        }
+                    }
+                    el.set_fills(fills);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_mesh_node_color(&self, idx: usize, color: Color) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let mut updated_mesh = None;
+                    let mesh_mut = match el {
+                        crate::core::Element::Rect(r) => &mut r.mesh_gradient,
+                        crate::core::Element::Path(p) => &mut p.mesh_gradient,
+                        _ => &mut None,
+                    };
+                    if let Some(m) = mesh_mut {
+                        if idx < m.nodes.len() {
+                            m.nodes[idx].color = color;
+                            updated_mesh = Some(m.clone());
+                        }
+                    }
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        f0.style = crate::core::FillStyle::Mesh;
+                        if let Some(um) = updated_mesh.clone() {
+                            f0.mesh = Some(um);
+                        } else if let Some(m) = &mut f0.mesh {
+                            if idx < m.nodes.len() {
+                                m.nodes[idx].color = color;
+                                updated_mesh = Some(m.clone());
+                            }
+                        }
+                    }
+                    el.set_fills(fills);
+                    if let Some(um) = updated_mesh {
+                        match el {
+                            crate::core::Element::Rect(r) => r.mesh_gradient = Some(um),
+                            crate::core::Element::Path(p) => p.mesh_gradient = Some(um),
+                            _ => {}
+                        }
+                    }
+                }
+            }
+            state.notify_status();
+        }
         self.drawing_area.queue_draw();
     }
 

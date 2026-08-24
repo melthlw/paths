@@ -3,7 +3,7 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use super::canvas::CanvasWidget;
-use crate::core::Color;
+use crate::core::{Color, GradientStop};
 
 #[derive(Clone)]
 pub struct ColorPickerPopover {
@@ -13,6 +13,9 @@ pub struct ColorPickerPopover {
     sat: Rc<Cell<f32>>,
     val: Rc<Cell<f32>>,
     alpha: Rc<Cell<f32>>,
+    current_mode: Rc<Cell<usize>>,
+    active_grad_stop: Rc<Cell<usize>>,
+    active_mesh_node: Rc<Cell<usize>>,
     on_change: Rc<RefCell<Option<Box<dyn Fn(Color)>>>>,
     on_mode_change: Rc<RefCell<Option<Box<dyn Fn(usize)>>>>,
     sv_area: gtk4::DrawingArea,
@@ -22,12 +25,18 @@ pub struct ColorPickerPopover {
     is_updating: Rc<Cell<bool>>,
 
     mode_buttons: Vec<gtk4::Button>,
-
     title_lbl: gtk4::Label,
-
+    solid_panel: gtk4::Box,
+    gradient_panel: gtk4::Box,
     mesh_panel: gtk4::Box,
-
     pattern_panel: gtk4::Box,
+
+    grad_track_da: gtk4::DrawingArea,
+    grad_stops_ref: Rc<RefCell<Vec<GradientStop>>>,
+    pat_c1_da: gtk4::DrawingArea,
+    pat_c2_da: gtk4::DrawingArea,
+
+    canvas: CanvasWidget,
 }
 
 fn draw_rounded_rect(cr: &cairo::Context, x: f64, y: f64, width: f64, height: f64, radius: f64) {
@@ -58,17 +67,102 @@ fn draw_rounded_rect(cr: &cairo::Context, x: f64, y: f64, width: f64, height: f6
     cr.close_path();
 }
 
+fn create_swatch_da(col_cell: Rc<Cell<Color>>, size: i32) -> gtk4::DrawingArea {
+    let da = gtk4::DrawingArea::builder()
+        .content_width(size)
+        .content_height(size)
+        .valign(gtk4::Align::Center)
+        .halign(gtk4::Align::Center)
+        .build();
+    da.set_draw_func(move |_, cr, w, h| {
+        let c = col_cell.get();
+        let r = (w.min(h) as f64 * 0.5) - 1.0;
+        cr.arc(w as f64 * 0.5, h as f64 * 0.5, r, 0.0, std::f64::consts::TAU);
+        cr.set_source_rgba(c.r as f64, c.g as f64, c.b as f64, c.a as f64);
+        let _ = cr.fill_preserve();
+        cr.set_source_rgba(0.0, 0.0, 0.0, 0.3);
+        cr.set_line_width(1.0);
+        let _ = cr.stroke();
+    });
+    da
+}
+
+fn interpolate_stops(stops: &[GradientStop], t: f32) -> Color {
+    if stops.is_empty() {
+        return Color::WHITE;
+    }
+    if stops.len() == 1 || t <= stops[0].offset {
+        return stops[0].color;
+    }
+    if t >= stops.last().unwrap().offset {
+        return stops.last().unwrap().color;
+    }
+    for i in 0..stops.len() - 1 {
+        let s0 = &stops[i];
+        let s1 = &stops[i + 1];
+        if t >= s0.offset && t <= s1.offset {
+            let span = (s1.offset - s0.offset).max(0.001);
+            let local_t = (t - s0.offset) / span;
+            return Color::new(
+                s0.color.r + local_t * (s1.color.r - s0.color.r),
+                s0.color.g + local_t * (s1.color.g - s0.color.g),
+                s0.color.b + local_t * (s1.color.b - s0.color.b),
+                s0.color.a + local_t * (s1.color.a - s0.color.a),
+            );
+        }
+    }
+    stops.last().unwrap().color
+}
+
 impl ColorPickerPopover {
     pub fn new(canvas: CanvasWidget, initial_color: Color, initial_mode: usize) -> Self {
+        Self::with_mode_switcher(canvas, initial_color, initial_mode, true)
+    }
+
+    pub fn with_mode_switcher(
+        canvas: CanvasWidget,
+        initial_color: Color,
+        initial_mode: usize,
+        show_mode_switcher: bool,
+    ) -> Self {
         let (h, s, v) = initial_color.to_hsv();
         let color = Rc::new(Cell::new(initial_color));
         let hue = Rc::new(Cell::new(h));
         let sat = Rc::new(Cell::new(s));
         let val = Rc::new(Cell::new(v));
         let alpha = Rc::new(Cell::new(initial_color.a));
+        let current_mode = Rc::new(Cell::new(initial_mode));
+        let active_grad_stop = Rc::new(Cell::new(0usize));
+        let active_mesh_node = Rc::new(Cell::new(0usize));
         let is_updating = Rc::new(Cell::new(false));
         let on_change: Rc<RefCell<Option<Box<dyn Fn(Color)>>>> = Rc::new(RefCell::new(None));
         let on_mode_change: Rc<RefCell<Option<Box<dyn Fn(usize)>>>> = Rc::new(RefCell::new(None));
+
+        // Initial gradient stops & pattern colors from selection
+        let (init_stops, init_sec_color, init_angle) = {
+            let fills_opt = canvas.get_selected_fills_and_strokes();
+            let fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+            if let Some(f0) = fills.first() {
+                let stops = f0.effective_stops();
+                (stops, f0.secondary_color, f0.angle)
+            } else {
+                (
+                    vec![
+                        GradientStop::new(0.0, initial_color),
+                        GradientStop::new(1.0, Color::WHITE),
+                    ],
+                    Color::WHITE,
+                    90.0,
+                )
+            }
+        };
+
+        let grad_stops_ref = Rc::new(RefCell::new(init_stops));
+        let pat_c1_col_cell = Rc::new(Cell::new(initial_color));
+        let pat_c2_col_cell = Rc::new(Cell::new(init_sec_color));
+
+        let pat_c1_da = create_swatch_da(pat_c1_col_cell.clone(), 16);
+        let pat_c2_da = create_swatch_da(pat_c2_col_cell.clone(), 16);
 
         let popover = gtk4::Popover::builder()
             .has_arrow(true)
@@ -77,12 +171,12 @@ impl ColorPickerPopover {
 
         let root_box = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Vertical)
-            .spacing(6)
+            .spacing(4)
             .margin_start(4)
             .margin_end(4)
             .margin_top(4)
             .margin_bottom(4)
-            .width_request(304)
+            .width_request(290)
             .build();
 
         // ── 1. Top Mode Switcher (Floating Tab Capsule) ──
@@ -113,7 +207,7 @@ impl ColorPickerPopover {
                     .build();
                 let b_content = gtk4::Box::builder()
                     .orientation(gtk4::Orientation::Horizontal)
-                    .spacing(5)
+                    .spacing(4)
                     .halign(gtk4::Align::Center)
                     .valign(gtk4::Align::Center)
                     .build();
@@ -136,18 +230,18 @@ impl ColorPickerPopover {
         // ── 2. Main Color Card ──
         let card = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Vertical)
-            .spacing(6)
+            .spacing(4)
             .css_classes(["color-picker-card"])
             .build();
 
-        // 2A. Header: [ Title ] ──────── [ RGBA ▾ ]
+        // 2A. Header
         let header = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Horizontal)
             .spacing(6)
-            .margin_start(4)
-            .margin_end(4)
-            .margin_top(2)
-            .margin_bottom(2)
+            .margin_start(2)
+            .margin_end(2)
+            .margin_top(1)
+            .margin_bottom(1)
             .valign(gtk4::Align::Center)
             .build();
 
@@ -166,35 +260,27 @@ impl ColorPickerPopover {
             .hexpand(true)
             .build();
         header.append(&title_lbl);
-
         card.append(&header);
 
-        // Top Divider
-        let divider_top = gtk4::Box::builder()
-            .css_classes(["color-picker-divider"])
-            .hexpand(true)
-            .build();
-        card.append(&divider_top);
-
-        // Pre-create DrawingAreas and Entry for reference by mode panels
+        // Pre-create DrawingAreas and Entry (Compact Dimensions)
         let hue_area = gtk4::DrawingArea::builder()
-            .content_width(30)
-            .content_height(154)
+            .content_width(24)
+            .content_height(110)
             .valign(gtk4::Align::Fill)
             .build();
 
         let sv_area = gtk4::DrawingArea::builder()
             .content_width(220)
-            .content_height(154)
+            .content_height(110)
             .hexpand(true)
             .valign(gtk4::Align::Fill)
             .build();
 
         let alpha_area = gtk4::DrawingArea::builder()
-            .content_width(260)
-            .content_height(30)
-            .margin_top(4)
-            .margin_bottom(4)
+            .content_width(250)
+            .content_height(24)
+            .margin_top(2)
+            .margin_bottom(2)
             .valign(gtk4::Align::Center)
             .hexpand(true)
             .build();
@@ -207,212 +293,1008 @@ impl ColorPickerPopover {
             .valign(gtk4::Align::Center)
             .build();
 
-        // ── Mesh Panel (visible in Mesh mode) ──
-        let mesh_panel = gtk4::Box::builder()
+        // ── Helper to load color into tuner ──
+        let load_tuner_color = {
+            let color_c = color.clone();
+            let hue_c = hue.clone();
+            let sat_c = sat.clone();
+            let val_c = val.clone();
+            let alpha_c = alpha.clone();
+            let is_upd = is_updating.clone();
+            let hex_e = hex_entry.clone();
+            let sv_draw = sv_area.clone();
+            let hue_draw = hue_area.clone();
+            let alpha_draw = alpha_area.clone();
+
+            Rc::new(move |c: Color| {
+                color_c.set(c);
+                let (h, s, v) = c.to_hsv();
+                hue_c.set(h);
+                sat_c.set(s);
+                val_c.set(v);
+                alpha_c.set(c.a);
+
+                if !is_upd.get() {
+                    is_upd.set(true);
+                    hex_e.set_text(&c.to_hex_rgba());
+                    is_upd.set(false);
+                }
+
+                sv_draw.queue_draw();
+                hue_draw.queue_draw();
+                alpha_draw.queue_draw();
+            })
+        };
+
+        // ── 1. SOLID PANEL (Minimal top area) ──
+        let solid_panel = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Vertical)
-            .spacing(6)
-            .margin_start(4)
-            .margin_end(4)
-            .margin_top(2)
-            .margin_bottom(2)
-            .visible(initial_mode == 2)
+            .visible(initial_mode == 0)
+            .build();
+        card.append(&solid_panel);
+
+        // ── 2. GRADIENT PANEL (Interactive Multi-Stop Track & Angle Dial) ──
+        let gradient_panel = gtk4::Box::builder()
+            .orientation(gtk4::Orientation::Vertical)
+            .spacing(4)
+            .visible(initial_mode == 1)
             .build();
 
-        // 1. Mesh Tool Activation Button
-        let mesh_tool_row = gtk4::Box::builder()
-            .orientation(gtk4::Orientation::Horizontal)
-            .spacing(6)
-            .valign(gtk4::Align::Center)
-            .build();
-
-        let edit_nodes_btn = gtk4::Button::builder()
-            .css_classes(["pill-btn"])
-            .hexpand(true)
-            .tooltip_text(&crate::core::gettext("Edit Mesh Nodes on Screen"))
-            .build();
-        let edit_box = gtk4::Box::builder()
-            .orientation(gtk4::Orientation::Horizontal)
-            .spacing(6)
-            .halign(gtk4::Align::Center)
-            .build();
-        let edit_icon = gtk4::Image::from_icon_name("eyedropper-pick-symbolic");
-        let edit_lbl = gtk4::Label::builder()
-            .label(&crate::core::gettext("Edit Mesh Nodes on Screen"))
-            .build();
-        edit_box.append(&edit_icon);
-        edit_box.append(&edit_lbl);
-        edit_nodes_btn.set_child(Some(&edit_box));
-
-        {
-            let canvas_m = canvas.clone();
-            let pop_c = popover.clone();
-            edit_nodes_btn.connect_clicked(move |_| {
-                canvas_m.set_active_tool("mesh_gradient");
-                pop_c.popdown();
-            });
-        }
-        mesh_tool_row.append(&edit_nodes_btn);
-        mesh_panel.append(&mesh_tool_row);
-
-        // 2. Mesh Themes Row
-        let themes_box = gtk4::Box::builder()
+        // Type switcher: Linear / Radial
+        let grad_type_box = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Horizontal)
             .spacing(4)
             .halign(gtk4::Align::Fill)
             .build();
 
-        let mesh_presets = [
-            ("Sunset", Color::from_hex("#ff5e3a").unwrap()),
-            ("Aurora", Color::from_hex("#00f2fe").unwrap()),
-            ("Ocean", Color::from_hex("#009efd").unwrap()),
-            ("Neon", Color::from_hex("#f857a6").unwrap()),
-        ];
+        let lin_btn = gtk4::Button::builder()
+            .label(&crate::core::gettext("Linear"))
+            .icon_name("media-playlist-consecutive-symbolic")
+            .css_classes(["flat", "pill-btn", "active"])
+            .hexpand(true)
+            .build();
+        let rad_btn = gtk4::Button::builder()
+            .label(&crate::core::gettext("Radial"))
+            .icon_name("media-record-symbolic")
+            .css_classes(["flat", "pill-btn"])
+            .hexpand(true)
+            .build();
 
-        for (p_name, c1) in mesh_presets {
+        {
+            let cv_l = canvas.clone();
+            let l_b = lin_btn.clone();
+            let r_b = rad_btn.clone();
+            lin_btn.connect_clicked(move |_| {
+                l_b.add_css_class("active");
+                r_b.remove_css_class("active");
+                let fills_opt = cv_l.get_selected_fills_and_strokes();
+                let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                if let Some(f0) = fills.first_mut() {
+                    f0.style = crate::core::FillStyle::LinearGradient;
+                }
+                cv_l.set_selected_fills(fills);
+                cv_l.set_active_tool("gradient");
+            });
+        }
+        {
+            let cv_r = canvas.clone();
+            let l_b = lin_btn.clone();
+            let r_b = rad_btn.clone();
+            rad_btn.connect_clicked(move |_| {
+                r_b.add_css_class("active");
+                l_b.remove_css_class("active");
+                let fills_opt = cv_r.get_selected_fills_and_strokes();
+                let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                if let Some(f0) = fills.first_mut() {
+                    f0.style = crate::core::FillStyle::RadialGradient;
+                }
+                cv_r.set_selected_fills(fills);
+                cv_r.set_active_tool("gradient");
+            });
+        }
+        grad_type_box.append(&lin_btn);
+        grad_type_box.append(&rad_btn);
+        gradient_panel.append(&grad_type_box);
+
+        // ── Interactive Gradient Track DrawingArea ──
+        let grad_track_da = gtk4::DrawingArea::builder()
+            .content_height(34)
+            .hexpand(true)
+            .margin_top(2)
+            .margin_bottom(2)
+            .build();
+
+        {
+            let g_stops = grad_stops_ref.clone();
+            let act_s = active_grad_stop.clone();
+            grad_track_da.set_draw_func(move |_, cr, width, height| {
+                let w = width as f64;
+                let _h = height as f64;
+                let track_pad = 8.0;
+                let track_w = (w - track_pad * 2.0).max(1.0);
+                let bar_h = 14.0;
+                let bar_y = 2.0;
+
+                // 1. Draw Checkerboard background for transparency
+                cr.save().unwrap();
+                draw_rounded_rect(cr, track_pad, bar_y, track_w, bar_h, 6.0);
+                cr.clip();
+                let check_sz = 4.0;
+                let cols = (track_w / check_sz).ceil() as usize;
+                let rows = (bar_h / check_sz).ceil() as usize;
+                for r in 0..rows {
+                    for c in 0..cols {
+                        if (r + c) % 2 == 0 {
+                            cr.set_source_rgb(0.8, 0.8, 0.8);
+                        } else {
+                            cr.set_source_rgb(0.6, 0.6, 0.6);
+                        }
+                        cr.rectangle(
+                            track_pad + c as f64 * check_sz,
+                            bar_y + r as f64 * check_sz,
+                            check_sz,
+                            check_sz,
+                        );
+                        let _ = cr.fill();
+                    }
+                }
+
+                // 2. Draw Multi-Stop Gradient Interpolation
+                let stops = g_stops.borrow();
+                let pat = cairo::LinearGradient::new(track_pad, 0.0, track_pad + track_w, 0.0);
+                for s in stops.iter() {
+                    pat.add_color_stop_rgba(
+                        s.offset.clamp(0.0, 1.0) as f64,
+                        s.color.r as f64,
+                        s.color.g as f64,
+                        s.color.b as f64,
+                        s.color.a as f64,
+                    );
+                }
+                cr.set_source(&pat).unwrap();
+                let _ = cr.paint();
+                cr.restore().unwrap();
+
+                // Border of gradient bar
+                draw_rounded_rect(cr, track_pad + 0.5, bar_y + 0.5, track_w - 1.0, bar_h - 1.0, 6.0);
+                cr.set_source_rgba(0.0, 0.0, 0.0, 0.3);
+                cr.set_line_width(1.0);
+                let _ = cr.stroke();
+
+                // 3. Draw Stop Pins along the track
+                let active_idx = act_s.get();
+                for (idx, s) in stops.iter().enumerate() {
+                    let pin_x = track_pad + s.offset.clamp(0.0, 1.0) as f64 * track_w;
+                    let pin_y = 24.0;
+                    let is_active = idx == active_idx;
+
+                    // Triangle pointer pointing up
+                    cr.new_sub_path();
+                    cr.move_to(pin_x, bar_y + bar_h + 1.0);
+                    cr.line_to(pin_x + 4.5, pin_y - 4.0);
+                    cr.line_to(pin_x - 4.5, pin_y - 4.0);
+                    cr.close_path();
+                    cr.set_source_rgba(1.0, 1.0, 1.0, 0.95);
+                    let _ = cr.fill_preserve();
+                    cr.set_source_rgba(0.0, 0.0, 0.0, 0.4);
+                    cr.set_line_width(1.0);
+                    let _ = cr.stroke();
+
+                    // Pin circle handle
+                    let radius = if is_active { 6.5 } else { 5.5 };
+                    if is_active {
+                        // Halo glow for active pin
+                        cr.arc(pin_x, pin_y, radius + 2.5, 0.0, std::f64::consts::TAU);
+                        cr.set_source_rgba(0.2, 0.6, 1.0, 0.45);
+                        let _ = cr.fill();
+                    }
+
+                    cr.arc(pin_x, pin_y, radius, 0.0, std::f64::consts::TAU);
+                    cr.set_source_rgba(
+                        s.color.r as f64,
+                        s.color.g as f64,
+                        s.color.b as f64,
+                        s.color.a as f64,
+                    );
+                    let _ = cr.fill_preserve();
+                    cr.set_source_rgba(1.0, 1.0, 1.0, 1.0);
+                    cr.set_line_width(1.8);
+                    let _ = cr.stroke_preserve();
+                    cr.set_source_rgba(0.0, 0.0, 0.0, 0.45);
+                    cr.set_line_width(0.8);
+                    let _ = cr.stroke();
+                }
+            });
+        }
+        gradient_panel.append(&grad_track_da);
+
+        // ── Stop Pills List & Actions Bar ──
+        let stops_actions_row = gtk4::Box::builder()
+            .orientation(gtk4::Orientation::Horizontal)
+            .spacing(4)
+            .halign(gtk4::Align::Fill)
+            .build();
+
+        let stop_pills_scroller = gtk4::ScrolledWindow::builder()
+            .hscrollbar_policy(gtk4::PolicyType::Automatic)
+            .vscrollbar_policy(gtk4::PolicyType::Never)
+            .hexpand(true)
+            .build();
+
+        let stop_pills_box = gtk4::Box::builder()
+            .orientation(gtk4::Orientation::Horizontal)
+            .spacing(3)
+            .build();
+        stop_pills_scroller.set_child(Some(&stop_pills_box));
+        stops_actions_row.append(&stop_pills_scroller);
+
+        // Actions: Invert, Add, Delete
+        let grad_invert_btn = gtk4::Button::builder()
+            .icon_name("object-flip-horizontal-symbolic")
+            .css_classes(["flat", "pill-btn"])
+            .tooltip_text(&crate::core::gettext("Invert Gradient"))
+            .build();
+
+        let grad_add_btn = gtk4::Button::builder()
+            .icon_name("list-add-symbolic")
+            .css_classes(["flat", "pill-btn"])
+            .tooltip_text(&crate::core::gettext("Add Color Stop"))
+            .build();
+
+        let grad_del_btn = gtk4::Button::builder()
+            .icon_name("user-trash-symbolic")
+            .css_classes(["flat", "pill-btn"])
+            .tooltip_text(&crate::core::gettext("Delete Selected Stop"))
+            .build();
+
+        stops_actions_row.append(&grad_invert_btn);
+        stops_actions_row.append(&grad_add_btn);
+        stops_actions_row.append(&grad_del_btn);
+        gradient_panel.append(&stops_actions_row);
+
+        // ── Function to rebuild stop pills ──
+        let rebuild_stop_pills = {
+            let sp_box = stop_pills_box.clone();
+            let g_stops = grad_stops_ref.clone();
+            let act_s = active_grad_stop.clone();
+            let ltc = load_tuner_color.clone();
+            let da_redraw = grad_track_da.clone();
+            let cv = canvas.clone();
+            let del_b = grad_del_btn.clone();
+
+            Rc::new(move || {
+                while let Some(child) = sp_box.first_child() {
+                    sp_box.remove(&child);
+                }
+
+                let stops = g_stops.borrow().clone();
+                del_b.set_sensitive(stops.len() > 2);
+
+                let active_idx = act_s.get().min(stops.len().saturating_sub(1));
+                act_s.set(active_idx);
+
+                let pill_btns: Rc<RefCell<Vec<gtk4::Button>>> = Rc::new(RefCell::new(Vec::new()));
+
+                for (idx, stop) in stops.iter().enumerate() {
+                    let btn = gtk4::Button::builder()
+                        .css_classes(["flat", "color-stop-btn"])
+                        .tooltip_text(&format!("Stop {} ({}%)", idx + 1, (stop.offset * 100.0).round() as i32))
+                        .build();
+
+                    if idx == active_idx {
+                        btn.add_css_class("active");
+                    }
+
+                    let btn_box = gtk4::Box::builder()
+                        .orientation(gtk4::Orientation::Horizontal)
+                        .spacing(4)
+                        .valign(gtk4::Align::Center)
+                        .build();
+
+                    let col_cell = Rc::new(Cell::new(stop.color));
+                    let da = create_swatch_da(col_cell, 14);
+                    btn_box.append(&da);
+
+                    let pct_lbl = gtk4::Label::builder()
+                        .label(&format!("{}%", (stop.offset * 100.0).round() as i32))
+                        .css_classes(["caption"])
+                        .build();
+                    btn_box.append(&pct_lbl);
+                    btn.set_child(Some(&btn_box));
+
+                    pill_btns.borrow_mut().push(btn.clone());
+
+                    let all_pills = pill_btns.clone();
+                    let act_s_cl = act_s.clone();
+                    let ltc_cl = ltc.clone();
+                    let da_cl = da_redraw.clone();
+                    let s_col = stop.color;
+                    let cv_cl = cv.clone();
+
+                    btn.connect_clicked(move |_| {
+                        act_s_cl.set(idx);
+                        for (k, b) in all_pills.borrow().iter().enumerate() {
+                            if k == idx {
+                                b.add_css_class("active");
+                            } else {
+                                b.remove_css_class("active");
+                            }
+                        }
+                        ltc_cl(s_col);
+                        da_cl.queue_draw();
+                        cv_cl.set_active_tool("gradient");
+                    });
+
+                    sp_box.append(&btn);
+                }
+            })
+        };
+
+        // Wire Invert, Add, and Delete actions
+        {
+            let g_stops = grad_stops_ref.clone();
+            let act_s = active_grad_stop.clone();
+            let cv_inv = canvas.clone();
+            let rbp_fn = rebuild_stop_pills.clone();
+            let da_redraw = grad_track_da.clone();
+            let ltc = load_tuner_color.clone();
+
+            grad_invert_btn.connect_clicked(move |_| {
+                {
+                    let mut stops = g_stops.borrow_mut();
+                    for s in stops.iter_mut() {
+                        s.offset = (1.0f32 - s.offset).clamp(0.0f32, 1.0f32);
+                    }
+                    stops.sort_by(|a, b| a.offset.partial_cmp(&b.offset).unwrap());
+                }
+                let stops_clone = g_stops.borrow().clone();
+                let fills_opt = cv_inv.get_selected_fills_and_strokes();
+                let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                if let Some(f0) = fills.first_mut() {
+                    f0.stops = stops_clone.clone();
+                    if let Some(s0) = stops_clone.first() {
+                        f0.color = s0.color;
+                    }
+                    if let Some(send) = stops_clone.last() {
+                        f0.secondary_color = send.color;
+                    }
+                }
+                cv_inv.set_selected_fills(fills);
+                let cur_idx = act_s.get().min(stops_clone.len().saturating_sub(1));
+                ltc(stops_clone[cur_idx].color);
+                rbp_fn();
+                da_redraw.queue_draw();
+            });
+        }
+        {
+            let g_stops = grad_stops_ref.clone();
+            let act_s = active_grad_stop.clone();
+            let cv_add = canvas.clone();
+            let rbp_fn = rebuild_stop_pills.clone();
+            let da_redraw = grad_track_da.clone();
+            let ltc = load_tuner_color.clone();
+
+            grad_add_btn.connect_clicked(move |_| {
+                let new_offset = 0.5f32;
+                let interp_col = interpolate_stops(&g_stops.borrow(), new_offset);
+                let new_stop = GradientStop::new(new_offset, interp_col);
+
+                let mut new_idx = 0;
+                {
+                    let mut stops = g_stops.borrow_mut();
+                    stops.push(new_stop);
+                    stops.sort_by(|a, b| a.offset.partial_cmp(&b.offset).unwrap());
+                    if let Some(pos) = stops.iter().position(|s| (s.offset - new_offset).abs() < 0.001) {
+                        new_idx = pos;
+                    }
+                }
+                act_s.set(new_idx);
+                let stops_clone = g_stops.borrow().clone();
+                let fills_opt = cv_add.get_selected_fills_and_strokes();
+                let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                if let Some(f0) = fills.first_mut() {
+                    f0.stops = stops_clone;
+                }
+                cv_add.set_selected_fills(fills);
+                ltc(interp_col);
+                rbp_fn();
+                da_redraw.queue_draw();
+            });
+        }
+        {
+            let g_stops = grad_stops_ref.clone();
+            let act_s = active_grad_stop.clone();
+            let cv_del = canvas.clone();
+            let rbp_fn = rebuild_stop_pills.clone();
+            let da_redraw = grad_track_da.clone();
+            let ltc = load_tuner_color.clone();
+
+            grad_del_btn.connect_clicked(move |_| {
+                let cur_idx = act_s.get();
+                {
+                    let mut stops = g_stops.borrow_mut();
+                    if stops.len() > 2 && cur_idx < stops.len() {
+                        stops.remove(cur_idx);
+                    }
+                }
+                let stops_clone = g_stops.borrow().clone();
+                let new_active = cur_idx.min(stops_clone.len().saturating_sub(1));
+                act_s.set(new_active);
+
+                let fills_opt = cv_del.get_selected_fills_and_strokes();
+                let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                if let Some(f0) = fills.first_mut() {
+                    f0.stops = stops_clone.clone();
+                    if let Some(s0) = stops_clone.first() {
+                        f0.color = s0.color;
+                    }
+                    if let Some(send) = stops_clone.last() {
+                        f0.secondary_color = send.color;
+                    }
+                }
+                cv_del.set_selected_fills(fills);
+                ltc(stops_clone[new_active].color);
+                rbp_fn();
+                da_redraw.queue_draw();
+            });
+        }
+
+        // ── Drag Gesture on Interactive Gradient Track ──
+        let track_drag = gtk4::GestureDrag::new();
+        let is_dragging_pin = Rc::new(Cell::new(false));
+        {
+            let g_stops = grad_stops_ref.clone();
+            let act_s = active_grad_stop.clone();
+            let ltc = load_tuner_color.clone();
+            let is_drag = is_dragging_pin.clone();
+            let da_redraw = grad_track_da.clone();
+            let rbp_fn = rebuild_stop_pills.clone();
+            let cv = canvas.clone();
+            let da_area = grad_track_da.clone();
+
+            track_drag.connect_drag_begin(move |_, x, y| {
+                let w = da_area.width() as f64;
+                let track_pad = 8.0;
+                let track_w = (w - track_pad * 2.0).max(1.0);
+
+                let mut hit_idx = None;
+                {
+                    let stops = g_stops.borrow();
+                    for (idx, s) in stops.iter().enumerate() {
+                        let pin_x = track_pad + s.offset.clamp(0.0, 1.0) as f64 * track_w;
+                        let pin_y = 24.0;
+                        let dx = x - pin_x;
+                        let dy = y - pin_y;
+                        if (dx * dx + dy * dy).sqrt() <= 10.0 {
+                            hit_idx = Some(idx);
+                            break;
+                        }
+                    }
+                }
+
+                if let Some(idx) = hit_idx {
+                    act_s.set(idx);
+                    is_drag.set(true);
+                    let stops = g_stops.borrow();
+                    ltc(stops[idx].color);
+                    rbp_fn();
+                    da_redraw.queue_draw();
+                } else if y <= 20.0 && x >= track_pad && x <= w - track_pad {
+                    // Clicked on bar: Insert new stop at offset!
+                    let offset = ((x - track_pad) / track_w).clamp(0.0, 1.0) as f32;
+                    let interp_col = interpolate_stops(&g_stops.borrow(), offset);
+                    let new_stop = GradientStop::new(offset, interp_col);
+
+                    let mut new_idx = 0;
+                    {
+                        let mut stops = g_stops.borrow_mut();
+                        stops.push(new_stop);
+                        stops.sort_by(|a, b| a.offset.partial_cmp(&b.offset).unwrap());
+                        if let Some(pos) = stops.iter().position(|s| (s.offset - offset).abs() < 0.001) {
+                            new_idx = pos;
+                        }
+                    }
+                    act_s.set(new_idx);
+                    is_drag.set(true);
+
+                    let stops_clone = g_stops.borrow().clone();
+                    let fills_opt = cv.get_selected_fills_and_strokes();
+                    let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                    if let Some(f0) = fills.first_mut() {
+                        f0.stops = stops_clone;
+                    }
+                    cv.set_selected_fills(fills);
+                    ltc(interp_col);
+                    rbp_fn();
+                    da_redraw.queue_draw();
+                }
+            });
+        }
+        {
+            let g_stops = grad_stops_ref.clone();
+            let act_s = active_grad_stop.clone();
+            let is_drag = is_dragging_pin.clone();
+            let da_redraw = grad_track_da.clone();
+            let rbp_fn = rebuild_stop_pills.clone();
+            let cv = canvas.clone();
+            let da_area = grad_track_da.clone();
+
+            track_drag.connect_drag_update(move |gesture, offset_x, _| {
+                if !is_drag.get() {
+                    return;
+                }
+                if let Some((start_x, _)) = gesture.start_point() {
+                    let cur_x = start_x + offset_x;
+                    let w = da_area.width() as f64;
+                    let track_pad = 8.0;
+                    let track_w = (w - track_pad * 2.0).max(1.0);
+                    let new_offset = ((cur_x - track_pad) / track_w).clamp(0.0, 1.0) as f32;
+
+                    let active_idx = act_s.get();
+                    {
+                        let mut stops = g_stops.borrow_mut();
+                        if active_idx < stops.len() {
+                            stops[active_idx].offset = new_offset;
+                        }
+                    }
+
+                    let stops_clone = g_stops.borrow().clone();
+                    let fills_opt = cv.get_selected_fills_and_strokes();
+                    let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                    if let Some(f0) = fills.first_mut() {
+                        f0.stops = stops_clone;
+                    }
+                    cv.set_selected_fills(fills);
+                    rbp_fn();
+                    da_redraw.queue_draw();
+                }
+            });
+        }
+        {
+            let is_drag = is_dragging_pin.clone();
+            let g_stops = grad_stops_ref.clone();
+            let act_s = active_grad_stop.clone();
+            let rbp_fn = rebuild_stop_pills.clone();
+            let da_redraw = grad_track_da.clone();
+
+            track_drag.connect_drag_end(move |_, _, _| {
+                is_drag.set(false);
+                let cur_idx = act_s.get();
+                let cur_stop = {
+                    let mut stops = g_stops.borrow_mut();
+                    let s_copy = stops.get(cur_idx).cloned();
+                    stops.sort_by(|a, b| a.offset.partial_cmp(&b.offset).unwrap());
+                    s_copy
+                };
+                if let Some(s) = cur_stop {
+                    let stops = g_stops.borrow();
+                    if let Some(new_p) = stops.iter().position(|item| (item.offset - s.offset).abs() < 0.001) {
+                        act_s.set(new_p);
+                    }
+                }
+                rbp_fn();
+                da_redraw.queue_draw();
+            });
+        }
+        grad_track_da.add_controller(track_drag);
+
+        // Initial build of stop pills
+        rebuild_stop_pills();
+
+        // ── Angle Control (Slider + Circular Compass Dial Knob + Badge, NO degree buttons!) ──
+        let angle_row = gtk4::Box::builder()
+            .orientation(gtk4::Orientation::Horizontal)
+            .spacing(6)
+            .valign(gtk4::Align::Center)
+            .margin_top(2)
+            .margin_bottom(2)
+            .build();
+
+        let angle_lbl = gtk4::Label::builder()
+            .label(&crate::core::gettext("Angle"))
+            .css_classes(["caption"])
+            .build();
+        angle_row.append(&angle_lbl);
+
+        let grad_angle_scale = gtk4::Scale::with_range(gtk4::Orientation::Horizontal, 0.0, 360.0, 1.0);
+        grad_angle_scale.set_value(init_angle as f64);
+        grad_angle_scale.set_hexpand(true);
+
+        // Interactive Circular Angle Dial (26x26px)
+        let angle_dial_da = gtk4::DrawingArea::builder()
+            .content_width(26)
+            .content_height(26)
+            .css_classes(["angle-dial"])
+            .valign(gtk4::Align::Center)
+            .build();
+
+        let current_angle = Rc::new(Cell::new(init_angle));
+
+        {
+            let cur_ang = current_angle.clone();
+            angle_dial_da.set_draw_func(move |_, cr, w, h| {
+                let cx = w as f64 * 0.5;
+                let cy = h as f64 * 0.5;
+                let radius = (w.min(h) as f64 * 0.5) - 1.5;
+                let ang_rad = (cur_ang.get() as f64).to_radians();
+
+                // Dial Background
+                cr.arc(cx, cy, radius, 0.0, std::f64::consts::TAU);
+                cr.set_source_rgba(0.0, 0.0, 0.0, 0.08);
+                let _ = cr.fill_preserve();
+                cr.set_source_rgba(0.0, 0.0, 0.0, 0.35);
+                cr.set_line_width(1.2);
+                let _ = cr.stroke();
+
+                // Needle Line
+                let nx = cx + ang_rad.cos() * (radius - 2.0);
+                let ny = cy + ang_rad.sin() * (radius - 2.0);
+                cr.move_to(cx, cy);
+                cr.line_to(nx, ny);
+                cr.set_source_rgba(0.2, 0.6, 1.0, 1.0);
+                cr.set_line_width(2.2);
+                let _ = cr.stroke();
+
+                // Center pivot dot
+                cr.arc(cx, cy, 2.5, 0.0, std::f64::consts::TAU);
+                cr.set_source_rgba(0.2, 0.6, 1.0, 1.0);
+                let _ = cr.fill();
+            });
+        }
+
+        // Degree Badge
+        let angle_badge = gtk4::Label::builder()
+            .label(&format!("{}°", init_angle as i32))
+            .css_classes(["angle-badge"])
+            .valign(gtk4::Align::Center)
+            .build();
+
+        // Wire angle slider & dial
+        {
+            let cv_ga = canvas.clone();
+            let cur_ang = current_angle.clone();
+            let dial_draw = angle_dial_da.clone();
+            let badge = angle_badge.clone();
+            grad_angle_scale.connect_value_changed(move |sc| {
+                let val = sc.value() as f32;
+                cur_ang.set(val);
+                badge.set_text(&format!("{}°", val as i32));
+                dial_draw.queue_draw();
+
+                let fills_opt = cv_ga.get_selected_fills_and_strokes();
+                let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                if let Some(f0) = fills.first_mut() {
+                    f0.angle = val;
+                }
+                cv_ga.set_selected_fills(fills);
+            });
+        }
+
+        // Dial gesture
+        let dial_drag = gtk4::GestureDrag::new();
+        {
+            let sc_clone = grad_angle_scale.clone();
+            let dial_area = angle_dial_da.clone();
+            let update_from_pos = move |x: f64, y: f64| {
+                let w = dial_area.width() as f64;
+                let h = dial_area.height() as f64;
+                let dx = x - (w * 0.5);
+                let dy = y - (h * 0.5);
+                let mut deg = dy.atan2(dx).to_degrees();
+                if deg < 0.0 {
+                    deg += 360.0;
+                }
+                sc_clone.set_value(deg.round());
+            };
+
+            let ufp_start = update_from_pos.clone();
+            dial_drag.connect_drag_begin(move |_, x, y| {
+                ufp_start(x, y);
+            });
+            dial_drag.connect_drag_update(move |gesture, offset_x, offset_y| {
+                if let Some((sx, sy)) = gesture.start_point() {
+                    update_from_pos(sx + offset_x, sy + offset_y);
+                }
+            });
+        }
+        angle_dial_da.add_controller(dial_drag);
+
+        angle_row.append(&grad_angle_scale);
+        angle_row.append(&angle_dial_da);
+        angle_row.append(&angle_badge);
+        gradient_panel.append(&angle_row);
+
+        card.append(&gradient_panel);
+
+        // ── 3. MESH PANEL (Dynamic Mesh Palette) ──
+        let mesh_panel = gtk4::Box::builder()
+            .orientation(gtk4::Orientation::Vertical)
+            .spacing(4)
+            .visible(initial_mode == 2)
+            .build();
+
+        let hint_lbl = gtk4::Label::builder()
+            .label(&crate::core::gettext("Click any point or edge on canvas to select, drag, or add new mesh points."))
+            .wrap(true)
+            .css_classes(["caption"])
+            .halign(gtk4::Align::Center)
+            .margin_start(4)
+            .margin_end(4)
+            .margin_top(2)
+            .margin_bottom(2)
+            .build();
+        mesh_panel.append(&hint_lbl);
+
+        // Theme Presets
+        let themes_box = gtk4::Box::builder()
+            .orientation(gtk4::Orientation::Horizontal)
+            .spacing(2)
+            .halign(gtk4::Align::Fill)
+            .build();
+
+        for (p_name, c1, c2) in [
+            ("Sunset", Color::from_hex("#ff5e3a").unwrap(), Color::from_hex("#ff2a6d").unwrap()),
+            ("Aurora", Color::from_hex("#00f2fe").unwrap(), Color::from_hex("#4facfe").unwrap()),
+            ("Ocean", Color::from_hex("#009efd").unwrap(), Color::from_hex("#2af598").unwrap()),
+            ("Neon", Color::from_hex("#f857a6").unwrap(), Color::from_hex("#ff5858").unwrap()),
+        ] {
             let p_btn = gtk4::Button::builder()
                 .label(&crate::core::gettext(p_name))
                 .css_classes(["flat", "pill-btn"])
                 .hexpand(true)
                 .build();
-            let on_ch = on_change.clone();
-            let col_c = color.clone();
-            let hue_c = hue.clone();
-            let sat_c = sat.clone();
-            let val_c = val.clone();
-            let is_upd = is_updating.clone();
-            let sv_draw = sv_area.clone();
-            let hue_draw = hue_area.clone();
-            let hex_e = hex_entry.clone();
+            let cv_th = canvas.clone();
+            let ltc = load_tuner_color.clone();
             p_btn.connect_clicked(move |_| {
-                col_c.set(c1);
-                let (h, s, v) = c1.to_hsv();
-                hue_c.set(h);
-                sat_c.set(s);
-                val_c.set(v);
-                sv_draw.queue_draw();
-                hue_draw.queue_draw();
-                if !is_upd.get() {
-                    is_upd.set(true);
-                    hex_e.set_text(&c1.to_hex_rgba());
-                    is_upd.set(false);
-                }
-                if let Some(cb) = on_ch.borrow().as_ref() {
-                    cb(c1);
-                }
+                cv_th.apply_selected_mesh_theme(c1, c2);
+                cv_th.set_active_tool("mesh_gradient");
+                ltc(c1);
             });
             themes_box.append(&p_btn);
         }
         mesh_panel.append(&themes_box);
+
         card.append(&mesh_panel);
 
-        // ── Pattern Panel (visible in Pattern mode) ──
+        // ── 4. PATTERN PANEL ──
         let pattern_panel = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Vertical)
-            .spacing(6)
-            .margin_start(4)
-            .margin_end(4)
-            .margin_top(2)
-            .margin_bottom(2)
+            .spacing(4)
             .visible(initial_mode == 3)
             .build();
 
-        let pat_types_box = gtk4::Box::builder()
+        let pat_scrolled = gtk4::ScrolledWindow::builder()
+            .hscrollbar_policy(gtk4::PolicyType::Never)
+            .vscrollbar_policy(gtk4::PolicyType::Automatic)
+            .propagate_natural_height(true)
+            .max_content_height(120)
+            .min_content_height(100)
+            .build();
+
+        let pat_content_box = gtk4::Box::builder()
+            .orientation(gtk4::Orientation::Vertical)
+            .spacing(4)
+            .build();
+
+        let pat_grid = gtk4::FlowBox::builder()
+            .selection_mode(gtk4::SelectionMode::None)
+            .max_children_per_line(2)
+            .min_children_per_line(2)
+            .homogeneous(true)
+            .row_spacing(2)
+            .column_spacing(2)
+            .build();
+
+        let pattern_types = [
+            (crate::core::element::PatternType::Checkerboard, crate::core::gettext("Checkerboard")),
+            (crate::core::element::PatternType::Dots, crate::core::gettext("Dots")),
+            (crate::core::element::PatternType::Stripes, crate::core::gettext("Stripes")),
+            (crate::core::element::PatternType::Grid, crate::core::gettext("Grid")),
+            (crate::core::element::PatternType::Hexagon, crate::core::gettext("Honeycomb")),
+            (crate::core::element::PatternType::Crosshatch, crate::core::gettext("Crosshatch")),
+            (crate::core::element::PatternType::Brick, crate::core::gettext("Brick Wall")),
+            (crate::core::element::PatternType::Scales, crate::core::gettext("Scales")),
+            (crate::core::element::PatternType::Houndstooth, crate::core::gettext("Houndstooth")),
+            (crate::core::element::PatternType::Basketweave, crate::core::gettext("Basketweave")),
+        ];
+
+        for (pt, pt_name) in pattern_types {
+            let canvas_p = canvas.clone();
+            let tile = crate::ui::inspector::appearance::fills::create_pattern_preview_tile(
+                pt,
+                None,
+                &pt_name,
+                false,
+                move || {
+                    let fills_opt = canvas_p.get_selected_fills_and_strokes();
+                    let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                    if fills.is_empty() {
+                        fills.push(crate::core::FillLayer::default());
+                    }
+                    if let Some(f0) = fills.first_mut() {
+                        f0.style = crate::core::FillStyle::Pattern;
+                        f0.pattern_type = pt;
+                        f0.custom_pattern_path = None;
+                    }
+                    canvas_p.set_selected_fills(fills);
+                    canvas_p.set_active_tool("pattern");
+                },
+            );
+            pat_grid.append(&tile);
+        }
+
+        let user_patterns = crate::core::scan_user_patterns();
+        for cp in user_patterns {
+            let cp_name = cp.name.clone();
+            let cp_path = cp.file_path.clone();
+            let canvas_p = canvas.clone();
+            let tile = crate::ui::inspector::appearance::fills::create_pattern_preview_tile(
+                crate::core::element::PatternType::Custom,
+                Some(cp_path.clone()),
+                &cp_name,
+                false,
+                move || {
+                    let fills_opt = canvas_p.get_selected_fills_and_strokes();
+                    let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                    if fills.is_empty() {
+                        fills.push(crate::core::FillLayer::default());
+                    }
+                    if let Some(f0) = fills.first_mut() {
+                        f0.style = crate::core::FillStyle::Pattern;
+                        f0.pattern_type = crate::core::element::PatternType::Custom;
+                        f0.custom_pattern_path = Some(cp_path.clone());
+                    }
+                    canvas_p.set_selected_fills(fills);
+                    canvas_p.set_active_tool("pattern");
+                },
+            );
+            pat_grid.append(&tile);
+        }
+
+        pat_content_box.append(&pat_grid);
+        pat_scrolled.set_child(Some(&pat_content_box));
+        pattern_panel.append(&pat_scrolled);
+
+        // Pattern Color Stops (Color 1 Foreground & Color 2 Background)
+        let pat_stops_row = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Horizontal)
             .spacing(4)
             .halign(gtk4::Align::Fill)
             .build();
 
-        let pattern_types = [
-            (crate::core::gettext("Checkerboard"), "view-grid-symbolic"),
-            (crate::core::gettext("Dots"), "format-fill-symbolic"),
-            (
-                crate::core::gettext("Stripes"),
-                "distribute-vertical-symbolic",
-            ),
-            (crate::core::gettext("Grid"), "view-grid-symbolic"),
-            (crate::core::gettext("Honeycomb"), "lib-patterns-symbolic"),
-        ];
+        let pat_c1_btn = gtk4::Button::builder()
+            .css_classes(["flat", "color-stop-btn", "active"])
+            .hexpand(true)
+            .build();
+        let pat_c1_box = gtk4::Box::builder()
+            .orientation(gtk4::Orientation::Horizontal)
+            .spacing(6)
+            .halign(gtk4::Align::Center)
+            .build();
+        pat_c1_box.append(&pat_c1_da);
+        pat_c1_box.append(&gtk4::Label::new(Some(&crate::core::gettext("Pattern"))));
+        pat_c1_btn.set_child(Some(&pat_c1_box));
 
-        for (pt_name, pt_icon) in pattern_types {
-            let p_btn = gtk4::Button::builder()
-                .css_classes(["flat", "pill-btn"])
-                .hexpand(true)
-                .tooltip_text(&pt_name)
-                .build();
-            let b_content = gtk4::Box::builder()
-                .orientation(gtk4::Orientation::Horizontal)
-                .spacing(3)
-                .halign(gtk4::Align::Center)
-                .build();
-            let img = gtk4::Image::from_icon_name(pt_icon);
-            img.set_pixel_size(12);
-            let lbl = gtk4::Label::builder().label(&pt_name).build();
-            b_content.append(&img);
-            b_content.append(&lbl);
-            p_btn.set_child(Some(&b_content));
-            pat_types_box.append(&p_btn);
+        let pat_c2_btn = gtk4::Button::builder()
+            .css_classes(["flat", "color-stop-btn"])
+            .hexpand(true)
+            .build();
+        let pat_c2_box = gtk4::Box::builder()
+            .orientation(gtk4::Orientation::Horizontal)
+            .spacing(6)
+            .halign(gtk4::Align::Center)
+            .build();
+        pat_c2_box.append(&pat_c2_da);
+        pat_c2_box.append(&gtk4::Label::new(Some(&crate::core::gettext("Background"))));
+        pat_c2_btn.set_child(Some(&pat_c2_box));
+
+        let pat_swap_btn = gtk4::Button::builder()
+            .icon_name("object-flip-horizontal-symbolic")
+            .css_classes(["flat", "pill-btn"])
+            .tooltip_text(&crate::core::gettext("Swap Colors"))
+            .build();
+
+        let active_pat_stop = Rc::new(Cell::new(0usize));
+        {
+            let act_stop = active_pat_stop.clone();
+            let s1_b = pat_c1_btn.clone();
+            let s2_b = pat_c2_btn.clone();
+            let s1_c = pat_c1_col_cell.clone();
+            let ltc = load_tuner_color.clone();
+            pat_c1_btn.connect_clicked(move |_| {
+                act_stop.set(0);
+                s1_b.add_css_class("active");
+                s2_b.remove_css_class("active");
+                ltc(s1_c.get());
+            });
         }
-        pattern_panel.append(&pat_types_box);
-        card.append(&pattern_panel);
-
-        // Wire mode buttons
-        let on_mode_clone = on_mode_change.clone();
-        let mode_btns_clone = mode_buttons.clone();
-        let canvas_mode = canvas.clone();
-        for (i, btn) in mode_buttons.iter().enumerate() {
-            let on_mode = on_mode_clone.clone();
-            let all_btns = mode_btns_clone.clone();
-            let title_c = title_lbl.clone();
-            let mesh_p_c = mesh_panel.clone();
-            let pat_p_c = pattern_panel.clone();
-            let cv = canvas_mode.clone();
-            btn.connect_clicked(move |_| {
-                for (k, b) in all_btns.iter().enumerate() {
-                    if k == i {
-                        b.add_css_class("active");
+        {
+            let act_stop = active_pat_stop.clone();
+            let s1_b = pat_c1_btn.clone();
+            let s2_b = pat_c2_btn.clone();
+            let s2_c = pat_c2_col_cell.clone();
+            let ltc = load_tuner_color.clone();
+            pat_c2_btn.connect_clicked(move |_| {
+                act_stop.set(1);
+                s2_b.add_css_class("active");
+                s1_b.remove_css_class("active");
+                ltc(s2_c.get());
+            });
+        }
+        {
+            let cv_swap = canvas.clone();
+            let s1_c = pat_c1_col_cell.clone();
+            let s2_c = pat_c2_col_cell.clone();
+            let s1_da_c = pat_c1_da.clone();
+            let s2_da_c = pat_c2_da.clone();
+            let act_stop = active_pat_stop.clone();
+            let ltc = load_tuner_color.clone();
+            pat_swap_btn.connect_clicked(move |_| {
+                let fills_opt = cv_swap.get_selected_fills_and_strokes();
+                let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                if let Some(f0) = fills.first_mut() {
+                    std::mem::swap(&mut f0.color, &mut f0.secondary_color);
+                    s1_c.set(f0.color);
+                    s2_c.set(f0.secondary_color);
+                    if act_stop.get() == 0 {
+                        ltc(f0.color);
                     } else {
-                        b.remove_css_class("active");
+                        ltc(f0.secondary_color);
                     }
                 }
-                match i {
-                    0 => {
-                        title_c.set_text(&crate::core::gettext("Flat Color"));
-                        mesh_p_c.set_visible(false);
-                        pat_p_c.set_visible(false);
-                    }
-                    1 => {
-                        title_c.set_text(&crate::core::gettext("Gradient"));
-                        mesh_p_c.set_visible(false);
-                        pat_p_c.set_visible(false);
-                        cv.set_active_tool("gradient");
-                    }
-                    2 => {
-                        title_c.set_text(&crate::core::gettext("Mesh Gradient"));
-                        mesh_p_c.set_visible(true);
-                        pat_p_c.set_visible(false);
-                        cv.set_active_tool("mesh_gradient");
-                    }
-                    3 => {
-                        title_c.set_text(&crate::core::gettext("Patterns"));
-                        mesh_p_c.set_visible(false);
-                        pat_p_c.set_visible(true);
-                    }
-                    _ => {}
-                }
-                if let Some(cb) = on_mode.borrow().as_ref() {
-                    cb(i);
-                }
+                cv_swap.set_selected_fills(fills);
+                s1_da_c.queue_draw();
+                s2_da_c.queue_draw();
             });
         }
 
-        root_box.append(&top_modes_box);
+        pat_stops_row.append(&pat_c1_btn);
+        pat_stops_row.append(&pat_swap_btn);
+        pat_stops_row.append(&pat_c2_btn);
+        pattern_panel.append(&pat_stops_row);
 
-        // 2B. Body Row: [ Hue Slider (vertical) ] + [ SV Palette (2D Canvas) ]
+        // Pattern Scale Controls
+        let scale_row = gtk4::Box::builder()
+            .orientation(gtk4::Orientation::Horizontal)
+            .spacing(4)
+            .valign(gtk4::Align::Center)
+            .build();
+        let scale_lbl = gtk4::Label::builder()
+            .label(&crate::core::gettext("Scale"))
+            .css_classes(["caption"])
+            .build();
+        scale_row.append(&scale_lbl);
+
+        let pat_scale_slider = gtk4::Scale::with_range(gtk4::Orientation::Horizontal, 4.0, 128.0, 1.0);
+        pat_scale_slider.set_value(20.0);
+        pat_scale_slider.set_hexpand(true);
+        let cv_scale = canvas.clone();
+        pat_scale_slider.connect_value_changed(move |sc| {
+            let val = sc.value() as f32;
+            let fills_opt = cv_scale.get_selected_fills_and_strokes();
+            let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+            if let Some(f0) = fills.first_mut() {
+                f0.pattern_scale = val;
+            }
+            cv_scale.set_selected_fills(fills);
+        });
+        scale_row.append(&pat_scale_slider);
+        pattern_panel.append(&scale_row);
+
+        card.append(&pattern_panel);
+
+        // ── 5. SHARED COLOR TUNING SECTION (Compact & Ergonomic) ──
+        let divider_tuner = gtk4::Box::builder()
+            .css_classes(["color-picker-divider"])
+            .hexpand(true)
+            .build();
+        card.append(&divider_tuner);
+
         let body_row = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Horizontal)
-            .spacing(10)
-            .margin_top(4)
-            .margin_bottom(4)
+            .spacing(6)
+            .margin_top(2)
+            .margin_bottom(2)
             .build();
 
         // ── Vertical Hue Slider ──
@@ -420,13 +1302,12 @@ impl ColorPickerPopover {
         hue_area.set_draw_func(move |_area, cr, width, height| {
             let w = width as f64;
             let h = height as f64;
-            let radius = 10.0;
+            let radius = 8.0;
 
             cr.save().unwrap();
             draw_rounded_rect(cr, 0.0, 0.0, w, h, radius);
             cr.clip();
 
-            // Rainbow vertical gradient (0° to 360°)
             let pat = cairo::LinearGradient::new(0.0, 0.0, 0.0, h);
             pat.add_color_stop_rgb(0.0, 1.0, 0.0, 0.0);
             pat.add_color_stop_rgb(1.0 / 6.0, 1.0, 1.0, 0.0);
@@ -439,24 +1320,21 @@ impl ColorPickerPopover {
             let _ = cr.paint();
             cr.restore().unwrap();
 
-            // Subtle border
             draw_rounded_rect(cr, 0.5, 0.5, w - 1.0, h - 1.0, radius);
             cr.set_source_rgba(0.0, 0.0, 0.0, 0.25);
             cr.set_line_width(1.0);
             let _ = cr.stroke();
 
-            // Thumb capsule handle
             let cur_h = hue_clone.get() as f64;
-            let thumb_h = 14.0;
+            let thumb_h = 10.0;
             let thumb_y = (cur_h / 360.0 * (h - thumb_h)).clamp(0.0, h - thumb_h);
-            draw_rounded_rect(cr, 2.0, thumb_y, w - 4.0, thumb_h, 6.0);
+            draw_rounded_rect(cr, 2.0, thumb_y, w - 4.0, thumb_h, 5.0);
             cr.set_source_rgba(1.0, 1.0, 1.0, 1.0);
             let _ = cr.fill_preserve();
             cr.set_source_rgba(0.0, 0.0, 0.0, 0.45);
             cr.set_line_width(1.2);
             let _ = cr.stroke();
         });
-
         body_row.append(&hue_area);
 
         // ── 2D Saturation/Value Palette ──
@@ -467,77 +1345,67 @@ impl ColorPickerPopover {
         sv_area.set_draw_func(move |_area, cr, width, height| {
             let w = width as f64;
             let h = height as f64;
-            let radius = 10.0;
+            let radius = 8.0;
 
             cr.save().unwrap();
             draw_rounded_rect(cr, 0.0, 0.0, w, h, radius);
             cr.clip();
 
-            // Base Pure Hue color
             let cur_h = hue_for_sv.get();
             let pure_hue = Color::from_hsv(cur_h, 1.0, 1.0, 1.0);
             cr.set_source_rgb(pure_hue.r as f64, pure_hue.g as f64, pure_hue.b as f64);
             let _ = cr.paint();
 
-            // Horizontal white-to-transparent gradient (Saturation: Left = 0, Right = 1)
             let sat_grad = cairo::LinearGradient::new(0.0, 0.0, w, 0.0);
             sat_grad.add_color_stop_rgba(0.0, 1.0, 1.0, 1.0, 1.0);
             sat_grad.add_color_stop_rgba(1.0, 1.0, 1.0, 1.0, 0.0);
             cr.set_source(&sat_grad).unwrap();
             let _ = cr.paint();
 
-            // Vertical transparent-to-black gradient (Value: Top = 1, Bottom = 0)
             let val_grad = cairo::LinearGradient::new(0.0, 0.0, 0.0, h);
             val_grad.add_color_stop_rgba(0.0, 0.0, 0.0, 0.0, 0.0);
             val_grad.add_color_stop_rgba(1.0, 0.0, 0.0, 0.0, 1.0);
             cr.set_source(&val_grad).unwrap();
             let _ = cr.paint();
-
             cr.restore().unwrap();
 
-            // Subtle border
             draw_rounded_rect(cr, 0.5, 0.5, w - 1.0, h - 1.0, radius);
             cr.set_source_rgba(0.0, 0.0, 0.0, 0.25);
             cr.set_line_width(1.0);
             let _ = cr.stroke();
 
-            // Draggable Circular Cursor Handle
             let cur_s = sat_for_sv.get() as f64;
             let cur_v = val_for_sv.get() as f64;
-            let cursor_x = (cur_s * w).clamp(6.0, w - 6.0);
-            let cursor_y = ((1.0 - cur_v) * h).clamp(6.0, h - 6.0);
+            let cursor_x = (cur_s * w).clamp(5.0, w - 5.0);
+            let cursor_y = ((1.0 - cur_v) * h).clamp(5.0, h - 5.0);
 
-            // Outer drop shadow ring
-            cr.arc(cursor_x, cursor_y, 7.5, 0.0, std::f64::consts::TAU);
+            cr.arc(cursor_x, cursor_y, 6.5, 0.0, std::f64::consts::TAU);
             cr.set_source_rgba(0.0, 0.0, 0.0, 0.45);
-            cr.set_line_width(2.5);
+            cr.set_line_width(2.0);
             let _ = cr.stroke();
 
-            // Inner crisp white ring
-            cr.arc(cursor_x, cursor_y, 6.0, 0.0, std::f64::consts::TAU);
+            cr.arc(cursor_x, cursor_y, 5.0, 0.0, std::f64::consts::TAU);
             cr.set_source_rgba(1.0, 1.0, 1.0, 1.0);
-            cr.set_line_width(2.2);
+            cr.set_line_width(1.8);
             let _ = cr.stroke();
         });
-
         body_row.append(&sv_area);
         card.append(&body_row);
 
-        // ── 2C. Alpha / Opacity Horizontal Slider ──
+        // ── Alpha / Opacity Horizontal Slider ──
         let color_for_alpha = color.clone();
         let alpha_for_alpha = alpha.clone();
 
         alpha_area.set_draw_func(move |_area, cr, width, height| {
             let w = width as f64;
             let h = height as f64;
-            let radius = 10.0;
+            let radius = 8.0;
 
             cr.save().unwrap();
             draw_rounded_rect(cr, 0.0, 0.0, w, h, radius);
             cr.clip();
 
-            // Dark checkerboard transparency pattern
-            let check_size = 5.0;
+            let check_size = 4.0;
             let cols = (w / check_size).ceil() as usize;
             let rows = (h / check_size).ceil() as usize;
             for r in 0..rows {
@@ -547,90 +1415,56 @@ impl ColorPickerPopover {
                     } else {
                         cr.set_source_rgb(0.55, 0.55, 0.55);
                     }
-                    cr.rectangle(
-                        c as f64 * check_size,
-                        r as f64 * check_size,
-                        check_size,
-                        check_size,
-                    );
+                    cr.rectangle(c as f64 * check_size, r as f64 * check_size, check_size, check_size);
                     let _ = cr.fill();
                 }
             }
 
-            // Alpha gradient of current color
             let cur_c = color_for_alpha.get();
             let alpha_grad = cairo::LinearGradient::new(0.0, 0.0, w, 0.0);
-            alpha_grad.add_color_stop_rgba(
-                0.0,
-                cur_c.r as f64,
-                cur_c.g as f64,
-                cur_c.b as f64,
-                0.0,
-            );
-            alpha_grad.add_color_stop_rgba(
-                1.0,
-                cur_c.r as f64,
-                cur_c.g as f64,
-                cur_c.b as f64,
-                1.0,
-            );
+            alpha_grad.add_color_stop_rgba(0.0, cur_c.r as f64, cur_c.g as f64, cur_c.b as f64, 0.0);
+            alpha_grad.add_color_stop_rgba(1.0, cur_c.r as f64, cur_c.g as f64, cur_c.b as f64, 1.0);
             cr.set_source(&alpha_grad).unwrap();
             let _ = cr.paint();
-
             cr.restore().unwrap();
 
-            // Border
             draw_rounded_rect(cr, 0.5, 0.5, w - 1.0, h - 1.0, radius);
             cr.set_source_rgba(0.0, 0.0, 0.0, 0.3);
             cr.set_line_width(1.0);
             let _ = cr.stroke();
 
-            // Centered percentage text with shadow
             let cur_a = alpha_for_alpha.get();
             let pct_text = format!("{}%", (cur_a * 100.0).round() as i32);
-            cr.set_font_size(12.0);
+            cr.set_font_size(10.0);
             let ext = cr.text_extents(&pct_text).unwrap();
             let tx = (w - ext.width()) / 2.0 - ext.x_bearing();
             let ty = (h - ext.height()) / 2.0 - ext.y_bearing();
 
-            // Text shadow
             cr.move_to(tx + 1.0, ty + 1.0);
             cr.set_source_rgba(0.0, 0.0, 0.0, 0.7);
             let _ = cr.show_text(&pct_text);
 
-            // Text main
             cr.move_to(tx, ty);
             cr.set_source_rgba(1.0, 1.0, 1.0, 1.0);
             let _ = cr.show_text(&pct_text);
 
-            // Thumb slider handle
-            let thumb_w = 14.0;
+            let thumb_w = 12.0;
             let thumb_x = (cur_a as f64 * (w - thumb_w)).clamp(0.0, w - thumb_w);
-            draw_rounded_rect(cr, thumb_x, 2.0, thumb_w, h - 4.0, 6.0);
+            draw_rounded_rect(cr, thumb_x, 2.0, thumb_w, h - 4.0, 5.0);
             cr.set_source_rgba(1.0, 1.0, 1.0, 1.0);
             let _ = cr.fill_preserve();
             cr.set_source_rgba(0.0, 0.0, 0.0, 0.45);
             cr.set_line_width(1.2);
             let _ = cr.stroke();
         });
-
         card.append(&alpha_area);
 
-        // Bottom Divider
-        let divider_bottom = gtk4::Box::builder()
-            .css_classes(["color-picker-divider"])
-            .hexpand(true)
-            .build();
-        card.append(&divider_bottom);
-
-        // ── 2D. Footer: [ #000000ff 💉 ] ──
+        // ── Footer: [ Hex Input + Eyedropper ] ──
         let footer = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Horizontal)
-            .spacing(8)
-            .margin_start(4)
-            .margin_end(4)
-            .margin_top(4)
-            .margin_bottom(2)
+            .spacing(6)
+            .margin_top(2)
+            .margin_bottom(1)
             .valign(gtk4::Align::Center)
             .build();
 
@@ -643,7 +1477,6 @@ impl ColorPickerPopover {
             .css_classes(["color-picker-hex-capsule"])
             .valign(gtk4::Align::Center)
             .build();
-
         hex_box.append(&hex_entry);
 
         let eyedropper_btn = gtk4::Button::builder()
@@ -662,9 +1495,284 @@ impl ColorPickerPopover {
             });
         }
         hex_box.append(&eyedropper_btn);
-
         footer.append(&hex_box);
         card.append(&footer);
+
+        // ── 2-Row Swatches Grid (Recent Document Colors + Defaults) ──
+        let swatches_grid = gtk4::Box::builder()
+            .orientation(gtk4::Orientation::Vertical)
+            .spacing(4)
+            .halign(gtk4::Align::Center)
+            .margin_top(3)
+            .margin_bottom(1)
+            .build();
+
+        let row1 = gtk4::Box::builder()
+            .orientation(gtk4::Orientation::Horizontal)
+            .spacing(4)
+            .build();
+        let row2 = gtk4::Box::builder()
+            .orientation(gtk4::Orientation::Horizontal)
+            .spacing(4)
+            .build();
+
+        let mut palette_colors = Vec::new();
+        for opt_c in canvas.get_document_colors() {
+            if let Some(c) = opt_c {
+                if !palette_colors.contains(&c) {
+                    palette_colors.push(c);
+                }
+            }
+        }
+
+        let default_hexes = [
+            "#e01b24", "#ff7800", "#f6d32d", "#33d17a", "#3584e4",
+            "#9141ac", "#c061cb", "#241f31", "#77767b", "#ffffff",
+        ];
+
+        for hex in default_hexes {
+            if palette_colors.len() >= 10 {
+                break;
+            }
+            if let Some(c) = Color::from_hex(hex) {
+                if !palette_colors.contains(&c) {
+                    palette_colors.push(c);
+                }
+            }
+        }
+        palette_colors.truncate(10);
+
+        for (idx, col) in palette_colors.into_iter().enumerate() {
+            let btn = gtk4::Button::builder()
+                .css_classes(["flat", "swatch-chip"])
+                .tooltip_text(&col.to_hex_rgba())
+                .build();
+            let da = gtk4::DrawingArea::builder().content_width(20).content_height(20).build();
+            da.set_draw_func(move |_, cr, w, h| {
+                cr.arc(w as f64 * 0.5, h as f64 * 0.5, (w.min(h) as f64 * 0.5) - 1.0, 0.0, std::f64::consts::TAU);
+                cr.set_source_rgba(col.r as f64, col.g as f64, col.b as f64, col.a as f64);
+                let _ = cr.fill_preserve();
+                cr.set_source_rgba(0.0, 0.0, 0.0, 0.25);
+                cr.set_line_width(1.0);
+                let _ = cr.stroke();
+            });
+            btn.set_child(Some(&da));
+
+            let ltc = load_tuner_color.clone();
+            let cv_s = canvas.clone();
+            let cur_m = current_mode.clone();
+            let act_g = active_grad_stop.clone();
+            let act_mesh_n = active_mesh_node.clone();
+            let act_p = active_pat_stop.clone();
+            let g_stops = grad_stops_ref.clone();
+            let pc1_c = pat_c1_col_cell.clone();
+            let pc2_c = pat_c2_col_cell.clone();
+            let pc1_da_c = pat_c1_da.clone();
+            let pc2_da_c = pat_c2_da.clone();
+            let g_track_c = grad_track_da.clone();
+            let rbp_c = rebuild_stop_pills.clone();
+            let on_ch = on_change.clone();
+
+            btn.connect_clicked(move |_| {
+                ltc(col);
+                let mode = cur_m.get();
+
+                let fills_opt = cv_s.get_selected_fills_and_strokes();
+                let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                if fills.is_empty() {
+                    fills.push(crate::core::FillLayer::default());
+                }
+
+                if let Some(f0) = fills.first_mut() {
+                    match mode {
+                        0 => {
+                            f0.style = crate::core::FillStyle::Solid;
+                            f0.mesh = None;
+                            f0.stops.clear();
+                            f0.custom_pattern_path = None;
+                            f0.color = col;
+                            cv_s.set_fill_color(col);
+                        }
+                        1 => {
+                            let stop_idx = act_g.get();
+                            {
+                                let mut stops = g_stops.borrow_mut();
+                                if stop_idx < stops.len() {
+                                    stops[stop_idx].color = col;
+                                }
+                            }
+                            let stops_clone = g_stops.borrow().clone();
+                            f0.stops = stops_clone.clone();
+                            if let Some(s0) = stops_clone.first() {
+                                f0.color = s0.color;
+                            }
+                            if let Some(send) = stops_clone.last() {
+                                f0.secondary_color = send.color;
+                            }
+                            g_track_c.queue_draw();
+                            rbp_c();
+                        }
+                        2 => {
+                            let node_idx = act_mesh_n.get();
+                            cv_s.set_mesh_node_color(node_idx, col);
+                        }
+                        3 => {
+                            if act_p.get() == 0 {
+                                f0.color = col;
+                                pc1_c.set(col);
+                            } else {
+                                f0.secondary_color = col;
+                                pc2_c.set(col);
+                            }
+                            pc1_da_c.queue_draw();
+                            pc2_da_c.queue_draw();
+                        }
+                        _ => {}
+                    }
+                }
+                if mode != 2 {
+                    cv_s.set_selected_fills(fills);
+                }
+
+                if let Some(cb) = on_ch.borrow().as_ref() {
+                    cb(col);
+                }
+            });
+
+            if idx < 5 {
+                row1.append(&btn);
+            } else {
+                row2.append(&btn);
+            }
+        }
+        swatches_grid.append(&row1);
+        swatches_grid.append(&row2);
+        card.append(&swatches_grid);
+
+        // Wire mode tab switcher
+        let on_mode_clone = on_mode_change.clone();
+        let mode_btns_clone = mode_buttons.clone();
+        let canvas_mode = canvas.clone();
+        let rbp_mode = rebuild_stop_pills.clone();
+        let g_track_mode = grad_track_da.clone();
+        let g_stops_mode = grad_stops_ref.clone();
+
+        for (i, btn) in mode_buttons.iter().enumerate() {
+            let on_mode = on_mode_clone.clone();
+            let all_btns = mode_btns_clone.clone();
+            let title_c = title_lbl.clone();
+            let solid_p_c = solid_panel.clone();
+            let grad_p_c = gradient_panel.clone();
+            let mesh_p_c = mesh_panel.clone();
+            let pat_p_c = pattern_panel.clone();
+            let cur_m = current_mode.clone();
+            let cv = canvas_mode.clone();
+            let ltc = load_tuner_color.clone();
+            let rbp_fn = rbp_mode.clone();
+            let gt_draw = g_track_mode.clone();
+            let gst = g_stops_mode.clone();
+
+            btn.connect_clicked(move |_| {
+                for (k, b) in all_btns.iter().enumerate() {
+                    if k == i {
+                        b.add_css_class("active");
+                    } else {
+                        b.remove_css_class("active");
+                    }
+                }
+                cur_m.set(i);
+
+                solid_p_c.set_visible(i == 0);
+                grad_p_c.set_visible(i == 1);
+                mesh_p_c.set_visible(i == 2);
+                pat_p_c.set_visible(i == 3);
+
+                match i {
+                    0 => {
+                        title_c.set_text(&crate::core::gettext("Flat Color"));
+                        let fills_opt = cv.get_selected_fills_and_strokes();
+                        let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                        if fills.is_empty() {
+                            fills.push(crate::core::FillLayer::default());
+                        }
+                        if let Some(f0) = fills.first_mut() {
+                            f0.style = crate::core::FillStyle::Solid;
+                            f0.mesh = None;
+                            f0.stops.clear();
+                            f0.custom_pattern_path = None;
+                            ltc(f0.color);
+                        }
+                        cv.set_selected_fills(fills);
+                    }
+                    1 => {
+                        title_c.set_text(&crate::core::gettext("Gradient"));
+                        let fills_opt = cv.get_selected_fills_and_strokes();
+                        let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                        if fills.is_empty() {
+                            fills.push(crate::core::FillLayer::default());
+                        }
+                        if let Some(f0) = fills.first_mut() {
+                            f0.style = crate::core::FillStyle::LinearGradient;
+                            f0.mesh = None;
+                            f0.custom_pattern_path = None;
+                            if f0.stops.len() < 2 {
+                                f0.stops = vec![
+                                    crate::core::GradientStop::new(0.0, f0.color),
+                                    crate::core::GradientStop::new(1.0, f0.secondary_color),
+                                ];
+                            }
+                            let st = f0.effective_stops();
+                            *gst.borrow_mut() = st.clone();
+                            if let Some(s0) = st.first() {
+                                ltc(s0.color);
+                            }
+                        }
+                        cv.set_selected_fills(fills);
+                        cv.set_active_tool("gradient");
+                        rbp_fn();
+                        gt_draw.queue_draw();
+                    }
+                    2 => {
+                        title_c.set_text(&crate::core::gettext("Mesh Gradient"));
+                        cv.reset_selected_mesh_grid(3, 3, None, None);
+                        let active_mesh = cv.get_selected_mesh();
+                        if let Some(m) = active_mesh {
+                            if let Some(n0) = m.nodes.first() {
+                                ltc(n0.color);
+                            }
+                        }
+                        cv.set_active_tool("mesh_gradient");
+                    }
+                    3 => {
+                        title_c.set_text(&crate::core::gettext("Patterns"));
+                        let fills_opt = cv.get_selected_fills_and_strokes();
+                        let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                        if fills.is_empty() {
+                            fills.push(crate::core::FillLayer::default());
+                        }
+                        if let Some(f0) = fills.first_mut() {
+                            f0.style = crate::core::FillStyle::Pattern;
+                            f0.mesh = None;
+                            f0.stops.clear();
+                            f0.pattern_type = crate::core::element::PatternType::Checkerboard;
+                            f0.pattern_scale = 20.0;
+                            f0.secondary_color = crate::core::Color::WHITE;
+                            ltc(f0.color);
+                        }
+                        cv.set_selected_fills(fills);
+                        cv.set_active_tool("pattern");
+                    }
+                    _ => {}
+                }
+                if let Some(cb) = on_mode.borrow().as_ref() {
+                    cb(i);
+                }
+            });
+        }
+
+        if show_mode_switcher {
+            root_box.append(&top_modes_box);
+        }
 
         root_box.append(&card);
         popover.set_child(Some(&root_box));
@@ -676,6 +1784,9 @@ impl ColorPickerPopover {
             sat,
             val,
             alpha,
+            current_mode,
+            active_grad_stop,
+            active_mesh_node,
             on_change,
             on_mode_change,
             sv_area,
@@ -685,15 +1796,96 @@ impl ColorPickerPopover {
             is_updating,
             mode_buttons,
             title_lbl,
+            solid_panel,
+            gradient_panel,
             mesh_panel,
             pattern_panel,
+            grad_track_da,
+            grad_stops_ref,
+            pat_c1_da,
+            pat_c2_da,
+            canvas,
         };
 
-        instance.wire_events();
+        instance.wire_events(rebuild_stop_pills, active_pat_stop);
         instance
     }
 
-    fn wire_events(&self) {
+    fn wire_events(
+        &self,
+        rebuild_stop_pills: Rc<dyn Fn()>,
+        active_pat_stop: Rc<Cell<usize>>,
+    ) {
+        let cv = self.canvas.clone();
+        let cur_mode = self.current_mode.clone();
+        let act_grad_stop = self.active_grad_stop.clone();
+        let act_mesh_n = self.active_mesh_node.clone();
+        let act_p = active_pat_stop;
+        let g_stops = self.grad_stops_ref.clone();
+        let pc1_da = self.pat_c1_da.clone();
+        let pc2_da = self.pat_c2_da.clone();
+        let g_track_da = self.grad_track_da.clone();
+        let rbp_fn = rebuild_stop_pills;
+
+        let apply_current_color = move |new_col: Color| {
+            let mode = cur_mode.get();
+
+            let fills_opt = cv.get_selected_fills_and_strokes();
+            let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+            if fills.is_empty() {
+                fills.push(crate::core::FillLayer::default());
+            }
+
+            if let Some(f0) = fills.first_mut() {
+                match mode {
+                    0 => {
+                        f0.style = crate::core::FillStyle::Solid;
+                        f0.mesh = None;
+                        f0.stops.clear();
+                        f0.custom_pattern_path = None;
+                        f0.color = new_col;
+                        cv.set_fill_color(new_col);
+                    }
+                    1 => {
+                        let stop_idx = act_grad_stop.get();
+                        {
+                            let mut stops = g_stops.borrow_mut();
+                            if stop_idx < stops.len() {
+                                stops[stop_idx].color = new_col;
+                            }
+                        }
+                        let stops_clone = g_stops.borrow().clone();
+                        f0.stops = stops_clone.clone();
+                        if let Some(s0) = stops_clone.first() {
+                            f0.color = s0.color;
+                        }
+                        if let Some(send) = stops_clone.last() {
+                            f0.secondary_color = send.color;
+                        }
+                        g_track_da.queue_draw();
+                        rbp_fn();
+                    }
+                    2 => {
+                        let node_idx = act_mesh_n.get();
+                        cv.set_mesh_node_color(node_idx, new_col);
+                    }
+                    3 => {
+                        if act_p.get() == 0 {
+                            f0.color = new_col;
+                        } else {
+                            f0.secondary_color = new_col;
+                        }
+                        pc1_da.queue_draw();
+                        pc2_da.queue_draw();
+                    }
+                    _ => {}
+                }
+            }
+            if mode != 2 {
+                cv.set_selected_fills(fills);
+            }
+        };
+
         // ── Hue Gesture ──
         let hue_drag = gtk4::GestureDrag::new();
         let hue_c = self.hue.clone();
@@ -707,6 +1899,7 @@ impl ColorPickerPopover {
         let hue_redraw = self.hue_area.clone();
         let alpha_redraw = self.alpha_area.clone();
         let hex_e = self.hex_entry.clone();
+        let app_col1 = apply_current_color.clone();
 
         let update_hue_at = move |area: &gtk4::DrawingArea, y: f64| {
             let h_total = area.height() as f64;
@@ -726,6 +1919,8 @@ impl ColorPickerPopover {
             hue_redraw.queue_draw();
             sv_redraw.queue_draw();
             alpha_redraw.queue_draw();
+
+            app_col1(new_col);
 
             if let Some(cb) = on_ch.borrow().as_ref() {
                 cb(new_col);
@@ -760,6 +1955,7 @@ impl ColorPickerPopover {
         let sv_redraw2 = self.sv_area.clone();
         let alpha_redraw2 = self.alpha_area.clone();
         let hex_e2 = self.hex_entry.clone();
+        let app_col2 = apply_current_color.clone();
 
         let update_sv_at = move |area: &gtk4::DrawingArea, x: f64, y: f64| {
             let w = area.width() as f64;
@@ -781,6 +1977,8 @@ impl ColorPickerPopover {
 
             sv_redraw2.queue_draw();
             alpha_redraw2.queue_draw();
+
+            app_col2(new_col);
 
             if let Some(cb) = on_ch2.borrow().as_ref() {
                 cb(new_col);
@@ -814,6 +2012,7 @@ impl ColorPickerPopover {
         let is_upd3 = self.is_updating.clone();
         let alpha_redraw3 = self.alpha_area.clone();
         let hex_e3 = self.hex_entry.clone();
+        let app_col3 = apply_current_color.clone();
 
         let update_alpha_at = move |area: &gtk4::DrawingArea, x: f64| {
             let w = area.width() as f64;
@@ -831,28 +2030,30 @@ impl ColorPickerPopover {
 
             alpha_redraw3.queue_draw();
 
+            app_col3(new_col);
+
             if let Some(cb) = on_ch3.borrow().as_ref() {
                 cb(new_col);
             }
         };
 
         let ua_start = update_alpha_at.clone();
-        let area_a_start = self.alpha_area.clone();
+        let area_alpha_start = self.alpha_area.clone();
         alpha_drag.connect_drag_begin(move |_, x, _y| {
-            ua_start(&area_a_start, x);
+            ua_start(&area_alpha_start, x);
         });
 
         let ua_update = update_alpha_at.clone();
-        let area_a_update = self.alpha_area.clone();
+        let area_alpha_update = self.alpha_area.clone();
         alpha_drag.connect_drag_update(move |gesture, offset_x, _offset_y| {
             if let Some((start_x, _)) = gesture.start_point() {
-                ua_update(&area_a_update, start_x + offset_x);
+                ua_update(&area_alpha_update, start_x + offset_x);
             }
         });
 
         self.alpha_area.add_controller(alpha_drag);
 
-        // ── Hex Entry Live Updates & Activation ──
+        // ── Hex Entry Changes ──
         let hue_c4 = self.hue.clone();
         let sat_c4 = self.sat.clone();
         let val_c4 = self.val.clone();
@@ -863,41 +2064,30 @@ impl ColorPickerPopover {
         let sv_redraw4 = self.sv_area.clone();
         let hue_redraw4 = self.hue_area.clone();
         let alpha_redraw4 = self.alpha_area.clone();
+        let app_col4 = apply_current_color;
 
-        let handle_hex = move |txt: &str| {
+        self.hex_entry.connect_changed(move |entry| {
             if is_upd4.get() {
                 return;
             }
-            let trimmed = txt.trim();
-            if let Some(parsed) = Color::from_hex(trimmed) {
+            let text = entry.text();
+            if let Some(parsed) = Color::from_hex(&text) {
+                col_c4.set(parsed);
                 let (h, s, v) = parsed.to_hsv();
                 hue_c4.set(h);
                 sat_c4.set(s);
                 val_c4.set(v);
                 alpha_c4.set(parsed.a);
-                col_c4.set(parsed);
 
-                hue_redraw4.queue_draw();
                 sv_redraw4.queue_draw();
+                hue_redraw4.queue_draw();
                 alpha_redraw4.queue_draw();
+
+                app_col4(parsed);
 
                 if let Some(cb) = on_ch4.borrow().as_ref() {
                     cb(parsed);
                 }
-            }
-        };
-
-        let hh_act = handle_hex.clone();
-        self.hex_entry.connect_activate(move |entry| {
-            hh_act(&entry.text());
-        });
-
-        let hh_chg = handle_hex.clone();
-        self.hex_entry.connect_changed(move |entry| {
-            let txt = entry.text();
-            let clean_len = txt.trim().trim_start_matches('#').len();
-            if clean_len == 3 || clean_len == 4 || clean_len == 6 || clean_len == 8 {
-                hh_chg(&txt);
             }
         });
     }
@@ -919,6 +2109,9 @@ impl ColorPickerPopover {
         self.hue_area.queue_draw();
         self.sv_area.queue_draw();
         self.alpha_area.queue_draw();
+        self.grad_track_da.queue_draw();
+        self.pat_c1_da.queue_draw();
+        self.pat_c2_da.queue_draw();
     }
 
     pub fn on_color_changed<F: Fn(Color) + 'static>(&self, callback: F) {
@@ -933,27 +2126,25 @@ impl ColorPickerPopover {
                 b.remove_css_class("active");
             }
         }
+        self.current_mode.set(mode);
+
+        self.solid_panel.set_visible(mode == 0);
+        self.gradient_panel.set_visible(mode == 1);
+        self.mesh_panel.set_visible(mode == 2);
+        self.pattern_panel.set_visible(mode == 3);
+
         match mode {
             0 => {
                 self.title_lbl.set_text(&crate::core::gettext("Flat Color"));
-                self.mesh_panel.set_visible(false);
-                self.pattern_panel.set_visible(false);
             }
             1 => {
                 self.title_lbl.set_text(&crate::core::gettext("Gradient"));
-                self.mesh_panel.set_visible(false);
-                self.pattern_panel.set_visible(false);
             }
             2 => {
-                self.title_lbl
-                    .set_text(&crate::core::gettext("Mesh Gradient"));
-                self.mesh_panel.set_visible(true);
-                self.pattern_panel.set_visible(false);
+                self.title_lbl.set_text(&crate::core::gettext("Mesh Gradient"));
             }
             3 => {
                 self.title_lbl.set_text(&crate::core::gettext("Patterns"));
-                self.mesh_panel.set_visible(false);
-                self.pattern_panel.set_visible(true);
             }
             _ => {}
         }

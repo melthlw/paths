@@ -117,7 +117,7 @@ Development roadmap structured by version milestones.
 
 ### Code Quality & Compiler Cleanliness
 - [x] **Zero-Warning Codebase Cleanliness**:
-  - [x] Eliminated all dead code warnings and unused methods across 19 modules without resorting to `#[allow(dead_code)]`.
+  - [x] Eliminated all dead code warnings and unused methods across 19 modules without resorting to ``.
   - [x] Wrapped all dynamic plugin loading symbols in explicit `unsafe` blocks for Rust 2024 compliance.
 
 ---
@@ -137,9 +137,9 @@ Development roadmap structured by version milestones.
   - [x] *Brick Wall*: Interlocking 50% staggered courses with alternating vertical mortar joints.
   - [x] *Seigaiha Scales*: Concentric 180° semicircular arcs centered at grid transition points.
   - [x] Synchronized SVG export and Skia renderers for all patterns.
-- [ ] **Custom Pattern Management**:
-  - [ ] On-canvas interactive scaling, rotation, and offset handles for pattern fills.
-  - [ ] Load custom SVG/raster patterns from user asset folder (`~/.config/gnome-paths/patterns/`).
+- [x] **Custom Pattern Management**:
+  - [x] On-canvas interactive scaling, rotation, and offset handles for pattern fills.
+  - [x] Load custom SVG/raster patterns from user asset folder (`~/.config/gnome-paths/libraries/patterns/`).
 
 ### Gradients & Mesh
 - [x] **Multi-Stop Linear & Radial Gradients**:

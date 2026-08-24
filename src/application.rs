@@ -41,8 +41,12 @@ impl DesignApplication {
             // Apply persisted color scheme
             let scheme_str = crate::core::AppSettings::color_scheme();
             match scheme_str.as_str() {
-                "light" => adw::StyleManager::default().set_color_scheme(adw::ColorScheme::ForceLight),
-                "dark" => adw::StyleManager::default().set_color_scheme(adw::ColorScheme::ForceDark),
+                "light" => {
+                    adw::StyleManager::default().set_color_scheme(adw::ColorScheme::ForceLight)
+                }
+                "dark" => {
+                    adw::StyleManager::default().set_color_scheme(adw::ColorScheme::ForceDark)
+                }
                 _ => adw::StyleManager::default().set_color_scheme(adw::ColorScheme::Default),
             }
 
@@ -148,18 +152,14 @@ impl DesignApplication {
         }
     }
 
-    #[allow(deprecated)]
     fn show_shortcuts_dialog(app: &adw::Application) {
         let resource_ui = format!("{}/ui/shortcuts.ui", RESOURCE_PATH);
         let builder = gtk4::Builder::from_resource(&resource_ui);
-        if let Some(shortcuts_dialog) = builder.object::<gtk4::ShortcutsWindow>("shortcuts_dialog")
-        {
+        if let Some(shortcuts_dialog) = builder.object::<gtk4::Window>("shortcuts_dialog") {
             if let Some(win) = app.active_window() {
                 shortcuts_dialog.set_transient_for(Some(&win));
-                shortcuts_dialog.present();
-            } else {
-                shortcuts_dialog.present();
             }
+            shortcuts_dialog.present();
         }
     }
 }

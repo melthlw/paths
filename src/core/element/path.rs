@@ -392,6 +392,11 @@ impl PathElement {
                 }
             }
         }
+        if options.move_patterns {
+            for fill in &mut self.fills {
+                fill.pattern_offset.translate(dx, dy);
+            }
+        }
     }
 
     pub fn scale(&mut self, origin: Point, sx: f32, sy: f32) {
@@ -450,7 +455,9 @@ impl PathElement {
 
         if options.move_patterns {
             for fill in &mut self.fills {
-                fill.pattern_scale = (fill.pattern_scale * avg_scale).clamp(4.0, 1024.0);
+                fill.pattern_scale = (fill.pattern_scale * avg_scale).clamp(4.0, 2048.0);
+                fill.pattern_offset.x = origin.x + (fill.pattern_offset.x - origin.x) * sx;
+                fill.pattern_offset.y = origin.y + (fill.pattern_offset.y - origin.y) * sy;
             }
         }
     }
@@ -1054,19 +1061,7 @@ impl PathElement {
         let path = self.to_skia_path();
 
         // 1. Fills
-        if let Some(mesh) = &self.mesh_gradient {
-            render_mesh_gradient(canvas, &path, mesh);
-        } else if let Some(grad) = &self.gradient {
-            let mut paint = skia::Paint::default();
-            paint.set_style(skia::PaintStyle::Fill);
-            paint.set_anti_alias(true);
-            if let Some(shader) = create_skia_gradient_shader(grad) {
-                paint.set_shader(shader);
-            } else if let Some(fill) = self.fill_color {
-                paint.set_color4f(fill.to_skia(), None);
-            }
-            canvas.draw_path(&path, &paint);
-        } else if !self.fills.is_empty() {
+        if !self.fills.is_empty() {
             let bounds = self.bounds();
             for fill in self.fills.iter().rev() {
                 if !fill.enabled {
@@ -1087,6 +1082,18 @@ impl PathElement {
                     canvas.draw_path(&path, &paint);
                 }
             }
+        } else if let Some(mesh) = &self.mesh_gradient {
+            render_mesh_gradient(canvas, &path, mesh);
+        } else if let Some(grad) = &self.gradient {
+            let mut paint = skia::Paint::default();
+            paint.set_style(skia::PaintStyle::Fill);
+            paint.set_anti_alias(true);
+            if let Some(shader) = create_skia_gradient_shader(grad) {
+                paint.set_shader(shader);
+            } else if let Some(fill) = self.fill_color {
+                paint.set_color4f(fill.to_skia(), None);
+            }
+            canvas.draw_path(&path, &paint);
         } else if let Some(fill) = self.fill_color {
             let mut paint = skia::Paint::default();
             paint.set_color4f(fill.to_skia(), None);

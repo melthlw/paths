@@ -53,6 +53,7 @@ pub fn get_tool_meta(
         "page" => (crate::core::gettext("Artboard / Page"), Some("F")),
         "gradient" => (crate::core::gettext("Gradient"), Some("G")),
         "mesh_gradient" | "mesh" => (crate::core::gettext("Mesh Gradient"), Some("M")),
+        "pattern" => (crate::core::gettext("Pattern Tool"), Some("Shift+P")),
         _ => (crate::core::gettext(fallback_tooltip), None),
     }
 }

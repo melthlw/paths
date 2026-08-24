@@ -5,22 +5,20 @@ pub mod rect;
 pub mod style;
 pub mod text;
 
-#[allow(unused_imports)]
 pub use brush::{BrushMode, BrushStroke, BrushStyle, StrokeCap, StrokeJoin};
-#[allow(unused_imports)]
+
 pub use group::{CloneElement, GroupElement, ImageElement};
-#[allow(unused_imports)]
-pub use path::{dist_to_segment, ArcMode, PathElement, PathNode, ShapeOrigin};
-#[allow(unused_imports)]
+
+pub use path::{ArcMode, PathElement, PathNode, ShapeOrigin, dist_to_segment};
+
 pub use rect::{CornerRadii, CornerStyle, RectElement};
-#[allow(unused_imports)]
+
 pub use style::{
-    create_fill_paint, create_pattern_shader, create_skia_gradient_shader, render_mesh_gradient,
-    BlendMode, FillLayer, FillStyle, Gradient, GradientStop, GradientType, MeshGradient, MeshNode,
+    BlendMode, FillLayer, FillStyle, Gradient, GradientStop, GradientType, MeshGradient,
     PatternType, StrokeLayer, StrokeStyle,
 };
-#[allow(unused_imports)]
-pub use text::{get_cached_typeface, get_system_font_families, TextAlign, TextElement};
+
+pub use text::{TextAlign, TextElement, get_system_font_families};
 
 use skia_safe as skia;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -607,6 +605,27 @@ impl Element {
                     .iter()
                     .find(|f| f.enabled)
                     .map(|f| f.color.with_alpha(f.color.a * f.opacity));
+                if let Some(f0) = fills.first() {
+                    match f0.style {
+                        FillStyle::Solid => {
+                            r.mesh_gradient = None;
+                            r.gradient = None;
+                        }
+                        FillStyle::LinearGradient | FillStyle::RadialGradient => {
+                            r.mesh_gradient = None;
+                        }
+                        FillStyle::Mesh => {
+                            r.gradient = None;
+                            if let Some(m) = &f0.mesh {
+                                r.mesh_gradient = Some(m.clone());
+                            }
+                        }
+                        FillStyle::Pattern => {
+                            r.mesh_gradient = None;
+                            r.gradient = None;
+                        }
+                    }
+                }
                 r.fills = fills;
             }
             Element::Path(p) => {
@@ -614,6 +633,27 @@ impl Element {
                     .iter()
                     .find(|f| f.enabled)
                     .map(|f| f.color.with_alpha(f.color.a * f.opacity));
+                if let Some(f0) = fills.first() {
+                    match f0.style {
+                        FillStyle::Solid => {
+                            p.mesh_gradient = None;
+                            p.gradient = None;
+                        }
+                        FillStyle::LinearGradient | FillStyle::RadialGradient => {
+                            p.mesh_gradient = None;
+                        }
+                        FillStyle::Mesh => {
+                            p.gradient = None;
+                            if let Some(m) = &f0.mesh {
+                                p.mesh_gradient = Some(m.clone());
+                            }
+                        }
+                        FillStyle::Pattern => {
+                            p.mesh_gradient = None;
+                            p.gradient = None;
+                        }
+                    }
+                }
                 p.fills = fills;
             }
             Element::Brush(b) => {
@@ -884,7 +924,7 @@ mod tests {
         assert_eq!(pattern_fill.pattern_type, PatternType::Checkerboard);
 
         let bounds = Rect::new(0.0, 0.0, 200.0, 200.0);
-        let paint = create_fill_paint(&pattern_fill, bounds);
+        let paint = style::create_fill_paint(&pattern_fill, bounds);
         assert!(paint.shader().is_some());
 
         let types = [
@@ -895,7 +935,8 @@ mod tests {
             PatternType::Hexagon,
         ];
         for pt in types {
-            let shader = create_pattern_shader(pt, Color::RED, Color::BLUE, 20.0, 45.0);
+            let shader =
+                style::create_pattern_shader(pt, Color::RED, Color::BLUE, 20.0, 45.0, Point::ZERO, None);
             assert!(shader.is_some());
         }
 
@@ -1034,5 +1075,47 @@ mod tests {
         // Catmull-Rom generated smooth handles for intermediate nodes
         assert!(path_elem.nodes[1].handle_in.is_some());
         assert!(path_elem.nodes[1].handle_out.is_some());
+    }
+
+    #[test]
+    fn test_mesh_gradient_per_node_colors() {
+        let mut mesh = MeshGradient::new_grid(
+            crate::core::Rect::new(0.0, 0.0, 100.0, 100.0),
+            3,
+            3,
+            Color::RED,
+            Color::BLUE,
+        );
+        assert_eq!(mesh.nodes.len(), 9);
+        assert_eq!(mesh.nodes[0].color, Color::RED);
+
+        // Customize each node independently
+        let new_col = Color::from_hex("#00ff00").unwrap();
+        mesh.nodes[4].color = new_col;
+        assert_eq!(mesh.nodes[4].color, new_col);
+        assert_ne!(mesh.nodes[0].color, mesh.nodes[4].color);
+    }
+
+    #[test]
+    fn test_mesh_gradient_subdivision() {
+        let mut mesh = MeshGradient::new_grid(
+            crate::core::Rect::new(0.0, 0.0, 100.0, 100.0),
+            2,
+            2,
+            Color::RED,
+            Color::BLUE,
+        );
+        assert_eq!(mesh.rows, 2);
+        assert_eq!(mesh.cols, 2);
+        assert_eq!(mesh.nodes.len(), 4);
+
+        // Subdivide at point (50.0, 50.0) with green color
+        let green = Color::from_hex("#00ff00").unwrap();
+        let new_idx = mesh.subdivide_at(Point::new(50.0, 50.0), Some(green));
+        assert_eq!(mesh.rows, 3);
+        assert_eq!(mesh.cols, 3);
+        assert_eq!(mesh.nodes.len(), 9);
+        assert_eq!(mesh.nodes[new_idx].color, green);
+        assert_eq!(mesh.nodes[new_idx].point, Point::new(50.0, 50.0));
     }
 }

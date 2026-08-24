@@ -86,6 +86,36 @@ impl FeaturePlugin for GradientFeature {
 
         self.target_id = Some(target_id);
 
+        if self.live_gradient.is_none() {
+            for el in &ctx.document.elements {
+                if el.id() == target_id {
+                    let grad_opt = match el {
+                        Element::Rect(r) => r.gradient.clone(),
+                        Element::Path(p) => p.gradient.clone(),
+                        _ => None,
+                    };
+                    if let Some(g) = grad_opt {
+                        self.live_gradient = Some(g);
+                    } else if let Some(f0) = el.fills().first() {
+                        if f0.style == crate::core::FillStyle::LinearGradient
+                            || f0.style == crate::core::FillStyle::RadialGradient
+                        {
+                            let b = el.bounds();
+                            let start = Point::new(b.x, b.y + b.height * 0.5);
+                            let end = Point::new(b.x + b.width, b.y + b.height * 0.5);
+                            let mut g =
+                                Gradient::new_linear(start, end, f0.color, f0.secondary_color);
+                            if f0.style == crate::core::FillStyle::RadialGradient {
+                                g.kind = GradientType::Radial;
+                            }
+                            self.live_gradient = Some(g);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
         // Check if clicked near an existing handle
         let mut handle_hit = None;
         if let Some(grad) = &self.live_gradient {
@@ -108,6 +138,26 @@ impl FeaturePlugin for GradientFeature {
         if let Some(handle) = handle_hit {
             self.drag_handle = Some(handle);
             self.is_dragging = true;
+
+            if let Some(grad) = &self.live_gradient {
+                match handle {
+                    DraggingHandle::Start => {
+                        if let Some(s0) = grad.stops.first() {
+                            ctx.active_fill_color = s0.color;
+                        }
+                    }
+                    DraggingHandle::End => {
+                        if let Some(s_end) = grad.stops.last() {
+                            ctx.active_fill_color = s_end.color;
+                        }
+                    }
+                    DraggingHandle::Stop(idx) => {
+                        if let Some(s) = grad.stops.get(idx) {
+                            ctx.active_fill_color = s.color;
+                        }
+                    }
+                }
+            }
         } else {
             // Start a new gradient drag line
             self.drag_start = Some(event.world_pos);
@@ -173,6 +223,20 @@ impl FeaturePlugin for GradientFeature {
                             Element::Path(p) => p.gradient = Some(grad.clone()),
                             _ => {}
                         }
+                        let mut fills = el.fills();
+                        if fills.is_empty() {
+                            fills.push(crate::core::FillLayer::default());
+                        }
+                        if let Some(f0) = fills.first_mut() {
+                            f0.style = match grad.kind {
+                                GradientType::Radial => crate::core::FillStyle::RadialGradient,
+                                _ => crate::core::FillStyle::LinearGradient,
+                            };
+                            f0.color = grad.stops.first().map(|s| s.color).unwrap_or(Color::BLACK);
+                            f0.secondary_color =
+                                grad.stops.last().map(|s| s.color).unwrap_or(Color::WHITE);
+                        }
+                        el.set_fills(fills);
                         break;
                     }
                 }
@@ -196,6 +260,20 @@ impl FeaturePlugin for GradientFeature {
                             Element::Path(p) => p.gradient = Some(grad.clone()),
                             _ => {}
                         }
+                        let mut fills = el.fills();
+                        if fills.is_empty() {
+                            fills.push(crate::core::FillLayer::default());
+                        }
+                        if let Some(f0) = fills.first_mut() {
+                            f0.style = match grad.kind {
+                                GradientType::Radial => crate::core::FillStyle::RadialGradient,
+                                _ => crate::core::FillStyle::LinearGradient,
+                            };
+                            f0.color = grad.stops.first().map(|s| s.color).unwrap_or(Color::BLACK);
+                            f0.secondary_color =
+                                grad.stops.last().map(|s| s.color).unwrap_or(Color::WHITE);
+                        }
+                        el.set_fills(fills);
                         break;
                     }
                 }

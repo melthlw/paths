@@ -1029,7 +1029,6 @@ impl CanvasState {
                 .map(|p| p.rect.normalize())
                 .unwrap_or_else(|| crate::core::Rect::new(0.0, 0.0, 794.0, 1123.0));
             self.viewport.zoom_to_rect(page_rect, self.widget_size);
-            self.notify_status();
         }
 
         let active_fill = self.active_fill_color;

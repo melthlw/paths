@@ -122,7 +122,11 @@ impl ColorControlBar {
         let fill_area_inner = fill_area.clone();
         fill_picker.on_color_changed(move |col| {
             current_fill_inner.set(Some(col.to_gdk()));
-            canvas_fill_inner.set_fill_color(col);
+            let fills_opt = canvas_fill_inner.get_selected_fills_and_strokes();
+            let fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+            if fills.first().map(|f| f.style == crate::core::FillStyle::Solid).unwrap_or(true) {
+                canvas_fill_inner.set_fill_color(col);
+            }
             fill_area_inner.queue_draw();
         });
 
