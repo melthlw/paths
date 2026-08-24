@@ -242,13 +242,6 @@ impl AppSettings {
             .unwrap_or(true)
     }
 
-    #[allow(dead_code)]
-    pub fn set_snap_to_guides(snap: bool) {
-        if let Some(s) = settings() {
-            let _ = s.set_boolean("snap-to-guides", snap);
-        }
-    }
-
     pub fn grid_style() -> String {
         settings()
             .map(|s| s.string("grid-style").to_string())

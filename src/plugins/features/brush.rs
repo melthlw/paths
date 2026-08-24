@@ -71,11 +71,6 @@ impl BrushFeature {
         Self::default()
     }
 
-    #[allow(dead_code)]
-    pub fn point_count(&self) -> usize {
-        self.current_points.len()
-    }
-
     /// Real-time smoothing filter / stabilizer using exponential moving average and Chaikin corner smoothing
     fn smooth_points(raw: &[Point], smoothing_factor: f32) -> Vec<Point> {
         if raw.len() <= 2 || smoothing_factor <= 0.01 {
@@ -183,7 +178,11 @@ impl FeaturePlugin for BrushFeature {
         }
 
         // 1. Universal Selection: Check if clicking on ANY existing element with Ctrl / Shift or when already selected
-        if event.ctrl_pressed || event.shift_pressed || (ctx.document.selected_ids.len() > 0 && ctx.document.hit_test(event.world_pos).is_some()) {
+        if event.ctrl_pressed
+            || event.shift_pressed
+            || (ctx.document.selected_ids.len() > 0
+                && ctx.document.hit_test(event.world_pos).is_some())
+        {
             if let Some(hit_id) = ctx.document.hit_test(event.world_pos) {
                 ctx.document.select(hit_id, event.shift_pressed);
                 self.state = BrushToolState::MovingElement {
@@ -303,7 +302,10 @@ impl FeaturePlugin for BrushFeature {
                     let stroke_w = self.width.max(1.0);
                     let color = ctx.active_stroke_color.unwrap_or(ctx.active_fill_color);
 
-                    let is_closed = self.auto_close || (smoothed.len() > 3 && smoothed[0].distance_to(*smoothed.last().unwrap()) < (stroke_w * 2.0).max(12.0));
+                    let is_closed = self.auto_close
+                        || (smoothed.len() > 3
+                            && smoothed[0].distance_to(*smoothed.last().unwrap())
+                                < (stroke_w * 2.0).max(12.0));
 
                     match self.mode {
                         BrushMode::Pencil => {
@@ -365,7 +367,8 @@ impl FeaturePlugin for BrushFeature {
     ) {
         if self.current_points.len() >= 2 {
             let color = ctx.active_stroke_color.unwrap_or(ctx.active_fill_color);
-            let mut stroke = BrushStroke::new(self.current_points.clone(), color, self.width.max(1.0));
+            let mut stroke =
+                BrushStroke::new(self.current_points.clone(), color, self.width.max(1.0));
             stroke.style = self.style;
             stroke.calligraphy_angle = self.calligraphy_angle;
             stroke.auto_close = self.auto_close;
@@ -375,4 +378,3 @@ impl FeaturePlugin for BrushFeature {
         }
     }
 }
-

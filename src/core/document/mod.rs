@@ -219,16 +219,6 @@ impl Document {
         self.selected_ids.clear();
     }
 
-    #[allow(dead_code)]
-    pub fn clear(&mut self) {
-        if self.elements.is_empty() {
-            return;
-        }
-        self.snapshot();
-        self.elements.clear();
-        self.selected_ids.clear();
-    }
-
     pub fn find_element(&self, id: ElementId) -> Option<&Element> {
         Self::find_element_recursive(&self.elements, id)
     }

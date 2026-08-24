@@ -16,16 +16,9 @@ use std::rc::Rc;
 use crate::plugins::manifest::BarPosition;
 use crate::ui::canvas::CanvasWidget;
 
-#[allow(dead_code)]
-pub struct FloatingToolbar {
-    container: gtk4::Box,
-}
+pub struct FloatingToolbar {}
 
 impl FloatingToolbar {
-    #[allow(dead_code)]
-    pub fn widget(&self) -> &gtk4::Box {
-        &self.container
-    }
     pub fn new(
         canvas: CanvasWidget,
         dock_box: gtk4::Box,
@@ -336,7 +329,7 @@ impl FloatingToolbar {
             });
         }
 
-        let grip_click = gtk4::GestureClick::builder().build();
+        let grip_click = gtk4::GestureClick::builder().button(3).build();
         let pop_gc = popover.clone();
         grip_click.connect_released(move |_, _, _, _| {
             pop_gc.popup();
@@ -350,7 +343,7 @@ impl FloatingToolbar {
         });
         grip.add_controller(grip_long);
 
-        let toolbar = Self { container };
+        let toolbar = Self {};
 
         // Listen for canvas tool changes (e.g. keyboard shortcuts V, A, P, B, R, T)
         let buttons_clone = buttons.clone();

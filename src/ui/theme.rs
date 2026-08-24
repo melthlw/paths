@@ -486,15 +486,6 @@ impl ToolbarIconSize {
         }
     }
 
-    #[allow(dead_code)]
-    pub fn label(self) -> String {
-        match self {
-            Self::Small => crate::core::gettext("Small (16px)"),
-            Self::Medium => crate::core::gettext("Medium (20px)"),
-            Self::Large => crate::core::gettext("Large (24px)"),
-        }
-    }
-
     pub fn css(self) -> &'static str {
         match self {
             Self::Small => {
@@ -553,16 +544,6 @@ impl InterfaceScale {
             1 => Self::Default,
             2 => Self::Comfortable,
             _ => Self::Large,
-        }
-    }
-
-    #[allow(dead_code)]
-    pub fn label(self) -> String {
-        match self {
-            Self::Compact => crate::core::gettext("Compact (90%)"),
-            Self::Default => crate::core::gettext("Default (100%)"),
-            Self::Comfortable => crate::core::gettext("Comfortable (110%)"),
-            Self::Large => crate::core::gettext("Large (125%)"),
         }
     }
 

@@ -133,27 +133,44 @@ pub fn rebuild_toolbar_items(
         let is_grouped = !item.sub_tools.is_empty();
 
         let icon_img = if let Some(res) = item.icon_resource {
-            crate::ui::icons::make_symbolic_image(res, 20)
+            crate::ui::icons::make_symbolic_image(res, 22)
         } else {
-            crate::ui::icons::make_symbolic_image(item.icon_name, 20)
+            crate::ui::icons::make_symbolic_image(item.icon_name, 22)
         };
 
         let button_child: gtk4::Widget = if is_grouped {
             let overlay = gtk4::Overlay::new();
-            overlay.set_size_request(24, 24);
-            overlay.set_halign(gtk4::Align::Center);
-            overlay.set_valign(gtk4::Align::Center);
-
-            icon_img.set_halign(gtk4::Align::Center);
-            icon_img.set_valign(gtk4::Align::Center);
             overlay.set_child(Some(&icon_img));
 
-            let indicator = crate::ui::icons::make_symbolic_image("tool-options-symbolic", 6);
+            let indicator = gtk4::DrawingArea::new();
+            indicator.set_content_width(6);
+            indicator.set_content_height(6);
             indicator.set_halign(gtk4::Align::End);
             indicator.set_valign(gtk4::Align::End);
-            indicator.set_margin_end(0);
-            indicator.set_margin_bottom(0);
-            indicator.set_opacity(0.9);
+            indicator.set_margin_end(1);
+            indicator.set_margin_bottom(1);
+            indicator.set_draw_func(move |da, cr, w, h| {
+                let w = w as f64;
+                let h = h as f64;
+                let r = 1.5_f64; // corner radius
+                // Rounded triangle: top-right -> bottom-right -> bottom-left
+                cr.new_path();
+                // Top-right corner
+                cr.arc(w - r, r, r, -std::f64::consts::FRAC_PI_2, 0.0);
+                // Bottom-right corner
+                cr.arc(w - r, h - r, r, 0.0, std::f64::consts::FRAC_PI_2);
+                // Bottom-left corner
+                cr.arc(r, h - r, r, std::f64::consts::FRAC_PI_2, std::f64::consts::PI);
+                cr.close_path();
+                let c = da.color();
+                cr.set_source_rgba(
+                    c.red() as f64,
+                    c.green() as f64,
+                    c.blue() as f64,
+                    0.5,
+                );
+                let _ = cr.fill();
+            });
             overlay.add_overlay(&indicator);
 
             overlay.upcast()
@@ -173,6 +190,8 @@ pub fn rebuild_toolbar_items(
             .active(is_active)
             .css_classes(["flat"])
             .focus_on_click(false)
+            .valign(gtk4::Align::Center)
+            .halign(gtk4::Align::Center)
             .build();
 
         if let Some(ref first) = first_toggle {

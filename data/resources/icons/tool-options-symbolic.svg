@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-  <path fill="currentColor" d="M 0 16 L 16 0 L 16 16 Z"/>
+  <path fill="currentColor" d="M 2 16 L 16 2 L 16 13.5 A 2.5 2.5 0 0 1 13.5 16 Z"/>
 </svg>

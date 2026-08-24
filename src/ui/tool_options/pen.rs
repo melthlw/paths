@@ -8,10 +8,6 @@ use crate::ui::canvas::CanvasWidget;
 #[derive(Clone)]
 pub struct PenControls {
     pub pen_box: gtk4::Box,
-    #[allow(dead_code)]
-    pub btn_mode_bezier: gtk4::ToggleButton,
-    #[allow(dead_code)]
-    pub btn_mode_lines: gtk4::ToggleButton,
     pub btn_undo_node: gtk4::Button,
     pub btn_close_path: gtk4::Button,
     pub btn_finish_path: gtk4::Button,
@@ -35,7 +31,9 @@ pub fn build_pen_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) ->
 
     let btn_mode_bezier = gtk4::ToggleButton::builder()
         .icon_name("tool-vector-pen-symbolic")
-        .tooltip_text(&crate::core::gettext("Bézier Mode (Smooth Curves & Angles)"))
+        .tooltip_text(&crate::core::gettext(
+            "Bézier Mode (Smooth Curves & Angles)",
+        ))
         .active(true)
         .css_classes(["flat"])
         .build();
@@ -101,7 +99,9 @@ pub fn build_pen_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) ->
     // 2. Undo Last Node Button
     let btn_undo_node = gtk4::Button::builder()
         .icon_name("edit-undo-symbolic")
-        .tooltip_text(&crate::core::gettext("Delete / Undo Last Placed Node (Backspace)"))
+        .tooltip_text(&crate::core::gettext(
+            "Delete / Undo Last Placed Node (Backspace)",
+        ))
         .css_classes(["flat"])
         .valign(gtk4::Align::Center)
         .build();
@@ -173,8 +173,6 @@ pub fn build_pen_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) ->
 
     PenControls {
         pen_box,
-        btn_mode_bezier,
-        btn_mode_lines,
         btn_undo_node,
         btn_close_path,
         btn_finish_path,

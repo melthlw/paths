@@ -325,7 +325,10 @@ impl ColorPickerPopover {
         let pattern_types = [
             (crate::core::gettext("Checkerboard"), "view-grid-symbolic"),
             (crate::core::gettext("Dots"), "format-fill-symbolic"),
-            (crate::core::gettext("Stripes"), "distribute-vertical-symbolic"),
+            (
+                crate::core::gettext("Stripes"),
+                "distribute-vertical-symbolic",
+            ),
             (crate::core::gettext("Grid"), "view-grid-symbolic"),
             (crate::core::gettext("Honeycomb"), "lib-patterns-symbolic"),
         ];
@@ -922,11 +925,6 @@ impl ColorPickerPopover {
         *self.on_change.borrow_mut() = Some(Box::new(callback));
     }
 
-    #[allow(dead_code)]
-    pub fn on_mode_changed<F: Fn(usize) + 'static>(&self, callback: F) {
-        *self.on_mode_change.borrow_mut() = Some(Box::new(callback));
-    }
-
     pub fn set_mode(&self, mode: usize) {
         for (k, b) in self.mode_buttons.iter().enumerate() {
             if k == mode {
@@ -973,13 +971,6 @@ impl ColorPickerPopover {
             self.popover.unparent();
         }
         self.popover.set_parent(widget);
-    }
-
-    #[allow(dead_code)]
-    pub fn unparent(&self) {
-        if self.popover.parent().is_some() {
-            self.popover.unparent();
-        }
     }
 
     pub fn popup(&self) {

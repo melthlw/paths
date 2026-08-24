@@ -34,7 +34,7 @@ pub use geometry::{
 pub use grid::{GridConfig, GridStyle};
 #[allow(unused_imports)]
 pub use i18n::{
-    get_language, gettext, init as init_i18n, on_language_change, on_language_change_local,
+    get_language, gettext, init as init_i18n, on_language_change_local,
     set_language, Language,
 };
 pub use io::{load_document_from_file, save_document_to_file};
@@ -52,6 +52,6 @@ pub use snap::{SnapConfig, SnapEngine, SnapGuide};
 pub use svg_export::export_document_to_svg;
 #[allow(unused_imports)]
 pub use svg_import::{
-    parse_svg, parse_svg_path_data, parse_svg_path_data_subpaths, parse_svg_path_to_elements,
+    parse_svg, parse_svg_path_data_subpaths, parse_svg_path_to_elements,
 };
 pub use units::{eval_math_expression, Unit};

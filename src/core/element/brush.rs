@@ -1,12 +1,12 @@
 use skia_safe as skia;
 
-use crate::core::color::Color;
-use crate::core::geometry::{Point, Rect};
-use crate::core::element::path::{PathElement, PathNode};
-use crate::core::NodeType;
 use super::path::dist_to_segment;
 use super::style::BlendMode;
 use super::ElementId;
+use crate::core::color::Color;
+use crate::core::element::path::{PathElement, PathNode};
+use crate::core::geometry::{Point, Rect};
+use crate::core::NodeType;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, Default)]
 pub enum StrokeCap {
@@ -53,20 +53,6 @@ pub enum BrushStyle {
     Ink,
     Marker,
     Airbrush,
-}
-
-impl BrushStyle {
-    #[allow(dead_code)]
-    pub fn name(&self) -> &'static str {
-        match self {
-            BrushStyle::Round => "Solid Round",
-            BrushStyle::Pencil => "Pencil (Graphite)",
-            BrushStyle::Calligraphy => "Calligraphy (Chisel 45°)",
-            BrushStyle::Ink => "Ink Pen (Tapered)",
-            BrushStyle::Marker => "Marker (Highlighter)",
-            BrushStyle::Airbrush => "Airbrush (Soft)",
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, Default)]
@@ -206,7 +192,11 @@ impl BrushStroke {
             for i in 0..n {
                 let p_curr = self.points[i];
                 let p_prev = if i > 0 { self.points[i - 1] } else { p_curr };
-                let p_next = if i + 1 < n { self.points[i + 1] } else { p_curr };
+                let p_next = if i + 1 < n {
+                    self.points[i + 1]
+                } else {
+                    p_curr
+                };
 
                 // Handle out towards next
                 let handle_out = if i + 1 < n {
@@ -236,7 +226,11 @@ impl BrushStroke {
         let mut path_elem = PathElement::new(
             nodes,
             self.auto_close,
-            if self.auto_close { Some(self.color.with_alpha(0.3)) } else { None },
+            if self.auto_close {
+                Some(self.color.with_alpha(0.3))
+            } else {
+                None
+            },
             Some(self.color),
             self.width,
         );
@@ -354,4 +348,3 @@ impl BrushStroke {
         }
     }
 }
-

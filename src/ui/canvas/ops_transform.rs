@@ -439,36 +439,6 @@ impl CanvasWidget {
         self.drawing_area.queue_draw();
     }
 
-    #[allow(dead_code)]
-    pub fn get_selected_node_coord(&self) -> Option<Point> {
-        if let Ok(state) = self.state.try_borrow() {
-            if let Some(feat) = state.plugin_manager.feature_by_id("path_editor") {
-                let nodes = feat.get_selected_nodes();
-                state.document.get_selected_node_coord(&nodes)
-            } else {
-                None
-            }
-        } else {
-            None
-        }
-    }
-
-    #[allow(dead_code)]
-    pub fn set_selected_node_coord(&self, new_pos: Point) {
-        let mut state = self.state.borrow_mut();
-        let selected_nodes = if let Some(feat) = state.plugin_manager.feature_by_id("path_editor") {
-            feat.get_selected_nodes()
-        } else {
-            Vec::new()
-        };
-        state
-            .document
-            .set_selected_node_coord(&selected_nodes, new_pos);
-        drop(state);
-        self.notify_status();
-        self.drawing_area.queue_draw();
-    }
-
     pub fn transform_options(&self) -> crate::core::TransformOptions {
         self.state
             .try_borrow()

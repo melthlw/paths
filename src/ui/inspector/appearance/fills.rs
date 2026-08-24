@@ -57,6 +57,7 @@ impl FillRow {
             .css_classes(["pill-btn"])
             .valign(gtk4::Align::Center)
             .tooltip_text(crate::core::gettext("Fill Style"))
+            .hexpand(entry.style != FillStyle::Solid)
             .build();
         line1.append(&style_btn);
 
@@ -162,7 +163,6 @@ impl FillRow {
         color_btn1.connect_clicked(move |_| {
             p1_open.popup();
         });
-        line1.append(&color_btn1);
 
         let hex_entry1 = gtk4::Entry::builder()
             .text(entry.color.to_hex())
@@ -170,7 +170,7 @@ impl FillRow {
             .max_width_chars(9)
             .css_classes(["numeric", "pill-entry"])
             .valign(gtk4::Align::Center)
-            .hexpand(entry.style == FillStyle::Solid)
+            .hexpand(true)
             .build();
 
         let (
@@ -179,7 +179,9 @@ impl FillRow {
             col2_cell_opt,
             swatch2_area_opt,
             picker2_opt,
-            _angle_btn_opt,
+            pat_btn_opt,
+            mesh_btn_opt,
+            angle_btn_opt,
         ) = if entry.style != FillStyle::Solid {
             let (color_btn2, swatch2_area, col2_cell) = create_swatch_button(entry.secondary_color);
             let picker2 = ColorPickerPopover::new(canvas.clone(), entry.secondary_color, mode1_idx);
@@ -191,7 +193,6 @@ impl FillRow {
             color_btn2.connect_clicked(move |_| {
                 p2_open.popup();
             });
-            line1.append(&color_btn2);
 
             let hex_entry2 = gtk4::Entry::builder()
                 .text(entry.secondary_color.to_hex())
@@ -202,7 +203,7 @@ impl FillRow {
                 .hexpand(true)
                 .build();
 
-            if entry.style == FillStyle::Pattern {
+            let pat_btn_opt = if entry.style == FillStyle::Pattern {
                 let pat_btn = gtk4::Button::builder()
                     .label(entry.pattern_type.label())
                     .css_classes(["pill-btn"])
@@ -265,12 +266,14 @@ impl FillRow {
                 pat_btn.connect_clicked(move |_| {
                     pop_c.popup();
                 });
-                line1.append(&pat_btn);
-            }
+                Some(pat_btn)
+            } else {
+                None
+            };
 
-            if entry.style == FillStyle::Mesh {
+            let mesh_btn_opt = if entry.style == FillStyle::Mesh {
                 let mesh_tool_btn = gtk4::Button::builder()
-                    .label(crate::core::gettext("Mesh"))
+                    .label(crate::core::gettext("Mesh Tool"))
                     .icon_name("action-unavailable-symbolic")
                     .css_classes(["pill-btn"])
                     .valign(gtk4::Align::Center)
@@ -283,8 +286,10 @@ impl FillRow {
                 mesh_tool_btn.connect_clicked(move |_| {
                     canvas_m.set_active_tool("mesh_gradient");
                 });
-                line1.append(&mesh_tool_btn);
-            }
+                Some(mesh_tool_btn)
+            } else {
+                None
+            };
 
             let angle_btn =
                 if entry.style == FillStyle::LinearGradient || entry.style == FillStyle::Pattern {
@@ -348,7 +353,6 @@ impl FillRow {
                     abtn.connect_clicked(move |_| {
                         ap_open.popup();
                     });
-                    line1.append(&abtn);
                     Some(abtn)
                 } else {
                     None
@@ -360,17 +364,27 @@ impl FillRow {
                 Some(col2_cell),
                 Some(swatch2_area),
                 Some(picker2),
+                pat_btn_opt,
+                mesh_btn_opt,
                 angle_btn,
             )
         } else {
-            (None, None, None, None, None, None)
+            (None, None, None, None, None, None, None, None)
         };
 
-        if let Some(hex2) = &hex_entry2_opt {
+        if entry.style == FillStyle::Solid {
+            line1.append(&color_btn1);
             line1.append(&hex_entry1);
-            line1.append(hex2);
         } else {
-            line1.append(&hex_entry1);
+            if let Some(ref pbtn) = pat_btn_opt {
+                line1.append(pbtn);
+            }
+            if let Some(ref mbtn) = mesh_btn_opt {
+                line1.append(mbtn);
+            }
+            if let Some(ref abtn) = angle_btn_opt {
+                line1.append(abtn);
+            }
         }
 
         let op_pct = (entry.opacity * 100.0).round() as i32;
@@ -443,6 +457,27 @@ impl FillRow {
         line1.append(&del_btn);
 
         container.append(&line1);
+
+        // Line 2: Colors and hex codes for multi-control fill styles (gradients, patterns, mesh)
+        if entry.style != FillStyle::Solid {
+            let line2 = gtk4::Box::builder()
+                .orientation(gtk4::Orientation::Horizontal)
+                .spacing(6)
+                .valign(gtk4::Align::Center)
+                .build();
+
+            line2.append(&color_btn1);
+            line2.append(&hex_entry1);
+
+            if let Some(color_btn2) = _color_btn2_opt {
+                line2.append(&color_btn2);
+            }
+            if let Some(hex2) = &hex_entry2_opt {
+                line2.append(hex2);
+            }
+
+            container.append(&line2);
+        }
 
         // Wire controls for Color 1
         {

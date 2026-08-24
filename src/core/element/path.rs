@@ -44,20 +44,6 @@ impl PathNode {
         }
     }
 
-    #[allow(dead_code)]
-    pub fn with_type(
-        point: Point,
-        handle_in: Option<Point>,
-        handle_out: Option<Point>,
-        node_type: NodeType,
-    ) -> Self {
-        Self {
-            point,
-            handle_in,
-            handle_out,
-            node_type,
-        }
-    }
 
     pub fn translate(&mut self, dx: f32, dy: f32) {
         self.point.x += dx;
@@ -80,10 +66,7 @@ impl PathNode {
         self.node_type == NodeType::Symmetric
     }
 
-    #[allow(dead_code)]
-    pub fn is_corner(&self) -> bool {
-        self.node_type == NodeType::Corner
-    }
+
 
     pub fn is_auto(&self) -> bool {
         self.node_type == NodeType::Auto
@@ -217,18 +200,7 @@ impl PathElement {
         elem
     }
 
-    #[allow(dead_code)]
-    pub fn new_from_subpaths(
-        subpaths: Vec<Vec<PathNode>>,
-        is_closed: bool,
-        fill_color: Option<Color>,
-        stroke_color: Option<Color>,
-        stroke_width: f32,
-    ) -> Self {
-        let subpath_lengths = subpaths.iter().map(|s| s.len()).collect();
-        let nodes = subpaths.into_iter().flatten().collect();
-        Self::new_compound(nodes, subpath_lengths, is_closed, fill_color, stroke_color, stroke_width)
-    }
+
 
     pub fn to_skia_path(&self) -> skia::Path {
         if self.nodes.is_empty() {
@@ -249,7 +221,11 @@ impl PathElement {
 
                 builder.move_to(sub[0].point.to_skia());
                 let count = sub.len();
-                let loop_count = if self.is_closed { count } else { count.saturating_sub(1) };
+                let loop_count = if self.is_closed {
+                    count
+                } else {
+                    count.saturating_sub(1)
+                };
                 for i in 0..loop_count {
                     let n1 = &sub[i];
                     let n2 = &sub[(i + 1) % count];
@@ -275,7 +251,11 @@ impl PathElement {
         } else {
             builder.move_to(self.nodes[0].point.to_skia());
             let count = self.nodes.len();
-            let loop_count = if self.is_closed { count } else { count.saturating_sub(1) };
+            let loop_count = if self.is_closed {
+                count
+            } else {
+                count.saturating_sub(1)
+            };
 
             for i in 0..loop_count {
                 let n1 = &self.nodes[i];
@@ -1142,13 +1122,8 @@ mod tests {
             PathNode::new(Point::new(25.0, 75.0)),
         ];
 
-        let compound = PathElement::new_from_subpaths(
-            vec![outer, inner],
-            true,
-            Some(Color::BLACK),
-            None,
-            1.0,
-        );
+        let compound =
+            PathElement::new_from_subpaths(vec![outer, inner], true, Some(Color::BLACK), None, 1.0);
 
         assert_eq!(compound.subpath_lengths, vec![4, 4]);
         assert_eq!(compound.nodes.len(), 8);
