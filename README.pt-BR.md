@@ -3,128 +3,170 @@
 </p>
 
 <h1 align="center">GNOME Paths</h1>
-<p align="center"><em>Editor de gráficos vetoriais e ilustrações para o ambiente GNOME.</em></p>
 
 <p align="center">
-  🇺🇸 <a href="README.md">Read in English</a>
+  <b>Estúdio moderno de ilustrações e computação gráfica vetorial acelerado por GPU para o GNOME.</b>
 </p>
 
 <p align="center">
-  Criar e editar gráficos vetoriais com mais rápidez, responsividade e perfeitamente integrado ao ambiente de trabalho.
+  <a href="README.pt-BR.md">Versão em Português</a> • 
+  <a href="README.md">Versão em Inglês</a>
 </p>
 
 <p align="center">
-  O <b>GNOME Paths</b> é uma ferramenta de design vetorial leve, construída com <b>GTK4</b>, <b>Libadwaita</b>, <b>Rust</b> e o motor gráfico <b>Skia</b>.
+  <img alt="GTK4" src="https://img.shields.io/badge/GTK-4.18+-3584e4.svg?style=flat-square&logo=gnome" />
+  <img alt="Libadwaita" src="https://img.shields.io/badge/Libadwaita-1.6+-9141ac.svg?style=flat-square" />
+  <img alt="Rust" src="https://img.shields.io/badge/Rust-2021%20%2F%202024-e66100.svg?style=flat-square&logo=rust" />
+  <img alt="Engine" src="https://img.shields.io/badge/Engine-Skia%202D%20GPU-26a269.svg?style=flat-square" />
+  <img alt="Licença" src="https://img.shields.io/badge/Licença-GPL--3.0--or--later-1c71d8.svg?style=flat-square" />
 </p>
 
-<div align="center">
-  <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1em;">
-    <a href="https://flathub.org/">
-      <img width="190" alt="Baixar no Flathub" src="https://flathub.org/api/badge?locale=pt_BR" />
-    </a>
-  </div>
+<div align="center" style="margin-top: 14px; margin-bottom: 24px;">
+  <a href="https://ko-fi.com/lauel">
+    <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Apoie no Ko-fi" style="height:32px; width:auto; display:inline-block;">
+  </a>
 </div>
-
-<div align="center" style="display:flex; justify-content:center; align-items:center; gap:12px; margin-top: 14px;">
-    <a href="https://ko-fi.com/lauel" style="display:flex; align-items:center;">
-        <img src="https://ko-fi.com/img/githubbutton_sm.svg"
-             alt="Apoie no Ko-fi"
-             style="height:30px; width:auto; display:block;">
-    </a>
-</div>
-
----
-
-<p align="center" style="display: flex; justify-content: center; gap: 0.8em; flex-wrap: wrap;">
-  <img alt="GTK4" src="https://img.shields.io/badge/GTK-4.18+-blue.svg" />
-  <img alt="Libadwaita" src="https://img.shields.io/badge/Libadwaita-1.6+-purple.svg" />
-  <img alt="Rust" src="https://img.shields.io/badge/Rust-2021-orange.svg" />
-  <img alt="Engine" src="https://img.shields.io/badge/Engine-Skia%20GPU-green.svg" />
-  <img alt="License" src="https://img.shields.io/badge/License-GPL--3.0--or--later-blue.svg" />
-</p>
 
 ---
 
 ## Capturas de Tela
 
-<div align="center" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px;">
-  <img src="screenshots/main-window.png" alt="Janela Principal" style="max-height:360px; max-width: 48%; object-fit: contain; border-radius: 8px;">
-  <img src="screenshots/preferences.png" alt="Janela de Preferências" style="max-height:360px; max-width: 48%; object-fit: contain; border-radius: 8px;">
+<div align="center">
+  <p><b>Área de Trabalho Principal e Ilustração Vetorial</b></p>
+  <img src="screenshots/main-window.png" alt="Área de Trabalho do GNOME Paths" style="max-width: 100%; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);" />
+</div>
+
+<br/>
+
+<div align="center">
+  <p><b>Painel de Preferências e Configurações</b></p>
+  <img src="screenshots/preferences.png" alt="Preferências do GNOME Paths" style="max-width: 85%; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);" />
 </div>
 
 ---
 
-## Recursos
+## Principais Recursos
 
-- **Edição de Caminhos Bézier**: Editor de nós com suporte a alças cúspides, suaves e simétricas.
-- **Formas Paramétricas**: Retângulos, círculos, estrelas, polígonos e espirais.
-- **Operações Booleanas**: União, Diferença, Interseção, Exclusão, Divisão e Cortar/Fatiar.
-- **Gradientes e Malha**: Gradientes lineares, radiais e grades de malha 2D (Mesh Gradient) editáveis diretamente na tela.
-- **Pranchetas Multipáginas**: Gerenciamento de múltiplas páginas em um único documento com opções de exportação individual.
-- **Formatos de Exportação**: SVG, PNG, PDF, JPG e WebP.
-- **Ajuste Magnético e Guias**: Encaixe magnético em grades, caixas delimitadoras de objetos e centros de pranchetas.
-- **Interface Adaptativa**: Preferências com temas personalizados e tema claro e escuro do sistema com barras de ferramentas customizáveis.
+<table>
+  <tr>
+    <td width="50%">
+      <h3>Edição Avançada de Nós e Curvas Bezier</h3>
+      <p>Editor de nós refinado com alças tangentes em tempo real, nós cúspides, suaves e simétricos, conversão de segmentos e suavização por algoritmo de de Casteljau.</p>
+    </td>
+    <td width="50%">
+      <h3>Operações Booleanas em Vetores</h3>
+      <p>Geometria booleana em tempo real: <b>União</b>, <b>Diferença</b>, <b>Interseção</b>, <b>Exclusão</b>, <b>Divisão</b> e <b>Fatiar / Cortar</b>.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>Gradientes em Malha (Mesh Gradient)</h3>
+      <p>Gradientes lineares, radiais e grades de malha 2D interativas na tela com controle ponto a ponto de cor e difusão.</p>
+    </td>
+    <td width="50%">
+      <h3>Formas Geométricas Paramétricas</h3>
+      <p>Primitivas editáveis dinamicamente: Retângulos com raios de canto independentes, círculos, elipses, polígonos regulares, estrelas e espirais.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>Pranchetas Multipáginas</h3>
+      <p>Crie projetos e brochuras com múltiplas pranchetas no mesmo documento, com exportação individual ou em lote.</p>
+    </td>
+    <td width="50%">
+      <h3>Ajuste Magnético e Guias</h3>
+      <p>Encaixe magnético inteligente em grades, caixas delimitadoras, centros de pranchetas, guias personalizadas e restrições de ângulo.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>Aceleração de Hardware com Skia GPU</h3>
+      <p>Pipeline de renderização 2D ultrarrápido com precisão sub-pixel e zoom contínuo através da engine gráfica Skia.</p>
+    </td>
+    <td width="50%">
+      <h3>Ecossistema Modular de Plugins</h3>
+      <p>Arquitetura nativa de plugins em bibliotecas dinâmicas <code>.so</code> com barras de ferramentas HUD flutuantes ou acopladas configuráveis.</p>
+    </td>
+  </tr>
+</table>
 
 ---
 
-## Sobre o Projeto e Visão
+## Formatos Suportados de Exportação e Importação
 
-O **GNOME Paths** nasceu da paixão por computação gráfica vetorial, profundamente inspirado na versatilidade e no poder do **Inkscape**, com o objetivo de oferecer uma experiência moderna, rápida, fluida e com integração nativa ao desktop GNOME.
-
-### Desenvolvimento e Transparência
-Este projeto foi extensivamente desenvolvido e iterado com o auxílio de **inteligência artificial em pair-programming**, sendo cuidadosamente planejado, arquitetado e mantido com grande atenção aos detalhes e respeito ao ecossistema do GNOME.
-
-Prezamos pela transparência e pela colaboração aberta. Caso você prefira o fluxo de desenvolvimento tradicional e não utilize ferramentas de IA, sinta-se totalmente bem-vindo para contribuir com código tradicional, desenvolvimento de plugins, novas ideias, testes e relatórios de bugs.
-
-### Horizontes e Ideias Futuras
-Ainda não sei exatamente onde este caminho vai chegar ou que rumo o projeto tomará, mas há diversas ideias em mente que podem ser exploradas:
-- **Espaços de Trabalho Dinâmicos**: Um sistema de interfaces adaptativas inspirado no Blender, onde a interface altera a disposição das ferramentas de acordo com o tipo de fluxo de trabalho (ex.: ilustração vetorial, edição de bitmap, diagramação editorial).
-- **Animação Vetorial**: Linha do tempo, interpolação por quadros-chave (*keyframes*) e curvas de interpolação de movimento.
-- **Diagramação Editorial e Documentos**: Ferramentas avançadas de layout multipágina para brochuras, livros e design editorial.
-- **Sistema de Nós (Node Graphs)**: Edição procedural e não-destrutiva de caminhos, malhas e transformações através de grafos de nós.
-
-Grande parte disso ainda são ideias e conceitos experimentais que poderão ou não se concretizar conforme o projeto evoluir.
+| Formato | Exportação | Importação | Características Principais |
+| :--- | :---: | :---: | :--- |
+| **SVG** | Sim | Sim | Preservação total de dados de projeto, curvas W3C padrão, gradientes e metadados |
+| **PNG** | Sim | Não | Rasterização em alta resolução com canal alfa (transparência) |
+| **PDF** | Sim | Não | Páginas vetoriais prontas para impressão e publicação |
+| **JPG** | Sim | Não | Imagens rasterizadas compactadas para web e pré-visualização |
+| **WebP** | Sim | Não | Formato moderno de alta fidelidade para gráficos na web |
 
 ---
 
-## Contribuição e Apoio
+## Atalhos de Teclado Rápidos
 
-O apoio da comunidade é fundamental para o crescimento do GNOME Paths. Se você deseja participar, toda forma de ajuda é muito bem-vinda:
+| Atalho | Ação | Atalho | Ação |
+| :--- | :--- | :--- | :--- |
+| <kbd>V</kbd> | Ferramenta de Seleção | <kbd>Ctrl</kbd> + <kbd>Z</kbd> | Desfazer |
+| <kbd>N</kbd> | Editor de Nós / Caminhos | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> | Refazer |
+| <kbd>P</kbd> | Caneta Vetorial (Pen) | <kbd>Ctrl</kbd> + <kbd>G</kbd> | Agrupar Selecionados |
+| <kbd>B</kbd> | Pincel Artístico (Brush) | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>G</kbd> | Desagrupar |
+| <kbd>R</kbd> | Ferramenta Retângulo | <kbd>Ctrl</kbd> + <kbd>E</kbd> | Exportação Rápida |
+| <kbd>E</kbd> | Ferramenta Círculo / Elipse | <kbd>Ctrl</kbd> + <kbd>0</kbd> | Ajustar à Janela |
+| <kbd>T</kbd> | Ferramenta de Texto | <kbd>1</kbd> | Zoom 100% |
 
-- **Relatórios de Bugs e Sugestões**: Ajude a encontrar falhas, relatar comportamentos inesperados ou sugerir melhorias no GitLab.
-- **Código e Desenvolvimento**: Envie pull requests com otimizações, correções de bugs ou novas ferramentas.
-- **Traduções**: Ajude a traduzir o GNOME Paths para outros idiomas (consulte [TRANSLATING.md](TRANSLATING.md)).
-- **Plugins**: Desenvolva plugins para adicionar novas funcionalidades ao GNOME Paths.
-- **Apoio Financeiro**: Se o projeto for útil para você e quiser apoiar o desenvolvimento contínuo, considere contribuir no [Ko-fi](https://ko-fi.com/lauel).
 ---
 
-## Como Compilar
+## Como Compilar e Executar
 
-### GNOME Builder
+### Pré-requisitos
 
-1. Instale o **GNOME Builder** pelo Flathub.
-2. Clone a URL do repositório: `https://gitlab.com/lewisHeart/gnome-paths.git`.
-3. Selecione a configuração de runtime Flatpak.
-4. Clique em **Executar** para compilar e iniciar o aplicativo.
+Pacotes de desenvolvimento necessários:
+- **Rust** (versão estável)
+- **GTK4** (`>= 4.18`)
+- **Libadwaita** (`>= 1.6`)
+- **Clang / LLVM** (necessário para a compilação do `skia-safe`)
 
-### Linha de Comando (Flatpak CLI)
+### 1. Cargo (Desenvolvimento Local)
 
 ```bash
-# Instale o SDK e extensões do GNOME 47
+git clone https://gitlab.com/lewisHeart/gnome-paths.git
+cd gnome-paths
+
+cargo run --release
+```
+
+Para rodar todos os 68 testes unitários automatizados:
+```bash
+cargo test
+```
+
+### 2. GNOME Builder (Flatpak)
+
+1. Abra o **GNOME Builder**.
+2. Clone o repositório `https://gitlab.com/lewisHeart/gnome-paths.git`.
+3. Selecione o runtime Flatpak **GNOME 47**.
+4. Clique em **Executar**.
+
+### 3. Flatpak Builder via Linha de Comando
+
+```bash
+# Instalar SDK e extensões do GNOME 47
 flatpak install flathub \
   org.gnome.Platform//47 \
   org.gnome.Sdk//47 \
   org.freedesktop.Sdk.Extension.rust-stable//24.08 \
   org.freedesktop.Sdk.Extension.llvm19//24.08
 
-# Compilar e instalar
+# Compilar e instalar o pacote Flatpak
 flatpak-builder --user --install --force-clean build-dir io.github.lewis.GnomePaths.json
 
-# Executar
+# Executar o aplicativo
 flatpak run io.github.lewis.GnomePaths
 ```
 
-### Meson e Ninja
+### 4. Meson e Ninja
 
 ```bash
 meson setup build
@@ -132,32 +174,34 @@ ninja -C build
 ./build/gnome-paths
 ```
 
-### Cargo
+---
 
-```bash
-cargo run --release
-```
+## Sobre o Projeto e Visão
 
-Para executar os testes unitários:
-```bash
-cargo test
-```
+O **GNOME Paths** nasceu da paixão por gráficos vetoriais, profundamente inspirado na versatilidade e no poder do **Inkscape**, com o objetivo de oferecer uma experiência moderna, rápida, fluida e com integração nativa ao ambiente GNOME.
+
+### Desenvolvimento e Transparência
+Este projeto é ativamente desenvolvido com o auxílio de **inteligência artificial em pair-programming**, sendo cuidadosamente estruturado, planejado e mantido com olhar e arquitetura humana.
+
+Prezamos pela transparência e colaboração aberta. Caso você prefira o fluxo de desenvolvimento tradicional sem ferramentas de IA, você é calorosamente convidado a contribuir via pull requests, revisões de código, desenvolvimento de plugins nativos, sugestões de design ou relatórios de bugs.
+
+### Possíveis Ideias Futuras 
+- **Espaços de Trabalho Dinâmicos**: Interfaces adaptativas que se reorganizam conforme o foco do trabalho (Ilustração, Editorial, Edição de Bitmap, Tipografia).
+- **Animação Vetorial**: Linha do tempo, interpolação por quadros-chave (keyframes) e curvas de movimento.
+- **Sistema de Nós Procedurais**: Operações e modificadores não-destrutivos baseados em grafos de nós.
+- **Diagramação Editorial Avançada**: Páginas-mestre, colunas de texto encadeadas e layout multipágina para livros e brochuras.
 
 ---
 
-## Traduções
+## Contribuição e Comunidade
 
-Instruções detalhadas sobre como contribuir e gerenciar traduções podem ser encontradas em **[TRANSLATING.md](TRANSLATING.md)**.
-
----
-
-## Repositório e Suporte
-
-- **GitLab**: [gitlab.com/lewisHeart/gnome-paths](https://gitlab.com/lewisHeart/gnome-paths)
-- **Ko-fi**: [ko-fi.com/lauel](https://ko-fi.com/lauel)
+- **Relatórios de Bugs e Sugestões**: Abra uma issue no [Rastreador de Issues do GitLab](https://gitlab.com/lewisHeart/gnome-paths/-/issues).
+- **Traduções**: Ajude a traduzir o GNOME Paths para outros idiomas! Veja **[TRANSLATING.md](TRANSLATING.md)**.
+- **Plugins**: Veja o modelo de plugin em [`examples/plugin-template`](examples/plugin-template/).
+- **Apoie o Projeto**: Se o GNOME Paths for útil para você, considere apoiar o desenvolvimento no [Ko-fi](https://ko-fi.com/lauel).
 
 ---
 
 ## Licença
 
-O GNOME Paths é licenciado sob a [GNU General Public License v3.0 ou posterior (GPL-3.0-or-later)](LICENSE).
+O GNOME Paths é um software livre de código aberto sob a licença **[GNU General Public License v3.0 ou posterior (GPL-3.0-or-later)](LICENSE)**.
