@@ -62,11 +62,7 @@ pub fn generate_default_items(groups: &[ToolbarGroup]) -> Vec<ToolItem> {
     for group in groups {
         let primary = &group.tools[0];
         let is_grouped = group.tools.len() > 1;
-        let (p_name, p_sc) = if is_grouped {
-            (crate::core::gettext("Rectangle"), Some("R"))
-        } else {
-            get_tool_meta(primary.tool_id, primary.tooltip)
-        };
+        let (p_name, p_sc) = get_tool_meta(primary.tool_id, primary.tooltip);
 
         let mut sub_items = Vec::new();
         if is_grouped {
@@ -249,11 +245,12 @@ pub fn rebuild_toolbar_items(
                 let cur_tool_sub_c = current_tool_id.clone();
 
                 sub_btn.connect_clicked(move |_| {
-                    if let Some(r) = sub_icon_res {
-                        main_icon_img_c.set_resource(Some(r));
+                    let sym_name = if let Some(r) = sub_icon_res {
+                        crate::ui::icons::symbolic_icon_name(r)
                     } else {
-                        main_icon_img_c.set_icon_name(Some(sub_icon_name));
-                    }
+                        crate::ui::icons::symbolic_icon_name(sub_icon_name)
+                    };
+                    main_icon_img_c.set_icon_name(Some(&sym_name));
                     cur_tool_sub_c.set(sub_tool_id);
                     is_updating_sub.set(true);
                     main_btn.set_active(true);

@@ -18,7 +18,8 @@ impl Default for PenStudioPlugin {
                 Some("/io/github/lewis/GnomePaths/icons/tool-vector-pen.svg"),
                 "Vector Pen (P)",
                 16,
-            ),
+            )
+            .with_group("pen-brush"),
         }
     }
 }
