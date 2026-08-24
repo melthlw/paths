@@ -249,6 +249,10 @@ impl CircleFeature {
 }
 
 impl FeaturePlugin for CircleFeature {
+    fn on_activate(&mut self, ctx: &mut PluginContext) {
+        ctx.set_cursor("tool:circle");
+    }
+
     fn on_pointer_down(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
         if event.button != Some(PointerButton::Primary) {
             return;
@@ -377,7 +381,7 @@ impl FeaturePlugin for CircleFeature {
             is_circle_locked: event.shift_pressed,
             is_center_anchored: event.alt_pressed,
         };
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:circle");
         ctx.request_redraw();
     }
 
@@ -394,7 +398,7 @@ impl FeaturePlugin for CircleFeature {
                 *current_pos = snapped;
                 *is_circle_locked = event.shift_pressed;
                 *is_center_anchored = event.alt_pressed;
-                ctx.set_cursor("crosshair");
+                ctx.set_cursor("tool:circle");
                 ctx.request_redraw();
             }
             CircleToolState::DraggingHandle {
@@ -571,7 +575,7 @@ impl FeaturePlugin for CircleFeature {
                     if is_hovering {
                         ctx.set_cursor("pointer");
                     } else {
-                        ctx.set_cursor("crosshair");
+                        ctx.set_cursor("tool:circle");
                     }
                 }
             }
@@ -615,7 +619,7 @@ impl FeaturePlugin for CircleFeature {
 
         self.state = CircleToolState::Idle;
         ctx.clear_snap_guides();
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:circle");
         ctx.request_redraw();
     }
 

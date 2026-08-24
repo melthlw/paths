@@ -387,17 +387,54 @@ pub fn gettext(msgid: &str) -> String {
     msgid.to_string()
 }
 
-/// Set user preferred language and save preference
+type LanguageChangeCallback = Box<dyn Fn(Language) + Send + Sync + 'static>;
+type LocalLanguageChangeCallback = Box<dyn Fn(Language) + 'static>;
+
+static LANGUAGE_LISTENERS: RwLock<Vec<LanguageChangeCallback>> = RwLock::new(Vec::new());
+
+thread_local! {
+    static LOCAL_LANGUAGE_LISTENERS: std::cell::RefCell<Vec<LocalLanguageChangeCallback>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+
+/// Register a thread-local UI listener callback to be notified immediately whenever the language changes
+pub fn on_language_change_local<F: Fn(Language) + 'static>(callback: F) {
+    LOCAL_LANGUAGE_LISTENERS.with(|cell| {
+        cell.borrow_mut().push(Box::new(callback));
+    });
+}
+
+/// Register a listener callback to be notified immediately whenever the language changes
+#[allow(dead_code)]
+pub fn on_language_change<F: Fn(Language) + Send + Sync + 'static>(callback: F) {
+    let mut lock = LANGUAGE_LISTENERS.write().unwrap();
+    lock.push(Box::new(callback));
+}
+
+/// Set user preferred language, save preference, and notify all listeners
 pub fn set_language(lang: Language) {
-    let mut lock = I18N.write().unwrap();
-    let mgr = lock.get_or_insert_with(I18nManager::new);
-    mgr.configured_language = lang;
-    mgr.effective_language = if lang == Language::System {
-        I18nManager::detect_system_language()
-    } else {
-        lang
-    };
-    I18nManager::save_preference(lang);
+    {
+        let mut lock = I18N.write().unwrap();
+        let mgr = lock.get_or_insert_with(I18nManager::new);
+        mgr.configured_language = lang;
+        mgr.effective_language = if lang == Language::System {
+            I18nManager::detect_system_language()
+        } else {
+            lang
+        };
+        I18nManager::save_preference(lang);
+    }
+
+    // Trigger all live UI listeners
+    let lock = LANGUAGE_LISTENERS.read().unwrap();
+    for listener in lock.iter() {
+        listener(lang);
+    }
+
+    LOCAL_LANGUAGE_LISTENERS.with(|cell| {
+        for listener in cell.borrow().iter() {
+            listener(lang);
+        }
+    });
 }
 
 /// Get the currently configured language preference

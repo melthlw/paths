@@ -24,7 +24,7 @@ pub fn build_general_page(window: &adw::Window, canvas: &CanvasWidget) -> gtk4::
     let lang_row = adw::ActionRow::builder()
         .title(crate::core::gettext("Application Language"))
         .subtitle(crate::core::gettext(
-            "Change user interface language and regional translation (restart required)",
+            "Change user interface language and regional translation",
         ))
         .activatable(true)
         .build();

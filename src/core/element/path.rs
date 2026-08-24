@@ -72,18 +72,22 @@ impl PathNode {
         }
     }
 
+    #[allow(dead_code)]
     pub fn is_smooth(&self) -> bool {
         self.node_type == NodeType::Smooth
     }
 
+    #[allow(dead_code)]
     pub fn is_symmetric(&self) -> bool {
         self.node_type == NodeType::Symmetric
     }
 
+    #[allow(dead_code)]
     pub fn is_corner(&self) -> bool {
         self.node_type == NodeType::Corner
     }
 
+    #[allow(dead_code)]
     pub fn is_auto(&self) -> bool {
         self.node_type == NodeType::Auto
     }
@@ -625,6 +629,60 @@ impl PathElement {
         let insert_idx = seg_idx + 1;
         self.nodes.insert(insert_idx, new_node);
         insert_idx
+    }
+
+    /// Toggle node between Smooth (extended tangent handles) and Corner (retracted handles)
+    pub fn toggle_node_smooth_corner(&mut self, idx: usize) {
+        let count = self.nodes.len();
+        if count == 0 || idx >= count {
+            return;
+        }
+
+        let is_currently_corner = self.nodes[idx].node_type == NodeType::Corner
+            && self.nodes[idx].handle_in.is_none()
+            && self.nodes[idx].handle_out.is_none();
+
+        if is_currently_corner {
+            self.convert_nodes_type(&[idx], NodeType::Smooth);
+        } else {
+            self.nodes[idx].handle_in = None;
+            self.nodes[idx].handle_out = None;
+            self.nodes[idx].node_type = NodeType::Corner;
+        }
+    }
+
+    /// Directly deform/bend a segment by dragging along it
+    pub fn bend_segment(&mut self, seg_idx: usize, delta: Point, t: f32) {
+        let count = self.nodes.len();
+        if count < 2 || seg_idx >= count {
+            return;
+        }
+
+        let next_idx = (seg_idx + 1) % count;
+        let p0 = self.nodes[seg_idx].point;
+        let p3 = self.nodes[next_idx].point;
+
+        let clamp_t = t.clamp(0.1, 0.9);
+        let weight_h0 = (1.0 - clamp_t).max(0.2);
+        let weight_h1 = clamp_t.max(0.2);
+
+        let cur_h0 = self.nodes[seg_idx].handle_out.unwrap_or(Point::new(
+            p0.x + (p3.x - p0.x) * 0.33,
+            p0.y + (p3.y - p0.y) * 0.33,
+        ));
+        let cur_h1 = self.nodes[next_idx].handle_in.unwrap_or(Point::new(
+            p3.x - (p3.x - p0.x) * 0.33,
+            p3.y - (p3.y - p0.y) * 0.33,
+        ));
+
+        self.nodes[seg_idx].handle_out = Some(Point::new(
+            cur_h0.x + delta.x * weight_h0 * 1.3,
+            cur_h0.y + delta.y * weight_h0 * 1.3,
+        ));
+        self.nodes[next_idx].handle_in = Some(Point::new(
+            cur_h1.x + delta.x * weight_h1 * 1.3,
+            cur_h1.y + delta.y * weight_h1 * 1.3,
+        ));
     }
 
     /// Delete nodes at specified indices

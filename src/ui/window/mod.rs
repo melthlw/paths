@@ -97,6 +97,168 @@ impl DesignWindow {
 
         let main_win_holder: Rc<RefCell<Option<adw::ApplicationWindow>>> =
             Rc::new(RefCell::new(None));
+        let toast_overlay = adw::ToastOverlay::new();
+        let file_ops = WindowFileOps::new(canvas.clone(), main_win_holder.clone(), toast_overlay.clone());
+
+        Self::build_content(&canvas, &main_win_holder, &toast_overlay, &file_ops);
+
+        let (win_w, win_h) = crate::core::AppSettings::window_size();
+        let is_maximized = crate::core::AppSettings::is_maximized();
+        let is_fullscreen = crate::core::AppSettings::is_fullscreen();
+
+        let window = adw::ApplicationWindow::builder()
+            .application(app)
+            .title("gnome-paths")
+            .default_width(win_w)
+            .default_height(win_h)
+            .content(&toast_overlay)
+            .build();
+
+        *main_win_holder.borrow_mut() = Some(window.clone());
+
+        // Instant Live Language Switcher
+        let canvas_rebuild = canvas.clone();
+        let win_holder_rebuild = main_win_holder.clone();
+        let toast_rebuild = toast_overlay.clone();
+        let file_ops_rebuild = file_ops.clone();
+        crate::core::on_language_change_local(move |_| {
+            let canvas_c = canvas_rebuild.clone();
+            let win_holder_c = win_holder_rebuild.clone();
+            let toast_c = toast_rebuild.clone();
+            let file_ops_c = file_ops_rebuild.clone();
+            glib::idle_add_local_once(move || {
+                Self::build_content(&canvas_c, &win_holder_c, &toast_c, &file_ops_c);
+            });
+        });
+
+        if is_maximized {
+            window.maximize();
+        }
+        if is_fullscreen {
+            window.fullscreen();
+        }
+
+        let win_close = window.clone();
+        let canvas_close = canvas.clone();
+        window.connect_close_request(move |_| {
+            let max = win_close.is_maximized();
+            let full = win_close.is_fullscreen();
+            crate::core::AppSettings::set_is_maximized(max);
+            crate::core::AppSettings::set_is_fullscreen(full);
+            if !max && !full {
+                crate::core::AppSettings::set_window_size(
+                    win_close.default_width(),
+                    win_close.default_height(),
+                );
+            }
+            crate::core::AppSettings::set_active_zoom(canvas_close.zoom() as f64);
+            glib::Propagation::Proceed
+        });
+
+        window.connect_notify(Some("maximized"), move |w, _| {
+            crate::core::AppSettings::set_is_maximized(w.is_maximized());
+        });
+
+        window.connect_notify(Some("fullscreened"), move |w, _| {
+            crate::core::AppSettings::set_is_fullscreen(w.is_fullscreen());
+        });
+
+        window.connect_notify(Some("default-width"), move |w, _| {
+            if !w.is_maximized() && !w.is_fullscreen() {
+                crate::core::AppSettings::set_window_size(w.default_width(), w.default_height());
+            }
+        });
+
+        window.connect_notify(Some("default-height"), move |w, _| {
+            if !w.is_maximized() && !w.is_fullscreen() {
+                crate::core::AppSettings::set_window_size(w.default_width(), w.default_height());
+            }
+        });
+
+        *main_win_holder.borrow_mut() = Some(window.clone());
+
+        // Connect Canvas file dialog requests (e.g. from canvas shortcuts)
+        {
+            let save_c = file_ops.perform_save.clone();
+            let save_as_c = file_ops.perform_save_as.clone();
+            let open_c = file_ops.perform_open.clone();
+            let new_c = file_ops.perform_new_doc.clone();
+            let exp_c = file_ops.perform_quick_export.clone();
+            canvas.set_on_file_dialog_request(move |action| match action {
+                crate::core::ShortcutAction::Save => save_c(),
+                crate::core::ShortcutAction::SaveAs => save_as_c(),
+                crate::core::ShortcutAction::Open => open_c(),
+                crate::core::ShortcutAction::NewDocument => new_c(),
+                crate::core::ShortcutAction::Export => exp_c(crate::core::ExportFormat::Png),
+                _ => {}
+            });
+        }
+
+        // Global shortcuts: Ctrl+S, Ctrl+Shift+S, Ctrl+O, Ctrl+N, Ctrl+,, Ctrl+?
+        {
+            let key_ctrl = gtk4::EventControllerKey::new();
+            let win_weak = window.downgrade();
+            let canvas_k = canvas.clone();
+            let save_k = file_ops.perform_save.clone();
+            let save_as_k = file_ops.perform_save_as.clone();
+            let open_k = file_ops.perform_open.clone();
+            let new_k = file_ops.perform_new_doc.clone();
+            key_ctrl.connect_key_pressed(move |_, keyval, _, state| {
+                let ctrl = state.contains(gtk4::gdk::ModifierType::CONTROL_MASK);
+                let shift = state.contains(gtk4::gdk::ModifierType::SHIFT_MASK);
+
+                if ctrl && (keyval == gtk4::gdk::Key::s || keyval == gtk4::gdk::Key::S) {
+                    if shift {
+                        save_as_k();
+                    } else {
+                        save_k();
+                    }
+                    return glib::Propagation::Stop;
+                }
+
+                if ctrl && !shift && (keyval == gtk4::gdk::Key::o || keyval == gtk4::gdk::Key::O) {
+                    open_k();
+                    return glib::Propagation::Stop;
+                }
+
+                if ctrl && !shift && (keyval == gtk4::gdk::Key::n || keyval == gtk4::gdk::Key::N) {
+                    new_k();
+                    return glib::Propagation::Stop;
+                }
+
+                if ctrl && keyval == gtk4::gdk::Key::comma {
+                    if let Some(win) = win_weak.upgrade() {
+                        super::preferences::show_preferences_window(&win, canvas_k.clone());
+                        return glib::Propagation::Stop;
+                    }
+                }
+
+                if ctrl && (keyval == gtk4::gdk::Key::question || keyval == gtk4::gdk::Key::slash) {
+                    if let Some(win) = win_weak.upgrade() {
+                        super::preferences::show_preferences_window(&win, canvas_k.clone());
+                        return glib::Propagation::Stop;
+                    }
+                }
+
+                glib::Propagation::Proceed
+            });
+            window.add_controller(key_ctrl);
+        }
+
+        Self { window }
+    }
+
+    pub fn present(&self) {
+        self.window.present();
+    }
+
+    fn build_content(
+        canvas: &CanvasWidget,
+        main_win_holder: &Rc<RefCell<Option<adw::ApplicationWindow>>>,
+        toast_overlay: &adw::ToastOverlay,
+        file_ops: &WindowFileOps,
+    ) {
+        let saved_zoom = canvas.zoom();
         let color_bar = ColorControlBar::new(canvas.clone());
         let color_bar_ref = Rc::new(color_bar);
 
@@ -131,13 +293,9 @@ impl DesignWindow {
         let layers = LayersSidebar::new(canvas.clone());
         let layers_ref = Rc::new(layers);
 
-        let toast_overlay = adw::ToastOverlay::new();
+        let menu_btn = menu::build_main_menu(file_ops, canvas, main_win_holder);
 
-        let file_ops = WindowFileOps::new(canvas.clone(), main_win_holder.clone(), toast_overlay.clone());
-
-        let menu_btn = menu::build_main_menu(&file_ops, &canvas, &main_win_holder);
-
-        let header_comps = header::build_header_bar(&canvas, &file_ops, &menu_btn);
+        let header_comps = header::build_header_bar(canvas, file_ops, &menu_btn);
 
         // Floating Zoom Controls (Positioned at bottom-right)
         let zoom_box = gtk4::Box::builder()
@@ -408,137 +566,5 @@ impl DesignWindow {
         layers_ref.update_state(&init_layers);
 
         toast_overlay.set_child(Some(&left_split_view));
-
-        let (win_w, win_h) = crate::core::AppSettings::window_size();
-        let is_maximized = crate::core::AppSettings::is_maximized();
-        let is_fullscreen = crate::core::AppSettings::is_fullscreen();
-
-        let window = adw::ApplicationWindow::builder()
-            .application(app)
-            .title("gnome-paths")
-            .default_width(win_w)
-            .default_height(win_h)
-            .content(&toast_overlay)
-            .build();
-
-        if is_maximized {
-            window.maximize();
-        }
-        if is_fullscreen {
-            window.fullscreen();
-        }
-
-        let win_close = window.clone();
-        let canvas_close = canvas.clone();
-        window.connect_close_request(move |_| {
-            let max = win_close.is_maximized();
-            let full = win_close.is_fullscreen();
-            crate::core::AppSettings::set_is_maximized(max);
-            crate::core::AppSettings::set_is_fullscreen(full);
-            if !max && !full {
-                crate::core::AppSettings::set_window_size(
-                    win_close.default_width(),
-                    win_close.default_height(),
-                );
-            }
-            crate::core::AppSettings::set_active_zoom(canvas_close.zoom() as f64);
-            glib::Propagation::Proceed
-        });
-
-        window.connect_notify(Some("maximized"), move |w, _| {
-            crate::core::AppSettings::set_is_maximized(w.is_maximized());
-        });
-
-        window.connect_notify(Some("fullscreened"), move |w, _| {
-            crate::core::AppSettings::set_is_fullscreen(w.is_fullscreen());
-        });
-
-        window.connect_notify(Some("default-width"), move |w, _| {
-            if !w.is_maximized() && !w.is_fullscreen() {
-                crate::core::AppSettings::set_window_size(w.default_width(), w.default_height());
-            }
-        });
-
-        window.connect_notify(Some("default-height"), move |w, _| {
-            if !w.is_maximized() && !w.is_fullscreen() {
-                crate::core::AppSettings::set_window_size(w.default_width(), w.default_height());
-            }
-        });
-
-        *main_win_holder.borrow_mut() = Some(window.clone());
-
-        // Connect Canvas file dialog requests (e.g. from canvas shortcuts)
-        {
-            let save_c = file_ops.perform_save.clone();
-            let save_as_c = file_ops.perform_save_as.clone();
-            let open_c = file_ops.perform_open.clone();
-            let new_c = file_ops.perform_new_doc.clone();
-            let exp_c = file_ops.perform_quick_export.clone();
-            canvas.set_on_file_dialog_request(move |action| match action {
-                crate::core::ShortcutAction::Save => save_c(),
-                crate::core::ShortcutAction::SaveAs => save_as_c(),
-                crate::core::ShortcutAction::Open => open_c(),
-                crate::core::ShortcutAction::NewDocument => new_c(),
-                crate::core::ShortcutAction::Export => exp_c(crate::core::ExportFormat::Png),
-                _ => {}
-            });
-        }
-
-        // Global shortcuts: Ctrl+S, Ctrl+Shift+S, Ctrl+O, Ctrl+N, Ctrl+,, Ctrl+?
-        {
-            let key_ctrl = gtk4::EventControllerKey::new();
-            let win_weak = window.downgrade();
-            let canvas_k = canvas.clone();
-            let save_k = file_ops.perform_save.clone();
-            let save_as_k = file_ops.perform_save_as.clone();
-            let open_k = file_ops.perform_open.clone();
-            let new_k = file_ops.perform_new_doc.clone();
-            key_ctrl.connect_key_pressed(move |_, keyval, _, state| {
-                let ctrl = state.contains(gtk4::gdk::ModifierType::CONTROL_MASK);
-                let shift = state.contains(gtk4::gdk::ModifierType::SHIFT_MASK);
-
-                if ctrl && (keyval == gtk4::gdk::Key::s || keyval == gtk4::gdk::Key::S) {
-                    if shift {
-                        save_as_k();
-                    } else {
-                        save_k();
-                    }
-                    return glib::Propagation::Stop;
-                }
-
-                if ctrl && !shift && (keyval == gtk4::gdk::Key::o || keyval == gtk4::gdk::Key::O) {
-                    open_k();
-                    return glib::Propagation::Stop;
-                }
-
-                if ctrl && !shift && (keyval == gtk4::gdk::Key::n || keyval == gtk4::gdk::Key::N) {
-                    new_k();
-                    return glib::Propagation::Stop;
-                }
-
-                if ctrl && keyval == gtk4::gdk::Key::comma {
-                    if let Some(win) = win_weak.upgrade() {
-                        super::preferences::show_preferences_window(&win, canvas_k.clone());
-                        return glib::Propagation::Stop;
-                    }
-                }
-
-                if ctrl && (keyval == gtk4::gdk::Key::question || keyval == gtk4::gdk::Key::slash) {
-                    if let Some(win) = win_weak.upgrade() {
-                        super::preferences::show_preferences_window(&win, canvas_k.clone());
-                        return glib::Propagation::Stop;
-                    }
-                }
-
-                glib::Propagation::Proceed
-            });
-            window.add_controller(key_ctrl);
-        }
-
-        Self { window }
-    }
-
-    pub fn present(&self) {
-        self.window.present();
     }
 }

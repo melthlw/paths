@@ -336,6 +336,7 @@ impl FeaturePlugin for PathEditorFeature {
         self.selected_nodes.clear();
         self.active_target = None;
         self.hover_target = None;
+        ctx.set_cursor("tool:node");
         ctx.request_redraw();
     }
 
@@ -381,16 +382,9 @@ impl FeaturePlugin for PathEditorFeature {
                 for el in &mut ctx.document.elements {
                     if let Element::Path(p) = el {
                         if p.id == element_id && !p.nodes.is_empty() {
-                            if let Some(node) = p.nodes.get(node_idx) {
-                                let new_type = if node.is_corner() {
-                                    NodeType::Smooth
-                                } else {
-                                    NodeType::Corner
-                                };
-                                p.convert_nodes_type(&[node_idx], new_type);
-                                ctx.request_redraw();
-                                return true;
-                            }
+                            p.toggle_node_smooth_corner(node_idx);
+                            ctx.request_redraw();
+                            return true;
                         }
                     }
                 }
@@ -598,25 +592,7 @@ impl FeaturePlugin for PathEditorFeature {
             for el in &mut ctx.document.elements {
                 if let Element::Path(p) = el {
                     if p.id == element_id && seg_idx < p.nodes.len() {
-                        let next_idx = (seg_idx + 1) % p.nodes.len();
-                        let (_h_in0, h_out0) = Self::compute_node_handles(p, seg_idx);
-                        let (h_in1, _h_out1) = Self::compute_node_handles(p, next_idx);
-
-                        let mut h0 = p.nodes[seg_idx].handle_out.unwrap_or(h_out0);
-                        let mut h1 = p.nodes[next_idx].handle_in.unwrap_or(h_in1);
-
-                        // Direct curve deformation factor based on parameter t
-                        let it = 1.0 - t;
-                        let factor0 = (1.0 / (3.0 * it * it * t.max(0.1))).clamp(0.5, 3.0);
-                        let factor1 = (1.0 / (3.0 * it * t * t.max(0.1))).clamp(0.5, 3.0);
-
-                        h0.x += dx * factor0 * 0.5;
-                        h0.y += dy * factor0 * 0.5;
-                        h1.x += dx * factor1 * 0.5;
-                        h1.y += dy * factor1 * 0.5;
-
-                        p.nodes[seg_idx].handle_out = Some(h0);
-                        p.nodes[next_idx].handle_in = Some(h1);
+                        p.bend_segment(seg_idx, Point::new(dx, dy), t);
                         break;
                     }
                 }
@@ -722,20 +698,20 @@ impl FeaturePlugin for PathEditorFeature {
                 ctx.set_cursor("grab");
             }
             Some(EditTarget::Node { .. }) => {
-                ctx.set_cursor("pointer");
+                ctx.set_cursor("tool:node");
             }
             Some(EditTarget::Segment { .. }) => {
                 if ctx.path_editor_config.enable_direct_segment_drag {
-                    ctx.set_cursor("grab");
+                    ctx.set_cursor("tool:node_curve");
                 } else {
-                    ctx.set_cursor("crosshair");
+                    ctx.set_cursor("tool:node_add");
                 }
             }
             _ => {
                 if ctx.document.hit_test(event.world_pos).is_some() {
                     ctx.set_cursor("pointer");
                 } else {
-                    ctx.set_cursor("default");
+                    ctx.set_cursor("tool:node");
                 }
             }
         }
@@ -750,7 +726,7 @@ impl FeaturePlugin for PathEditorFeature {
         self.panning_last_screen = None;
         self.is_dragging_segment = false;
         ctx.clear_snap_guides();
-        ctx.set_cursor("default");
+        ctx.set_cursor("tool:node");
         ctx.request_redraw();
     }
 
@@ -843,7 +819,7 @@ impl FeaturePlugin for PathEditorFeature {
         self.panning_last_screen = None;
         self.is_dragging_segment = false;
         ctx.clear_snap_guides();
-        ctx.set_cursor("default");
+        ctx.set_cursor("tool:node");
         ctx.request_redraw();
     }
 
@@ -856,15 +832,22 @@ impl FeaturePlugin for PathEditorFeature {
         let zoom = viewport.zoom;
         let config = ctx.path_editor_config;
 
-        let node_size = (config.node_size / zoom).max(4.0);
+        let node_size = (config.node_size / zoom).max(6.0);
         let half = node_size / 2.0;
-        let handle_size = (config.handle_size / zoom).max(3.0);
-        let stroke_w = (1.5 / zoom).max(1.0);
+        let corner_radius = (2.2 / zoom).max(1.5);
+        let handle_radius = ((config.handle_size * 0.95) / zoom).max(4.0);
+        let stroke_w = (1.5 / zoom).max(1.1);
+
+        // Paints
+        let mut shadow_paint = skia::Paint::default();
+        shadow_paint.set_color4f(skia::Color4f::new(0.0, 0.0, 0.0, 0.35), None);
+        shadow_paint.set_style(skia::PaintStyle::Fill);
+        shadow_paint.set_anti_alias(true);
 
         let mut path_outline_paint = skia::Paint::default();
-        path_outline_paint.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.75), None);
+        path_outline_paint.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.85), None);
         path_outline_paint.set_style(skia::PaintStyle::Stroke);
-        path_outline_paint.set_stroke_width((1.2 / zoom).max(0.8));
+        path_outline_paint.set_stroke_width((1.2 / zoom).max(0.9));
         path_outline_paint.set_anti_alias(true);
 
         let mut node_fill = skia::Paint::default();
@@ -877,22 +860,40 @@ impl FeaturePlugin for PathEditorFeature {
         node_selected_fill.set_style(skia::PaintStyle::Fill);
         node_selected_fill.set_anti_alias(true);
 
+        let mut node_selected_stroke = skia::Paint::default();
+        node_selected_stroke.set_color4f(skia::Color4f::new(1.0, 1.0, 1.0, 1.0), None);
+        node_selected_stroke.set_style(skia::PaintStyle::Stroke);
+        node_selected_stroke.set_stroke_width((1.6 / zoom).max(1.2));
+        node_selected_stroke.set_anti_alias(true);
+
         let mut node_stroke = skia::Paint::default();
-        node_stroke.set_color4f(skia::Color4f::new(0.12, 0.40, 0.78, 1.0), None);
+        node_stroke.set_color4f(skia::Color4f::new(0.15, 0.45, 0.85, 1.0), None);
         node_stroke.set_style(skia::PaintStyle::Stroke);
         node_stroke.set_stroke_width(stroke_w);
         node_stroke.set_anti_alias(true);
 
         let mut hover_ring = skia::Paint::default();
-        hover_ring.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.45), None);
+        hover_ring.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.40), None);
         hover_ring.set_style(skia::PaintStyle::Stroke);
-        hover_ring.set_stroke_width((3.0 / zoom).max(2.0));
+        hover_ring.set_stroke_width((3.5 / zoom).max(2.2));
         hover_ring.set_anti_alias(true);
 
+        let mut selected_glow = skia::Paint::default();
+        selected_glow.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.28), None);
+        selected_glow.set_style(skia::PaintStyle::Stroke);
+        selected_glow.set_stroke_width((4.0 / zoom).max(2.5));
+        selected_glow.set_anti_alias(true);
+
+        let mut handle_line_halo = skia::Paint::default();
+        handle_line_halo.set_color4f(skia::Color4f::new(0.0, 0.0, 0.0, 0.40), None);
+        handle_line_halo.set_style(skia::PaintStyle::Stroke);
+        handle_line_halo.set_stroke_width((2.4 / zoom).max(1.8));
+        handle_line_halo.set_anti_alias(true);
+
         let mut handle_line = skia::Paint::default();
-        handle_line.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.8), None);
+        handle_line.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.95), None);
         handle_line.set_style(skia::PaintStyle::Stroke);
-        handle_line.set_stroke_width((1.0 / zoom).max(0.75));
+        handle_line.set_stroke_width((1.2 / zoom).max(0.85));
         handle_line.set_anti_alias(true);
 
         let mut handle_circle_fill = skia::Paint::default();
@@ -903,8 +904,10 @@ impl FeaturePlugin for PathEditorFeature {
         let mut handle_circle_stroke = skia::Paint::default();
         handle_circle_stroke.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 1.0), None);
         handle_circle_stroke.set_style(skia::PaintStyle::Stroke);
-        handle_circle_stroke.set_stroke_width(stroke_w);
+        handle_circle_stroke.set_stroke_width((1.6 / zoom).max(1.2));
         handle_circle_stroke.set_anti_alias(true);
+
+        let shadow_offset = Point::new(0.8 / zoom, 1.2 / zoom);
 
         // 1. Draw Paths, Nodes, and Handles for selected objects
         for el in &ctx.document.elements {
@@ -914,6 +917,31 @@ impl FeaturePlugin for PathEditorFeature {
                     if config.show_path_outline {
                         let sk_path = p.to_skia_path();
                         canvas.draw_path(&sk_path, &path_outline_paint);
+                    }
+
+                    // Highlight hovered segment if applicable
+                    if let Some(EditTarget::Segment { element_id, seg_idx, .. }) = self.hover_target {
+                        if element_id == p.id && seg_idx < p.nodes.len() && config.highlight_hovered_segment {
+                            let count = p.nodes.len();
+                            let next_idx = (seg_idx + 1) % count;
+                            let n0 = &p.nodes[seg_idx];
+                            let n1 = &p.nodes[next_idx];
+                            let (_h_in_0, h_out_0) = Self::compute_node_handles(p, seg_idx);
+                            let (h_in_1, _h_out_1) = Self::compute_node_handles(p, next_idx);
+                            let h0 = n0.handle_out.or(if n0.handle_in.is_some() { Some(h_out_0) } else { None }).unwrap_or(n0.point);
+                            let h1 = n1.handle_in.or(if n1.handle_out.is_some() { Some(h_in_1) } else { None }).unwrap_or(n1.point);
+
+                            let mut seg_path = skia::PathBuilder::new();
+                            seg_path.move_to(n0.point.to_skia());
+                            seg_path.cubic_to(h0.to_skia(), h1.to_skia(), n1.point.to_skia());
+
+                            let mut seg_glow = skia::Paint::default();
+                            seg_glow.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.5), None);
+                            seg_glow.set_style(skia::PaintStyle::Stroke);
+                            seg_glow.set_stroke_width((4.0 / zoom).max(2.5));
+                            seg_glow.set_anti_alias(true);
+                            canvas.draw_path(&seg_path.detach(), &seg_glow);
+                        }
                     }
 
                     for (i, node) in p.nodes.iter().enumerate() {
@@ -928,88 +956,131 @@ impl FeaturePlugin for PathEditorFeature {
                             let (h_in, h_out) = Self::compute_node_handles(p, i);
 
                             // Handle Out
+                            canvas.draw_line(pt.to_skia(), h_out.to_skia(), &handle_line_halo);
                             canvas.draw_line(pt.to_skia(), h_out.to_skia(), &handle_line);
-                            canvas.draw_circle(h_out.to_skia(), handle_size, &handle_circle_fill);
-                            canvas.draw_circle(h_out.to_skia(), handle_size, &handle_circle_stroke);
+
+                            // Drop shadow under handle grip
+                            canvas.draw_circle(
+                                Point::new(h_out.x + shadow_offset.x, h_out.y + shadow_offset.y).to_skia(),
+                                handle_radius,
+                                &shadow_paint,
+                            );
+                            canvas.draw_circle(h_out.to_skia(), handle_radius, &handle_circle_fill);
+                            canvas.draw_circle(h_out.to_skia(), handle_radius, &handle_circle_stroke);
 
                             if matches!(self.hover_target, Some(EditTarget::HandleOut { element_id, node_idx }) if element_id == p.id && node_idx == i)
                             {
-                                canvas.draw_circle(h_out.to_skia(), handle_size * 1.6, &hover_ring);
+                                canvas.draw_circle(h_out.to_skia(), handle_radius * 1.7, &hover_ring);
                             }
 
                             // Handle In
+                            canvas.draw_line(pt.to_skia(), h_in.to_skia(), &handle_line_halo);
                             canvas.draw_line(pt.to_skia(), h_in.to_skia(), &handle_line);
-                            canvas.draw_circle(h_in.to_skia(), handle_size, &handle_circle_fill);
-                            canvas.draw_circle(h_in.to_skia(), handle_size, &handle_circle_stroke);
+
+                            // Drop shadow under handle grip
+                            canvas.draw_circle(
+                                Point::new(h_in.x + shadow_offset.x, h_in.y + shadow_offset.y).to_skia(),
+                                handle_radius,
+                                &shadow_paint,
+                            );
+                            canvas.draw_circle(h_in.to_skia(), handle_radius, &handle_circle_fill);
+                            canvas.draw_circle(h_in.to_skia(), handle_radius, &handle_circle_stroke);
 
                             if matches!(self.hover_target, Some(EditTarget::HandleIn { element_id, node_idx }) if element_id == p.id && node_idx == i)
                             {
-                                canvas.draw_circle(h_in.to_skia(), handle_size * 1.6, &hover_ring);
+                                canvas.draw_circle(h_in.to_skia(), handle_radius * 1.7, &hover_ring);
                             }
                         }
 
-                        // Draw Anchor Node according to its NodeType shape
+                        // Draw Anchor Node
+                        let rect = skia::Rect::from_xywh(pt.x - half, pt.y - half, node_size, node_size);
+                        let shadow_rect = skia::Rect::from_xywh(
+                            pt.x - half + shadow_offset.x,
+                            pt.y - half + shadow_offset.y,
+                            node_size,
+                            node_size,
+                        );
+
+                        // Selection glow halo
+                        if is_node_selected {
+                            canvas.draw_circle(pt.to_skia(), half * 1.75, &selected_glow);
+                        }
+
                         if config.show_distinct_node_shapes {
                             match node.node_type {
                                 NodeType::Corner => {
-                                    // Square for Corner nodes
-                                    let rect = skia::Rect::from_xywh(pt.x - half, pt.y - half, node_size, node_size);
-                                    if is_node_selected {
-                                        canvas.draw_rect(rect, &node_selected_fill);
-                                        let inner = half * 0.4;
-                                        canvas.draw_rect(skia::Rect::from_xywh(pt.x - inner, pt.y - inner, inner * 2.0, inner * 2.0), &node_fill);
-                                    } else {
-                                        canvas.draw_rect(rect, &node_fill);
-                                    }
-                                    canvas.draw_rect(rect, &node_stroke);
-                                }
-                                NodeType::Smooth => {
-                                    // Diamond for Smooth nodes
-                                    let mut diamond = skia::PathBuilder::new();
-                                    diamond.move_to(Point::new(pt.x, pt.y - half * 1.1).to_skia());
-                                    diamond.line_to(Point::new(pt.x + half * 1.1, pt.y).to_skia());
-                                    diamond.line_to(Point::new(pt.x, pt.y + half * 1.1).to_skia());
-                                    diamond.line_to(Point::new(pt.x - half * 1.1, pt.y).to_skia());
-                                    diamond.close();
-                                    let dp = diamond.detach();
+                                    // Sleek Rounded Rectangle for Corner nodes
+                                    canvas.draw_round_rect(shadow_rect, corner_radius, corner_radius, &shadow_paint);
 
                                     if is_node_selected {
-                                        canvas.draw_path(&dp, &node_selected_fill);
-                                        canvas.draw_circle(pt.to_skia(), half * 0.35, &node_fill);
+                                        canvas.draw_round_rect(rect, corner_radius, corner_radius, &node_selected_fill);
+                                        canvas.draw_round_rect(rect, corner_radius, corner_radius, &node_selected_stroke);
                                     } else {
-                                        canvas.draw_path(&dp, &node_fill);
+                                        canvas.draw_round_rect(rect, corner_radius, corner_radius, &node_fill);
+                                        canvas.draw_round_rect(rect, corner_radius, corner_radius, &node_stroke);
                                     }
-                                    canvas.draw_path(&dp, &node_stroke);
+                                }
+                                NodeType::Smooth => {
+                                    // Sleek Circular Anchor for Smooth nodes
+                                    canvas.draw_circle(
+                                        Point::new(pt.x + shadow_offset.x, pt.y + shadow_offset.y).to_skia(),
+                                        half * 1.05,
+                                        &shadow_paint,
+                                    );
+
+                                    if is_node_selected {
+                                        canvas.draw_circle(pt.to_skia(), half * 1.05, &node_selected_fill);
+                                        canvas.draw_circle(pt.to_skia(), half * 1.05, &node_selected_stroke);
+                                    } else {
+                                        canvas.draw_circle(pt.to_skia(), half * 1.05, &node_fill);
+                                        canvas.draw_circle(pt.to_skia(), half * 1.05, &node_stroke);
+                                    }
                                 }
                                 NodeType::Symmetric | NodeType::Auto => {
-                                    // Circle for Symmetric & Auto nodes
-                                    let r = half * 0.95;
+                                    // Circle with center accent core for Symmetric & Auto nodes
+                                    canvas.draw_circle(
+                                        Point::new(pt.x + shadow_offset.x, pt.y + shadow_offset.y).to_skia(),
+                                        half * 1.05,
+                                        &shadow_paint,
+                                    );
+
                                     if is_node_selected {
-                                        canvas.draw_circle(pt.to_skia(), r, &node_selected_fill);
-                                        canvas.draw_circle(pt.to_skia(), r * 0.4, &node_fill);
+                                        canvas.draw_circle(pt.to_skia(), half * 1.05, &node_selected_fill);
+                                        canvas.draw_circle(pt.to_skia(), half * 1.05, &node_selected_stroke);
+                                        canvas.draw_circle(pt.to_skia(), half * 0.40, &node_fill);
                                     } else {
-                                        canvas.draw_circle(pt.to_skia(), r, &node_fill);
+                                        canvas.draw_circle(pt.to_skia(), half * 1.05, &node_fill);
+                                        canvas.draw_circle(pt.to_skia(), half * 1.05, &node_stroke);
+                                        canvas.draw_circle(pt.to_skia(), half * 0.40, &node_stroke);
                                     }
-                                    canvas.draw_circle(pt.to_skia(), r, &node_stroke);
                                 }
                             }
                         } else {
-                            // Uniform Square
-                            let rect = skia::Rect::from_xywh(pt.x - half, pt.y - half, node_size, node_size);
+                            // Uniform Rounded Rectangle
+                            canvas.draw_round_rect(shadow_rect, corner_radius, corner_radius, &shadow_paint);
+
                             if is_node_selected {
-                                canvas.draw_rect(rect, &node_selected_fill);
-                                let inner = half * 0.4;
-                                canvas.draw_rect(skia::Rect::from_xywh(pt.x - inner, pt.y - inner, inner * 2.0, inner * 2.0), &node_fill);
+                                canvas.draw_round_rect(rect, corner_radius, corner_radius, &node_selected_fill);
+                                canvas.draw_round_rect(rect, corner_radius, corner_radius, &node_selected_stroke);
                             } else {
-                                canvas.draw_rect(rect, &node_fill);
+                                canvas.draw_round_rect(rect, corner_radius, corner_radius, &node_fill);
+                                canvas.draw_round_rect(rect, corner_radius, corner_radius, &node_stroke);
                             }
-                            canvas.draw_rect(rect, &node_stroke);
+                        }
+
+                        // Distinct start indicator for open paths
+                        if !p.is_closed && i == 0 {
+                            let mut start_badge = skia::Paint::default();
+                            start_badge.set_color4f(skia::Color4f::new(0.18, 0.80, 0.44, 0.9), None);
+                            start_badge.set_style(skia::PaintStyle::Fill);
+                            start_badge.set_anti_alias(true);
+                            canvas.draw_circle(pt.to_skia(), half * 0.4, &start_badge);
                         }
 
                         // Hover ring on node
                         if matches!(self.hover_target, Some(EditTarget::Node { element_id, node_idx }) if element_id == p.id && node_idx == i)
                         {
-                            canvas.draw_circle(pt.to_skia(), half * 1.6, &hover_ring);
+                            canvas.draw_circle(pt.to_skia(), half * 1.7, &hover_ring);
                         }
                     }
 
@@ -1044,18 +1115,24 @@ impl FeaturePlugin for PathEditorFeature {
         if let Some(EditTarget::Segment { insert_pos, .. }) = self.hover_target {
             if config.highlight_hovered_segment {
                 let mut insert_preview_fill = skia::Paint::default();
-                insert_preview_fill.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.9), None);
+                insert_preview_fill.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.95), None);
                 insert_preview_fill.set_style(skia::PaintStyle::Fill);
                 insert_preview_fill.set_anti_alias(true);
-                canvas.draw_circle(insert_pos.to_skia(), half * 0.9, &insert_preview_fill);
-                canvas.draw_circle(insert_pos.to_skia(), half * 1.5, &hover_ring);
+
+                canvas.draw_circle(
+                    Point::new(insert_pos.x + shadow_offset.x, insert_pos.y + shadow_offset.y).to_skia(),
+                    half * 1.1,
+                    &shadow_paint,
+                );
+                canvas.draw_circle(insert_pos.to_skia(), half * 1.1, &insert_preview_fill);
+                canvas.draw_circle(insert_pos.to_skia(), half * 1.7, &hover_ring);
 
                 let mut cross_paint = skia::Paint::default();
                 cross_paint.set_color4f(skia::Color4f::new(1.0, 1.0, 1.0, 1.0), None);
                 cross_paint.set_style(skia::PaintStyle::Stroke);
-                cross_paint.set_stroke_width((1.5 / zoom).max(1.0));
+                cross_paint.set_stroke_width((1.5 / zoom).max(1.1));
                 cross_paint.set_anti_alias(true);
-                let cross_len = half * 0.5;
+                let cross_len = half * 0.55;
                 canvas.draw_line(
                     Point::new(insert_pos.x - cross_len, insert_pos.y).to_skia(),
                     Point::new(insert_pos.x + cross_len, insert_pos.y).to_skia(),

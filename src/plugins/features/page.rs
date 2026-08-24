@@ -95,7 +95,7 @@ impl PageFeature {
 
 impl FeaturePlugin for PageFeature {
     fn on_activate(&mut self, ctx: &mut PluginContext) {
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:page");
     }
 
     fn on_pointer_down(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
@@ -152,7 +152,7 @@ impl FeaturePlugin for PageFeature {
             start_pos: event.world_pos,
             current_pos: event.world_pos,
         };
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:page");
         ctx.request_redraw();
     }
 
@@ -162,7 +162,7 @@ impl FeaturePlugin for PageFeature {
         match &mut self.drag_state {
             PageDragState::Creating { current_pos, .. } => {
                 *current_pos = event.world_pos;
-                ctx.set_cursor("crosshair");
+                ctx.set_cursor("tool:page");
                 ctx.request_redraw();
             }
             PageDragState::Moving {
@@ -262,7 +262,7 @@ impl FeaturePlugin for PageFeature {
                 if is_over_page {
                     ctx.set_cursor("grab");
                 } else {
-                    ctx.set_cursor("crosshair");
+                    ctx.set_cursor("tool:page");
                 }
             }
         }
@@ -291,7 +291,7 @@ impl FeaturePlugin for PageFeature {
         }
 
         self.drag_state = PageDragState::Idle;
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:page");
         ctx.request_redraw();
     }
 

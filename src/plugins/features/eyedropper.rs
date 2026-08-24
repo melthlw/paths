@@ -41,7 +41,7 @@ impl EyedropperFeature {
 
 impl FeaturePlugin for EyedropperFeature {
     fn on_activate(&mut self, ctx: &mut PluginContext) {
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:eyedropper");
     }
 
     fn on_pointer_down(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
@@ -79,7 +79,7 @@ impl FeaturePlugin for EyedropperFeature {
     fn on_pointer_move(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
         self.hover_pos = Some(event.world_pos);
         self.hover_color = Some(Self::sample_color_at(ctx, event.world_pos));
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:eyedropper");
         ctx.request_redraw();
     }
 

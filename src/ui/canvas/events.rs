@@ -20,12 +20,14 @@ impl CanvasWidget {
 
     pub(crate) fn setup_event_controllers(&self) {
         let area = &self.drawing_area;
+        let cursor_cache = self.cursor_cache.clone();
 
         // 0. Gesture Click (Double click detection to edit text / select all)
         let gesture_click = gtk4::GestureClick::new();
         gesture_click.set_button(1);
         let state_click = self.state.clone();
         let area_click = self.drawing_area.clone();
+        let cc_click = cursor_cache.clone();
         gesture_click.connect_pressed(glib::clone!(
             #[weak]
             area_click,
@@ -35,7 +37,7 @@ impl CanvasWidget {
                         .borrow_mut()
                         .double_click(Point::new(x as f32, y as f32));
                     if let Some(c) = cursor {
-                        area_click.set_cursor_from_name(Some(c));
+                        Self::apply_cursor(&area_click, &cc_click, c);
                     }
                     if redraw {
                         area_click.queue_draw();
@@ -50,6 +52,7 @@ impl CanvasWidget {
         gesture_right_click.set_button(3);
         let state_menu = self.state.clone();
         let area_menu = self.drawing_area.clone();
+        let cc_menu = cursor_cache.clone();
         let context_menu = crate::ui::context_menu::ObjectContextMenu::new(self.clone(), area);
         let menu_clone = context_menu.clone();
 
@@ -71,7 +74,7 @@ impl CanvasWidget {
                         false,
                     );
                     if let Some(c) = cursor {
-                        area_menu.set_cursor_from_name(Some(c));
+                        Self::apply_cursor(&area_menu, &cc_menu, c);
                     }
                     if redraw {
                         area_menu.queue_draw();
@@ -105,6 +108,7 @@ impl CanvasWidget {
         gesture_drag.set_button(0);
         let state_drag = self.state.clone();
         let area_drag = self.drawing_area.clone();
+        let cc_drag = cursor_cache.clone();
 
         gesture_drag.connect_drag_begin(glib::clone!(
             #[weak]
@@ -137,7 +141,7 @@ impl CanvasWidget {
                 );
 
                 if let Some(cursor_name) = cursor {
-                    area_drag.set_cursor_from_name(Some(cursor_name));
+                    Self::apply_cursor(&area_drag, &cc_drag, cursor_name);
                 }
                 if redraw {
                     area_drag.queue_draw();
@@ -147,6 +151,7 @@ impl CanvasWidget {
 
         let state_update = self.state.clone();
         let area_update = self.drawing_area.clone();
+        let cc_update = cursor_cache.clone();
         gesture_drag.connect_drag_update(glib::clone!(
             #[weak]
             area_update,
@@ -173,7 +178,7 @@ impl CanvasWidget {
                     );
 
                     if let Some(cursor_name) = cursor {
-                        area_update.set_cursor_from_name(Some(cursor_name));
+                        Self::apply_cursor(&area_update, &cc_update, cursor_name);
                     }
                     if redraw {
                         area_update.queue_draw();
@@ -184,6 +189,7 @@ impl CanvasWidget {
 
         let state_end = self.state.clone();
         let area_end = self.drawing_area.clone();
+        let cc_end = cursor_cache.clone();
         gesture_drag.connect_drag_end(glib::clone!(
             #[weak]
             area_end,
@@ -217,7 +223,7 @@ impl CanvasWidget {
                     );
 
                     if let Some(cursor_name) = cursor {
-                        area_end.set_cursor_from_name(Some(cursor_name));
+                        Self::apply_cursor(&area_end, &cc_end, cursor_name);
                     }
                     if redraw {
                         area_end.queue_draw();
@@ -232,6 +238,7 @@ impl CanvasWidget {
         let motion_controller = gtk4::EventControllerMotion::new();
         let state_motion = self.state.clone();
         let area_motion = self.drawing_area.clone();
+        let cc_motion = cursor_cache.clone();
 
         motion_controller.connect_motion(glib::clone!(
             #[weak]
@@ -256,7 +263,7 @@ impl CanvasWidget {
                 );
 
                 if let Some(cursor_name) = cursor {
-                    area_motion.set_cursor_from_name(Some(cursor_name));
+                    Self::apply_cursor(&area_motion, &cc_motion, cursor_name);
                 }
                 if redraw {
                     area_motion.queue_draw();
@@ -296,6 +303,7 @@ impl CanvasWidget {
         let key_controller = gtk4::EventControllerKey::new();
         let state_key = self.state.clone();
         let area_key = self.drawing_area.clone();
+        let cc_key = cursor_cache.clone();
 
         key_controller.connect_key_pressed(glib::clone!(
             #[weak]
@@ -307,7 +315,7 @@ impl CanvasWidget {
 
                 if keyval == gdk::Key::space && !state.plugin_manager.is_editing() {
                     state.is_space_down = true;
-                    area_key.set_cursor_from_name(Some("grab"));
+                    Self::apply_cursor(&area_key, &cc_key, "grab");
                     return glib::Propagation::Stop;
                 }
 
@@ -332,13 +340,14 @@ impl CanvasWidget {
 
         let state_keyup = self.state.clone();
         let area_keyup = self.drawing_area.clone();
+        let cc_keyup = cursor_cache.clone();
         key_controller.connect_key_released(glib::clone!(
             #[weak]
             area_keyup,
             move |_controller, keyval, _keycode, _state_flags| {
                 if keyval == gdk::Key::space {
                     state_keyup.borrow_mut().is_space_down = false;
-                    area_keyup.set_cursor_from_name(Some("default"));
+                    Self::apply_cursor(&area_keyup, &cc_keyup, "default");
                 }
             }
         ));

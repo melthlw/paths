@@ -48,7 +48,7 @@ impl MeshGradientFeature {
 
 impl FeaturePlugin for MeshGradientFeature {
     fn on_activate(&mut self, ctx: &mut PluginContext) {
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:node");
     }
 
     fn on_pointer_down(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {

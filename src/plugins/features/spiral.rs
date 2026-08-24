@@ -187,6 +187,10 @@ impl SpiralFeature {
 }
 
 impl FeaturePlugin for SpiralFeature {
+    fn on_activate(&mut self, ctx: &mut PluginContext) {
+        ctx.set_cursor("tool:spiral");
+    }
+
     fn on_pointer_down(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
         if event.button != Some(PointerButton::Primary) {
             return;
@@ -315,7 +319,7 @@ impl FeaturePlugin for SpiralFeature {
             is_square_locked: event.shift_pressed,
             is_center_anchored: event.alt_pressed,
         };
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:spiral");
         ctx.request_redraw();
     }
 
@@ -332,7 +336,7 @@ impl FeaturePlugin for SpiralFeature {
                 *current_pos = snapped;
                 *is_square_locked = event.shift_pressed;
                 *is_center_anchored = event.alt_pressed;
-                ctx.set_cursor("crosshair");
+                ctx.set_cursor("tool:spiral");
                 ctx.request_redraw();
             }
             SpiralToolState::DraggingHandle {
@@ -510,7 +514,7 @@ impl FeaturePlugin for SpiralFeature {
                     if is_hovering {
                         ctx.set_cursor("pointer");
                     } else {
-                        ctx.set_cursor("crosshair");
+                        ctx.set_cursor("tool:spiral");
                     }
                 }
             }
@@ -551,7 +555,7 @@ impl FeaturePlugin for SpiralFeature {
 
         self.state = SpiralToolState::Idle;
         ctx.clear_snap_guides();
-        ctx.set_cursor("crosshair");
+        ctx.set_cursor("tool:spiral");
         ctx.request_redraw();
     }
 
