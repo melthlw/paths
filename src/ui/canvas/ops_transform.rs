@@ -12,6 +12,84 @@ impl CanvasWidget {
         }
     }
 
+    pub fn pen_undo_node(&self) {
+        let mut state = self.state.borrow_mut();
+        let key_event = crate::core::KeyEvent {
+            key: gtk4::gdk::Key::BackSpace,
+            shift_pressed: false,
+            ctrl_pressed: false,
+            alt_pressed: false,
+        };
+        let (handled, redraw) = state.on_key_pressed(&key_event);
+        if handled || redraw {
+            state.notify_status();
+            drop(state);
+            self.drawing_area.queue_draw();
+        }
+    }
+
+    pub fn pen_finish_path(&self) {
+        let mut state = self.state.borrow_mut();
+        let key_event = crate::core::KeyEvent {
+            key: gtk4::gdk::Key::Return,
+            shift_pressed: false,
+            ctrl_pressed: false,
+            alt_pressed: false,
+        };
+        let (handled, redraw) = state.on_key_pressed(&key_event);
+        if handled || redraw {
+            state.notify_status();
+            drop(state);
+            self.drawing_area.queue_draw();
+        }
+    }
+
+    pub fn pen_close_path(&self) {
+        let mut state = self.state.borrow_mut();
+        let key_event = crate::core::KeyEvent {
+            key: gtk4::gdk::Key::c,
+            shift_pressed: false,
+            ctrl_pressed: false,
+            alt_pressed: false,
+        };
+        let (handled, redraw) = state.on_key_pressed(&key_event);
+        if handled || redraw {
+            state.notify_status();
+            drop(state);
+            self.drawing_area.queue_draw();
+        }
+    }
+
+    pub fn pen_resume_path(&self) {
+        let mut state = self.state.borrow_mut();
+        let mut open_path_info = None;
+        for elem in &state.document.elements {
+            if state.document.selected_ids.contains(&elem.id()) {
+                if let crate::core::Element::Path(p) = elem {
+                    if !p.is_closed && !p.nodes.is_empty() {
+                        open_path_info = Some((p.id, p.nodes.clone()));
+                        break;
+                    }
+                }
+            }
+        }
+
+        if let Some((id, nodes)) = open_path_info {
+            if let Some(feat) = state.plugin_manager.feature_by_id_mut("pen") {
+                if let Some(pen) = feat.as_pen_feature_mut() {
+                    pen.nodes = nodes;
+                    pen.resuming_path_id = Some(id);
+                    if let Some(last) = pen.nodes.last() {
+                        pen.current_cursor = Some(last.point);
+                    }
+                }
+            }
+            state.notify_status();
+            drop(state);
+            self.drawing_area.queue_draw();
+        }
+    }
+
     pub fn flip_horizontal(&self) {
         let mut state = self.state.borrow_mut();
         state.document.flip_horizontal_selected();
@@ -388,5 +466,36 @@ impl CanvasWidget {
         drop(state);
         self.notify_status();
         self.drawing_area.queue_draw();
+    }
+
+    pub fn transform_options(&self) -> crate::core::TransformOptions {
+        self.state
+            .try_borrow()
+            .map(|s| s.transform_options)
+            .unwrap_or_default()
+    }
+
+    pub fn set_scale_stroke_width(&self, enabled: bool) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.transform_options.scale_stroke_width = enabled;
+        }
+    }
+
+    pub fn set_scale_corner_radii(&self, enabled: bool) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.transform_options.scale_corner_radii = enabled;
+        }
+    }
+
+    pub fn set_move_gradients(&self, enabled: bool) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.transform_options.move_gradients = enabled;
+        }
+    }
+
+    pub fn set_move_patterns(&self, enabled: bool) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.transform_options.move_patterns = enabled;
+        }
     }
 }

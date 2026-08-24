@@ -104,13 +104,7 @@ impl FloatingToolbar {
             (crate::core::gettext("Right"), BarPosition::Right, "go-next-symbolic"),
         ];
 
-        for (name, pos, icon) in positions {
-            let btn = gtk4::Button::builder()
-                .tooltip_text(&name)
-                .icon_name(icon)
-                .css_classes(["flat"])
-                .build();
-
+        let apply_pos = {
             let dock_box_c = dock_box.clone();
             let color_bar_c = color_bar.clone();
             let options_bar_c = options_bar.clone();
@@ -118,9 +112,8 @@ impl FloatingToolbar {
             let items_box_c = items_box.clone();
             let popovers_c = popovers.clone();
             let pos_c = position.clone();
-            let pop_close = popover.clone();
 
-            btn.connect_clicked(move |_| {
+            Rc::new(move |pos: BarPosition| {
                 pos_c.set(pos);
                 match pos {
                     BarPosition::Bottom => {
@@ -212,6 +205,21 @@ impl FloatingToolbar {
                         options_bar_c.update_margin_for_toolbar(BarPosition::Right);
                     }
                 }
+            })
+        };
+
+        for (name, pos, icon) in positions {
+            let btn = gtk4::Button::builder()
+                .tooltip_text(&name)
+                .icon_name(icon)
+                .css_classes(["flat"])
+                .build();
+
+            let apply_pos_btn = apply_pos.clone();
+            let pop_close = popover.clone();
+
+            btn.connect_clicked(move |_| {
+                apply_pos_btn(pos);
                 pop_close.popdown();
             });
 

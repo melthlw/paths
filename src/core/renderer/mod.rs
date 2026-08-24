@@ -148,6 +148,8 @@ impl SkiaRenderer {
         let is_dark = libadwaita::StyleManager::default().is_dark();
         if let Some(c) = render_options.canvas_bg_color {
             canvas.clear(c.to_skia());
+        } else if let Some(theme_bg) = crate::ui::theme::current_visual_theme().workspace_bg_color() {
+            canvas.clear(theme_bg.to_skia());
         } else if is_dark {
             canvas.clear(Color4f::new(0.14, 0.14, 0.15, 1.0));
         } else {

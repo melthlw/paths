@@ -49,6 +49,7 @@ pub struct InspectorSidebar {
     y_entry: gtk4::Entry,
     w_entry: gtk4::Entry,
     h_entry: gtk4::Entry,
+    unit_dd: gtk4::DropDown,
     blend_dd: gtk4::DropDown,
     blur_slider: PillSlider,
     opacity_slider: PillSlider,
@@ -425,6 +426,7 @@ impl InspectorSidebar {
         let y_entry = trans_sec.y_entry;
         let w_entry = trans_sec.w_entry;
         let h_entry = trans_sec.h_entry;
+        let unit_dd = trans_sec.unit_dd;
         let convert_path_row = trans_sec.convert_path_row;
         let transform_body = trans_sec.container;
 
@@ -691,6 +693,7 @@ impl InspectorSidebar {
             y_entry,
             w_entry,
             h_entry,
+            unit_dd,
             blend_dd,
             blur_slider,
             opacity_slider,
@@ -827,28 +830,34 @@ impl InspectorSidebar {
         self.align_box.set_sensitive(has_selection);
         self.convert_path_row.set_visible(can_convert_to_path);
 
+        let cur_unit = self.canvas.unit();
+        let cur_unit_idx = cur_unit.to_index();
+        if self.unit_dd.selected() != cur_unit_idx {
+            self.unit_dd.set_selected(cur_unit_idx);
+        }
+
         // Sync Geometry entries in Transform tab only when values actually change
         if let Some(r) = bounds {
             if !self.x_entry.has_focus() {
-                let s = format!("{:.1}", r.x);
+                let s = cur_unit.format(r.x);
                 if self.x_entry.text().as_str() != s.as_str() {
                     self.x_entry.set_text(&s);
                 }
             }
             if !self.y_entry.has_focus() {
-                let s = format!("{:.1}", r.y);
+                let s = cur_unit.format(r.y);
                 if self.y_entry.text().as_str() != s.as_str() {
                     self.y_entry.set_text(&s);
                 }
             }
             if !self.w_entry.has_focus() {
-                let s = format!("{:.1}", r.width);
+                let s = cur_unit.format(r.width);
                 if self.w_entry.text().as_str() != s.as_str() {
                     self.w_entry.set_text(&s);
                 }
             }
             if !self.h_entry.has_focus() {
-                let s = format!("{:.1}", r.height);
+                let s = cur_unit.format(r.height);
                 if self.h_entry.text().as_str() != s.as_str() {
                     self.h_entry.set_text(&s);
                 }

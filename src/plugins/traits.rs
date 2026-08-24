@@ -69,7 +69,7 @@ impl<'a> PluginContext<'a> {
 }
 
 /// Feature Plugin: Core vector tool and document logic
-pub trait FeaturePlugin: Send + Sync {
+pub trait FeaturePlugin: 'static + Send + Sync {
     fn on_activate(&mut self, _ctx: &mut PluginContext) {}
     fn on_pointer_down(&mut self, ctx: &mut PluginContext, event: &PointerEvent);
     fn on_pointer_move(&mut self, ctx: &mut PluginContext, event: &PointerEvent);
@@ -86,6 +86,14 @@ pub trait FeaturePlugin: Send + Sync {
 
     fn is_editing(&self) -> bool {
         false
+    }
+
+    fn as_pen_feature(&self) -> Option<&crate::plugins::features::pen::PenFeature> {
+        None
+    }
+
+    fn as_pen_feature_mut(&mut self) -> Option<&mut crate::plugins::features::pen::PenFeature> {
+        None
     }
 
     fn render_overlay(

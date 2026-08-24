@@ -95,7 +95,7 @@ pub fn show_preferences_window(parent: &impl IsA<gtk4::Widget>, canvas: CanvasWi
         },
         NavSection {
             id: "node_editor",
-            title: crate::core::gettext("Path & Node Editor"),
+            title: crate::core::gettext("Path and Node Editor"),
             icon_resource: Some("/io/github/lewis/GnomePaths/icons/tool-path-editor.svg"),
             icon_name: "edit-symbolic",
         },

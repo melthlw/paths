@@ -37,6 +37,14 @@ pub fn build_plugins_page(window: &adw::Window, canvas: &CanvasWidget) -> gtk4::
                 ))
                 .active(enabled)
                 .build();
+
+            let canvas_p = canvas.clone();
+            let plugin_id = id.to_string();
+            row.connect_active_notify(move |switch| {
+                let is_on = switch.is_active();
+                canvas_p.set_plugin_enabled(&plugin_id, is_on);
+            });
+
             plugins_list_group.add(&row);
         }
     }

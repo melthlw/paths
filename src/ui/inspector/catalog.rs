@@ -116,7 +116,11 @@ pub fn build_catalog_popover(
         filterable_items.push((title.to_lowercase(), item_btn.upcast()));
     }
 
-    let external_plugins = canvas.state().borrow().plugin_manager.external_plugins();
+    let external_plugins = canvas
+        .state()
+        .try_borrow()
+        .map(|s| s.plugin_manager.external_plugins())
+        .unwrap_or_default();
     if !external_plugins.is_empty() {
         let plug_title = gtk4::Label::builder()
             .label(crate::core::gettext("Plugins & Tools"))

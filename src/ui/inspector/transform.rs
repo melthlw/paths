@@ -1,7 +1,9 @@
 use gtk4::prelude::*;
 use libadwaita as adw;
 use libadwaita::prelude::*;
+use std::rc::Rc;
 
+use crate::core::eval_math_expression;
 use crate::ui::canvas::CanvasWidget;
 
 pub struct TransformSection {
@@ -10,7 +12,55 @@ pub struct TransformSection {
     pub y_entry: gtk4::Entry,
     pub w_entry: gtk4::Entry,
     pub h_entry: gtk4::Entry,
+    pub unit_dd: gtk4::DropDown,
     pub convert_path_row: adw::ActionRow,
+}
+
+fn attach_numeric_evaluator<F: Fn(f32) + 'static>(
+    entry: &gtk4::Entry,
+    canvas: &CanvasWidget,
+    get_base_val: impl Fn(&CanvasWidget) -> Option<f32> + 'static,
+    apply_val: F,
+) {
+    let apply_rc = Rc::new(apply_val);
+    let get_base_rc = Rc::new(get_base_val);
+
+    // On Enter pressed:
+    {
+        let c = canvas.clone();
+        let app = apply_rc.clone();
+        let gb = get_base_rc.clone();
+        entry.connect_activate(move |e| {
+            let text = e.text();
+            let unit = c.unit();
+            let base = gb(&c);
+            if let Ok(px_val) = eval_math_expression(&text, unit, base) {
+                app(px_val);
+                e.set_text(&unit.format(px_val));
+            }
+        });
+    }
+
+    // On Focus Lost (user clicked outside):
+    {
+        let c = canvas.clone();
+        let app = apply_rc.clone();
+        let gb = get_base_rc.clone();
+        let entry_weak = entry.downgrade();
+        let focus_ctrl = gtk4::EventControllerFocus::new();
+        focus_ctrl.connect_leave(move |_| {
+            if let Some(e) = entry_weak.upgrade() {
+                let text = e.text();
+                let unit = c.unit();
+                let base = gb(&c);
+                if let Ok(px_val) = eval_math_expression(&text, unit, base) {
+                    app(px_val);
+                    e.set_text(&unit.format(px_val));
+                }
+            }
+        });
+        entry.add_controller(focus_ctrl);
+    }
 }
 
 pub fn build_transform_section(canvas: &CanvasWidget) -> TransformSection {
@@ -27,6 +77,30 @@ pub fn build_transform_section(canvas: &CanvasWidget) -> TransformSection {
         .title(crate::core::gettext("Position and Dimensions"))
         .build();
     geom_title_row.add_prefix(&gtk4::Image::from_icon_name("view-grid-symbolic"));
+
+    // Document Unit Switcher DropDown in Transform Header
+    let unit_strings: Vec<&str> = crate::core::Unit::ALL
+        .iter()
+        .map(|u| u.display_name())
+        .collect();
+    let unit_list = gtk4::StringList::new(&unit_strings);
+    let unit_dd = gtk4::DropDown::builder()
+        .model(&unit_list)
+        .selected(canvas.unit().to_index())
+        .tooltip_text(crate::core::gettext("Document Unit"))
+        .valign(gtk4::Align::Center)
+        .build();
+
+    {
+        let c = canvas.clone();
+        unit_dd.connect_selected_notify(move |dd| {
+            let unit = crate::core::Unit::from_index(dd.selected());
+            if c.unit() != unit {
+                c.set_unit(unit);
+            }
+        });
+    }
+    geom_title_row.add_suffix(&unit_dd);
     geom_group.add(&geom_title_row);
 
     let geom_box = gtk4::Box::builder()
@@ -45,7 +119,7 @@ pub fn build_transform_section(canvas: &CanvasWidget) -> TransformSection {
         .build();
 
     let x_lbl = gtk4::Label::builder()
-        .label("X:")
+        .label(&crate::core::gettext("X:"))
         .css_classes(["dim-label"])
         .build();
     let x_entry = gtk4::Entry::builder()
@@ -54,19 +128,28 @@ pub fn build_transform_section(canvas: &CanvasWidget) -> TransformSection {
         .css_classes(["numeric"])
         .hexpand(true)
         .build();
-    {
-        let c = canvas.clone();
-        x_entry.connect_activate(move |e| {
-            if let Ok(v) = e.text().trim().parse::<f32>() {
-                c.set_selected_x(v);
-            }
-        });
-    }
+
+    attach_numeric_evaluator(
+        &x_entry,
+        canvas,
+        |c| {
+            c.state()
+                .try_borrow()
+                .ok()
+                .and_then(|s| s.document.selection_bounds())
+                .map(|b| b.x)
+        },
+        {
+            let c = canvas.clone();
+            move |val| c.set_selected_x(val)
+        },
+    );
+
     xy_row.append(&x_lbl);
     xy_row.append(&x_entry);
 
     let y_lbl = gtk4::Label::builder()
-        .label("Y:")
+        .label(&crate::core::gettext("Y:"))
         .css_classes(["dim-label"])
         .build();
     let y_entry = gtk4::Entry::builder()
@@ -75,14 +158,23 @@ pub fn build_transform_section(canvas: &CanvasWidget) -> TransformSection {
         .css_classes(["numeric"])
         .hexpand(true)
         .build();
-    {
-        let c = canvas.clone();
-        y_entry.connect_activate(move |e| {
-            if let Ok(v) = e.text().trim().parse::<f32>() {
-                c.set_selected_y(v);
-            }
-        });
-    }
+
+    attach_numeric_evaluator(
+        &y_entry,
+        canvas,
+        |c| {
+            c.state()
+                .try_borrow()
+                .ok()
+                .and_then(|s| s.document.selection_bounds())
+                .map(|b| b.y)
+        },
+        {
+            let c = canvas.clone();
+            move |val| c.set_selected_y(val)
+        },
+    );
+
     xy_row.append(&y_lbl);
     xy_row.append(&y_entry);
 
@@ -95,7 +187,7 @@ pub fn build_transform_section(canvas: &CanvasWidget) -> TransformSection {
         .build();
 
     let w_lbl = gtk4::Label::builder()
-        .label("L:")
+        .label(&crate::core::gettext("W:"))
         .css_classes(["dim-label"])
         .build();
     let w_entry = gtk4::Entry::builder()
@@ -112,20 +204,30 @@ pub fn build_transform_section(canvas: &CanvasWidget) -> TransformSection {
         .build();
 
     {
-        let c = canvas.clone();
-        let lock = lock_btn.clone();
-        w_entry.connect_activate(move |e| {
-            if let Ok(v) = e.text().trim().parse::<f32>() {
-                c.set_selected_width(v, lock.is_active());
-            }
-        });
+        let c_clone = canvas.clone();
+        let lock_clone = lock_btn.clone();
+        attach_numeric_evaluator(
+            &w_entry,
+            canvas,
+            |c| {
+                c.state()
+                    .try_borrow()
+                    .ok()
+                    .and_then(|s| s.document.selection_bounds())
+                    .map(|b| b.width)
+            },
+            move |val| {
+                c_clone.set_selected_width(val, lock_clone.is_active());
+            },
+        );
     }
+
     wh_row.append(&w_lbl);
     wh_row.append(&w_entry);
     wh_row.append(&lock_btn);
 
     let h_lbl = gtk4::Label::builder()
-        .label("A:")
+        .label(&crate::core::gettext("H:"))
         .css_classes(["dim-label"])
         .build();
     let h_entry = gtk4::Entry::builder()
@@ -134,15 +236,26 @@ pub fn build_transform_section(canvas: &CanvasWidget) -> TransformSection {
         .css_classes(["numeric"])
         .hexpand(true)
         .build();
+
     {
-        let c = canvas.clone();
-        let lock = lock_btn.clone();
-        h_entry.connect_activate(move |e| {
-            if let Ok(v) = e.text().trim().parse::<f32>() {
-                c.set_selected_height(v, lock.is_active());
-            }
-        });
+        let c_clone = canvas.clone();
+        let lock_clone = lock_btn.clone();
+        attach_numeric_evaluator(
+            &h_entry,
+            canvas,
+            |c| {
+                c.state()
+                    .try_borrow()
+                    .ok()
+                    .and_then(|s| s.document.selection_bounds())
+                    .map(|b| b.height)
+            },
+            move |val| {
+                c_clone.set_selected_height(val, lock_clone.is_active());
+            },
+        );
     }
+
     wh_row.append(&h_lbl);
     wh_row.append(&h_entry);
 
@@ -292,6 +405,7 @@ pub fn build_transform_section(canvas: &CanvasWidget) -> TransformSection {
         y_entry,
         w_entry,
         h_entry,
+        unit_dd,
         convert_path_row,
     }
 }

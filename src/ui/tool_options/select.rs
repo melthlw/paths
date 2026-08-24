@@ -1,22 +1,23 @@
 use gtk4::prelude::*;
 
-use super::helpers::{create_coord_entry, create_resource_btn};
+use super::helpers::{create_coord_entry, create_resource_btn, create_resource_toggle_btn};
 use crate::ui::canvas::CanvasWidget;
 
 pub struct SelectControls {
     pub general_box: gtk4::Box,
     pub layer_box: gtk4::Box,
-    pub corner_box: gtk4::Box,
+    pub transform_modes_box: gtk4::Box,
     pub btn_convert_path: gtk4::Button,
     pub right_capsule: gtk4::Box,
     pub x_entry: gtk4::Entry,
     pub y_entry: gtk4::Entry,
     pub w_entry: gtk4::Entry,
     pub h_entry: gtk4::Entry,
+    pub unit_dd: gtk4::DropDown,
 }
 
 pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
-    // General selection tools container (Rotate, Layer Order, Convert to Path, Boolean Ops)
+    // General selection tools container (Rotate, Layer Order, Convert to Path, Boolean Ops, Transform Modes)
     let general_box = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Horizontal)
         .spacing(2)
@@ -94,25 +95,7 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
 
     general_box.append(&layer_box);
 
-    // 8-9. Corner Editing Box (Visible for Rect / Selection / Path)
-    let corner_box = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(2)
-        .visible(false)
-        .build();
-
-    let btn_sharp = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/corner-sharp.svg",
-        &crate::core::gettext("Sharp Corner"),
-    );
-    corner_box.append(&btn_sharp);
-
-    let btn_round = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/corner-round.svg",
-        &crate::core::gettext("Rounded Corner"),
-    );
-    corner_box.append(&btn_round);
-
+    // Convert to Path button
     let btn_convert_path = create_resource_btn(
         "/io/github/lewis/GnomePaths/icons/object-to-path.svg",
         &crate::core::gettext("Convert to Path (Ctrl+Shift+C)"),
@@ -121,9 +104,67 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
     btn_convert_path.connect_clicked(move |_| {
         canvas_conv.convert_selected_to_path();
     });
-    corner_box.append(&btn_convert_path);
+    btn_convert_path.set_visible(false);
+    general_box.append(&btn_convert_path);
 
-    general_box.append(&corner_box);
+    // Transform Modes Box (Scale Stroke, Scale Corners, Move Gradients, Move Patterns)
+    let transform_modes_box = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Horizontal)
+        .spacing(2)
+        .visible(true)
+        .build();
+
+    let cur_opts = canvas.transform_options();
+
+    // 1. Scale Stroke Width
+    let btn_scale_stroke = create_resource_toggle_btn(
+        "/io/github/lewis/GnomePaths/icons/corner-sharp.svg",
+        &crate::core::gettext("When scaling objects, scale the stroke width in the same proportion"),
+        cur_opts.scale_stroke_width,
+    );
+    let canvas_ss = canvas.clone();
+    btn_scale_stroke.connect_toggled(move |btn| {
+        canvas_ss.set_scale_stroke_width(btn.is_active());
+    });
+    transform_modes_box.append(&btn_scale_stroke);
+
+    // 2. Scale Corner Radii
+    let btn_scale_corners = create_resource_toggle_btn(
+        "/io/github/lewis/GnomePaths/icons/corner-round.svg",
+        &crate::core::gettext("When scaling rectangles, scale the radii of rounded corners in the same proportion"),
+        cur_opts.scale_corner_radii,
+    );
+    let canvas_sc = canvas.clone();
+    btn_scale_corners.connect_toggled(move |btn| {
+        canvas_sc.set_scale_corner_radii(btn.is_active());
+    });
+    transform_modes_box.append(&btn_scale_corners);
+
+    // 3. Move Gradients
+    let btn_move_gradients = create_resource_toggle_btn(
+        "/io/github/lewis/GnomePaths/icons/tool-gradient.svg",
+        &crate::core::gettext("Move gradients (in fill or stroke) along with the objects"),
+        cur_opts.move_gradients,
+    );
+    let canvas_mg = canvas.clone();
+    btn_move_gradients.connect_toggled(move |btn| {
+        canvas_mg.set_move_gradients(btn.is_active());
+    });
+    transform_modes_box.append(&btn_move_gradients);
+
+    // 4. Move Patterns
+    let btn_move_patterns = create_resource_toggle_btn(
+        "/io/github/lewis/GnomePaths/icons/format-fill.svg",
+        &crate::core::gettext("Move patterns (in fill or stroke) along with the objects"),
+        cur_opts.move_patterns,
+    );
+    let canvas_mp = canvas.clone();
+    btn_move_patterns.connect_toggled(move |btn| {
+        canvas_mp.set_move_patterns(btn.is_active());
+    });
+    transform_modes_box.append(&btn_move_patterns);
+
+    general_box.append(&transform_modes_box);
 
     // RIGHT CAPSULE: [X] [Y] [Flip H] [Flip V] [W] [Lock] [H]
     let right_capsule = gtk4::Box::builder()
@@ -139,8 +180,16 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
     let canvas_x = canvas.clone();
     x_entry.connect_activate(move |entry| {
         let text = entry.text();
-        if let Ok(val) = text.trim().parse::<f32>() {
+        let unit = canvas_x.unit();
+        let base = canvas_x
+            .state()
+            .try_borrow()
+            .ok()
+            .and_then(|s| s.document.selection_bounds())
+            .map(|b| b.x);
+        if let Ok(val) = crate::core::eval_math_expression(text.as_str(), unit, base) {
             canvas_x.set_selected_x(val);
+            entry.set_text(&unit.format(val));
         }
     });
     right_capsule.append(&x_box);
@@ -150,8 +199,16 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
     let canvas_y = canvas.clone();
     y_entry.connect_activate(move |entry| {
         let text = entry.text();
-        if let Ok(val) = text.trim().parse::<f32>() {
+        let unit = canvas_y.unit();
+        let base = canvas_y
+            .state()
+            .try_borrow()
+            .ok()
+            .and_then(|s| s.document.selection_bounds())
+            .map(|b| b.y);
+        if let Ok(val) = crate::core::eval_math_expression(text.as_str(), unit, base) {
             canvas_y.set_selected_y(val);
+            entry.set_text(&unit.format(val));
         }
     });
     right_capsule.append(&y_box);
@@ -195,8 +252,16 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
     let lock_clone_w = lock_btn.clone();
     w_entry.connect_activate(move |entry| {
         let text = entry.text();
-        if let Ok(val) = text.trim().parse::<f32>() {
+        let unit = canvas_w.unit();
+        let base = canvas_w
+            .state()
+            .try_borrow()
+            .ok()
+            .and_then(|s| s.document.selection_bounds())
+            .map(|b| b.width);
+        if let Ok(val) = crate::core::eval_math_expression(text.as_str(), unit, base) {
             canvas_w.set_selected_width(val, lock_clone_w.is_active());
+            entry.set_text(&unit.format(val));
         }
     });
     right_capsule.append(&w_box);
@@ -208,21 +273,59 @@ pub fn build_select_controls(canvas: &CanvasWidget) -> SelectControls {
     let lock_clone_h = lock_btn;
     h_entry.connect_activate(move |entry| {
         let text = entry.text();
-        if let Ok(val) = text.trim().parse::<f32>() {
+        let unit = canvas_h.unit();
+        let base = canvas_h
+            .state()
+            .try_borrow()
+            .ok()
+            .and_then(|s| s.document.selection_bounds())
+            .map(|b| b.height);
+        if let Ok(val) = crate::core::eval_math_expression(text.as_str(), unit, base) {
             canvas_h.set_selected_height(val, lock_clone_h.is_active());
+            entry.set_text(&unit.format(val));
         }
     });
     right_capsule.append(&h_box);
 
+    let sep_u = gtk4::Separator::builder()
+        .orientation(gtk4::Orientation::Vertical)
+        .margin_start(2)
+        .margin_end(2)
+        .build();
+    right_capsule.append(&sep_u);
+
+    let unit_suffixes: Vec<&str> = crate::core::Unit::ALL
+        .iter()
+        .map(|u| u.suffix())
+        .collect();
+    let unit_strings = gtk4::StringList::new(&unit_suffixes);
+    let unit_dd = gtk4::DropDown::builder()
+        .model(&unit_strings)
+        .selected(canvas.unit().to_index())
+        .tooltip_text(crate::core::gettext("Document Unit (px, mm, cm, m, in, pt, pc)"))
+        .valign(gtk4::Align::Center)
+        .css_classes(["flat"])
+        .build();
+
+    let canvas_u = canvas.clone();
+    unit_dd.connect_selected_notify(move |dd| {
+        let unit = crate::core::Unit::from_index(dd.selected());
+        if canvas_u.unit() != unit {
+            canvas_u.set_unit(unit);
+        }
+    });
+    right_capsule.append(&unit_dd);
+
     SelectControls {
         general_box,
         layer_box,
-        corner_box,
+        transform_modes_box,
         btn_convert_path,
         right_capsule,
         x_entry,
         y_entry,
         w_entry,
         h_entry,
+        unit_dd,
     }
 }

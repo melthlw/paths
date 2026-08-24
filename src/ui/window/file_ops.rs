@@ -211,7 +211,11 @@ impl WindowFileOps {
             Rc::new(move |fmt: ExportFormat| {
                 let mut cfg = crate::core::ExportConfig::default();
                 cfg.format = fmt;
-                let state_doc = canvas.state().borrow().document.clone();
+                let state_doc = canvas
+                    .state()
+                    .try_borrow()
+                    .map(|s| s.document.clone())
+                    .unwrap_or_else(|_| crate::core::Document::new());
                 let file_dialog = gtk4::FileDialog::builder()
                     .title(&crate::core::gettext("Quick Export"))
                     .modal(true)
@@ -225,7 +229,7 @@ impl WindowFileOps {
                             let exported = crate::core::export_document(&state_doc, &cfg);
                             if let Some((_, data)) = exported.into_iter().next() {
                                 let _ = std::fs::write(file_path, data);
-                                canvas_c.state().borrow_mut().notify_status();
+                                canvas_c.notify_status();
                             }
                         }
                     }

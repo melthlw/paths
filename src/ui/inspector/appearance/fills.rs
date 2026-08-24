@@ -563,8 +563,12 @@ impl FillRow {
                 if u.get() {
                     return;
                 }
-                let txt = entry.text().trim().trim_end_matches('%').to_string();
-                if let Ok(val) = txt.parse::<f32>() {
+                let cur_op = list.borrow().get(idx).map(|e| e.opacity * 100.0).unwrap_or(100.0);
+                if let Ok(val) = crate::core::eval_math_expression(
+                    entry.text().as_str(),
+                    crate::core::Unit::Px,
+                    Some(cur_op),
+                ) {
                     let alpha = (val / 100.0).clamp(0.0, 1.0);
                     u.set(true);
                     entry.set_text(&format!("{}%", (alpha * 100.0).round() as i32));

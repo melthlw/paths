@@ -1,4 +1,5 @@
 pub mod helpers;
+pub mod pen;
 pub mod pen_brush_text;
 pub mod select;
 pub mod shapes;
@@ -7,6 +8,7 @@ use gtk4::prelude::*;
 use std::cell::Cell;
 use std::rc::Rc;
 
+use self::pen::{build_pen_controls, PenControls};
 use self::pen_brush_text::build_pen_brush_text_controls;
 use self::select::build_select_controls;
 use self::shapes::build_shape_controls;
@@ -21,10 +23,12 @@ pub struct ToolOptionsBar {
     mode_img: gtk4::Image,
     general_box: gtk4::Box,
     layer_box: gtk4::Box,
-    corner_box: gtk4::Box,
+    transform_modes_box: gtk4::Box,
     btn_convert_path: gtk4::Button,
     shape_options_box: gtk4::Box,
     shape_sep: gtk4::Separator,
+    pen_box: gtk4::Box,
+    pen_controls: PenControls,
     // Shape-specific controls
     rect_radius_box: gtk4::Box,
     rect_r_lbl: gtk4::Label,
@@ -79,7 +83,9 @@ pub struct ToolOptionsBar {
     y_entry: gtk4::Entry,
     w_entry: gtk4::Entry,
     h_entry: gtk4::Entry,
+    unit_dd: gtk4::DropDown,
     path_editor_box: gtk4::Box,
+    canvas: CanvasWidget,
     is_syncing: Rc<Cell<bool>>,
     is_top: Rc<Cell<bool>>,
 }
@@ -124,13 +130,14 @@ impl ToolOptionsBar {
         let select_controls = build_select_controls(&canvas);
         let general_box = select_controls.general_box;
         let layer_box = select_controls.layer_box;
-        let corner_box = select_controls.corner_box;
+        let transform_modes_box = select_controls.transform_modes_box;
         let btn_convert_path = select_controls.btn_convert_path;
         let right_capsule = select_controls.right_capsule;
         let x_entry = select_controls.x_entry;
         let y_entry = select_controls.y_entry;
         let w_entry = select_controls.w_entry;
         let h_entry = select_controls.h_entry;
+        let unit_dd = select_controls.unit_dd;
 
         let shape_controls = build_shape_controls(&canvas, &is_syncing);
         let shape_options_box = shape_controls.shape_options_box;
@@ -192,6 +199,10 @@ impl ToolOptionsBar {
         left_capsule.append(&general_box);
         left_capsule.append(&shape_options_box);
         left_capsule.append(&path_editor_box);
+
+        let pen_controls = build_pen_controls(&canvas, &is_syncing);
+        let pen_box = pen_controls.pen_box.clone();
+        left_capsule.append(&pen_box);
 
         container.append(&left_capsule);
         container.append(&text_capsule);
@@ -296,7 +307,7 @@ impl ToolOptionsBar {
             mode_img,
             general_box,
             layer_box,
-            corner_box,
+            transform_modes_box,
             btn_convert_path,
             shape_options_box,
             shape_sep,
@@ -353,7 +364,11 @@ impl ToolOptionsBar {
             y_entry,
             w_entry,
             h_entry,
+            unit_dd,
             path_editor_box,
+            pen_box,
+            pen_controls,
+            canvas,
             is_syncing,
             is_top,
         }
@@ -381,12 +396,13 @@ impl ToolOptionsBar {
             "rectangle" | "square" | "star" | "triangle" | "circle" | "spiral"
         );
 
-        if is_editing_text || tool_id == "text" || (has_selection && text_info.is_some()) {
+        if is_editing_text || tool_id == "text" || (tool_id == "select" && has_selection && text_info.is_some()) {
             self.container.set_visible(true);
             self.left_capsule.set_visible(false);
             self.page_capsule.set_visible(false);
             self.right_capsule.set_visible(false);
             self.text_capsule.set_visible(true);
+            self.pen_box.set_visible(false);
         } else if tool_id == "page" {
             self.container.set_visible(true);
             self.left_capsule.set_visible(false);
@@ -454,6 +470,7 @@ impl ToolOptionsBar {
             self.polygon_box.set_visible(false);
             self.circle_box.set_visible(false);
             self.spiral_box.set_visible(false);
+            self.pen_box.set_visible(false);
 
             self.is_syncing.set(true);
             match tool_id {
@@ -613,7 +630,56 @@ impl ToolOptionsBar {
             self.right_capsule.set_visible(true);
             self.general_box.set_visible(false);
             self.shape_options_box.set_visible(false);
+            self.pen_box.set_visible(false);
             self.path_editor_box.set_visible(true);
+        } else if tool_id == "pen" || tool_id == "vector-pen" || tool_id == "vector_pen" {
+            self.container.set_visible(true);
+            self.text_capsule.set_visible(false);
+            self.page_capsule.set_visible(false);
+            self.left_capsule.set_visible(true);
+            self.right_capsule.set_visible(false);
+            self.general_box.set_visible(false);
+            self.shape_options_box.set_visible(false);
+            self.path_editor_box.set_visible(false);
+            self.pen_box.set_visible(true);
+
+            if let Ok(state_b) = self.canvas.state().try_borrow() {
+                let is_editing = state_b.plugin_manager.is_editing();
+                self.pen_controls.btn_undo_node.set_sensitive(is_editing);
+                self.pen_controls.btn_finish_path.set_sensitive(is_editing);
+                self.pen_controls.btn_close_path.set_sensitive(is_editing);
+
+                let mut has_open_selected = false;
+                for elem in &state_b.document.elements {
+                    if state_b.document.selected_ids.contains(&elem.id()) {
+                        if let crate::core::Element::Path(p) = elem {
+                            if !p.is_closed {
+                                has_open_selected = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                self.pen_controls.btn_resume_path.set_sensitive(has_open_selected && !is_editing);
+
+                if is_editing {
+                    if let Some(feat) = state_b.plugin_manager.feature_by_id("pen") {
+                        if let Some(pen) = feat.as_pen_feature() {
+                            let count = pen.node_count();
+                            self.pen_controls.status_lbl.set_label(&format!(
+                                "{} ({} {})",
+                                crate::core::gettext("Drawing path"),
+                                count,
+                                if count == 1 { crate::core::gettext("node") } else { crate::core::gettext("nodes") }
+                            ));
+                        }
+                    }
+                } else if has_open_selected {
+                    self.pen_controls.status_lbl.set_label(&crate::core::gettext("Open path selected (Click endpoint or Resume)"));
+                } else {
+                    self.pen_controls.status_lbl.set_label(&crate::core::gettext("Ready to draw"));
+                }
+            }
         } else if has_selection {
             self.container.set_visible(true);
             self.text_capsule.set_visible(false);
@@ -623,9 +689,10 @@ impl ToolOptionsBar {
             self.general_box.set_visible(true);
             self.shape_options_box.set_visible(false);
             self.path_editor_box.set_visible(false);
+            self.pen_box.set_visible(false);
 
             self.layer_box.set_visible(selected_count > 0);
-            self.corner_box.set_visible(can_convert_to_path);
+            self.transform_modes_box.set_visible(true);
             self.btn_convert_path.set_visible(can_convert_to_path);
             self.boolean_box.set_visible(selected_count >= 2);
         } else {
@@ -634,6 +701,7 @@ impl ToolOptionsBar {
             self.right_capsule.set_visible(false);
             self.text_capsule.set_visible(false);
             self.page_capsule.set_visible(false);
+            self.pen_box.set_visible(false);
         }
 
         let (icon_res, tool_name) = match tool_id {
@@ -817,22 +885,26 @@ impl ToolOptionsBar {
             self.is_syncing.set(false);
         }
 
+        let unit = self.canvas.unit();
+        if self.unit_dd.selected() != unit.to_index() {
+            self.unit_dd.set_selected(unit.to_index());
+        }
         if tool_id == "path_editor" || tool_id == "path-editor" {
             if let Some(pt) = node_coord {
-                let x_str = format!("{:.1}", pt.x);
+                let x_str = unit.format(pt.x);
                 if !self.x_entry.has_focus() && self.x_entry.text().as_str() != x_str {
                     self.x_entry.set_text(&x_str);
                 }
-                let y_str = format!("{:.1}", pt.y);
+                let y_str = unit.format(pt.y);
                 if !self.y_entry.has_focus() && self.y_entry.text().as_str() != y_str {
                     self.y_entry.set_text(&y_str);
                 }
             } else if let Some(r) = bounds {
-                let x_str = format!("{:.1}", r.x);
+                let x_str = unit.format(r.x);
                 if !self.x_entry.has_focus() && self.x_entry.text().as_str() != x_str {
                     self.x_entry.set_text(&x_str);
                 }
-                let y_str = format!("{:.1}", r.y);
+                let y_str = unit.format(r.y);
                 if !self.y_entry.has_focus() && self.y_entry.text().as_str() != y_str {
                     self.y_entry.set_text(&y_str);
                 }
@@ -851,19 +923,19 @@ impl ToolOptionsBar {
                 self.h_entry.set_text("");
             }
         } else if let Some(r) = bounds {
-            let x_str = format!("{:.1}", r.x);
+            let x_str = unit.format(r.x);
             if !self.x_entry.has_focus() && self.x_entry.text().as_str() != x_str {
                 self.x_entry.set_text(&x_str);
             }
-            let y_str = format!("{:.1}", r.y);
+            let y_str = unit.format(r.y);
             if !self.y_entry.has_focus() && self.y_entry.text().as_str() != y_str {
                 self.y_entry.set_text(&y_str);
             }
-            let w_str = format!("{:.1}", r.width);
+            let w_str = unit.format(r.width);
             if !self.w_entry.has_focus() && self.w_entry.text().as_str() != w_str {
                 self.w_entry.set_text(&w_str);
             }
-            let h_str = format!("{:.1}", r.height);
+            let h_str = unit.format(r.height);
             if !self.h_entry.has_focus() && self.h_entry.text().as_str() != h_str {
                 self.h_entry.set_text(&h_str);
             }

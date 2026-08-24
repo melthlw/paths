@@ -73,13 +73,16 @@
 **GNOME Paths** was born out of a love for vector graphics, deeply inspired by the versatility and power of **Inkscape**, with the goal of providing a modern, fast, and responsive experience that feels native to the GNOME desktop.
 
 ### Development & Transparency
-This project has been extensively coded and iterated with the assistance of **AI pair-programming**, but it is thoughtfully planned, structured, and curated with genuine care and dedication. 
+This project has been extensively developed and iterated with the assistance of **AI pair-programming**, while being carefully planned, architected, and maintained with deep attention to detail and respect for the GNOME HIG ecosystem.
+
+We value transparency and open collaboration. If you prefer traditional human development workflows and do not use AI tools, you are warmly welcome to contribute with handcrafted code, custom plugins, architecture reviews, feature ideas, testing, or bug reports.
 
 ### Future Horizons & Ideas
 I'm not entirely sure where this road will take us or how far the project will grow, but there are several ambitious directions under exploration:
-- **Workspace-Driven Interface**: A Blender-inspired adaptive interface system where tabs and layouts dynamically adjust depending on the document type and workflow (e.g., Illustration, Precision Pathing, Typography).
-- **Vector Animation**: Timeline, keyframing, and motion path support for vector animation.
-- **Document Layout & Diagramming**: Advanced multi-page layout and publishing tools for brochures, books, and diagrams.
+- **Dynamic Workspace Layouts**: A Blender-inspired adaptive workspace system where the UI layout dynamically adjusts depending on the active workflow (e.g., Vector Illustration, Raster Bitmap Editing, Editorial Layouts).
+- **Vector Animation**: Timeline, keyframing, and motion interpolation curves for vector animation.
+- **Editorial Layout & Document Publishing**: Advanced multi-page layout and publishing tools for brochures, booklets, and editorial design.
+- **Node Graphs (Procedural System)**: Procedural, non-destructive path operations, mesh modifiers, and transformations driven by a node graph.
 
 Many of these are still experimental ideas and concepts that may evolve or take shape as the project matures.
 

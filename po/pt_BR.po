@@ -2281,3 +2281,303 @@ msgstr "Ferramenta leve de design vetorial, construída com GTK4, Libadwaita, Ru
 
 msgid "Support Development"
 msgstr "Apoie o Desenvolvimento"
+
+msgid "Visual Themes and Palettes"
+msgstr "Temas Visuais e Paletas"
+
+msgid "Color schemes inspired by GNOME Builder, Text Editor, and modern developer aesthetics"
+msgstr "Esquemas de cores inspirados no GNOME Builder, Editor de Texto e estética de desenvolvimento moderna"
+
+msgid "Interface and Ergonomics"
+msgstr "Interface e Ergonomia"
+
+msgid "Node and Handle Appearance"
+msgstr "Aparência de Nós e Alças"
+
+msgid "Interaction and Manipulation"
+msgstr "Interação e Manipulação"
+
+msgid "Path and Node Editor"
+msgstr "Editor de Caminhos e Nós"
+
+msgid "Adwaita (System)"
+msgstr "Adwaita (Sistema)"
+
+msgid "Default GNOME HIG palette"
+msgstr "Paleta padrão do GNOME HIG"
+
+msgid "Solarized Light"
+msgstr "Solarized Claro"
+
+msgid "Warm parchment tones"
+msgstr "Tons quentes de pergaminho"
+
+msgid "Solarized Dark"
+msgstr "Solarized Escuro"
+
+msgid "Deep solarized teal"
+msgstr "Verde-azulado profundo solarized"
+
+msgid "Cobalt (Builder)"
+msgstr "Cobalto (GNOME Builder)"
+
+msgid "GNOME Builder dark navy"
+msgstr "Azul marinho escuro do GNOME Builder"
+
+msgid "Oblivion (Classic)"
+msgstr "Oblivion (Clássico)"
+
+msgid "GNOME classic dark slate"
+msgstr "Ardósia escura clássica do GNOME"
+
+msgid "Nord (Arctic)"
+msgstr "Nord (Ártico)"
+
+msgid "Arctic icy blue and snow"
+msgstr "Azul gélido do ártico e neve"
+
+msgid "Dracula"
+msgstr "Dracula"
+
+msgid "Vibrant dark purple"
+msgstr "Roxo escuro vibrante"
+
+msgid "Monokai Pro"
+msgstr "Monokai Pro"
+
+msgid "High-contrast dark charcoal"
+msgstr "Carvão escuro de alto contraste"
+
+msgid "Small (16px)"
+msgstr "Pequeno (16px)"
+
+msgid "Medium (20px)"
+msgstr "Médio (20px)"
+
+msgid "Large (24px)"
+msgstr "Grande (24px)"
+
+msgid "Compact (90%)"
+msgstr "Compacto (90%)"
+
+msgid "Default (100%)"
+msgstr "Padrão (100%)"
+
+msgid "Comfortable (110%)"
+msgstr "Confortável (110%)"
+
+msgid "Large (125%)"
+msgstr "Grande (125%)"
+
+msgid "Add to Palette"
+msgstr "Adicionar à Paleta"
+
+msgid "GNOME Darker"
+msgstr "GNOME Darker"
+
+msgid "Deeper GNOME dark tone"
+msgstr "Tom escuro mais profundo do GNOME Adwaita"
+
+msgid "Catppuccin (Mocha)"
+msgstr "Catppuccin (Mocha)"
+
+msgid "Soothing warm pastel theme"
+msgstr "Paleta relaxante com tons pastéis quentes"
+
+msgid "System Default"
+msgstr "Padrão do Sistema"
+
+msgid "Teal"
+msgstr "Azul Petróleo / Verde-azulado"
+
+
+
+msgid "Add Active Color"
+msgstr "Adicionar Cor Ativa"
+
+msgid "Add Color to Palette (+)"
+msgstr "Adicionar Cor à Paleta (+)"
+
+msgid "Adjust icon sizing, interface density, and overall scale"
+msgstr "Ajuste o tamanho de ícones, densidade da interface e escala geral"
+
+msgid "Bézier"
+msgstr "Bézier"
+
+msgid "Bézier Curves (Click & Drag for tangent handles)"
+msgstr "Curvas Bézier (Clique e arraste para alças tangentes)"
+
+msgid "Change application interface language and number formatting"
+msgstr "Alterar idioma da interface do aplicativo e formatação numérica"
+
+msgid "Change the pixel size of tools and HUD buttons"
+msgstr "Alterar o tamanho em pixels das ferramentas e botões do HUD"
+
+msgid "Choose light, dark, or automatic system synchronization"
+msgstr "Escolha claro, escuro ou sincronização automática com o sistema"
+
+msgid "Close & Finish Path (C)"
+msgstr "Fechar e Concluir Caminho (C)"
+
+msgid "Color Picker..."
+msgstr "Seletor de Cores..."
+
+msgid "Color Presets"
+msgstr "Predefinições de Cores"
+
+msgid "Continue / Resume Selected Open Path"
+msgstr "Continuar / Retomar Caminho Aberto Selecionado"
+
+msgid "Copy Hex"
+msgstr "Copiar Hex"
+
+msgid "Custom Palette"
+msgstr "Paleta Personalizada"
+
+msgid "Delete Color"
+msgstr "Excluir Cor"
+
+msgid "Document Colors"
+msgstr "Cores do Documento"
+
+msgid "Document Unit"
+msgstr "Unidade do Documento"
+
+msgid "Document Unit (px, mm, cm, m, in, pt, pc)"
+msgstr "Unidade do Documento (px, mm, cm, m, in, pt, pc)"
+
+msgid "Draw shapes or text on canvas\nto create layers."
+msgstr "Desenhe formas ou texto na tela\npara criar camadas."
+
+msgid "Drawing path"
+msgstr "Desenhando caminho"
+
+msgid "Drop to Create New Section Below"
+msgstr "Solte para Criar Nova Seção Abaixo"
+
+msgid "Drop to Dock at Top"
+msgstr "Solte para Fixar no Topo"
+
+msgid "Edit Mesh Nodes on Canvas (Mesh Tool)"
+msgstr "Editar Nós da Malha na Tela (Ferramenta Malha)"
+
+msgid "Finish Open Path (Enter / Right-Click)"
+msgstr "Concluir Caminho Aberto (Enter / Botão Direito)"
+
+msgid "GNOME Adwaita"
+msgstr "GNOME Adwaita"
+
+msgid "Image Formats (*.png, *.jpg, *.jpeg, *.webp, *.svg, *.pdf)"
+msgstr "Formatos de Imagem (*.png, *.jpg, *.jpeg, *.webp, *.svg, *.pdf)"
+
+msgid "Interface Scale"
+msgstr "Escala da Interface"
+
+msgid "Letter Spacing (Tracking / px)"
+msgstr "Espaçamento entre Letras (Tracking / px)"
+
+msgid "Lines"
+msgstr "Linhas"
+
+msgid "Material 500"
+msgstr "Material 500"
+
+msgid "Monochrome"
+msgstr "Monocromático"
+
+msgid "Move gradients (in fill or stroke) along with the objects"
+msgstr "Mover gradientes (no preenchimento ou contorno) junto com os objetos"
+
+msgid "Move patterns (in fill or stroke) along with the objects"
+msgstr "Mover padrões (no preenchimento ou contorno) junto com os objetos"
+
+msgid "No existing groups.\nUse the '+' button at the top to create a group."
+msgstr "Nenhum grupo existente.\nUse o botão '+' no topo para criar um grupo."
+
+msgid "Object to nodes and Bézier curves (Ctrl+Shift+C)"
+msgstr "Objeto para nós e curvas Bézier (Ctrl+Shift+C)"
+
+msgid "Open path selected (Click endpoint or Resume)"
+msgstr "Caminho aberto selecionado (Clique no ponto final ou Retomar)"
+
+msgid "Opens local extension folder in file manager"
+msgstr "Abre pasta local de extensões no gerenciador de arquivos"
+
+msgid "Palette Options"
+msgstr "Opções da Paleta"
+
+msgid "Pastel Soft"
+msgstr "Pastel Suave"
+
+msgid "Position"
+msgstr "Posição"
+
+msgid "Ready to draw"
+msgstr "Pronto para desenhar"
+
+msgid "Reset / Clear Palette"
+msgstr "Redefinir / Limpar Paleta"
+
+msgid "Scale controls, fonts, and panel proportions"
+msgstr "Dimensionar controles, fontes e proporções do painel"
+
+msgid "Select which pages to include in final file"
+msgstr "Selecione quais páginas incluir no arquivo final"
+
+msgid "Snaps points and objects to nearest grid"
+msgstr "Encaixa pontos e objetos na grade mais próxima"
+
+msgid "Straight Line Segments"
+msgstr "Segmentos de Linha Reta"
+
+msgid "Supported Formats (*.svg, *.png, *.jpg, *.jpeg, *.webp)"
+msgstr "Formatos Suportados (*.svg, *.png, *.jpg, *.jpeg, *.webp)"
+
+msgid "Target Mode"
+msgstr "Modo de Destino"
+
+msgid "Toggle Orientation (Portrait / Landscape)"
+msgstr "Alternar Orientação (Retrato / Paisagem)"
+
+msgid "Toolbar Icon Size"
+msgstr "Tamanho dos Ícones da Barra de Ferramentas"
+
+msgid "Transparent / None"
+msgstr "Transparente / Nenhum"
+
+msgid "Undo Last Node (Ctrl+Z / Backspace)"
+msgstr "Desfazer Último Nó (Ctrl+Z / Backspace)"
+
+msgid "Vibrant Neon"
+msgstr "Neon Vibrante"
+
+msgid "When scaling objects, scale the stroke width in the same proportion"
+msgstr "Ao redimensionar objetos, dimensionar a largura do contorno na mesma proporção"
+
+msgid "When scaling rectangles, scale the radii of rounded corners in the same proportion"
+msgstr "Ao redimensionar retângulos, dimensionar os raios dos cantos arredondados na mesma proporção"
+
+msgid "node"
+msgstr "nó"
+
+msgid "nodes"
+msgstr "nós"
+
+msgid "X:"
+msgstr "X:"
+
+msgid "Y:"
+msgstr "Y:"
+
+msgid "W:"
+msgstr "L:"
+
+msgid "H:"
+msgstr "A:"
+
+msgid "W"
+msgstr "L"
+
+msgid "H"
+msgstr "A"
+

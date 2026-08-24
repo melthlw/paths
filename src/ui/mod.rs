@@ -6,6 +6,8 @@ pub mod icons;
 pub mod inspector;
 pub mod layers;
 pub mod preferences;
+pub mod palette_bar;
+pub mod theme;
 pub mod tool_options;
 pub mod toolbar;
 pub mod window;

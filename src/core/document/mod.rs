@@ -7,8 +7,11 @@ pub mod selection;
 pub mod text_style;
 pub mod transform;
 
+pub use transform::TransformOptions;
+
 use std::collections::HashSet;
 
+use crate::core::color::Color;
 use crate::core::element::{BlendMode, Element, ElementId};
 use crate::core::geometry::{Point, Rect};
 use crate::core::page::{Page, PageId};
@@ -32,6 +35,7 @@ pub struct Document {
     pub active_page_id: Option<PageId>,
     pub guides: Vec<Guide>,
     pub clipboard: Vec<Element>,
+    pub unit: crate::core::Unit,
     undo_stack: Vec<(
         Vec<Element>,
         HashSet<ElementId>,
@@ -59,6 +63,7 @@ impl Default for Document {
             active_page_id: Some(page_id),
             guides: Vec::new(),
             clipboard: Vec::new(),
+            unit: crate::core::Unit::Px,
             undo_stack: Vec::new(),
             redo_stack: Vec::new(),
         }
@@ -330,6 +335,20 @@ impl Document {
             }
             other => other.hit_test(p),
         }
+    }
+
+    pub fn get_document_colors(&self) -> Vec<Option<Color>> {
+        let mut colors: Vec<Option<Color>> = vec![None];
+        for el in &self.elements {
+            el.collect_colors(&mut colors);
+        }
+        let mut unique = Vec::new();
+        for c in colors {
+            if !unique.contains(&c) {
+                unique.push(c);
+            }
+        }
+        unique
     }
 }
 

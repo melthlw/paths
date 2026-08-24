@@ -28,6 +28,12 @@ impl DesignWindow {
         let color_bar = ColorControlBar::new(canvas.clone());
         let color_bar_ref = Rc::new(color_bar);
 
+        let palette_bar = crate::ui::palette_bar::ColorPaletteBar::new(canvas.clone());
+        let palette_bar_ref = Rc::new(palette_bar);
+        palette_bar_ref
+            .widget()
+            .set_visible(canvas.is_plugin_enabled("color_palette_toolbar"));
+
         let tool_options = ToolOptionsBar::new(canvas.clone());
 
         // Floating Dock Container (holds separate Color Bar and Toolbar capsules)
@@ -116,7 +122,7 @@ impl DesignWindow {
         zoom_box.append(&zoom_in_btn);
         zoom_box.append(&zoom_reset_btn);
 
-        // Center Overlay: Canvas at bottom + Tool Options + Bottom Dock + Zoom HUD
+        // Center Overlay: Canvas at bottom + Tool Options + Bottom Dock + Lateral Palette Bar + Zoom HUD
         let overlay = gtk4::Overlay::builder()
             .hexpand(true)
             .vexpand(true)
@@ -124,6 +130,7 @@ impl DesignWindow {
             .build();
         overlay.add_overlay(tool_options.widget());
         overlay.add_overlay(&bottom_dock);
+        overlay.add_overlay(palette_bar_ref.widget());
         overlay.add_overlay(&zoom_box);
 
         // Center Content: ToolbarView with top HeaderBar and Overlay content
@@ -174,12 +181,14 @@ impl DesignWindow {
         let inspector_clone = inspector_ref.clone();
         let layers_clone = layers_ref.clone();
         let color_bar_clone = color_bar_ref.clone();
+        let palette_bar_clone = palette_bar_ref.clone();
         let grid_btn_clone = header_comps.grid_btn.clone();
         let ruler_btn_clone = header_comps.ruler_btn.clone();
         let snap_btn_clone = header_comps.snap_btn.clone();
         let undo_btn_clone = header_comps.undo_btn.clone();
         let redo_btn_clone = header_comps.redo_btn.clone();
         let is_syncing_cb = header_comps.is_syncing_header.clone();
+        let canvas_unit_sync = canvas.clone();
 
         let state_rc = canvas.state();
         let mut state = state_rc.borrow_mut();
@@ -202,7 +211,8 @@ impl DesignWindow {
                   can_redo,
                   fills_and_strokes,
                   blend_info,
-                  node_coord| {
+                  node_coord,
+                  doc_colors| {
                 let pct = (zoom * 100.0).round() as i32;
                 let zoom_str = format!("{}%", pct);
                 if zoom_lbl_clone.text().as_str() != zoom_str.as_str() {
@@ -249,6 +259,12 @@ impl DesignWindow {
                     blend_info,
                 );
                 color_bar_clone.update_state(selected_count, style);
+                let is_palette_enabled = canvas_unit_sync.is_plugin_enabled("color_palette_toolbar");
+                palette_bar_clone.widget().set_visible(is_palette_enabled);
+                if is_palette_enabled {
+                    palette_bar_clone.update_state(selected_count, style, &doc_colors);
+                    palette_bar_clone.widget().queue_draw();
+                }
                 layers_clone.update_state(&layers_info);
             },
         ));

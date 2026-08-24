@@ -115,7 +115,11 @@ pub fn rebuild_toolbar_items(
     tool_icon_setters.borrow_mut().clear();
     popovers.borrow_mut().clear();
 
-    let active_tool = canvas.state().borrow().plugin_manager.active_id();
+    let active_tool = canvas
+        .state()
+        .try_borrow()
+        .map(|s| s.plugin_manager.active_id())
+        .unwrap_or("select");
     let mut first_toggle: Option<gtk4::ToggleButton> = None;
 
     let popover_pos = match position {
@@ -295,18 +299,6 @@ pub fn rebuild_toolbar_items(
                 canvas_tool.set_active_tool(cur_tool_toggled.get());
                 is_updating_btn.set(false);
             }
-        });
-
-        let canvas_click = canvas.clone();
-        let cur_tool_click = current_tool_id.clone();
-        let is_updating_click = is_updating.clone();
-        btn.connect_clicked(move |_| {
-            if is_updating_click.get() {
-                return;
-            }
-            is_updating_click.set(true);
-            canvas_click.set_active_tool(cur_tool_click.get());
-            is_updating_click.set(false);
         });
 
         items_box.append(&btn);

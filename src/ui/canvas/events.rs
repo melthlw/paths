@@ -60,9 +60,36 @@ impl CanvasWidget {
                 let mut state = state_menu.borrow_mut();
                 let screen_pt = Point::new(x as f32, y as f32);
                 let world_pt = state.viewport.screen_to_world(screen_pt, state.widget_size);
+
+                // If currently editing with a tool (like Pen drawing path), dispatch right-click to finish
+                if state.plugin_manager.is_editing() {
+                    let (redraw, cursor) = state.pointer_down(
+                        world_pt,
+                        PointerButton::Secondary,
+                        false,
+                        false,
+                        false,
+                    );
+                    if let Some(c) = cursor {
+                        area_menu.set_cursor_from_name(Some(c));
+                    }
+                    if redraw {
+                        area_menu.queue_draw();
+                    }
+                    state.notify_status();
+                    return;
+                }
+
                 if let Some(hit_id) = state.document.hit_test(world_pt) {
                     if !state.document.selected_ids.contains(&hit_id) {
                         state.document.select(hit_id, false);
+                        state.notify_status();
+                        area_menu.queue_draw();
+                    }
+                } else {
+                    // Right-clicked outside on empty canvas: deselect all objects
+                    if !state.document.selected_ids.is_empty() {
+                        state.document.selected_ids.clear();
                         state.notify_status();
                         area_menu.queue_draw();
                     }

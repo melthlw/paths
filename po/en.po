@@ -2221,3 +2221,361 @@ msgstr "Import plugins (.so)"
 
 
 
+
+msgid "Add Active Color"
+msgstr "Add Active Color"
+
+msgid "Add Color to Palette (+)"
+msgstr "Add Color to Palette (+)"
+
+msgid "Adjust icon sizing, interface density, and overall scale"
+msgstr "Adjust icon sizing, interface density, and overall scale"
+
+msgid "Bézier"
+msgstr "Bézier"
+
+msgid "Bézier Curves (Click & Drag for tangent handles)"
+msgstr "Bézier Curves (Click & Drag for tangent handles)"
+
+msgid "Change application interface language and number formatting"
+msgstr "Change application interface language and number formatting"
+
+msgid "Change the pixel size of tools and HUD buttons"
+msgstr "Change the pixel size of tools and HUD buttons"
+
+msgid "Choose light, dark, or automatic system synchronization"
+msgstr "Choose light, dark, or automatic system synchronization"
+
+msgid "Close & Finish Path (C)"
+msgstr "Close & Finish Path (C)"
+
+msgid "Color Picker..."
+msgstr "Color Picker..."
+
+msgid "Color Presets"
+msgstr "Color Presets"
+
+msgid "Continue / Resume Selected Open Path"
+msgstr "Continue / Resume Selected Open Path"
+
+msgid "Copy Hex"
+msgstr "Copy Hex"
+
+msgid "Custom Palette"
+msgstr "Custom Palette"
+
+msgid "Delete Color"
+msgstr "Delete Color"
+
+msgid "Document Colors"
+msgstr "Document Colors"
+
+msgid "Document Unit"
+msgstr "Document Unit"
+
+msgid "Document Unit (px, mm, cm, m, in, pt, pc)"
+msgstr "Document Unit (px, mm, cm, m, in, pt, pc)"
+
+msgid "Draw shapes or text on canvas\nto create layers."
+msgstr "Draw shapes or text on canvas\nto create layers."
+
+msgid "Drawing path"
+msgstr "Drawing path"
+
+msgid "Drop to Create New Section Below"
+msgstr "Drop to Create New Section Below"
+
+msgid "Drop to Dock at Top"
+msgstr "Drop to Dock at Top"
+
+msgid "Edit Mesh Nodes on Canvas (Mesh Tool)"
+msgstr "Edit Mesh Nodes on Canvas (Mesh Tool)"
+
+msgid "Finish Open Path (Enter / Right-Click)"
+msgstr "Finish Open Path (Enter / Right-Click)"
+
+msgid "GNOME Adwaita"
+msgstr "GNOME Adwaita"
+
+msgid "Image Formats (*.png, *.jpg, *.jpeg, *.webp, *.svg, *.pdf)"
+msgstr "Image Formats (*.png, *.jpg, *.jpeg, *.webp, *.svg, *.pdf)"
+
+msgid "Interface Scale"
+msgstr "Interface Scale"
+
+msgid "Letter Spacing (Tracking / px)"
+msgstr "Letter Spacing (Tracking / px)"
+
+msgid "Lines"
+msgstr "Lines"
+
+msgid "Material 500"
+msgstr "Material 500"
+
+msgid "Monochrome"
+msgstr "Monochrome"
+
+msgid "Move gradients (in fill or stroke) along with the objects"
+msgstr "Move gradients (in fill or stroke) along with the objects"
+
+msgid "Move patterns (in fill or stroke) along with the objects"
+msgstr "Move patterns (in fill or stroke) along with the objects"
+
+msgid "No existing groups.\nUse the '+' button at the top to create a group."
+msgstr "No existing groups.\nUse the '+' button at the top to create a group."
+
+msgid "Object to nodes and Bézier curves (Ctrl+Shift+C)"
+msgstr "Object to nodes and Bézier curves (Ctrl+Shift+C)"
+
+msgid "Open path selected (Click endpoint or Resume)"
+msgstr "Open path selected (Click endpoint or Resume)"
+
+msgid "Opens local extension folder in file manager"
+msgstr "Opens local extension folder in file manager"
+
+msgid "Palette Options"
+msgstr "Palette Options"
+
+msgid "Pastel Soft"
+msgstr "Pastel Soft"
+
+msgid "Position"
+msgstr "Position"
+
+msgid "Ready to draw"
+msgstr "Ready to draw"
+
+msgid "Reset / Clear Palette"
+msgstr "Reset / Clear Palette"
+
+msgid "Scale controls, fonts, and panel proportions"
+msgstr "Scale controls, fonts, and panel proportions"
+
+msgid "Select which pages to include in final file"
+msgstr "Select which pages to include in final file"
+
+msgid "Snaps points and objects to nearest grid"
+msgstr "Snaps points and objects to nearest grid"
+
+msgid "Straight Line Segments"
+msgstr "Straight Line Segments"
+
+msgid "Supported Formats (*.svg, *.png, *.jpg, *.jpeg, *.webp)"
+msgstr "Supported Formats (*.svg, *.png, *.jpg, *.jpeg, *.webp)"
+
+msgid "Target Mode"
+msgstr "Target Mode"
+
+msgid "Toggle Orientation (Portrait / Landscape)"
+msgstr "Toggle Orientation (Portrait / Landscape)"
+
+msgid "Toolbar Icon Size"
+msgstr "Toolbar Icon Size"
+
+msgid "Transparent / None"
+msgstr "Transparent / None"
+
+msgid "Undo Last Node (Ctrl+Z / Backspace)"
+msgstr "Undo Last Node (Ctrl+Z / Backspace)"
+
+msgid "Vibrant Neon"
+msgstr "Vibrant Neon"
+
+msgid "When scaling objects, scale the stroke width in the same proportion"
+msgstr "When scaling objects, scale the stroke width in the same proportion"
+
+msgid "When scaling rectangles, scale the radii of rounded corners in the same proportion"
+msgstr "When scaling rectangles, scale the radii of rounded corners in the same proportion"
+
+msgid "node"
+msgstr "node"
+
+msgid "nodes"
+msgstr "nodes"
+
+msgid "Add to Palette"
+msgstr "Add to Palette"
+
+msgid "Adwaita (System)"
+msgstr "Adwaita (System)"
+
+msgid "Arctic icy blue and snow"
+msgstr "Arctic icy blue and snow"
+
+msgid "Catppuccin (Mocha)"
+msgstr "Catppuccin (Mocha)"
+
+msgid "Cobalt (Builder)"
+msgstr "Cobalt (Builder)"
+
+msgid "Color schemes inspired by GNOME Builder, Text Editor, and modern developer aesthetics"
+msgstr "Color schemes inspired by GNOME Builder, Text Editor, and modern developer aesthetics"
+
+msgid "Comfortable (110%)"
+msgstr "Comfortable (110%)"
+
+msgid "Compact (90%)"
+msgstr "Compact (90%)"
+
+msgid "Core Panels"
+msgstr "Core Panels"
+
+msgid "Crisp White"
+msgstr "Crisp White"
+
+msgid "Customize the color of toolbar, tool options and inspector icons"
+msgstr "Customize the color of toolbar, tool options and inspector icons"
+
+msgid "Dark (#242424)"
+msgstr "Dark (#242424)"
+
+msgid "Deep solarized teal"
+msgstr "Deep solarized teal"
+
+msgid "Deeper GNOME dark tone"
+msgstr "Deeper GNOME dark tone"
+
+msgid "Default (100%)"
+msgstr "Default (100%)"
+
+msgid "Default GNOME HIG palette"
+msgstr "Default GNOME HIG palette"
+
+msgid "Dracula"
+msgstr "Dracula"
+
+msgid "Edit Shortcut"
+msgstr "Edit Shortcut"
+
+msgid "Full Circle"
+msgstr "Full Circle"
+
+msgid "GNOME Builder dark navy"
+msgstr "GNOME Builder dark navy"
+
+msgid "GNOME Darker"
+msgstr "GNOME Darker"
+
+msgid "GNOME classic dark slate"
+msgstr "GNOME classic dark slate"
+
+msgid "High-contrast dark charcoal"
+msgstr "High-contrast dark charcoal"
+
+msgid "Icon Color"
+msgstr "Icon Color"
+
+msgid "Interaction and Manipulation"
+msgstr "Interaction and Manipulation"
+
+msgid "Interface Icons"
+msgstr "Interface Icons"
+
+msgid "Interface and Ergonomics"
+msgstr "Interface and Ergonomics"
+
+msgid "Large (125%)"
+msgstr "Large (125%)"
+
+msgid "Large (24px)"
+msgstr "Large (24px)"
+
+msgid "Lightweight, vector design tool built with GTK4, Libadwaita, Rust, and the Skia 2D engine."
+msgstr "Lightweight, vector design tool built with GTK4, Libadwaita, Rust, and the Skia 2D engine."
+
+msgid "Medium (20px)"
+msgstr "Medium (20px)"
+
+msgid "Monokai Pro"
+msgstr "Monokai Pro"
+
+msgid "Node and Handle Appearance"
+msgstr "Node and Handle Appearance"
+
+msgid "Nord (Arctic)"
+msgstr "Nord (Arctic)"
+
+msgid "Oblivion (Classic)"
+msgstr "Oblivion (Classic)"
+
+msgid "Path and Node Editor"
+msgstr "Path and Node Editor"
+
+msgid "Performance"
+msgstr "Performance"
+
+msgid "Properties"
+msgstr "Properties"
+
+msgid "Pure Black"
+msgstr "Pure Black"
+
+msgid "Search panels..."
+msgstr "Search panels..."
+
+msgid "Shortcut"
+msgstr "Shortcut"
+
+msgid "Small (16px)"
+msgstr "Small (16px)"
+
+msgid "Solarized Dark"
+msgstr "Solarized Dark"
+
+msgid "Solarized Light"
+msgstr "Solarized Light"
+
+msgid "Soothing warm pastel theme"
+msgstr "Soothing warm pastel theme"
+
+msgid "Support Development"
+msgstr "Support Development"
+
+msgid "Teal"
+msgstr "Teal"
+
+msgid "Theme Default"
+msgstr "Theme Default"
+
+msgid "Tint toolbars, HUDs and inspector icons with selected chromatic hue"
+msgstr "Tint toolbars, HUDs and inspector icons with selected chromatic hue"
+
+msgid "Vector graphics and illustration editor for the GNOME desktop."
+msgstr "Vector graphics and illustration editor for the GNOME desktop."
+
+msgid "Vibrant dark purple"
+msgstr "Vibrant dark purple"
+
+msgid "Visual Themes and Palettes"
+msgstr "Visual Themes and Palettes"
+
+msgid "Warm parchment tones"
+msgstr "Warm parchment tones"
+
+msgid "Zoom In"
+msgstr "Zoom In"
+
+msgid "Zoom Out"
+msgstr "Zoom Out"
+
+msgid "{} — GNOME Paths"
+msgstr "{} — GNOME Paths"
+
+msgid "X:"
+msgstr "X:"
+
+msgid "Y:"
+msgstr "Y:"
+
+msgid "W:"
+msgstr "W:"
+
+msgid "H:"
+msgstr "H:"
+
+msgid "W"
+msgstr "W"
+
+msgid "H"
+msgstr "H"
+

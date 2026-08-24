@@ -15,11 +15,13 @@ pub fn make_color_swatches<T: Clone + PartialEq + 'static>(
 ) -> gtk4::Box {
     let container = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Horizontal)
-        .spacing(10)
+        .spacing(12)
         .valign(gtk4::Align::Center)
         .halign(gtk4::Align::Center)
-        .margin_top(6)
-        .margin_bottom(6)
+        .margin_top(10)
+        .margin_bottom(10)
+        .margin_start(12)
+        .margin_end(12)
         .build();
 
     let buttons: Rc<RefCell<Vec<(gtk4::Button, gtk4::Image)>>> = Rc::new(RefCell::new(Vec::new()));
@@ -61,76 +63,6 @@ pub fn make_color_swatches<T: Clone + PartialEq + 'static>(
         });
 
         buttons.borrow_mut().push((btn.clone(), check_img));
-        container.append(&btn);
-    }
-
-    container
-}
-
-#[allow(dead_code)]
-pub fn make_paper_swatches<T: Clone + PartialEq + 'static>(
-    items: Vec<(&'static str, &'static str, T)>,
-    current: T,
-    on_selected: impl Fn(T) + Clone + 'static,
-) -> gtk4::Box {
-    let container = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(10)
-        .valign(gtk4::Align::Center)
-        .margin_top(4)
-        .margin_bottom(4)
-        .build();
-
-    let buttons: Rc<RefCell<Vec<gtk4::Button>>> = Rc::new(RefCell::new(Vec::new()));
-
-    for (name, chip_class, val) in items {
-        let btn = gtk4::Button::builder()
-            .tooltip_text(crate::core::gettext(name))
-            .valign(gtk4::Align::Center)
-            .css_classes(["pref-paper-chip"])
-            .build();
-
-        let inner_box = gtk4::Box::builder()
-            .orientation(gtk4::Orientation::Vertical)
-            .spacing(4)
-            .halign(gtk4::Align::Center)
-            .valign(gtk4::Align::Center)
-            .build();
-
-        let preview_box = gtk4::Box::builder()
-            .width_request(44)
-            .height_request(18)
-            .css_classes(["card", chip_class])
-            .build();
-
-        let lbl = gtk4::Label::builder()
-            .label(crate::core::gettext(name))
-            .css_classes(["caption"])
-            .halign(gtk4::Align::Center)
-            .build();
-
-        inner_box.append(&preview_box);
-        inner_box.append(&lbl);
-        btn.set_child(Some(&inner_box));
-
-        if val == current {
-            btn.add_css_class("active");
-        }
-
-        let on_sel = on_selected.clone();
-        let val_c = val.clone();
-        let btn_list = buttons.clone();
-        let btn_self = btn.clone();
-
-        btn.connect_clicked(move |_| {
-            for b in btn_list.borrow().iter() {
-                b.remove_css_class("active");
-            }
-            btn_self.add_css_class("active");
-            on_sel(val_c.clone());
-        });
-
-        buttons.borrow_mut().push(btn.clone());
         container.append(&btn);
     }
 

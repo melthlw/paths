@@ -15,9 +15,10 @@ pub mod shortcuts;
 pub mod snap;
 pub mod svg_export;
 pub mod svg_import;
+pub mod units;
 
 pub use color::Color;
-pub use document::Document;
+pub use document::{Document, TransformOptions};
 pub use element::{
     dist_to_segment, get_system_font_families, ArcMode, BlendMode, BrushStroke, CornerRadii,
     CornerStyle, Element, ElementId, FillLayer, FillStyle, Gradient, GradientType, ImageElement,
@@ -42,3 +43,4 @@ pub use shortcuts::{KeyCombo, ShortcutAction, ShortcutCategory, ShortcutManager,
 pub use snap::{SnapConfig, SnapEngine, SnapGuide};
 pub use svg_export::export_document_to_svg;
 pub use svg_import::parse_svg;
+pub use units::{eval_math_expression, Unit};

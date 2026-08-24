@@ -14,6 +14,8 @@ use std::rc::Rc;
 pub struct CanvasWidget {
     pub(crate) drawing_area: gtk4::DrawingArea,
     pub(crate) state: Rc<RefCell<CanvasState>>,
+    pub(crate) unit: Rc<std::cell::Cell<crate::core::Unit>>,
+    pub(crate) enabled_plugins: Rc<RefCell<std::collections::HashSet<String>>>,
 }
 
 impl CanvasWidget {
@@ -27,10 +29,14 @@ impl CanvasWidget {
             .build();
 
         let state = Rc::new(RefCell::new(CanvasState::new()));
+        let unit = Rc::new(std::cell::Cell::new(crate::core::Unit::Px));
+        let enabled_plugins = Rc::new(RefCell::new(std::collections::HashSet::new()));
 
         let widget = Self {
             drawing_area,
             state,
+            unit,
+            enabled_plugins,
         };
 
         widget.setup_drawing();
@@ -69,23 +75,44 @@ impl CanvasWidget {
     }
 
     pub fn set_active_tool(&self, tool_id: &'static str) {
-        self.state.borrow_mut().set_active_tool(tool_id);
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.set_active_tool(tool_id);
+        }
         self.drawing_area.queue_draw();
     }
 
     pub fn undo(&self) {
-        let mut state = self.state.borrow_mut();
-        if state.document.undo() {
-            state.notify_status();
-            self.drawing_area.queue_draw();
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            if state.plugin_manager.is_editing() {
+                let key_event = crate::core::KeyEvent {
+                    key: gtk4::gdk::Key::z,
+                    shift_pressed: false,
+                    ctrl_pressed: true,
+                    alt_pressed: false,
+                };
+                let (handled, redraw) = state.on_key_pressed(&key_event);
+                if handled || redraw {
+                    state.notify_status();
+                    drop(state);
+                    self.drawing_area.queue_draw();
+                    return;
+                }
+            }
+            if state.document.undo() {
+                state.notify_status();
+                drop(state);
+                self.drawing_area.queue_draw();
+            }
         }
     }
 
     pub fn redo(&self) {
-        let mut state = self.state.borrow_mut();
-        if state.document.redo() {
-            state.notify_status();
-            self.drawing_area.queue_draw();
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            if state.document.redo() {
+                state.notify_status();
+                drop(state);
+                self.drawing_area.queue_draw();
+            }
         }
     }
 

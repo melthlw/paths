@@ -211,6 +211,66 @@ impl Element {
         }
     }
 
+    pub fn collect_colors(&self, out: &mut Vec<Option<Color>>) {
+        match self {
+            Element::Rect(r) => {
+                if let Some(fc) = r.fill_color {
+                    out.push(Some(fc));
+                }
+                for f in &r.fills {
+                    if f.enabled {
+                        out.push(Some(f.color));
+                        if f.secondary_color.a > 0.01 {
+                            out.push(Some(f.secondary_color));
+                        }
+                    }
+                }
+                if let Some(s) = r.stroke_color {
+                    out.push(Some(s));
+                }
+                for s in &r.strokes {
+                    if s.enabled {
+                        out.push(Some(s.color));
+                    }
+                }
+            }
+            Element::Path(p) => {
+                if let Some(fc) = p.fill_color {
+                    out.push(Some(fc));
+                }
+                for f in &p.fills {
+                    if f.enabled {
+                        out.push(Some(f.color));
+                        if f.secondary_color.a > 0.01 {
+                            out.push(Some(f.secondary_color));
+                        }
+                    }
+                }
+                if let Some(s) = p.stroke_color {
+                    out.push(Some(s));
+                }
+                for s in &p.strokes {
+                    if s.enabled {
+                        out.push(Some(s.color));
+                    }
+                }
+            }
+            Element::Text(t) => {
+                out.push(Some(t.color));
+            }
+            Element::Brush(b) => {
+                out.push(Some(b.color));
+            }
+            Element::Group(g) => {
+                for child in &g.children {
+                    child.collect_colors(out);
+                }
+            }
+            Element::Image(_) => {}
+            Element::Clone(_) => {}
+        }
+    }
+
     pub fn set_stroke_color(&mut self, color: Option<Color>) {
         match self {
             Element::Rect(r) => {

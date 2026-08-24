@@ -15,6 +15,44 @@ impl CanvasWidget {
         self.state.try_borrow().map(|s| s.is_dirty).unwrap_or(false)
     }
 
+    pub fn get_document_colors(&self) -> Vec<Option<Color>> {
+        if let Ok(state) = self.state.try_borrow() {
+            state.document.get_document_colors()
+        } else {
+            vec![None]
+        }
+    }
+
+    pub fn is_plugin_enabled(&self, id: &str) -> bool {
+        self.enabled_plugins.borrow().contains(id)
+    }
+
+    pub fn set_plugin_enabled(&self, id: &str, enabled: bool) {
+        if enabled {
+            self.enabled_plugins.borrow_mut().insert(id.to_string());
+        } else {
+            self.enabled_plugins.borrow_mut().remove(id);
+        }
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.plugin_manager.set_plugin_enabled(id, enabled);
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn unit(&self) -> crate::core::Unit {
+        self.unit.get()
+    }
+
+    pub fn set_unit(&self, unit: crate::core::Unit) {
+        self.unit.set(unit);
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.unit = unit;
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
     pub fn set_on_file_state_changed<F: Fn(Option<&Path>, bool) + 'static>(&self, f: F) {
         let mut state = self.state.borrow_mut();
         state.on_file_state_changed = Some(Box::new(f));
