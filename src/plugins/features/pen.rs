@@ -20,8 +20,6 @@ pub struct PenFeature {
     pub is_dragging_handle: bool,
     pub mode: PenMode,
 
-    #[allow(dead_code)]
-    pub auto_close: bool,
     pub resuming_path_id: Option<ElementId>,
 }
 
@@ -32,7 +30,6 @@ impl Default for PenFeature {
             current_cursor: None,
             is_dragging_handle: false,
             mode: PenMode::Bezier,
-            auto_close: true,
             resuming_path_id: None,
         }
     }
@@ -41,11 +38,6 @@ impl Default for PenFeature {
 impl PenFeature {
     pub fn new() -> Self {
         Self::default()
-    }
-
-    #[allow(dead_code)]
-    pub fn node_count(&self) -> usize {
-        self.nodes.len()
     }
 
     pub fn undo_last_node(&mut self, ctx: &mut PluginContext) -> bool {
@@ -111,30 +103,6 @@ impl PenFeature {
         ctx.request_redraw();
     }
 
-    #[allow(dead_code)]
-    pub fn resume_selected_path(&mut self, ctx: &mut PluginContext) -> bool {
-        if !self.nodes.is_empty() {
-            return false;
-        }
-
-        // Find if any selected element is an open PathElement
-        for elem in &ctx.document.elements {
-            if ctx.document.selected_ids.contains(&elem.id()) {
-                if let Element::Path(p) = elem {
-                    if !p.is_closed && !p.nodes.is_empty() {
-                        self.nodes = p.nodes.clone();
-                        self.resuming_path_id = Some(p.id);
-                        if let Some(last) = self.nodes.last() {
-                            self.current_cursor = Some(last.point);
-                        }
-                        ctx.request_redraw();
-                        return true;
-                    }
-                }
-            }
-        }
-        false
-    }
 }
 
 impl FeaturePlugin for PenFeature {
@@ -310,10 +278,6 @@ impl FeaturePlugin for PenFeature {
 
     fn is_editing(&self) -> bool {
         !self.nodes.is_empty()
-    }
-
-    fn as_pen_feature(&self) -> Option<&PenFeature> {
-        Some(self)
     }
 
     fn as_pen_feature_mut(&mut self) -> Option<&mut PenFeature> {

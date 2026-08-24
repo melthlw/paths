@@ -100,12 +100,6 @@ impl Unit {
         }
     }
 
-    /// Format a pixel value into this unit with its suffix (e.g. "120.5 mm")
-    #[allow(dead_code)]
-    pub fn format_with_suffix(self, px: f32) -> String {
-        format!("{} {}", self.format(px), self.suffix())
-    }
-
     /// Parse unit from a suffix string
     pub fn from_suffix(s: &str) -> Option<Self> {
         match s.trim().to_lowercase().as_str() {

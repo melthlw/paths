@@ -58,21 +58,7 @@ impl Language {
         }
     }
 
-    #[allow(dead_code)]
-    pub fn display_name(&self) -> &'static str {
-        match self {
-            Language::System => "System Default (Automatic)",
-            Language::PtBr => "Português (Brasil)",
-            Language::En => "English",
-            Language::Es => "Español",
-            Language::Fr => "Français",
-            Language::De => "Deutsch",
-            Language::It => "Italiano",
-            Language::Ja => "日本語",
-            Language::ZhCn => "中文 (简体)",
-            Language::Ru => "Русский",
-        }
-    }
+
 
     pub fn all_info() -> &'static [LanguageInfo] {
         &[
@@ -157,21 +143,6 @@ impl Language {
             .unwrap_or(Self::all_info()[0].clone())
     }
 
-    #[allow(dead_code)]
-    pub fn all() -> &'static [Language] {
-        &[
-            Language::System,
-            Language::PtBr,
-            Language::En,
-            Language::Es,
-            Language::Fr,
-            Language::De,
-            Language::It,
-            Language::Ja,
-            Language::ZhCn,
-            Language::Ru,
-        ]
-    }
 }
 
 /// Global I18n Manager with embedded catalogs for standalone/cargo execution and GNU gettext compatibility
@@ -403,12 +374,7 @@ pub fn on_language_change_local<F: Fn(Language) + 'static>(callback: F) {
     });
 }
 
-/// Register a listener callback to be notified immediately whenever the language changes
-#[allow(dead_code)]
-pub fn on_language_change<F: Fn(Language) + Send + Sync + 'static>(callback: F) {
-    let mut lock = LANGUAGE_LISTENERS.write().unwrap();
-    lock.push(Box::new(callback));
-}
+
 
 /// Set user preferred language, save preference, and notify all listeners
 pub fn set_language(lang: Language) {
@@ -444,13 +410,7 @@ pub fn get_language() -> Language {
     mgr.configured_language
 }
 
-/// Get the active effective language in use
-#[allow(dead_code)]
-pub fn get_effective_language() -> Language {
-    let mut lock = I18N.write().unwrap();
-    let mgr = lock.get_or_insert_with(I18nManager::new);
-    mgr.effective_language
-}
+
 
 /// Replaces `{}` placeholders sequentially in translated templates
 pub fn format_i18n(template: &str, args: &[&dyn std::fmt::Display]) -> String {

@@ -20,8 +20,6 @@ pub struct BrushControls {
     pub btn_taper_end: gtk4::ToggleButton,
     pub btn_auto_close: gtk4::ToggleButton,
     pub cap_dd: gtk4::DropDown,
-    #[allow(dead_code)]
-    pub btn_convert_path: gtk4::Button,
 }
 
 pub fn build_brush_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) -> BrushControls {
@@ -117,7 +115,8 @@ pub fn build_brush_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
         crate::core::gettext("Marker (Highlighter)"),
         crate::core::gettext("Airbrush (Soft)"),
     ];
-    let style_model = gtk4::StringList::new(&style_names.iter().map(|s| s.as_str()).collect::<Vec<_>>());
+    let style_model =
+        gtk4::StringList::new(&style_names.iter().map(|s| s.as_str()).collect::<Vec<_>>());
     let style_dd = gtk4::DropDown::builder()
         .model(&style_model)
         .selected(0)
@@ -139,7 +138,9 @@ pub fn build_brush_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
     let calligraphy_angle_spin = gtk4::SpinButton::with_range(-180.0, 180.0, 5.0);
     calligraphy_angle_spin.set_value(45.0);
     calligraphy_angle_spin.set_digits(0);
-    calligraphy_angle_spin.set_tooltip_text(Some(&crate::core::gettext("Calligraphy Chisel Nib Angle (degrees)")));
+    calligraphy_angle_spin.set_tooltip_text(Some(&crate::core::gettext(
+        "Calligraphy Chisel Nib Angle (degrees)",
+    )));
     calligraphy_box.append(&cal_lbl);
     calligraphy_box.append(&calligraphy_angle_spin);
 
@@ -214,7 +215,9 @@ pub fn build_brush_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
     let width_spin = gtk4::SpinButton::with_range(1.0, 200.0, 1.0);
     width_spin.set_digits(1);
     width_spin.set_value(6.0);
-    width_spin.set_tooltip_text(Some(&crate::core::gettext("Brush Size / Stroke Width (px)")));
+    width_spin.set_tooltip_text(Some(&crate::core::gettext(
+        "Brush Size / Stroke Width (px)",
+    )));
     width_spin.set_valign(gtk4::Align::Center);
     width_box.append(&width_lbl);
     width_box.append(&width_spin);
@@ -306,21 +309,27 @@ pub fn build_brush_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
     img_pressure.set_pixel_size(16);
     let btn_pressure = gtk4::ToggleButton::builder()
         .child(&img_pressure)
-        .tooltip_text(&crate::core::gettext("Pressure / Velocity Dynamics (Width changes with speed)"))
+        .tooltip_text(&crate::core::gettext(
+            "Pressure / Velocity Dynamics (Width changes with speed)",
+        ))
         .active(true)
         .css_classes(["flat"])
         .build();
 
     let btn_taper_start = gtk4::ToggleButton::builder()
         .label("▶")
-        .tooltip_text(&crate::core::gettext("Taper Start (Fine point at stroke beginning)"))
+        .tooltip_text(&crate::core::gettext(
+            "Taper Start (Fine point at stroke beginning)",
+        ))
         .active(false)
         .css_classes(["flat"])
         .build();
 
     let btn_taper_end = gtk4::ToggleButton::builder()
         .label("◀")
-        .tooltip_text(&crate::core::gettext("Taper End (Fine point at stroke end)"))
+        .tooltip_text(&crate::core::gettext(
+            "Taper End (Fine point at stroke end)",
+        ))
         .active(false)
         .css_classes(["flat"])
         .build();
@@ -329,7 +338,9 @@ pub fn build_brush_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
     img_close.set_pixel_size(16);
     let btn_auto_close = gtk4::ToggleButton::builder()
         .child(&img_close)
-        .tooltip_text(&crate::core::gettext("Auto-Close Path (Create closed shape with fill)"))
+        .tooltip_text(&crate::core::gettext(
+            "Auto-Close Path (Create closed shape with fill)",
+        ))
         .active(false)
         .css_classes(["flat"])
         .build();
@@ -429,7 +440,8 @@ pub fn build_brush_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
         crate::core::gettext("Square Cap"),
         crate::core::gettext("Flat Cap"),
     ];
-    let cap_model = gtk4::StringList::new(&cap_names.iter().map(|s| s.as_str()).collect::<Vec<_>>());
+    let cap_model =
+        gtk4::StringList::new(&cap_names.iter().map(|s| s.as_str()).collect::<Vec<_>>());
     let cap_dd = gtk4::DropDown::builder()
         .model(&cap_model)
         .selected(0)
@@ -501,6 +513,5 @@ pub fn build_brush_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
         btn_taper_end,
         btn_auto_close,
         cap_dd,
-        btn_convert_path,
     }
 }

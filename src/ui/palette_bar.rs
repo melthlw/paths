@@ -44,19 +44,8 @@ impl PalettePreset {
         }
     }
 
-    #[allow(dead_code)]
-    pub fn label(self) -> String {
-        match self {
-            Self::GnomeAdwaita => crate::core::gettext("GNOME Adwaita"),
-            Self::DocumentColors => crate::core::gettext("Document Colors"),
-            Self::Custom => crate::core::gettext("Custom Palette"),
-            Self::PastelSoft => crate::core::gettext("Pastel Soft"),
-            Self::VibrantNeon => crate::core::gettext("Vibrant Neon"),
-            Self::Monochrome => crate::core::gettext("Monochrome"),
-            Self::Material500 => crate::core::gettext("Material 500"),
-        }
-    }
 }
+
 
 fn get_preset_colors(preset: PalettePreset, canvas: &CanvasWidget) -> Vec<Option<Color>> {
     match preset {
@@ -543,11 +532,6 @@ impl ColorPaletteBar {
         &self.container
     }
 
-    #[allow(dead_code)]
-    pub fn set_on_reposition<F: Fn(PaletteBarPosition) + 'static>(&self, f: F) {
-        *self.on_reposition.borrow_mut() = Some(Box::new(f));
-    }
-
     pub fn set_position(&self, pos: PaletteBarPosition) {
         self.position.set(pos);
         match pos {
@@ -869,10 +853,7 @@ impl ColorPaletteBar {
                 .focus_on_click(false)
                 .build();
 
-            let initial_col = self
-                .active_color
-                .get()
-                .unwrap_or(Color::BLACK);
+            let initial_col = self.active_color.get().unwrap_or(Color::BLACK);
 
             let color_popover = ColorPickerPopover::new(self.canvas.clone(), initial_col, 0);
             color_popover.attach_to(&add_btn);

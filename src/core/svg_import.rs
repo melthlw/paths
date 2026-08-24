@@ -133,12 +133,22 @@ fn parse_use_tag(tag: &str) -> Option<Element> {
     let href = get_attribute(tag, "href").or_else(|| get_attribute(tag, "xlink:href"))?;
     let target_id_str = href.trim_start_matches('#');
     let source_id = if let Some(num_str) = target_id_str.strip_prefix("elem_") {
-        num_str.parse::<u64>().map(ElementId).unwrap_or(ElementId(1))
+        num_str
+            .parse::<u64>()
+            .map(ElementId)
+            .unwrap_or(ElementId(1))
     } else {
-        target_id_str.parse::<u64>().map(ElementId).unwrap_or(ElementId(1))
+        target_id_str
+            .parse::<u64>()
+            .map(ElementId)
+            .unwrap_or(ElementId(1))
     };
-    let x = get_attribute(tag, "x").and_then(|s| s.parse::<f32>().ok()).unwrap_or(0.0);
-    let y = get_attribute(tag, "y").and_then(|s| s.parse::<f32>().ok()).unwrap_or(0.0);
+    let x = get_attribute(tag, "x")
+        .and_then(|s| s.parse::<f32>().ok())
+        .unwrap_or(0.0);
+    let y = get_attribute(tag, "y")
+        .and_then(|s| s.parse::<f32>().ok())
+        .unwrap_or(0.0);
     let (_fill_col, _stroke_col, _stroke_w, opacity) = extract_style(tag);
 
     let mut clone_elem = CloneElement::new(source_id, Point::new(x, y));
@@ -494,7 +504,8 @@ pub fn parse_svg_path_to_elements(
     stroke_width: f32,
 ) -> Vec<PathElement> {
     if let Some(sk_path) = skia::Path::from_svg(d) {
-        let elements = PathElement::from_skia_path(&sk_path, fill_color, stroke_color, stroke_width);
+        let elements =
+            PathElement::from_skia_path(&sk_path, fill_color, stroke_color, stroke_width);
         if !elements.is_empty() {
             return elements;
         }
@@ -525,11 +536,6 @@ pub fn parse_svg_path_to_elements(
             stroke_width,
         )]
     }
-}
-
-#[allow(dead_code)]
-pub fn parse_svg_path_data(d: &str) -> Vec<PathNode> {
-    parse_svg_path_data_subpaths(d).into_iter().flatten().collect()
 }
 
 pub fn parse_svg_path_data_subpaths(d: &str) -> Vec<Vec<PathNode>> {
@@ -730,7 +736,15 @@ pub fn parse_svg_path_data_subpaths(d: &str) -> Vec<Vec<PathNode>> {
                 }
             }
             'A' | 'a' => {
-                if let (Some(_rx), Some(_ry), Some(_rot), Some(_large_arc), Some(_sweep), Some(x_raw), Some(y_raw)) = (
+                if let (
+                    Some(_rx),
+                    Some(_ry),
+                    Some(_rot),
+                    Some(_large_arc),
+                    Some(_sweep),
+                    Some(x_raw),
+                    Some(y_raw),
+                ) = (
                     get_num(&tokens, &mut i),
                     get_num(&tokens, &mut i),
                     get_num(&tokens, &mut i),

@@ -183,41 +183,6 @@ impl FillLayer {
             mesh: None,
         }
     }
-
-    #[allow(dead_code)]
-    pub fn new_gradient(
-        style: FillStyle,
-        color: Color,
-        secondary_color: Color,
-        angle: f32,
-    ) -> Self {
-        Self {
-            style,
-            color,
-            secondary_color,
-            angle,
-            opacity: 1.0,
-            enabled: true,
-            pattern_type: PatternType::Checkerboard,
-            pattern_scale: 16.0,
-            mesh: None,
-        }
-    }
-
-    #[allow(dead_code)]
-    pub fn new_pattern(pattern_type: PatternType, scale: f32, c1: Color, c2: Color) -> Self {
-        Self {
-            style: FillStyle::Pattern,
-            color: c1,
-            secondary_color: c2,
-            angle: 0.0,
-            opacity: 1.0,
-            enabled: true,
-            pattern_type,
-            pattern_scale: scale,
-            mesh: None,
-        }
-    }
 }
 
 pub fn create_pattern_shader(
@@ -316,14 +281,30 @@ pub fn create_pattern_shader(
 
             // 1. Horizontal course mortar lines
             canvas.draw_line(skia::Point::new(0.0, 0.0), skia::Point::new(w, 0.0), &paint);
-            canvas.draw_line(skia::Point::new(0.0, half_h), skia::Point::new(w, half_h), &paint);
+            canvas.draw_line(
+                skia::Point::new(0.0, half_h),
+                skia::Point::new(w, half_h),
+                &paint,
+            );
 
             // 2. Vertical joints: top course at 0 and W
-            canvas.draw_line(skia::Point::new(0.0, 0.0), skia::Point::new(0.0, half_h), &paint);
-            canvas.draw_line(skia::Point::new(w, 0.0), skia::Point::new(w, half_h), &paint);
+            canvas.draw_line(
+                skia::Point::new(0.0, 0.0),
+                skia::Point::new(0.0, half_h),
+                &paint,
+            );
+            canvas.draw_line(
+                skia::Point::new(w, 0.0),
+                skia::Point::new(w, half_h),
+                &paint,
+            );
 
             // 3. Vertical joint: bottom course staggered by 50% at W/2
-            canvas.draw_line(skia::Point::new(w * 0.5, half_h), skia::Point::new(w * 0.5, h), &paint);
+            canvas.draw_line(
+                skia::Point::new(w * 0.5, half_h),
+                skia::Point::new(w * 0.5, h),
+                &paint,
+            );
         }
         PatternType::Crosshatch => {
             paint.set_stroke_width((sz * 0.12).max(1.0));
@@ -375,10 +356,26 @@ pub fn create_pattern_shader(
             let mut p_h = paint.clone();
             p_h.set_stroke_width((sz * 0.15).max(1.0));
             p_h.set_style(skia::PaintStyle::Stroke);
-            canvas.draw_line(skia::Point::new(0.0, half * 0.5), skia::Point::new(half, half * 0.5), &p_h);
-            canvas.draw_line(skia::Point::new(half * 0.5, half), skia::Point::new(half * 0.5, sz), &p_h);
-            canvas.draw_line(skia::Point::new(half, sz * 0.75), skia::Point::new(sz, sz * 0.75), &p_h);
-            canvas.draw_line(skia::Point::new(sz * 0.75, 0.0), skia::Point::new(sz * 0.75, half), &p_h);
+            canvas.draw_line(
+                skia::Point::new(0.0, half * 0.5),
+                skia::Point::new(half, half * 0.5),
+                &p_h,
+            );
+            canvas.draw_line(
+                skia::Point::new(half * 0.5, half),
+                skia::Point::new(half * 0.5, sz),
+                &p_h,
+            );
+            canvas.draw_line(
+                skia::Point::new(half, sz * 0.75),
+                skia::Point::new(sz, sz * 0.75),
+                &p_h,
+            );
+            canvas.draw_line(
+                skia::Point::new(sz * 0.75, 0.0),
+                skia::Point::new(sz * 0.75, half),
+                &p_h,
+            );
         }
     }
 

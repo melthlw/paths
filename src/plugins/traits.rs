@@ -88,11 +88,6 @@ pub trait FeaturePlugin: 'static + Send + Sync {
         false
     }
 
-    #[allow(dead_code)]
-    fn as_pen_feature(&self) -> Option<&crate::plugins::features::pen::PenFeature> {
-        None
-    }
-
     fn as_pen_feature_mut(&mut self) -> Option<&mut crate::plugins::features::pen::PenFeature> {
         None
     }
@@ -101,7 +96,9 @@ pub trait FeaturePlugin: 'static + Send + Sync {
         None
     }
 
-    fn as_brush_feature_mut(&mut self) -> Option<&mut crate::plugins::features::brush::BrushFeature> {
+    fn as_brush_feature_mut(
+        &mut self,
+    ) -> Option<&mut crate::plugins::features::brush::BrushFeature> {
         None
     }
 

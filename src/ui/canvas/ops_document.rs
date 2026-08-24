@@ -10,11 +10,6 @@ use crate::core::{
 };
 
 impl CanvasWidget {
-    #[allow(dead_code)]
-    pub fn is_dirty(&self) -> bool {
-        self.state.try_borrow().map(|s| s.is_dirty).unwrap_or(false)
-    }
-
     pub fn get_document_colors(&self) -> Vec<Option<Color>> {
         if let Ok(state) = self.state.try_borrow() {
             state.document.get_document_colors()
@@ -267,15 +262,6 @@ impl CanvasWidget {
             .try_borrow()
             .ok()
             .and_then(|s| s.current_file_path.clone())
-    }
-
-    #[allow(dead_code)]
-    pub fn clear_canvas(&self) {
-        let mut state = self.state.borrow_mut();
-        state.document.clear();
-        state.mark_dirty();
-        state.notify_status();
-        self.drawing_area.queue_draw();
     }
 
     // Page Management
@@ -593,15 +579,6 @@ impl CanvasWidget {
     pub fn select_all(&self) {
         let mut state = self.state.borrow_mut();
         state.document.selected_ids = state.document.elements.iter().map(|e| e.id()).collect();
-        state.notify_status();
-        drop(state);
-        self.drawing_area.queue_draw();
-    }
-
-    #[allow(dead_code)]
-    pub fn deselect_all(&self) {
-        let mut state = self.state.borrow_mut();
-        state.document.selected_ids.clear();
         state.notify_status();
         drop(state);
         self.drawing_area.queue_draw();
@@ -960,21 +937,6 @@ impl CanvasWidget {
     pub fn set_high_precision_aa(&self, enabled: bool) {
         self.state.borrow_mut().render_options.high_precision_aa = enabled;
         self.drawing_area.queue_draw();
-    }
-
-    #[allow(dead_code)]
-    pub fn graphics_device_info(&self) -> String {
-        if let Some(display) = gtk4::gdk::Display::default() {
-            let hw = self.state.borrow().render_options.hardware_accelerated;
-            let mode = if hw {
-                crate::core::gettext("Hardware Accelerated (GPU / Skia Pipeline)")
-            } else {
-                crate::core::gettext("Software Fallback (CPU Raster)")
-            };
-            format!("{} — {}", display.type_().name(), mode)
-        } else {
-            crate::core::gettext("Skia Graphics Pipeline")
-        }
     }
 
     pub fn canvas_bg_color(&self) -> Option<Color> {

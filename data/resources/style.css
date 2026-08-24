@@ -218,6 +218,14 @@
     color: @popover_fg_color;
 }
 
+.toolbar.card button image.tool-group-indicator,
+.tool-group-indicator {
+    color: @popover_fg_color;
+    opacity: 0.55;
+    min-width: 6px;
+    min-height: 6px;
+}
+
 .toolbar.card button:checked {
     background-color: alpha(currentColor, 0.15);
     color: @popover_fg_color;
