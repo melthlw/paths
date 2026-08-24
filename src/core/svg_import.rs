@@ -1,3 +1,5 @@
+use skia_safe as skia;
+
 use crate::core::color::Color;
 use crate::core::element::{CloneElement, Element, ElementId, PathElement, PathNode, RectElement};
 use crate::core::geometry::{Point, Rect};
@@ -28,9 +30,7 @@ pub fn parse_svg(content: &str) -> Result<SvgImportResult, String> {
             if pos < len {
                 pos += 1; // include '>'
                 let tag_str = &content[start..pos];
-                if let Some(elem) = parse_svg_tag(tag_str) {
-                    elements.push(elem);
-                }
+                elements.extend(parse_svg_tag_elements(tag_str));
             }
         } else {
             pos += 1;
@@ -91,24 +91,42 @@ fn parse_dimension(s: &str) -> Option<f32> {
     s.parse::<f32>().ok()
 }
 
-fn parse_svg_tag(tag: &str) -> Option<Element> {
+fn parse_svg_tag_elements(tag: &str) -> Vec<Element> {
     let trimmed = tag
         .trim_start_matches('<')
         .trim_end_matches('>')
         .trim_end_matches('/');
-    let tag_name = trimmed.split_whitespace().next()?;
+    let Some(tag_name) = trimmed.split_whitespace().next() else {
+        return Vec::new();
+    };
 
     match tag_name {
-        "path" => parse_path_tag(tag),
-        "rect" => parse_rect_tag(tag),
-        "circle" => parse_circle_tag(tag),
-        "ellipse" => parse_ellipse_tag(tag),
-        "line" => parse_line_tag(tag),
-        "polygon" => parse_polygon_tag(tag, true),
-        "polyline" => parse_polygon_tag(tag, false),
-        "use" => parse_use_tag(tag),
-        _ => None,
+        "path" => parse_path_tags(tag),
+        "rect" => parse_rect_tag(tag).into_iter().collect(),
+        "circle" => parse_circle_tag(tag).into_iter().collect(),
+        "ellipse" => parse_ellipse_tag(tag).into_iter().collect(),
+        "line" => parse_line_tag(tag).into_iter().collect(),
+        "polygon" => parse_polygon_tag(tag, true).into_iter().collect(),
+        "polyline" => parse_polygon_tag(tag, false).into_iter().collect(),
+        "use" => parse_use_tag(tag).into_iter().collect(),
+        _ => Vec::new(),
     }
+}
+
+fn parse_path_tags(tag: &str) -> Vec<Element> {
+    let Some(d) = get_attribute(tag, "d") else {
+        return Vec::new();
+    };
+    let (fill_col, stroke_col, stroke_w, opacity) = extract_style(tag);
+    let id_str = get_attribute(tag, "id");
+    let mut elements = parse_svg_path_to_elements(&d, fill_col, stroke_col, stroke_w);
+    for el in &mut elements {
+        el.opacity = opacity;
+        if let Some(ref name) = id_str {
+            el.name = Some(name.clone());
+        }
+    }
+    elements.into_iter().map(Element::Path).collect()
 }
 
 fn parse_use_tag(tag: &str) -> Option<Element> {
@@ -170,23 +188,6 @@ fn parse_use_tag(tag: &str) -> Option<Element> {
         }
     }
     Some(Element::Clone(clone_elem))
-}
-
-fn parse_path_tag(tag: &str) -> Option<Element> {
-    let d = get_attribute(tag, "d")?;
-    let (fill_col, stroke_col, stroke_w, opacity) = extract_style(tag);
-    let nodes = parse_svg_path_data(&d);
-    if nodes.is_empty() {
-        return None;
-    }
-
-    let is_closed = d.to_ascii_lowercase().contains('z');
-    let mut path_elem = PathElement::new(nodes, is_closed, fill_col, stroke_col, stroke_w);
-    path_elem.opacity = opacity;
-    if let Some(id_str) = get_attribute(tag, "id") {
-        path_elem.name = Some(id_str);
-    }
-    Some(Element::Path(path_elem))
 }
 
 fn parse_rect_tag(tag: &str) -> Option<Element> {
@@ -486,8 +487,44 @@ fn parse_color(s: &str) -> Option<Color> {
     }
 }
 
+pub fn parse_svg_path_to_elements(
+    d: &str,
+    fill_color: Option<Color>,
+    stroke_color: Option<Color>,
+    stroke_width: f32,
+) -> Vec<PathElement> {
+    if let Some(sk_path) = skia::Path::from_svg(d) {
+        let elements = PathElement::from_skia_path(&sk_path, fill_color, stroke_color, stroke_width);
+        if !elements.is_empty() {
+            return elements;
+        }
+    }
+
+    let subpaths = parse_svg_path_data_subpaths(d);
+    let is_closed = d.to_ascii_lowercase().contains('z');
+    subpaths
+        .into_iter()
+        .filter(|nodes| !nodes.is_empty())
+        .map(|nodes| {
+            PathElement::new(
+                nodes,
+                is_closed,
+                fill_color,
+                stroke_color,
+                stroke_width,
+            )
+        })
+        .collect()
+}
+
+#[allow(dead_code)]
 pub fn parse_svg_path_data(d: &str) -> Vec<PathNode> {
-    let mut nodes = Vec::new();
+    parse_svg_path_data_subpaths(d).into_iter().flatten().collect()
+}
+
+pub fn parse_svg_path_data_subpaths(d: &str) -> Vec<Vec<PathNode>> {
+    let mut subpaths = Vec::new();
+    let mut current_nodes = Vec::new();
     let mut current_point = Point::new(0.0, 0.0);
     let mut start_point = Point::new(0.0, 0.0);
 
@@ -515,53 +552,59 @@ pub fn parse_svg_path_data(d: &str) -> Vec<PathNode> {
 
         match cmd {
             'M' => {
+                if !current_nodes.is_empty() {
+                    subpaths.push(std::mem::take(&mut current_nodes));
+                }
                 if let (Some(x), Some(y)) = (get_num(&tokens, &mut i), get_num(&tokens, &mut i)) {
                     current_point = Point::new(x, y);
                     start_point = current_point;
-                    nodes.push(PathNode::new(current_point));
+                    current_nodes.push(PathNode::new(current_point));
                 }
             }
             'm' => {
+                if !current_nodes.is_empty() {
+                    subpaths.push(std::mem::take(&mut current_nodes));
+                }
                 if let (Some(dx), Some(dy)) = (get_num(&tokens, &mut i), get_num(&tokens, &mut i)) {
                     current_point = Point::new(current_point.x + dx, current_point.y + dy);
                     start_point = current_point;
-                    nodes.push(PathNode::new(current_point));
+                    current_nodes.push(PathNode::new(current_point));
                 }
             }
             'L' => {
                 if let (Some(x), Some(y)) = (get_num(&tokens, &mut i), get_num(&tokens, &mut i)) {
                     current_point = Point::new(x, y);
-                    nodes.push(PathNode::new(current_point));
+                    current_nodes.push(PathNode::new(current_point));
                 }
             }
             'l' => {
                 if let (Some(dx), Some(dy)) = (get_num(&tokens, &mut i), get_num(&tokens, &mut i)) {
                     current_point = Point::new(current_point.x + dx, current_point.y + dy);
-                    nodes.push(PathNode::new(current_point));
+                    current_nodes.push(PathNode::new(current_point));
                 }
             }
             'H' => {
                 if let Some(x) = get_num(&tokens, &mut i) {
                     current_point = Point::new(x, current_point.y);
-                    nodes.push(PathNode::new(current_point));
+                    current_nodes.push(PathNode::new(current_point));
                 }
             }
             'h' => {
                 if let Some(dx) = get_num(&tokens, &mut i) {
                     current_point = Point::new(current_point.x + dx, current_point.y);
-                    nodes.push(PathNode::new(current_point));
+                    current_nodes.push(PathNode::new(current_point));
                 }
             }
             'V' => {
                 if let Some(y) = get_num(&tokens, &mut i) {
                     current_point = Point::new(current_point.x, y);
-                    nodes.push(PathNode::new(current_point));
+                    current_nodes.push(PathNode::new(current_point));
                 }
             }
             'v' => {
                 if let Some(dy) = get_num(&tokens, &mut i) {
                     current_point = Point::new(current_point.x, current_point.y + dy);
-                    nodes.push(PathNode::new(current_point));
+                    current_nodes.push(PathNode::new(current_point));
                 }
             }
             'C' => {
@@ -573,13 +616,13 @@ pub fn parse_svg_path_data(d: &str) -> Vec<PathNode> {
                     get_num(&tokens, &mut i),
                     get_num(&tokens, &mut i),
                 ) {
-                    if let Some(last_node) = nodes.last_mut() {
+                    if let Some(last_node) = current_nodes.last_mut() {
                         last_node.handle_out = Some(Point::new(x1, y1));
                     }
                     current_point = Point::new(x, y);
                     let node =
                         PathNode::with_handles(current_point, Some(Point::new(x2, y2)), None);
-                    nodes.push(node);
+                    current_nodes.push(node);
                 }
             }
             'c' => {
@@ -595,12 +638,12 @@ pub fn parse_svg_path_data(d: &str) -> Vec<PathNode> {
                     let cp2 = Point::new(current_point.x + dx2, current_point.y + dy2);
                     let end = Point::new(current_point.x + dx, current_point.y + dy);
 
-                    if let Some(last_node) = nodes.last_mut() {
+                    if let Some(last_node) = current_nodes.last_mut() {
                         last_node.handle_out = Some(cp1);
                     }
                     current_point = end;
                     let node = PathNode::with_handles(current_point, Some(cp2), None);
-                    nodes.push(node);
+                    current_nodes.push(node);
                 }
             }
             'S' | 's' => {
@@ -621,7 +664,7 @@ pub fn parse_svg_path_data(d: &str) -> Vec<PathNode> {
                     } else {
                         Point::new(x2_raw, y2_raw)
                     };
-                    let cp1 = if let Some(last) = nodes.last() {
+                    let cp1 = if let Some(last) = current_nodes.last() {
                         if let Some(h_out) = last.handle_out {
                             Point::new(
                                 2.0 * current_point.x - h_out.x,
@@ -634,11 +677,11 @@ pub fn parse_svg_path_data(d: &str) -> Vec<PathNode> {
                         current_point
                     };
 
-                    if let Some(last_node) = nodes.last_mut() {
+                    if let Some(last_node) = current_nodes.last_mut() {
                         last_node.handle_out = Some(cp1);
                     }
                     current_point = end;
-                    nodes.push(PathNode::with_handles(current_point, Some(cp2), None));
+                    current_nodes.push(PathNode::with_handles(current_point, Some(cp2), None));
                 }
             }
             'Q' | 'q' => {
@@ -669,11 +712,11 @@ pub fn parse_svg_path_data(d: &str) -> Vec<PathNode> {
                         end.y + (2.0 / 3.0) * (qp.y - end.y),
                     );
 
-                    if let Some(last_node) = nodes.last_mut() {
+                    if let Some(last_node) = current_nodes.last_mut() {
                         last_node.handle_out = Some(cp1);
                     }
                     current_point = end;
-                    nodes.push(PathNode::with_handles(current_point, Some(cp2), None));
+                    current_nodes.push(PathNode::with_handles(current_point, Some(cp2), None));
                 }
             }
             'A' | 'a' => {
@@ -692,11 +735,14 @@ pub fn parse_svg_path_data(d: &str) -> Vec<PathNode> {
                         Point::new(x_raw, y_raw)
                     };
                     current_point = end;
-                    nodes.push(PathNode::new(current_point));
+                    current_nodes.push(PathNode::new(current_point));
                 }
             }
             'Z' | 'z' => {
                 current_point = start_point;
+                if !current_nodes.is_empty() {
+                    subpaths.push(std::mem::take(&mut current_nodes));
+                }
             }
             _ => {}
         }
@@ -706,7 +752,11 @@ pub fn parse_svg_path_data(d: &str) -> Vec<PathNode> {
         }
     }
 
-    nodes
+    if !current_nodes.is_empty() {
+        subpaths.push(current_nodes);
+    }
+
+    subpaths
 }
 
 fn get_num(tokens: &[PathToken], idx: &mut usize) -> Option<f32> {
@@ -823,5 +873,16 @@ mod tests {
         } else {
             panic!("Expected Path element");
         }
+    }
+
+    #[test]
+    fn test_parse_compound_svg_path_with_subpaths() {
+        let compound_d = "M 0 0 L 10 0 L 10 10 Z M 20 20 L 30 20 L 30 30 Z";
+        let elements = parse_svg_path_to_elements(compound_d, Some(Color::BLACK), None, 1.0);
+        assert_eq!(elements.len(), 2);
+        assert_eq!(elements[0].nodes.len(), 3);
+        assert_eq!(elements[1].nodes.len(), 3);
+        assert_eq!(elements[0].nodes[0].point, Point::new(0.0, 0.0));
+        assert_eq!(elements[1].nodes[0].point, Point::new(20.0, 20.0));
     }
 }

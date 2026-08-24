@@ -462,66 +462,94 @@ pub fn handle_asset_drop(state: &mut super::state::CanvasState, payload: &str, w
     } else if let Some(icon_str) = payload.strip_prefix("gnome-paths:icon:") {
         if let Some(idx) = icon_str.find(':') {
             let path_d = &icon_str[idx + 1..];
-            let nodes = crate::core::svg_import::parse_svg_path_data(path_d);
-            if !nodes.is_empty() {
+            let path_elements = crate::core::svg_import::parse_svg_path_to_elements(
+                path_d,
+                Some(state.active_fill_color),
+                None,
+                1.0,
+            );
+            if !path_elements.is_empty() {
                 state.document.snapshot();
-                let mut path_el = crate::core::element::PathElement::new(
-                    nodes,
-                    true,
-                    Some(state.active_fill_color),
-                    None,
-                    1.0,
-                );
-                let b = path_el.bounds();
-                let target_size = 64.0f32;
-                let max_dim = b.width.max(b.height);
-                if max_dim > 0.1 && max_dim < 36.0 {
-                    let scale = target_size / max_dim;
-                    let center_b = Point::new(b.x + b.width / 2.0, b.y + b.height / 2.0);
-                    path_el.scale(center_b, scale, scale);
+                let mut min_x = f32::MAX;
+                let mut min_y = f32::MAX;
+                let mut max_x = f32::MIN;
+                let mut max_y = f32::MIN;
+                for el in &path_elements {
+                    let b = el.bounds();
+                    min_x = min_x.min(b.x);
+                    min_y = min_y.min(b.y);
+                    max_x = max_x.max(b.x + b.width);
+                    max_y = max_y.max(b.y + b.height);
                 }
-                let b_final = path_el.bounds();
-                let dx = world_pt.x - (b_final.x + b_final.width / 2.0);
-                let dy = world_pt.y - (b_final.y + b_final.height / 2.0);
-                path_el.translate(dx, dy);
-                let el = Element::Path(path_el);
-                let id = el.id();
-                state.document.add_element(el);
+                let total_b = crate::core::geometry::Rect::new(min_x, min_y, (max_x - min_x).max(0.1), (max_y - min_y).max(0.1));
+                let target_size = 64.0f32;
+                let max_dim = total_b.width.max(total_b.height);
+                let scale = if max_dim > 0.1 && max_dim < 36.0 {
+                    target_size / max_dim
+                } else {
+                    1.0
+                };
+                let center_b = Point::new(total_b.x + total_b.width / 2.0, total_b.y + total_b.height / 2.0);
+                let dx = world_pt.x - center_b.x;
+                let dy = world_pt.y - center_b.y;
+
                 state.document.selected_ids.clear();
-                state.document.selected_ids.insert(id);
+                for mut el in path_elements {
+                    if scale != 1.0 {
+                        el.scale(center_b, scale, scale);
+                    }
+                    el.translate(dx, dy);
+                    let element_id = el.id;
+                    state.document.add_element(Element::Path(el));
+                    state.document.selected_ids.insert(element_id);
+                }
                 return true;
             }
         }
     } else if let Some(shape_str) = payload.strip_prefix("gnome-paths:shape:") {
         if let Some(idx) = shape_str.find(':') {
             let path_d = &shape_str[idx + 1..];
-            let nodes = crate::core::svg_import::parse_svg_path_data(path_d);
-            if !nodes.is_empty() {
+            let path_elements = crate::core::svg_import::parse_svg_path_to_elements(
+                path_d,
+                Some(state.active_fill_color),
+                None,
+                1.0,
+            );
+            if !path_elements.is_empty() {
                 state.document.snapshot();
-                let mut path_el = crate::core::element::PathElement::new(
-                    nodes,
-                    true,
-                    Some(state.active_fill_color),
-                    None,
-                    1.0,
-                );
-                let b = path_el.bounds();
-                let target_size = 80.0f32;
-                let max_dim = b.width.max(b.height);
-                if max_dim > 0.1 && max_dim < 36.0 {
-                    let scale = target_size / max_dim;
-                    let center_b = Point::new(b.x + b.width / 2.0, b.y + b.height / 2.0);
-                    path_el.scale(center_b, scale, scale);
+                let mut min_x = f32::MAX;
+                let mut min_y = f32::MAX;
+                let mut max_x = f32::MIN;
+                let mut max_y = f32::MIN;
+                for el in &path_elements {
+                    let b = el.bounds();
+                    min_x = min_x.min(b.x);
+                    min_y = min_y.min(b.y);
+                    max_x = max_x.max(b.x + b.width);
+                    max_y = max_y.max(b.y + b.height);
                 }
-                let b_final = path_el.bounds();
-                let dx = world_pt.x - (b_final.x + b_final.width / 2.0);
-                let dy = world_pt.y - (b_final.y + b_final.height / 2.0);
-                path_el.translate(dx, dy);
-                let el = Element::Path(path_el);
-                let id = el.id();
-                state.document.add_element(el);
+                let total_b = crate::core::geometry::Rect::new(min_x, min_y, (max_x - min_x).max(0.1), (max_y - min_y).max(0.1));
+                let target_size = 80.0f32;
+                let max_dim = total_b.width.max(total_b.height);
+                let scale = if max_dim > 0.1 && max_dim < 36.0 {
+                    target_size / max_dim
+                } else {
+                    1.0
+                };
+                let center_b = Point::new(total_b.x + total_b.width / 2.0, total_b.y + total_b.height / 2.0);
+                let dx = world_pt.x - center_b.x;
+                let dy = world_pt.y - center_b.y;
+
                 state.document.selected_ids.clear();
-                state.document.selected_ids.insert(id);
+                for mut el in path_elements {
+                    if scale != 1.0 {
+                        el.scale(center_b, scale, scale);
+                    }
+                    el.translate(dx, dy);
+                    let element_id = el.id;
+                    state.document.add_element(Element::Path(el));
+                    state.document.selected_ids.insert(element_id);
+                }
                 return true;
             }
         }

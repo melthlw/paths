@@ -54,11 +54,11 @@ fn create_vector_path_preview(path_d: &str, width: i32, height: i32) -> gtk4::Dr
         .height_request(height)
         .build();
 
-    let nodes = crate::core::svg_import::parse_svg_path_data(path_d);
+    let subpaths = crate::core::svg_import::parse_svg_path_data_subpaths(path_d);
     area.set_draw_func(move |_, cr, w, h| {
         let wf = w as f64;
         let hf = h as f64;
-        if nodes.is_empty() {
+        if subpaths.is_empty() {
             return;
         }
 
@@ -66,11 +66,13 @@ fn create_vector_path_preview(path_d: &str, width: i32, height: i32) -> gtk4::Dr
         let mut min_y = f32::MAX;
         let mut max_x = f32::MIN;
         let mut max_y = f32::MIN;
-        for n in &nodes {
-            min_x = min_x.min(n.point.x);
-            min_y = min_y.min(n.point.y);
-            max_x = max_x.max(n.point.x);
-            max_y = max_y.max(n.point.y);
+        for sub in &subpaths {
+            for n in sub {
+                min_x = min_x.min(n.point.x);
+                min_y = min_y.min(n.point.y);
+                max_x = max_x.max(n.point.x);
+                max_y = max_y.max(n.point.y);
+            }
         }
         let bw = (max_x - min_x).max(0.1) as f64;
         let bh = (max_y - min_y).max(0.1) as f64;
@@ -88,12 +90,15 @@ fn create_vector_path_preview(path_d: &str, width: i32, height: i32) -> gtk4::Dr
         cr.scale(scale, scale);
 
         cr.new_path();
-        let count = nodes.len();
-        if count > 0 {
-            cr.move_to(nodes[0].point.x as f64, nodes[0].point.y as f64);
+        for sub in &subpaths {
+            let count = sub.len();
+            if count == 0 {
+                continue;
+            }
+            cr.move_to(sub[0].point.x as f64, sub[0].point.y as f64);
             for i in 0..count {
-                let n1 = &nodes[i];
-                let n2 = &nodes[(i + 1) % count];
+                let n1 = &sub[i];
+                let n2 = &sub[(i + 1) % count];
                 if let (Some(h_out), Some(h_in)) = (n1.handle_out, n2.handle_in) {
                     cr.curve_to(
                         h_out.x as f64,
