@@ -28,6 +28,17 @@ pub fn create_resource_btn(resource_path: &str, tooltip: &str) -> gtk4::Button {
     btn
 }
 
+pub fn create_resource_toggle_btn(resource_path: &str, tooltip: &str, active: bool) -> gtk4::ToggleButton {
+    let img = crate::ui::icons::make_symbolic_image(resource_path, 18);
+    gtk4::ToggleButton::builder()
+        .child(&img)
+        .tooltip_text(tooltip)
+        .css_classes(["flat"])
+        .active(active)
+        .focus_on_click(false)
+        .build()
+}
+
 pub fn create_coord_entry(prefix: &str) -> (gtk4::Box, gtk4::Entry) {
     let box_widget = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Horizontal)

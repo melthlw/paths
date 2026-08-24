@@ -89,12 +89,12 @@
 }
 
 .studio-tab-btn.drop-before {
-    box-shadow: inset 3px 0 0 0 @accent_color;
+    border-left: 3px solid @accent_color;
     background-color: alpha(@accent_color, 0.12);
 }
 
 .studio-tab-btn.drop-after {
-    box-shadow: inset -3px 0 0 0 @accent_color;
+    border-right: 3px solid @accent_color;
     background-color: alpha(@accent_color, 0.12);
 }
 
@@ -262,6 +262,118 @@
 
 .color-swatch-btn:hover {
     background-color: alpha(currentColor, 0.12);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Color Palette Toolbar (Dark Pill Toolbar with Circular Swatches)
+   ───────────────────────────────────────────────────────────── */
+.color-palette-capsule {
+    background-color: @popover_bg_color;
+    color: @popover_fg_color;
+    border: 1px solid alpha(currentColor, 0.14);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22), 0 1px 3px rgba(0, 0, 0, 0.10);
+    padding: 6px 4px;
+    border-radius: 9999px;
+    transition: all 180ms ease;
+}
+
+.color-palette-scrolled scrollbar,
+.color-palette-scrolled scrollbar.vertical,
+.color-palette-scrolled scrollbar.horizontal,
+.color-palette-scrolled .scrollbar {
+    opacity: 0;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+}
+
+.color-palette-scrolled trough,
+.color-palette-scrolled slider {
+    background: transparent;
+    border: none;
+    min-width: 0;
+    min-height: 0;
+}
+
+.color-swatch-circle-btn {
+    min-width: 38px;
+    min-height: 38px;
+    padding: 2px;
+    border-radius: 9999px;
+    background: transparent;
+    border: none;
+    transition: transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 160ms ease;
+}
+
+.color-swatch-circle-btn:hover {
+    transform: scale(1.18);
+}
+
+.color-swatch-circle-btn:active {
+    transform: scale(0.92);
+}
+
+.color-add-btn {
+    min-width: 34px;
+    min-height: 34px;
+    padding: 4px;
+    border-radius: 9999px;
+    color: @accent_color;
+    background: alpha(@accent_color, 0.10);
+    border: 1px dashed alpha(@accent_color, 0.4);
+    transition: all 150ms ease;
+}
+
+.color-add-btn:hover {
+    background: alpha(@accent_color, 0.22);
+    border-color: @accent_color;
+    transform: scale(1.12);
+}
+
+.color-more-btn {
+    min-width: 30px;
+    min-height: 30px;
+    padding: 2px;
+    border-radius: 9999px;
+    color: alpha(@popover_fg_color, 0.75);
+    background: transparent;
+    border: none;
+    transition: background-color 120ms ease, color 120ms ease;
+}
+
+.color-more-btn:hover {
+    background-color: alpha(currentColor, 0.12);
+    color: @popover_fg_color;
+}
+
+.color-palette-popover>contents {
+    padding: 10px;
+    border-radius: 16px;
+    background-color: @popover_bg_color;
+    color: @popover_fg_color;
+    border: 1px solid alpha(currentColor, 0.12);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.color-mode-segmented {
+    background-color: alpha(currentColor, 0.08);
+    border-radius: 9999px;
+    padding: 3px;
+}
+
+.color-mode-segmented button {
+    border-radius: 9999px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.color-mode-segmented button:checked {
+    background-color: @card_bg_color;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -552,26 +664,28 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Preferences Visual Color & Paper Swatches
+   Preferences Visual Color & Paper Swatches (GNOME HIG)
    ───────────────────────────────────────────────────────────── */
 
 .pref-color-chip {
-    min-width: 30px;
-    min-height: 30px;
+    min-width: 32px;
+    min-height: 32px;
     padding: 0;
     border-radius: 9999px;
-    border: 1px solid alpha(currentColor, 0.22);
-    transition: all 120ms cubic-bezier(0.2, 0.0, 0.0, 1.0);
+    border: 1px solid alpha(currentColor, 0.18);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    transition: transform 140ms ease, box-shadow 140ms ease;
 }
 
 .pref-color-chip:hover {
-    transform: scale(1.08);
-    border-color: alpha(currentColor, 0.45);
+    transform: scale(1.10);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.20);
 }
 
 .pref-color-chip.active {
-    border: 2px solid alpha(currentColor, 0.55);
     transform: scale(1.05);
+    border: 2px solid @accent_color;
+    box-shadow: 0 2px 8px alpha(@accent_color, 0.35);
 }
 
 .pref-color-chip image {
@@ -580,6 +694,7 @@
 
 .pref-color-chip.chip-white image,
 .pref-color-chip.chip-gold image,
+.pref-color-chip.chip-mint image,
 .pref-color-chip.chip-paper-light image,
 .pref-color-chip.chip-paper-cream image {
     color: #1a1a1a;
@@ -645,6 +760,8 @@
 .chip-blue { background: #3584e4; }
 .chip-purple { background: #9141ac; }
 .chip-green { background: #2ec27e; }
+.chip-teal { background: #21a477; }
+.chip-mint { background: #57e389; }
 .chip-orange { background: #e66100; }
 .chip-red { background: #e01b24; }
 .chip-slate { background: #62a0ea; }
@@ -660,6 +777,7 @@
 .chip-cream { background: #fcf9f2; }
 .chip-paper-dark { background: #1e1e1e; }
 .chip-system-gradient { background: linear-gradient(135deg, #ffffff 50%, #242424 50%); }
+.chip-system-accent { background: linear-gradient(135deg, #3584e4 0%, #9141ac 33%, #e01b24 66%, #2ec27e 100%); }
 
 
 
@@ -697,4 +815,43 @@
 
 .tab-close-btn:active {
     transform: scale(0.9);
+}
+
+/* Visual Theme Preset Cards */
+.theme-preset-card {
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background-color: alpha(currentColor, 0.04);
+    padding: 8px 10px;
+    transition: all 180ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.theme-preset-card:hover {
+    background-color: alpha(currentColor, 0.08);
+    border-color: alpha(currentColor, 0.20);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+}
+
+.theme-preset-card.active {
+    border-color: @accent_color;
+    background-color: alpha(@accent_color, 0.10);
+    box-shadow: 0 4px 16px alpha(@accent_color, 0.25);
+}
+
+.theme-preset-card .theme-check-icon {
+    opacity: 0.0;
+    color: @accent_color;
+    transition: all 180ms ease;
+    transform: scale(0.7);
+}
+
+.theme-preset-card.active .theme-check-icon {
+    opacity: 1.0;
+    color: @accent_color;
+    transform: scale(1.0);
+}
+
+.theme-preset-card.active .heading {
+    color: @accent_color;
 }

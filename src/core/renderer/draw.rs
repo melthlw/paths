@@ -107,7 +107,11 @@ pub fn draw_infinite_dot_grid(
     let offset_y = (cy + viewport.pan.y).rem_euclid(grid_size);
 
     let mut dot_paint = Paint::default();
-    if is_dark {
+    if let Some((_, r_fg)) = crate::ui::theme::current_visual_theme().ruler_colors() {
+        let mut c = r_fg.to_skia();
+        c.a = if is_dark { 0.28 } else { 0.35 };
+        dot_paint.set_color4f(c, None);
+    } else if is_dark {
         dot_paint.set_color4f(Color4f::new(0.38, 0.38, 0.40, 0.50), None);
     } else {
         dot_paint.set_color4f(Color4f::new(0.76, 0.76, 0.80, 0.55), None);
@@ -423,16 +427,31 @@ pub fn draw_snap_guides(canvas: &skia::Canvas, guides: &[SnapGuide], zoom: f32) 
 
 pub fn draw_selection_highlight(canvas: &skia::Canvas, bounds: Rect, zoom: f32) {
     let stroke_width = (1.2 / zoom).max(1.0);
-    let handle_size = (7.0 / zoom).clamp(4.0, 9.0);
+    let handle_size = (7.5 / zoom).clamp(4.5, 9.5);
     let r = bounds.normalize();
+    let theme_accent = crate::ui::theme::current_visual_theme().accent_color().to_skia();
 
+    // 1. Subtle Outer Drop Shadow Line for Visibility
+    let mut shadow_stroke = Paint::default();
+    shadow_stroke.set_color4f(Color4f::new(0.0, 0.0, 0.0, 0.22), None);
+    shadow_stroke.set_style(PaintStyle::Stroke);
+    shadow_stroke.set_stroke_width(stroke_width + 1.0 / zoom);
+    shadow_stroke.set_anti_alias(true);
+    canvas.draw_rect(r.to_skia(), &shadow_stroke);
+
+    // 2. Primary Vibrant Accent Stroke
     let mut stroke_paint = Paint::default();
-    stroke_paint.set_color4f(Color4f::new(0.208, 0.518, 0.894, 1.0), None);
+    stroke_paint.set_color4f(theme_accent, None);
     stroke_paint.set_style(PaintStyle::Stroke);
     stroke_paint.set_stroke_width(stroke_width);
     stroke_paint.set_anti_alias(true);
-
     canvas.draw_rect(r.to_skia(), &stroke_paint);
+
+    // 3. Handle Shadow & Fill Paints
+    let mut handle_shadow = Paint::default();
+    handle_shadow.set_color4f(Color4f::new(0.0, 0.0, 0.0, 0.30), None);
+    handle_shadow.set_style(PaintStyle::Fill);
+    handle_shadow.set_anti_alias(true);
 
     let mut handle_fill = Paint::default();
     handle_fill.set_color4f(Color4f::new(1.0, 1.0, 1.0, 1.0), None);
@@ -440,7 +459,7 @@ pub fn draw_selection_highlight(canvas: &skia::Canvas, bounds: Rect, zoom: f32) 
     handle_fill.set_anti_alias(true);
 
     let mut handle_stroke = Paint::default();
-    handle_stroke.set_color4f(Color4f::new(0.208, 0.518, 0.894, 1.0), None);
+    handle_stroke.set_color4f(theme_accent, None);
     handle_stroke.set_style(PaintStyle::Stroke);
     handle_stroke.set_stroke_width(stroke_width);
     handle_stroke.set_anti_alias(true);
@@ -457,17 +476,41 @@ pub fn draw_selection_highlight(canvas: &skia::Canvas, bounds: Rect, zoom: f32) 
     ];
 
     let half = handle_size / 2.0;
+    let corner_rad = (1.5 / zoom).clamp(1.0, 2.5);
+
     for p in points {
+        let shadow_rect = skia::Rect::from_xywh(
+            p.x - half,
+            p.y - half + 0.8 / zoom,
+            handle_size,
+            handle_size,
+        );
         let handle_rect = skia::Rect::from_xywh(p.x - half, p.y - half, handle_size, handle_size);
-        canvas.draw_rect(handle_rect, &handle_fill);
-        canvas.draw_rect(handle_rect, &handle_stroke);
+        canvas.draw_round_rect(shadow_rect, corner_rad, corner_rad, &handle_shadow);
+        canvas.draw_round_rect(handle_rect, corner_rad, corner_rad, &handle_fill);
+        canvas.draw_round_rect(handle_rect, corner_rad, corner_rad, &handle_stroke);
     }
 
+    // 4. Rotation Lollipop Handle
     let rot_top = Point::new(r.x + r.width / 2.0, r.y);
     let rot_handle = Point::new(r.x + r.width / 2.0, r.y - 20.0 / zoom);
+    let rot_radius = half * 1.15;
+
     canvas.draw_line(rot_top.to_skia(), rot_handle.to_skia(), &stroke_paint);
-    canvas.draw_circle(rot_handle.to_skia(), half * 1.15, &handle_fill);
-    canvas.draw_circle(rot_handle.to_skia(), half * 1.15, &handle_stroke);
+    canvas.draw_circle(
+        skia::Point::new(rot_handle.x, rot_handle.y + 0.8 / zoom),
+        rot_radius,
+        &handle_shadow,
+    );
+    canvas.draw_circle(rot_handle.to_skia(), rot_radius, &handle_fill);
+    canvas.draw_circle(rot_handle.to_skia(), rot_radius, &handle_stroke);
+
+    // Subtle accent center dot in rotation handle
+    let mut dot_paint = Paint::default();
+    dot_paint.set_color4f(theme_accent, None);
+    dot_paint.set_style(PaintStyle::Fill);
+    dot_paint.set_anti_alias(true);
+    canvas.draw_circle(rot_handle.to_skia(), rot_radius * 0.45, &dot_paint);
 }
 
 pub fn draw_user_guides(
@@ -634,7 +677,12 @@ pub fn draw_rulers(
     let origin_offset_x = origin.x;
     let origin_offset_y = origin.y;
 
-    let bg_color = if is_dark {
+    let theme_ruler = crate::ui::theme::current_visual_theme().ruler_colors();
+    let theme_accent = crate::ui::theme::current_visual_theme().accent_color().to_skia();
+
+    let bg_color = if let Some((r_bg, _)) = theme_ruler {
+        r_bg.to_skia()
+    } else if is_dark {
         Color4f::new(0.14, 0.14, 0.15, 0.98)
     } else {
         Color4f::new(0.95, 0.95, 0.96, 0.98)
@@ -644,12 +692,18 @@ pub fn draw_rulers(
     } else {
         Color4f::new(0.82, 0.82, 0.84, 1.0)
     };
-    let tick_color = if is_dark {
+    let tick_color = if let Some((_, r_fg)) = theme_ruler {
+        let mut c = r_fg.to_skia();
+        c.a = 0.65;
+        c
+    } else if is_dark {
         Color4f::new(0.55, 0.55, 0.58, 1.0)
     } else {
         Color4f::new(0.55, 0.55, 0.58, 1.0)
     };
-    let text_color = if is_dark {
+    let text_color = if let Some((_, r_fg)) = theme_ruler {
+        r_fg.to_skia()
+    } else if is_dark {
         Color4f::new(0.85, 0.85, 0.88, 1.0)
     } else {
         Color4f::new(0.20, 0.20, 0.22, 1.0)
@@ -703,11 +757,11 @@ pub fn draw_rulers(
         let screen_y2 = cy + viewport.pan.y + (sel_norm.y + sel_norm.height) * viewport.zoom;
 
         let mut sel_span_paint = Paint::default();
-        sel_span_paint.set_color4f(Color4f::new(0.208, 0.518, 0.894, 0.18), None);
+        sel_span_paint.set_color4f(Color4f::new(theme_accent.r, theme_accent.g, theme_accent.b, 0.18), None);
         sel_span_paint.set_style(PaintStyle::Fill);
 
         let mut sel_bracket_paint = Paint::default();
-        sel_bracket_paint.set_color4f(Color4f::new(0.208, 0.518, 0.894, 0.9), None);
+        sel_bracket_paint.set_color4f(Color4f::new(theme_accent.r, theme_accent.g, theme_accent.b, 0.9), None);
         sel_bracket_paint.set_style(PaintStyle::Stroke);
         sel_bracket_paint.set_stroke_width(1.5);
 
@@ -993,7 +1047,7 @@ pub fn draw_rulers(
     // 7. Cursor Indicators on Rulers
     if cursor_pos.x >= t && cursor_pos.y >= t {
         let mut cursor_paint = Paint::default();
-        cursor_paint.set_color4f(Color4f::new(0.208, 0.518, 0.894, 1.0), None);
+        cursor_paint.set_color4f(theme_accent, None);
         cursor_paint.set_style(PaintStyle::Stroke);
         cursor_paint.set_stroke_width(1.2);
 
@@ -1026,7 +1080,7 @@ pub fn draw_rulers(
     let mut icon_paint = Paint::default();
     icon_paint.set_color4f(
         if ruler_config.custom_origin.is_some() {
-            Color4f::new(0.208, 0.518, 0.894, 1.0)
+            theme_accent
         } else {
             tick_color
         },

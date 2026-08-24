@@ -430,7 +430,11 @@ pub fn build_export_tab(
                 && (cfg.scope == crate::core::ExportScope::AllPages
                     || matches!(cfg.scope, crate::core::ExportScope::SelectedPages(_)));
 
-            let state_doc = canvas_exp.state().borrow().document.clone();
+            let state_doc = canvas_exp
+                .state()
+                .try_borrow()
+                .map(|s| s.document.clone())
+                .unwrap_or_else(|_| crate::core::Document::new());
             let parent_win = main_win_btn.borrow().clone();
 
             if is_multi {
@@ -450,7 +454,7 @@ pub fn build_export_tab(
                                     let out_path = folder_path.join(&fname);
                                     let _ = std::fs::write(out_path, data);
                                 }
-                                canvas_sub.state().borrow_mut().notify_status();
+                                canvas_sub.notify_status();
                             }
                         }
                     },
@@ -468,7 +472,7 @@ pub fn build_export_tab(
                             let exported = crate::core::export_document(&state_doc, &cfg);
                             if let Some((_, data)) = exported.into_iter().next() {
                                 let _ = std::fs::write(file_path, data);
-                                canvas_sub.state().borrow_mut().notify_status();
+                                canvas_sub.notify_status();
                             }
                         }
                     }

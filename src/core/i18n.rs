@@ -61,7 +61,7 @@ impl Language {
     #[allow(dead_code)]
     pub fn display_name(&self) -> &'static str {
         match self {
-            Language::System => "Padrão do Sistema (System Default)",
+            Language::System => "System Default (Automatic)",
             Language::PtBr => "Português (Brasil)",
             Language::En => "English",
             Language::Es => "Español",
@@ -79,7 +79,7 @@ impl Language {
             LanguageInfo {
                 lang: Language::System,
                 code: "system",
-                native_name: "Padrão do Sistema",
+                native_name: "System Default",
                 localized_name: "System Default",
                 region: "Automatic (GNOME)",
             },
@@ -217,11 +217,25 @@ impl I18nManager {
                     return Language::PtBr;
                 } else if low.starts_with("en") {
                     return Language::En;
+                } else if low.starts_with("es") {
+                    return Language::Es;
+                } else if low.starts_with("fr") {
+                    return Language::Fr;
+                } else if low.starts_with("de") {
+                    return Language::De;
+                } else if low.starts_with("it") {
+                    return Language::It;
+                } else if low.starts_with("ja") {
+                    return Language::Ja;
+                } else if low.starts_with("zh") {
+                    return Language::ZhCn;
+                } else if low.starts_with("ru") {
+                    return Language::Ru;
                 }
             }
         }
-        // Default to PtBr if Portuguese environment or En otherwise
-        Language::PtBr
+        // Canonical international default is English
+        Language::En
     }
 
     fn config_path() -> Option<std::path::PathBuf> {

@@ -129,7 +129,11 @@ impl ColorControlBar {
         let fill_picker_open = fill_picker.clone();
         let canvas_fill_open = canvas.clone();
         fill_btn.connect_clicked(move |_| {
-            let active_tool = canvas_fill_open.state().borrow().plugin_manager.active_id();
+            let active_tool = canvas_fill_open
+                .state()
+                .try_borrow()
+                .map(|s| s.plugin_manager.active_id())
+                .unwrap_or("select");
             if active_tool == "gradient" {
                 fill_picker_open.set_mode(1);
             } else if active_tool == "mesh_gradient" || active_tool == "mesh" {

@@ -6,7 +6,7 @@ use crate::ui::canvas::CanvasWidget;
 
 pub fn build_node_editor_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
     let node_visual_group = adw::PreferencesGroup::builder()
-        .title(crate::core::gettext("Node & Handle Appearance"))
+        .title(crate::core::gettext("Node and Handle Appearance"))
         .description(crate::core::gettext(
             "Configure the visual sizing, shapes, and handles for vector editing",
         ))
@@ -168,7 +168,7 @@ pub fn build_node_editor_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
 
     // Interaction & Manipulation Group
     let node_interact_group = adw::PreferencesGroup::builder()
-        .title(crate::core::gettext("Interaction & Manipulation"))
+        .title(crate::core::gettext("Interaction and Manipulation"))
         .description(crate::core::gettext(
             "Configure behavior and sensitivities for vector path editing",
         ))

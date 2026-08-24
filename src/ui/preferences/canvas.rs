@@ -289,16 +289,24 @@ pub fn build_canvas_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
         ))
         .build();
     {
+        let c_c = canvas.clone();
+        let cur_unit_suffix = canvas.unit().suffix();
         let unit_capsule = make_segmented_capsule(
             vec![
                 ("px", "px"),
-                ("pt", "pt"),
                 ("mm", "mm"),
                 ("cm", "cm"),
+                ("m", "m"),
                 ("in", "in"),
+                ("pt", "pt"),
+                ("pc", "pc"),
             ],
-            "px",
-            |_unit| {},
+            cur_unit_suffix,
+            move |u_str| {
+                if let Some(unit) = crate::core::Unit::from_suffix(&u_str) {
+                    c_c.set_unit(unit);
+                }
+            },
         );
         unit_row.add_suffix(&unit_capsule);
     }

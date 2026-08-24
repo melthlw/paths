@@ -128,6 +128,7 @@ impl Color {
         (h, s, v)
     }
 
+    #[allow(dead_code)]
     pub fn to_gdk(self) -> gtk4::gdk::RGBA {
         gtk4::gdk::RGBA::builder()
             .red(self.r)

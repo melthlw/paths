@@ -1,6 +1,7 @@
 pub mod boolean;
 pub mod brush;
 pub mod circle;
+pub mod color_palette;
 pub mod eyedropper;
 pub mod gradient;
 pub mod measure;
@@ -23,6 +24,7 @@ pub use boolean::{
 };
 pub use brush::BrushStudioPlugin;
 pub use circle::CircleStudioPlugin;
+pub use color_palette::ColorPaletteStudioPlugin;
 pub use eyedropper::EyedropperStudioPlugin;
 pub use gradient::GradientStudioPlugin;
 pub use measure::MeasureStudioPlugin;

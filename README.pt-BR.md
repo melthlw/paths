@@ -10,11 +10,11 @@
 </p>
 
 <p align="center">
-  Criar e editar gráficos vetoriais no Linux deve ser algo rápido, responsivo e perfeitamente integrado ao ambiente de trabalho.
+  Criar e editar gráficos vetoriais com mais rápidez, responsividade e perfeitamente integrado ao ambiente de trabalho.
 </p>
 
 <p align="center">
-  O <b>GNOME Paths</b> é uma ferramenta de design vetorial leve, construída com <b>GTK4</b>, <b>Libadwaita</b>, <b>Rust</b> e o motor gráfico <b>Skia 2D</b>.
+  O <b>GNOME Paths</b> é uma ferramenta de design vetorial leve, construída com <b>GTK4</b>, <b>Libadwaita</b>, <b>Rust</b> e o motor gráfico <b>Skia</b>.
 </p>
 
 <div align="center">
@@ -57,13 +57,13 @@
 ## Recursos
 
 - **Edição de Caminhos Bézier**: Editor de nós com suporte a alças cúspides, suaves e simétricas.
-- **Formas Paramétricas**: Retângulos com raios de cantos independentes, círculos, estrelas, polígonos e espirais.
+- **Formas Paramétricas**: Retângulos, círculos, estrelas, polígonos e espirais.
 - **Operações Booleanas**: União, Diferença, Interseção, Exclusão, Divisão e Cortar/Fatiar.
 - **Gradientes e Malha**: Gradientes lineares, radiais e grades de malha 2D (Mesh Gradient) editáveis diretamente na tela.
 - **Pranchetas Multipáginas**: Gerenciamento de múltiplas páginas em um único documento com opções de exportação individual.
 - **Formatos de Exportação**: SVG, PNG, PDF, JPG e WebP.
 - **Ajuste Magnético e Guias**: Encaixe magnético em grades, caixas delimitadoras de objetos e centros de pranchetas.
-- **Interface Adaptativa**: Segue as preferências de tema claro e escuro do sistema com barras de ferramentas customizáveis.
+- **Interface Adaptativa**: Preferências com temas personalizados e tema claro e escuro do sistema com barras de ferramentas customizáveis.
 
 ---
 
@@ -72,13 +72,16 @@
 O **GNOME Paths** nasceu da paixão por computação gráfica vetorial, profundamente inspirado na versatilidade e no poder do **Inkscape**, com o objetivo de oferecer uma experiência moderna, rápida, fluida e com integração nativa ao desktop GNOME.
 
 ### Desenvolvimento e Transparência
-Este projeto foi extensivamente programado e iterado com o auxílio de **IA em pair-programming**, mas foi cuidadosamente planejado, estruturado e mantido com muito carinho e atenção aos detalhes.
+Este projeto foi extensivamente desenvolvido e iterado com o auxílio de **inteligência artificial em pair-programming**, sendo cuidadosamente planejado, arquitetado e mantido com grande atenção aos detalhes e respeito ao ecossistema do GNOME.
+
+Prezamos pela transparência e pela colaboração aberta. Caso você prefira o fluxo de desenvolvimento tradicional e não utilize ferramentas de IA, sinta-se totalmente bem-vindo para contribuir com código tradicional, desenvolvimento de plugins, novas ideias, testes e relatórios de bugs.
 
 ### Horizontes e Ideias Futuras
 Ainda não sei exatamente onde este caminho vai chegar ou que rumo o projeto tomará, mas há diversas ideias em mente que podem ser exploradas:
-- **Espaços de Trabalho Dinâmicos**: Um sistema de interfaces adaptativas inspirado no Blender, onde as abas alteram a disposição das ferramentas de acordo com o tipo de fluxo ou documento (ex: Ilustração, Vetorização de Precisão, Tipografia).
-- **Animação Vetorial**: Linha do tempo, interpolação por quadros-chave (keyframes) e caminhos de movimento para animação vetorial.
-- **Diagramação Editorial e Documentos**: Ferramentas avançadas de diagramação multipágina para brochuras, livros e layouts gráficos.
+- **Espaços de Trabalho Dinâmicos**: Um sistema de interfaces adaptativas inspirado no Blender, onde a interface altera a disposição das ferramentas de acordo com o tipo de fluxo de trabalho (ex.: ilustração vetorial, edição de bitmap, diagramação editorial).
+- **Animação Vetorial**: Linha do tempo, interpolação por quadros-chave (*keyframes*) e curvas de interpolação de movimento.
+- **Diagramação Editorial e Documentos**: Ferramentas avançadas de layout multipágina para brochuras, livros e design editorial.
+- **Sistema de Nós (Node Graphs)**: Edição procedural e não-destrutiva de caminhos, malhas e transformações através de grafos de nós.
 
 Grande parte disso ainda são ideias e conceitos experimentais que poderão ou não se concretizar conforme o projeto evoluir.
 
@@ -91,8 +94,8 @@ O apoio da comunidade é fundamental para o crescimento do GNOME Paths. Se você
 - **Relatórios de Bugs e Sugestões**: Ajude a encontrar falhas, relatar comportamentos inesperados ou sugerir melhorias no GitLab.
 - **Código e Desenvolvimento**: Envie pull requests com otimizações, correções de bugs ou novas ferramentas.
 - **Traduções**: Ajude a traduzir o GNOME Paths para outros idiomas (consulte [TRANSLATING.md](TRANSLATING.md)).
+- **Plugins**: Desenvolva plugins para adicionar novas funcionalidades ao GNOME Paths.
 - **Apoio Financeiro**: Se o projeto for útil para você e quiser apoiar o desenvolvimento contínuo, considere contribuir no [Ko-fi](https://ko-fi.com/lauel).
-
 ---
 
 ## Como Compilar

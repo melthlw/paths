@@ -52,12 +52,14 @@ pub struct CanvasState {
                 Option<(Vec<crate::core::FillLayer>, Vec<crate::core::StrokeLayer>)>,
                 Option<(crate::core::BlendMode, f32, f32)>,
                 Option<Point>,
+                Vec<Option<Color>>,
             ),
         >,
     >,
     pub shortcuts: crate::core::ShortcutManager,
     pub render_options: crate::core::RenderOptions,
     pub path_editor_config: crate::core::PathEditorConfig,
+    pub transform_options: crate::core::TransformOptions,
     is_switching_tool: bool,
     pub current_file_path: Option<std::path::PathBuf>,
     pub is_dirty: bool,
@@ -88,6 +90,7 @@ impl CanvasState {
             renderer: SkiaRenderer::new(),
             render_options: crate::core::RenderOptions::default(),
             path_editor_config: crate::core::PathEditorConfig::default(),
+            transform_options: crate::core::TransformOptions::default(),
             active_fill_color: Color::new(0.2, 0.55, 0.95, 1.0),
             active_stroke_color: None,
             active_stroke_width: 2.0,
@@ -130,12 +133,12 @@ impl CanvasState {
                 self.active_stroke_color,
                 self.active_stroke_width,
             ));
-            let is_editing_text = self.plugin_manager.is_editing();
+            let is_editing_text = tool_id == "text" && self.plugin_manager.is_editing();
             let has_text_selected = self.document.elements.iter().any(|e| {
                 self.document.selected_ids.contains(&e.id())
                     && matches!(e, crate::core::Element::Text(_))
             });
-            let text_info = if is_editing_text || tool_id == "text" || has_text_selected {
+            let text_info = if is_editing_text || tool_id == "text" || (tool_id == "select" && has_text_selected) {
                 self.document.get_selected_text_info()
             } else {
                 None
@@ -172,6 +175,7 @@ impl CanvasState {
             } else {
                 None
             };
+            let doc_colors = self.document.get_document_colors();
             cb(
                 tool_id,
                 self.viewport.zoom,
@@ -192,6 +196,7 @@ impl CanvasState {
                 fills_and_strokes,
                 blend_info,
                 node_coord,
+                doc_colors,
             );
         }
     }

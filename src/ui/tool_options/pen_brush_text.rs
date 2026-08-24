@@ -778,7 +778,7 @@ pub fn build_pen_brush_text_controls(
         .valign(gtk4::Align::Center)
         .build();
     let pw_lbl = gtk4::Label::builder()
-        .label("W")
+        .label(&crate::core::gettext("W"))
         .css_classes(["dim-label", "caption"])
         .build();
     let page_w_spin = gtk4::SpinButton::with_range(50.0, 20000.0, 10.0);
@@ -795,7 +795,7 @@ pub fn build_pen_brush_text_controls(
         .valign(gtk4::Align::Center)
         .build();
     let ph_lbl = gtk4::Label::builder()
-        .label("H")
+        .label(&crate::core::gettext("H"))
         .css_classes(["dim-label", "caption"])
         .build();
     let page_h_spin = gtk4::SpinButton::with_range(50.0, 20000.0, 10.0);

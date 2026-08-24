@@ -381,13 +381,12 @@ impl StrokeRow {
                 if u.get() {
                     return;
                 }
-                let txt = entry
-                    .text()
-                    .trim()
-                    .trim_end_matches("pt")
-                    .trim()
-                    .to_string();
-                if let Ok(w) = txt.parse::<f32>() {
+                let cur_w = list.borrow().get(idx).map(|e| e.width).unwrap_or(2.0);
+                if let Ok(w) = crate::core::eval_math_expression(
+                    entry.text().as_str(),
+                    canvas.unit(),
+                    Some(cur_w),
+                ) {
                     let width = w.clamp(0.1, 200.0);
                     u.set(true);
                     entry.set_text(&format!("{:.1} pt", width));
@@ -410,8 +409,12 @@ impl StrokeRow {
                 if u.get() {
                     return;
                 }
-                let txt = entry.text().trim().trim_end_matches('%').to_string();
-                if let Ok(val) = txt.parse::<f32>() {
+                let cur_op = list.borrow().get(idx).map(|e| e.opacity * 100.0).unwrap_or(100.0);
+                if let Ok(val) = crate::core::eval_math_expression(
+                    entry.text().as_str(),
+                    crate::core::Unit::Px,
+                    Some(cur_op),
+                ) {
                     let alpha = (val / 100.0).clamp(0.0, 1.0);
                     u.set(true);
                     entry.set_text(&format!("{}%", (alpha * 100.0).round() as i32));

@@ -3,10 +3,10 @@ use skia_safe as skia;
 use super::modules::{
     BooleanCutStudioPlugin, BooleanDifferenceStudioPlugin, BooleanDivisionStudioPlugin,
     BooleanExclusionStudioPlugin, BooleanIntersectionStudioPlugin, BooleanUnionStudioPlugin,
-    BrushStudioPlugin, CircleStudioPlugin, EyedropperStudioPlugin, GradientStudioPlugin,
-    MeasureStudioPlugin, MeshGradientStudioPlugin, PageStudioPlugin, PaintBucketStudioPlugin,
-    PathEditorStudioPlugin, PenStudioPlugin, RectangleStudioPlugin, SelectStudioPlugin,
-    SpiralStudioPlugin, StarStudioPlugin, TextStudioPlugin, TriangleStudioPlugin,
+    BrushStudioPlugin, CircleStudioPlugin, ColorPaletteStudioPlugin, EyedropperStudioPlugin,
+    GradientStudioPlugin, MeasureStudioPlugin, MeshGradientStudioPlugin, PageStudioPlugin,
+    PaintBucketStudioPlugin, PathEditorStudioPlugin, PenStudioPlugin, RectangleStudioPlugin,
+    SelectStudioPlugin, SpiralStudioPlugin, StarStudioPlugin, TextStudioPlugin, TriangleStudioPlugin,
     Zoom100StudioPlugin, ZoomFitAllStudioPlugin, ZoomPageStudioPlugin, ZoomSelectionStudioPlugin,
     ZoomStudioPlugin,
 };
@@ -25,6 +25,7 @@ pub struct ToolbarGroup {
 pub struct PluginRegistry {
     modules: Vec<Box<dyn StudioPlugin>>,
     _external_handles: Vec<super::external::ExternalPlugin>,
+    enabled_plugins: std::collections::HashSet<String>,
     active_id: &'static str,
 }
 
@@ -33,6 +34,7 @@ impl Default for PluginRegistry {
         let mut registry = Self {
             modules: Vec::new(),
             _external_handles: Vec::new(),
+            enabled_plugins: std::collections::HashSet::new(),
             active_id: "select",
         };
 
@@ -65,10 +67,14 @@ impl Default for PluginRegistry {
         registry.register_core(Box::new(BooleanDivisionStudioPlugin::new()));
         registry.register_core(Box::new(BooleanCutStudioPlugin::new()));
 
+        // Register non-system / external studio extensions
+        registry.register_external(Box::new(ColorPaletteStudioPlugin::new()));
+
         // Scan and load any installed external (.so) plugins
         let external_plugins = super::external::scan_and_load_external_plugins();
         for ext in external_plugins {
             registry.modules.push(ext.plugin);
+            // Note: _external_handles can hold the handle if needed
         }
 
         registry
@@ -90,16 +96,28 @@ impl PluginRegistry {
         self.modules.push(module);
     }
 
+    pub fn is_plugin_enabled(&self, id: &str) -> bool {
+        self.enabled_plugins.contains(id)
+    }
+
+    pub fn set_plugin_enabled(&mut self, id: &str, enabled: bool) {
+        if enabled {
+            self.enabled_plugins.insert(id.to_string());
+        } else {
+            self.enabled_plugins.remove(id);
+        }
+    }
+
     pub fn active_id(&self) -> &'static str {
         self.active_id
     }
 
-    /// Returns only external (non-core) plugins, visible in Settings
+    /// Returns only external (non-core) plugins, visible in Settings (disabled by default)
     pub fn external_plugins(&self) -> Vec<(&'static str, &'static str, bool)> {
         self.modules
             .iter()
             .filter(|m| !m.is_core())
-            .map(|m| (m.id(), m.name(), true))
+            .map(|m| (m.id(), m.name(), self.is_plugin_enabled(m.id())))
             .collect()
     }
 

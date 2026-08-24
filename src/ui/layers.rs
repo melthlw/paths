@@ -19,6 +19,11 @@ pub struct LayersSidebar {
     is_syncing: Rc<Cell<bool>>,
     current_layers: Rc<std::cell::RefCell<Vec<LayerItemInfo>>>,
     expanded_groups: Rc<std::cell::RefCell<HashSet<ElementId>>>,
+    btn_group: gtk4::Button,
+    btn_ungroup: gtk4::Button,
+    btn_up: gtk4::Button,
+    btn_down: gtk4::Button,
+    btn_del: gtk4::Button,
 }
 
 impl LayersSidebar {
@@ -40,7 +45,7 @@ impl LayersSidebar {
             .build();
         header_bar.set_title_widget(Some(&title_lbl));
 
-        // Action buttons inside HeaderBar
+        // Action buttons inside HeaderBar (initially hidden until something is selected)
         let actions_box = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Horizontal)
             .spacing(2)
@@ -51,6 +56,7 @@ impl LayersSidebar {
             .tooltip_text(&crate::core::gettext("Group Selected (Ctrl+G)"))
             .css_classes(["flat"])
             .focus_on_click(false)
+            .visible(false)
             .child(&img_group)
             .build();
 
@@ -59,6 +65,7 @@ impl LayersSidebar {
             .tooltip_text(&crate::core::gettext("Ungroup (Shift+Ctrl+G)"))
             .css_classes(["flat"])
             .focus_on_click(false)
+            .visible(false)
             .child(&img_ungroup)
             .build();
 
@@ -67,6 +74,7 @@ impl LayersSidebar {
             .tooltip_text(&crate::core::gettext("Move Layer Up"))
             .css_classes(["flat"])
             .focus_on_click(false)
+            .visible(false)
             .build();
 
         let btn_down = gtk4::Button::builder()
@@ -74,6 +82,7 @@ impl LayersSidebar {
             .tooltip_text(&crate::core::gettext("Move Layer Down"))
             .css_classes(["flat"])
             .focus_on_click(false)
+            .visible(false)
             .build();
 
         let btn_del = gtk4::Button::builder()
@@ -81,6 +90,7 @@ impl LayersSidebar {
             .tooltip_text(&crate::core::gettext("Delete Layer"))
             .css_classes(["flat"])
             .focus_on_click(false)
+            .visible(false)
             .build();
 
         let canvas_grp = canvas.clone();
@@ -204,6 +214,11 @@ impl LayersSidebar {
             is_syncing,
             current_layers: cur_layers,
             expanded_groups,
+            btn_group,
+            btn_ungroup,
+            btn_up,
+            btn_down,
+            btn_del,
         })
     }
 
@@ -219,7 +234,40 @@ impl LayersSidebar {
         self.is_syncing.set(true);
         *self.current_layers.borrow_mut() = layers.to_vec();
 
-        // Auto-expand parent groups if a child is selected
+        // 1. Calculate selection metrics to dynamically toggle header action buttons
+        fn count_selected_and_check_group(
+            layer: &LayerItemInfo,
+            count: &mut usize,
+            has_sel_group: &mut bool,
+        ) {
+            if layer.is_selected {
+                *count += 1;
+                if layer.is_group {
+                    *has_sel_group = true;
+                }
+            }
+            for child in &layer.children {
+                count_selected_and_check_group(child, count, has_sel_group);
+            }
+        }
+
+        let mut sel_count = 0;
+        let mut has_sel_group = false;
+        for l in layers {
+            count_selected_and_check_group(l, &mut sel_count, &mut has_sel_group);
+        }
+
+        let can_group = sel_count >= 2;
+        let can_ungroup = has_sel_group || self.canvas.can_ungroup();
+        let has_selection = sel_count >= 1;
+
+        self.btn_group.set_visible(can_group);
+        self.btn_ungroup.set_visible(can_ungroup);
+        self.btn_up.set_visible(has_selection);
+        self.btn_down.set_visible(has_selection);
+        self.btn_del.set_visible(has_selection);
+
+        // 2. Auto-expand parent groups if a child is selected
         fn expand_selected_parents(
             layer: &LayerItemInfo,
             expanded: &mut HashSet<ElementId>,

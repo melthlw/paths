@@ -543,12 +543,14 @@ impl FeaturePlugin for SelectFeature {
         {
             let r = Rect::from_points(start_world, current_world).round();
 
+            let theme_accent = crate::ui::theme::current_visual_theme().accent_color().to_skia();
+
             let mut fill_paint = skia::Paint::default();
-            fill_paint.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.12), None);
+            fill_paint.set_color4f(skia::Color4f::new(theme_accent.r, theme_accent.g, theme_accent.b, 0.12), None);
             fill_paint.set_style(skia::PaintStyle::Fill);
 
             let mut stroke_paint = skia::Paint::default();
-            stroke_paint.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.85), None);
+            stroke_paint.set_color4f(skia::Color4f::new(theme_accent.r, theme_accent.g, theme_accent.b, 0.85), None);
             stroke_paint.set_style(skia::PaintStyle::Stroke);
             stroke_paint.set_stroke_width((1.0 / viewport.zoom).max(1.0));
             stroke_paint.set_anti_alias(true);
@@ -563,6 +565,7 @@ impl FeaturePlugin for SelectFeature {
             if let Some(Element::Rect(rect_el)) =
                 ctx.document.elements.iter().find(|e| e.id() == sel_id)
             {
+                let theme_accent = crate::ui::theme::current_visual_theme().accent_color().to_skia();
                 let r = rect_el.rect.normalize();
                 let handles = [
                     CornerRadiusHandle::TopLeft,
@@ -573,13 +576,18 @@ impl FeaturePlugin for SelectFeature {
                 let handle_radius = (4.5 / viewport.zoom).clamp(3.5, 6.5);
                 let stroke_w = (1.5 / viewport.zoom).max(1.0);
 
+                let mut shadow_paint = skia::Paint::default();
+                shadow_paint.set_color4f(skia::Color4f::new(0.0, 0.0, 0.0, 0.25), None);
+                shadow_paint.set_style(skia::PaintStyle::Fill);
+                shadow_paint.set_anti_alias(true);
+
                 let mut fill_paint = skia::Paint::default();
                 fill_paint.set_color4f(skia::Color4f::new(1.0, 1.0, 1.0, 1.0), None);
                 fill_paint.set_style(skia::PaintStyle::Fill);
                 fill_paint.set_anti_alias(true);
 
                 let mut stroke_paint = skia::Paint::default();
-                stroke_paint.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 1.0), None);
+                stroke_paint.set_color4f(theme_accent, None);
                 stroke_paint.set_style(skia::PaintStyle::Stroke);
                 stroke_paint.set_stroke_width(stroke_w);
                 stroke_paint.set_anti_alias(true);
@@ -593,6 +601,11 @@ impl FeaturePlugin for SelectFeature {
                         CornerRadiusHandle::BottomLeft => radii.bottom_left,
                     };
                     let pos = h.position(r, rad, viewport.zoom);
+                    canvas.draw_circle(
+                        skia::Point::new(pos.x, pos.y + 0.8 / viewport.zoom),
+                        handle_radius,
+                        &shadow_paint,
+                    );
                     canvas.draw_circle(pos.to_skia(), handle_radius, &fill_paint);
                     canvas.draw_circle(pos.to_skia(), handle_radius, &stroke_paint);
                 }

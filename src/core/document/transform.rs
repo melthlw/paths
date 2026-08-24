@@ -2,6 +2,25 @@ use crate::core::element::{Element, ElementId};
 use crate::core::geometry::{Point, Rect};
 use super::Document;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct TransformOptions {
+    pub scale_stroke_width: bool,
+    pub scale_corner_radii: bool,
+    pub move_gradients: bool,
+    pub move_patterns: bool,
+}
+
+impl Default for TransformOptions {
+    fn default() -> Self {
+        Self {
+            scale_stroke_width: true,
+            scale_corner_radii: true,
+            move_gradients: true,
+            move_patterns: true,
+        }
+    }
+}
+
 impl Document {
     pub fn translate_selected(&mut self, dx: f32, dy: f32) {
         for el in &mut self.elements {
