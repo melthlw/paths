@@ -177,7 +177,7 @@ impl ColorPaletteBar {
         let custom_colors = Rc::new(RefCell::new(Vec::new()));
 
         let swatches = Rc::new(RefCell::new(initial_colors));
-        let active_color = Rc::new(Cell::new(Some(Color::new(0.208, 0.518, 0.894, 1.0))));
+        let active_color = Rc::new(Cell::new(Some(Color::BLACK)));
         let target_mode = Rc::new(Cell::new(PaletteTargetMode::Fill));
         let current_preset = Rc::new(Cell::new(initial_preset));
         let position = Rc::new(Cell::new(PaletteBarPosition::Left));
@@ -228,7 +228,7 @@ impl ColorPaletteBar {
 
         // Options / More Button (...)
         let more_btn = gtk4::Button::builder()
-            .icon_name("view-more-symbolic")
+            .icon_name("palette-more-symbolic")
             .tooltip_text(crate::core::gettext("Palette Options"))
             .css_classes(["flat", "color-more-btn"])
             .valign(gtk4::Align::Center)
@@ -349,7 +349,7 @@ impl ColorPaletteBar {
             .spacing(8)
             .halign(gtk4::Align::Start)
             .build();
-        let picker_icon = gtk4::Image::from_icon_name("color-select-symbolic");
+        let picker_icon = gtk4::Image::from_icon_name("color-picker-symbolic");
         let picker_lbl = gtk4::Label::new(Some(&crate::core::gettext("Color Picker...")));
         picker_box.append(&picker_icon);
         picker_box.append(&picker_lbl);
@@ -430,7 +430,7 @@ impl ColorPaletteBar {
             .spacing(8)
             .halign(gtk4::Align::Start)
             .build();
-        let clear_icon = gtk4::Image::from_icon_name("edit-clear-symbolic");
+        let clear_icon = gtk4::Image::from_icon_name("clear-palette-symbolic");
         let clear_lbl = gtk4::Label::new(Some(&crate::core::gettext("Reset / Clear Palette")));
         clear_box.append(&clear_icon);
         clear_box.append(&clear_lbl);
@@ -480,22 +480,22 @@ impl ColorPaletteBar {
             (
                 crate::core::gettext("Left"),
                 PaletteBarPosition::Left,
-                "sidebar-show-symbolic",
+                "sidebar-layers-symbolic",
             ),
             (
                 crate::core::gettext("Right"),
                 PaletteBarPosition::Right,
-                "sidebar-show-right-symbolic",
+                "sidebar-inspector-symbolic",
             ),
             (
                 crate::core::gettext("Bottom"),
                 PaletteBarPosition::Bottom,
-                "go-down-symbolic",
+                "layer-move-down-symbolic",
             ),
             (
                 crate::core::gettext("Top"),
                 PaletteBarPosition::Top,
-                "go-up-symbolic",
+                "layer-move-up-symbolic",
             ),
         ];
 
@@ -872,7 +872,7 @@ impl ColorPaletteBar {
             let initial_col = self
                 .active_color
                 .get()
-                .unwrap_or(Color::new(0.2, 0.55, 0.95, 1.0));
+                .unwrap_or(Color::BLACK);
 
             let color_popover = ColorPickerPopover::new(self.canvas.clone(), initial_col, 0);
             color_popover.attach_to(&add_btn);

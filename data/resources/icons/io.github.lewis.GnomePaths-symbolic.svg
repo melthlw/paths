@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <g fill="currentColor">
+    <!-- Tangent Dotted Lines -->
+    <path d="M 3.5 12.5 L 6.5 4.5" stroke="currentColor" stroke-width="1" stroke-dasharray="1 1" fill="none" opacity="0.5"/>
+    <path d="M 12.5 3.5 L 9.5 11.5" stroke="currentColor" stroke-width="1" stroke-dasharray="1 1" fill="none" opacity="0.5"/>
+    
+    <!-- Smooth Bézier Vector Curve -->
+    <path d="M 3.5 12.5 C 6.5 4.5, 9.5 11.5, 12.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+
+    <!-- Handles -->
+    <circle cx="6.5" cy="4.5" r="1.2"/>
+    <circle cx="9.5" cy="11.5" r="1.2"/>
+
+    <!-- Anchor Nodes -->
+    <rect x="2" y="11" width="3" height="3" rx="0.5"/>
+    <rect x="11" y="2" width="3" height="3" rx="0.5"/>
+  </g>
+</svg>

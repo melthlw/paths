@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-  <!-- Two nodes converging -->
-  <rect x="1" y="6" width="4" height="4" rx="0.5" fill="currentColor"/>
-  <rect x="11" y="6" width="4" height="4" rx="0.5" fill="currentColor"/>
-  <!-- Inward arrow from left -->
-  <path fill="currentColor" d="M 5 7.25 H 7 V 6 L 8.5 8 L 7 10 V 8.75 H 5 Z"/>
-  <!-- Inward arrow from right -->
-  <path fill="currentColor" d="M 11 7.25 H 9 V 6 L 7.5 8 L 9 10 V 8.75 H 11 Z"/>
-</svg>

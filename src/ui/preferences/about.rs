@@ -70,7 +70,7 @@ pub fn build_about_page() -> gtk4::ScrolledWindow {
         .activatable(true)
         .build();
     let link_icon = gtk4::Image::builder()
-        .icon_name("external-link-symbolic")
+        .icon_name("link-external-symbolic")
         .valign(gtk4::Align::Center)
         .build();
     repo_row.add_suffix(&link_icon);
@@ -91,7 +91,7 @@ pub fn build_about_page() -> gtk4::ScrolledWindow {
         .activatable(true)
         .build();
     let heart_icon = gtk4::Image::builder()
-        .icon_name("emblem-favorite-symbolic")
+        .icon_name("favorite-symbolic")
         .valign(gtk4::Align::Center)
         .build();
     support_row.add_suffix(&heart_icon);

@@ -14,8 +14,8 @@ impl Default for RectangleStudioPlugin {
             ui: ToolUiItem::new(
                 "rectangle",
                 "Rectangle & Shapes",
-                "media-record-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-square.svg"),
+                "tool-square-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-square-symbolic.svg"),
                 "Rectangle & Shapes (R)",
                 14,
             )

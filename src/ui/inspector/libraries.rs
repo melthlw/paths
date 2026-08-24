@@ -180,7 +180,7 @@ pub fn build_libraries_section(canvas: &CanvasWidget) -> gtk4::Widget {
     });
 
     let reload_btn = gtk4::Button::builder()
-        .icon_name("view-refresh-symbolic")
+        .icon_name("reload-library-symbolic")
         .tooltip_text(&crate::core::gettext("Reload Libraries from disk"))
         .css_classes(["flat"])
         .valign(gtk4::Align::Center)
@@ -233,7 +233,7 @@ pub fn build_libraries_section(canvas: &CanvasWidget) -> gtk4::Widget {
                 &swatches_page,
                 Some("swatches"),
                 &crate::core::gettext("Colors"),
-                "color-select-symbolic",
+                "color-picker-symbolic",
             );
             view_stack.add_titled_with_icon(
                 &patterns_page,
@@ -245,7 +245,7 @@ pub fn build_libraries_section(canvas: &CanvasWidget) -> gtk4::Widget {
                 &icons_page,
                 Some("icons"),
                 &crate::core::gettext("Icons"),
-                "starred-symbolic",
+                "clone-master-symbolic",
             );
             view_stack.add_titled_with_icon(
                 &shapes_page,
@@ -594,7 +594,7 @@ fn build_swatches_page(
         .build();
 
     let pick_color_btn = gtk4::Button::builder()
-        .icon_name("color-select-symbolic")
+        .icon_name("color-picker-symbolic")
         .tooltip_text(&crate::core::gettext("Pick New Color from Dialog"))
         .css_classes(["flat"])
         .valign(gtk4::Align::Center)
@@ -1451,7 +1451,7 @@ fn build_strokes_page(canvas: &CanvasWidget, strokes: &[StrokePresetDef]) -> (gt
         row.add_prefix(&preview_line);
 
         let apply_btn = gtk4::Button::builder()
-            .icon_name("object-select-symbolic")
+            .icon_name("check-symbolic")
             .css_classes(["flat", "circular"])
             .valign(gtk4::Align::Center)
             .tooltip_text(crate::core::gettext("Apply Stroke Style"))

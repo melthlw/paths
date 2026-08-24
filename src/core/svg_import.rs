@@ -502,19 +502,29 @@ pub fn parse_svg_path_to_elements(
 
     let subpaths = parse_svg_path_data_subpaths(d);
     let is_closed = d.to_ascii_lowercase().contains('z');
-    subpaths
-        .into_iter()
-        .filter(|nodes| !nodes.is_empty())
-        .map(|nodes| {
-            PathElement::new(
-                nodes,
-                is_closed,
-                fill_color,
-                stroke_color,
-                stroke_width,
-            )
-        })
-        .collect()
+    if subpaths.is_empty() {
+        return Vec::new();
+    }
+    if subpaths.len() == 1 {
+        vec![PathElement::new(
+            subpaths.into_iter().next().unwrap(),
+            is_closed,
+            fill_color,
+            stroke_color,
+            stroke_width,
+        )]
+    } else {
+        let subpath_lengths = subpaths.iter().map(|s| s.len()).collect();
+        let nodes = subpaths.into_iter().flatten().collect();
+        vec![PathElement::new_compound(
+            nodes,
+            subpath_lengths,
+            is_closed,
+            fill_color,
+            stroke_color,
+            stroke_width,
+        )]
+    }
 }
 
 #[allow(dead_code)]
@@ -879,10 +889,10 @@ mod tests {
     fn test_parse_compound_svg_path_with_subpaths() {
         let compound_d = "M 0 0 L 10 0 L 10 10 Z M 20 20 L 30 20 L 30 30 Z";
         let elements = parse_svg_path_to_elements(compound_d, Some(Color::BLACK), None, 1.0);
-        assert_eq!(elements.len(), 2);
-        assert_eq!(elements[0].nodes.len(), 3);
-        assert_eq!(elements[1].nodes.len(), 3);
+        assert_eq!(elements.len(), 1);
+        assert_eq!(elements[0].subpath_lengths, vec![3, 3]);
+        assert_eq!(elements[0].nodes.len(), 6);
         assert_eq!(elements[0].nodes[0].point, Point::new(0.0, 0.0));
-        assert_eq!(elements[1].nodes[0].point, Point::new(20.0, 20.0));
+        assert_eq!(elements[0].nodes[3].point, Point::new(20.0, 20.0));
     }
 }

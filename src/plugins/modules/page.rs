@@ -14,8 +14,8 @@ impl Default for PageStudioPlugin {
             ui: ToolUiItem::new(
                 "page",
                 "Page Tool",
-                "document-page-setup-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-page.svg"),
+                "tool-page-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-page-symbolic.svg"),
                 "Page Tool (Shift+P)",
                 99,
             ),

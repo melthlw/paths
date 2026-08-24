@@ -94,7 +94,7 @@ impl CanvasState {
             path_editor_config: crate::core::PathEditorConfig::default(),
             transform_options: crate::core::TransformOptions::default(),
             is_universal_selecting: false,
-            active_fill_color: Color::new(0.2, 0.55, 0.95, 1.0),
+            active_fill_color: Color::BLACK,
             active_stroke_color: None,
             active_stroke_width: 2.0,
             widget_size: (800.0, 600.0),

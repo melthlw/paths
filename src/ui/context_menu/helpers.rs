@@ -66,7 +66,7 @@ pub fn create_toggle_item(
         .hexpand(true)
         .build();
 
-    let check_icon = gtk4::Image::from_icon_name("emblem-ok-symbolic");
+    let check_icon = gtk4::Image::from_icon_name("check-symbolic");
     check_icon.set_pixel_size(14);
     check_icon.add_css_class("accent");
     check_icon.set_visible(false);

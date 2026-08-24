@@ -7,7 +7,7 @@ impl CanvasWidget {
         self.state
             .try_borrow()
             .map(|s| s.active_fill_color)
-            .unwrap_or_else(|_| Color::new(0.2, 0.55, 0.95, 1.0))
+            .unwrap_or_else(|_| Color::BLACK)
     }
 
     pub fn active_stroke_color(&self) -> Option<Color> {

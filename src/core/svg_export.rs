@@ -1,7 +1,7 @@
 use crate::core::color::Color;
 use crate::core::document::Document;
 use crate::core::element::{
-    BlendMode, Element, FillLayer, FillStyle, Gradient, GradientType, PathNode, PatternType,
+    BlendMode, Element, FillLayer, FillStyle, Gradient, GradientType, PathElement, PathNode, PatternType,
     StrokeStyle, TextAlign,
 };
 use crate::core::geometry::Rect;
@@ -449,7 +449,7 @@ fn render_clip_path_def(clip: &Element, id: &str, defs: &mut String) {
             }
         }
         Element::Path(p) => {
-            let d = path_nodes_to_svg_d(&p.nodes, p.is_closed);
+            let d = path_element_to_svg_d(p);
             let _ = writeln!(defs, "      <path d=\"{}\"/>", d);
         }
         _ => {}
@@ -520,7 +520,7 @@ fn render_element_to_svg(elem: &Element, svg: &mut String, indent_level: usize) 
             );
         }
         Element::Path(p) => {
-            let d = path_nodes_to_svg_d(&p.nodes, p.is_closed);
+            let d = path_element_to_svg_d(p);
             let mut fill_str = "none".to_string();
             if let Some(_grad) = &p.gradient {
                 fill_str = format!("url(#grad_{})", p.id.0);
@@ -754,6 +754,25 @@ pub fn path_nodes_to_svg_d(nodes: &[PathNode], is_closed: bool) -> String {
     }
 
     d
+}
+
+pub fn path_element_to_svg_d(p: &PathElement) -> String {
+    if !p.subpath_lengths.is_empty() {
+        let mut parts = Vec::new();
+        let mut offset = 0;
+        for &len in &p.subpath_lengths {
+            if len == 0 || offset >= p.nodes.len() {
+                continue;
+            }
+            let end = (offset + len).min(p.nodes.len());
+            let sub = &p.nodes[offset..end];
+            offset = end;
+            parts.push(path_nodes_to_svg_d(sub, p.is_closed));
+        }
+        parts.join(" ")
+    } else {
+        path_nodes_to_svg_d(&p.nodes, p.is_closed)
+    }
 }
 
 fn blend_mode_to_svg(mode: BlendMode) -> String {

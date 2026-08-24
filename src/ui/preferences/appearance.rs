@@ -255,7 +255,7 @@ pub fn build_appearance_page() -> gtk4::ScrolledWindow {
         preview_box.append(&chip_acc);
 
         let check_icon = gtk4::Image::builder()
-            .icon_name("object-select-symbolic")
+            .icon_name("check-symbolic")
             .css_classes(["theme-check-icon"])
             .valign(gtk4::Align::Center)
             .build();

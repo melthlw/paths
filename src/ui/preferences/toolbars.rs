@@ -22,7 +22,7 @@ pub fn build_toolbars_page(window: &adw::Window, canvas: &CanvasWidget) -> gtk4:
         .build();
     let customize_btn = gtk4::Button::builder()
         .label(crate::core::gettext("Customize..."))
-        .icon_name("preferences-other-symbolic")
+        .icon_name("prefs-toolbars-symbolic")
         .valign(gtk4::Align::Center)
         .css_classes(["suggested-action"])
         .build();
@@ -45,7 +45,7 @@ pub fn build_toolbars_page(window: &adw::Window, canvas: &CanvasWidget) -> gtk4:
             "You can drag the toolbar handle on the canvas or right-click it to quickly dock it to the top, bottom, left, or right edges.",
         ))
         .build();
-    let tip_icon = gtk4::Image::from_icon_name("dialog-information-symbolic");
+    let tip_icon = gtk4::Image::from_icon_name("info-symbolic");
     tip_icon.set_pixel_size(16);
     tip_row.add_prefix(&tip_icon);
     toolbars_group.add(&tip_row);

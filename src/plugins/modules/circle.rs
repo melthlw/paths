@@ -14,8 +14,8 @@ impl Default for CircleStudioPlugin {
             ui: ToolUiItem::new(
                 "circle",
                 "Circle",
-                "media-record-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-circle.svg"),
+                "tool-circle-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-circle-symbolic.svg"),
                 "Circle (C)",
                 15,
             )

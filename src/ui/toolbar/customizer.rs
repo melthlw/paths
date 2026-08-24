@@ -73,7 +73,7 @@ pub fn show_customize_toolbar_dialog(
     // Reset button in HeaderBar
     let reset_btn = gtk4::Button::builder()
         .tooltip_text(&crate::core::gettext("Restore Factory Default"))
-        .icon_name("view-refresh-symbolic")
+        .icon_name("reload-library-symbolic")
         .css_classes(["flat"])
         .build();
     header.pack_end(&reset_btn);
@@ -233,14 +233,14 @@ pub fn show_customize_toolbar_dialog(
                     .build();
 
                 let btn_up = gtk4::Button::builder()
-                    .icon_name("go-up-symbolic")
+                    .icon_name("layer-move-up-symbolic")
                     .tooltip_text(&crate::core::gettext("Move up / before"))
                     .css_classes(["flat"])
                     .sensitive(!is_first)
                     .build();
 
                 let btn_down = gtk4::Button::builder()
-                    .icon_name("go-down-symbolic")
+                    .icon_name("layer-move-down-symbolic")
                     .tooltip_text(&crate::core::gettext("Move down / after"))
                     .css_classes(["flat"])
                     .sensitive(!is_last)
@@ -290,7 +290,7 @@ pub fn show_customize_toolbar_dialog(
                 });
 
                 // Drag Handle
-                let drag_handle = gtk4::Image::from_icon_name("list-drag-handle-symbolic");
+                let drag_handle = gtk4::Image::from_icon_name("drag-handle-symbolic");
                 drag_handle.set_opacity(0.5);
                 drag_handle.set_cursor_from_name(Some("grab"));
                 let drag_source = gtk4::DragSource::new();

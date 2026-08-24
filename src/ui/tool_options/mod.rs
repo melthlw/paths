@@ -276,7 +276,7 @@ impl ToolOptionsBar {
             true,
         );
         let btn_opt_bottom =
-            make_opt_pos_btn("pan-down-symbolic", crate::core::gettext("Bottom"), false);
+            make_opt_pos_btn("dropdown-arrow-symbolic", crate::core::gettext("Bottom"), false);
 
         opt_pos_linked.append(&btn_opt_top);
         opt_pos_linked.append(&btn_opt_bottom);
@@ -674,24 +674,6 @@ impl ToolOptionsBar {
                     }
                 }
                 self.pen_controls.btn_resume_path.set_sensitive(has_open_selected && !is_editing);
-
-                if is_editing {
-                    if let Some(feat) = state_b.plugin_manager.feature_by_id("pen") {
-                        if let Some(pen) = feat.as_pen_feature() {
-                            let count = pen.node_count();
-                            self.pen_controls.status_lbl.set_label(&format!(
-                                "{} ({} {})",
-                                crate::core::gettext("Drawing path"),
-                                count,
-                                if count == 1 { crate::core::gettext("node") } else { crate::core::gettext("nodes") }
-                            ));
-                        }
-                    }
-                } else if has_open_selected {
-                    self.pen_controls.status_lbl.set_label(&crate::core::gettext("Open path selected (Click endpoint or Resume)"));
-                } else {
-                    self.pen_controls.status_lbl.set_label(&crate::core::gettext("Ready to draw"));
-                }
             }
         } else if tool_id == "brush" || tool_id == "pencil" {
             self.container.set_visible(true);
@@ -750,30 +732,6 @@ impl ToolOptionsBar {
                             crate::core::StrokeCap::Butt => 2,
                         };
                         self.brush_controls.cap_dd.set_selected(cap_idx);
-
-                        let pts = brush.point_count();
-                        if pts > 0 {
-                            self.brush_controls.status_lbl.set_label(&format!(
-                                "{} ({} {})",
-                                crate::core::gettext("Drawing"),
-                                pts,
-                                if pts == 1 {
-                                    crate::core::gettext("pt")
-                                } else {
-                                    crate::core::gettext("pts")
-                                }
-                            ));
-                        } else {
-                            let msg = match brush.mode {
-                                crate::core::BrushMode::Brush => {
-                                    crate::core::gettext("Brush: Freehand Stroke")
-                                }
-                                crate::core::BrushMode::Pencil => {
-                                    crate::core::gettext("Pencil: Vector Bézier Curve")
-                                }
-                            };
-                            self.brush_controls.status_lbl.set_label(&msg);
-                        }
                         self.is_syncing.set(false);
                     }
                 }
@@ -806,99 +764,99 @@ impl ToolOptionsBar {
 
         let (icon_res, tool_name) = match tool_id {
             "select" => (
-                "/io/github/lewis/GnomePaths/icons/tool-selection-options.svg",
+                "tool-selection-options-symbolic",
                 crate::core::gettext("Selection"),
             ),
             "path-editor" | "path_editor" => (
-                "/io/github/lewis/GnomePaths/icons/tool-path-editor.svg",
+                "tool-path-editor-symbolic",
                 crate::core::gettext("Node Editor"),
             ),
             "page" => (
-                "/io/github/lewis/GnomePaths/icons/tool-page.svg",
+                "tool-page-symbolic",
                 crate::core::gettext("Page Tool"),
             ),
             "rectangle" | "square" => (
-                "/io/github/lewis/GnomePaths/icons/tool-square.svg",
+                "tool-square-symbolic",
                 crate::core::gettext("Rectangle"),
             ),
             "circle" => (
-                "/io/github/lewis/GnomePaths/icons/tool-circle.svg",
+                "tool-circle-symbolic",
                 crate::core::gettext("Circle"),
             ),
             "star" => (
-                "/io/github/lewis/GnomePaths/icons/tool-star.svg",
+                "tool-star-symbolic",
                 crate::core::gettext("Star"),
             ),
             "triangle" => (
-                "/io/github/lewis/GnomePaths/icons/tool-triangle.svg",
+                "tool-triangle-symbolic",
                 crate::core::gettext("Polygon"),
             ),
             "spiral" => (
-                "/io/github/lewis/GnomePaths/icons/tool-spiral.svg",
+                "tool-spiral-symbolic",
                 crate::core::gettext("Spiral"),
             ),
             "vector-pen" | "vector_pen" => (
-                "/io/github/lewis/GnomePaths/icons/tool-vector-pen.svg",
+                "tool-vector-pen-symbolic",
                 crate::core::gettext("Vector Pen"),
             ),
             "pen" => (
-                "/io/github/lewis/GnomePaths/icons/tool-pen.svg",
+                "tool-pen-symbolic",
                 crate::core::gettext("Pen"),
             ),
             "brush" => (
-                "/io/github/lewis/GnomePaths/icons/tool-vector-pen.svg",
+                "tool-vector-pen-symbolic",
                 crate::core::gettext("Brush"),
             ),
             "text" => (
-                "/io/github/lewis/GnomePaths/icons/tool-text.svg",
+                "tool-text-symbolic",
                 crate::core::gettext("Text"),
             ),
             "paint_bucket" => (
-                "/io/github/lewis/GnomePaths/icons/tool-paint-bucket.svg",
+                "tool-paint-bucket-symbolic",
                 crate::core::gettext("Paint Bucket"),
             ),
             "gradient" => (
-                "/io/github/lewis/GnomePaths/icons/tool-gradient.svg",
+                "transform-move-gradient-symbolic",
                 crate::core::gettext("Gradient"),
             ),
             "mesh_gradient" => (
-                "/io/github/lewis/GnomePaths/icons/tool-mesh.svg",
+                "tool-mesh-symbolic",
                 crate::core::gettext("Mesh Gradient"),
             ),
             "eyedropper" => (
-                "/io/github/lewis/GnomePaths/icons/tool-eyedropper.svg",
+                "tool-eyedropper-symbolic",
                 crate::core::gettext("Eyedropper"),
             ),
             "measure" => (
-                "/io/github/lewis/GnomePaths/icons/tool-measure.svg",
+                "tool-measure-symbolic",
                 crate::core::gettext("Ruler / Measure"),
             ),
             "zoom" => (
-                "/io/github/lewis/GnomePaths/icons/tool-zoom.svg",
+                "tool-zoom-symbolic",
                 crate::core::gettext("Zoom"),
             ),
             "zoom_selection" => (
-                "/io/github/lewis/GnomePaths/icons/tool-zoom-selection.svg",
+                "tool-zoom-selection-symbolic",
                 crate::core::gettext("Zoom Selection"),
             ),
             "zoom_fit_all" => (
-                "/io/github/lewis/GnomePaths/icons/tool-zoom-fit-all.svg",
+                "tool-zoom-fit-all-symbolic",
                 crate::core::gettext("Zoom All"),
             ),
             "zoom_100" => (
-                "/io/github/lewis/GnomePaths/icons/tool-zoom-100.svg",
+                "tool-zoom-100-symbolic",
                 crate::core::gettext("Zoom 100%"),
             ),
             "zoom_fit_page" => (
-                "/io/github/lewis/GnomePaths/icons/tool-zoom-page.svg",
+                "tool-zoom-page-symbolic",
                 crate::core::gettext("Zoom Page"),
             ),
             "drag" => (
-                "/io/github/lewis/GnomePaths/icons/tool-drag.svg",
+                "tool-drag-symbolic",
                 crate::core::gettext("Pan Canvas"),
             ),
             _ => (
-                "/io/github/lewis/GnomePaths/icons/tool-selection-options.svg",
+                "tool-selection-options-symbolic",
                 crate::core::gettext("Selection"),
             ),
         };

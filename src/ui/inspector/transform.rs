@@ -198,7 +198,7 @@ pub fn build_transform_section(canvas: &CanvasWidget) -> TransformSection {
         .build();
 
     let lock_btn = gtk4::ToggleButton::builder()
-        .icon_name("changes-prevent-symbolic")
+        .icon_name("lock-aspect-ratio-symbolic")
         .tooltip_text(crate::core::gettext("Lock aspect ratio"))
         .css_classes(["flat"])
         .build();
@@ -272,7 +272,7 @@ pub fn build_transform_section(canvas: &CanvasWidget) -> TransformSection {
         .title(crate::core::gettext("Mirror and Layers"))
         .build();
     trans_ops_title.add_prefix(&gtk4::Image::from_icon_name(
-        "object-flip-horizontal-symbolic",
+        "flip-horizontal-symbolic",
     ));
     trans_ops_group.add(&trans_ops_title);
 
@@ -286,7 +286,7 @@ pub fn build_transform_section(canvas: &CanvasWidget) -> TransformSection {
 
     // Flip H & V
     let flip_h_btn = gtk4::Button::builder()
-        .icon_name("object-flip-horizontal-symbolic")
+        .icon_name("flip-horizontal-symbolic")
         .tooltip_text(crate::core::gettext("Flip Horizontal"))
         .css_classes(["flat"])
         .build();
@@ -297,7 +297,7 @@ pub fn build_transform_section(canvas: &CanvasWidget) -> TransformSection {
     ops_box.append(&flip_h_btn);
 
     let flip_v_btn = gtk4::Button::builder()
-        .icon_name("object-flip-vertical-symbolic")
+        .icon_name("flip-vertical-symbolic")
         .tooltip_text(crate::core::gettext("Flip Vertical"))
         .css_classes(["flat"])
         .build();
@@ -380,7 +380,7 @@ pub fn build_transform_section(canvas: &CanvasWidget) -> TransformSection {
         16,
     ));
     let convert_btn = gtk4::Button::builder()
-        .icon_name("go-next-symbolic")
+        .icon_name("tab-move-right-symbolic")
         .valign(gtk4::Align::Center)
         .css_classes(["flat"])
         .tooltip_text(crate::core::gettext("Convert (Ctrl+Shift+C)"))

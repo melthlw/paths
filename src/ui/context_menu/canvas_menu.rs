@@ -130,7 +130,7 @@ pub fn build_canvas_menu(
         .orientation(gtk4::Orientation::Horizontal)
         .spacing(8)
         .build();
-    let back_insert_icon = gtk4::Image::from_icon_name("go-previous-symbolic");
+    let back_insert_icon = gtk4::Image::from_icon_name("tab-move-left-symbolic");
     back_insert_icon.set_pixel_size(16);
     let back_insert_label = gtk4::Label::builder()
         .label(&crate::core::gettext("Insert Object"))
@@ -207,7 +207,7 @@ pub fn build_canvas_menu(
         .orientation(gtk4::Orientation::Horizontal)
         .spacing(8)
         .build();
-    let back_guides_icon = gtk4::Image::from_icon_name("go-previous-symbolic");
+    let back_guides_icon = gtk4::Image::from_icon_name("tab-move-left-symbolic");
     back_guides_icon.set_pixel_size(16);
     let back_guides_label = gtk4::Label::builder()
         .label(&crate::core::gettext("Guides & Grid"))

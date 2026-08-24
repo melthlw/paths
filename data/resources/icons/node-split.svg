@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-  <!-- Two separated nodes -->
-  <rect x="1" y="6" width="4" height="4" rx="0.5" fill="currentColor"/>
-  <rect x="11" y="6" width="4" height="4" rx="0.5" fill="currentColor"/>
-  <!-- Outward arrow to left -->
-  <path fill="currentColor" d="M 6.5 8 L 8 6 V 7.25 H 9.5 V 8.75 H 8 V 10 Z"/>
-  <!-- Split slash in center -->
-  <path fill="currentColor" d="M 9 3 L 7 13 L 6 13 L 8 3 Z"/>
-</svg>

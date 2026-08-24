@@ -14,8 +14,8 @@ impl Default for MeshGradientStudioPlugin {
             ui: ToolUiItem::new(
                 "mesh_gradient",
                 "Mesh Gradient",
-                "view-grid-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-mesh.svg"),
+                "tool-mesh-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-mesh-symbolic.svg"),
                 "Mesh Gradient (U)",
                 37,
             )

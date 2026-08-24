@@ -22,7 +22,6 @@ pub struct BrushControls {
     pub cap_dd: gtk4::DropDown,
     #[allow(dead_code)]
     pub btn_convert_path: gtk4::Button,
-    pub status_lbl: gtk4::Label,
 }
 
 pub fn build_brush_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) -> BrushControls {
@@ -303,7 +302,7 @@ pub fn build_brush_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
         .valign(gtk4::Align::Center)
         .build();
 
-    let img_pressure = gtk4::Image::from_icon_name("input-tablet-symbolic");
+    let img_pressure = gtk4::Image::from_icon_name("brush-pressure-symbolic");
     img_pressure.set_pixel_size(16);
     let btn_pressure = gtk4::ToggleButton::builder()
         .child(&img_pressure)
@@ -326,7 +325,7 @@ pub fn build_brush_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
         .css_classes(["flat"])
         .build();
 
-    let img_close = gtk4::Image::from_icon_name("object-flip-horizontal-symbolic");
+    let img_close = gtk4::Image::from_icon_name("flip-horizontal-symbolic");
     img_close.set_pixel_size(16);
     let btn_auto_close = gtk4::ToggleButton::builder()
         .child(&img_close)
@@ -488,16 +487,6 @@ pub fn build_brush_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
     }
     brush_box.append(&btn_convert_path);
 
-    // 8. Status Label
-    let status_lbl = gtk4::Label::builder()
-        .label(&crate::core::gettext("Ready to draw"))
-        .css_classes(["dim-label", "caption"])
-        .margin_start(4)
-        .margin_end(4)
-        .valign(gtk4::Align::Center)
-        .build();
-    brush_box.append(&status_lbl);
-
     BrushControls {
         brush_box,
         btn_mode_brush,
@@ -513,6 +502,5 @@ pub fn build_brush_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
         btn_auto_close,
         cap_dd,
         btn_convert_path,
-        status_lbl,
     }
 }

@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-  <!-- Curved Bézier connecting ribbon -->
-  <path fill="currentColor" d="M 3.5 12.5 C 3.5 6.5, 12.5 9.5, 12.5 3.5 L 14 3.5 C 14 11, 5 8, 5 12.5 Z"/>
-  <!-- Bottom-left node -->
-  <rect x="1" y="10" width="5" height="5" rx="0.75" fill="currentColor"/>
-  <!-- Top-right node -->
-  <rect x="10" y="1" width="5" height="5" rx="0.75" fill="currentColor"/>
-</svg>

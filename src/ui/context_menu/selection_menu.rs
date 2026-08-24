@@ -79,7 +79,7 @@ pub fn build_selection_menu(
         Some("Shift + Alt + D"),
     );
     let (select_original_btn, _) = create_item(
-        "go-jump-symbolic",
+        "clone-jump-master-symbolic",
         &crate::core::gettext("Select Original"),
         Some("Shift + D"),
     );
@@ -140,7 +140,7 @@ pub fn build_selection_menu(
         Some("Shift + Ctrl + G"),
     );
     let (enter_group_btn, enter_group_label) = create_item(
-        "go-jump-symbolic",
+        "clone-jump-master-symbolic",
         &crate::core::gettext("Enter Group"),
         None,
     );
@@ -161,7 +161,7 @@ pub fn build_selection_menu(
         None,
     );
     let (lock_btn, _) = create_item(
-        "changes-prevent-symbolic",
+        "lock-aspect-ratio-symbolic",
         &crate::core::gettext("Lock Selection"),
         None,
     );
@@ -185,7 +185,7 @@ pub fn build_selection_menu(
         .orientation(gtk4::Orientation::Horizontal)
         .spacing(8)
         .build();
-    let back_same_icon = gtk4::Image::from_icon_name("go-previous-symbolic");
+    let back_same_icon = gtk4::Image::from_icon_name("tab-move-left-symbolic");
     back_same_icon.set_pixel_size(16);
     let back_same_label = gtk4::Label::builder()
         .label(&crate::core::gettext("Select Same"))
@@ -200,7 +200,7 @@ pub fn build_selection_menu(
     select_same_box.append(&gtk4::Separator::new(gtk4::Orientation::Horizontal));
 
     let (sel_fill_btn, _) = create_item(
-        "color-select-symbolic",
+        "color-picker-symbolic",
         &crate::core::gettext("Same Fill Color"),
         None,
     );

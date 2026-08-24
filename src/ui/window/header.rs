@@ -38,7 +38,7 @@ pub fn build_header_bar(
         .build();
 
     let toggle_layers_btn = gtk4::ToggleButton::builder()
-        .icon_name("sidebar-show-symbolic")
+        .icon_name("sidebar-layers-symbolic")
         .tooltip_text(&crate::core::gettext("Layers Panel"))
         .css_classes(["flat"])
         .focus_on_click(false)
@@ -128,7 +128,7 @@ pub fn build_header_bar(
     start_box.append(&sep_view);
 
     let grid_btn = gtk4::ToggleButton::builder()
-        .icon_name("view-grid-symbolic")
+        .icon_name("grid-symbolic")
         .tooltip_text(&crate::core::gettext("Grid (Ctrl+G)"))
         .css_classes(["flat"])
         .focus_on_click(false)
@@ -147,7 +147,7 @@ pub fn build_header_bar(
     start_box.append(&grid_btn);
 
     let ruler_btn = gtk4::ToggleButton::builder()
-        .icon_name("view-paged-symbolic")
+        .icon_name("ruler-symbolic")
         .tooltip_text(&crate::core::gettext("Rulers (Ctrl+R)"))
         .css_classes(["flat"])
         .focus_on_click(false)
@@ -166,7 +166,7 @@ pub fn build_header_bar(
     start_box.append(&ruler_btn);
 
     let snap_btn = gtk4::ToggleButton::builder()
-        .icon_name("insert-object-symbolic")
+        .icon_name("snap-symbolic")
         .tooltip_text(&crate::core::gettext("Magnetic Snapping (Ctrl+Shift+')"))
         .css_classes(["flat"])
         .focus_on_click(false)
@@ -320,7 +320,7 @@ pub fn build_header_bar(
     });
 
     let toggle_sidebar_btn = gtk4::ToggleButton::builder()
-        .icon_name("sidebar-show-right-symbolic")
+        .icon_name("sidebar-inspector-symbolic")
         .tooltip_text(&crate::core::gettext("Panels"))
         .active(true)
         .build();

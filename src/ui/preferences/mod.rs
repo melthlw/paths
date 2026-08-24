@@ -79,7 +79,7 @@ pub fn show_preferences_window(parent: &impl IsA<gtk4::Widget>, canvas: CanvasWi
             id: "general",
             title: crate::core::gettext("General and System"),
             icon_resource: None,
-            icon_name: "preferences-system-symbolic",
+            icon_name: "prefs-general-symbolic",
         },
         NavSection {
             id: "appearance",
@@ -91,7 +91,7 @@ pub fn show_preferences_window(parent: &impl IsA<gtk4::Widget>, canvas: CanvasWi
             id: "canvas",
             title: crate::core::gettext("Canvas and Grid"),
             icon_resource: None,
-            icon_name: "preferences-desktop-display-symbolic",
+            icon_name: "prefs-canvas-symbolic",
         },
         NavSection {
             id: "node_editor",
@@ -109,19 +109,19 @@ pub fn show_preferences_window(parent: &impl IsA<gtk4::Widget>, canvas: CanvasWi
             id: "shortcuts",
             title: crate::core::gettext("Keyboard Shortcuts"),
             icon_resource: None,
-            icon_name: "input-keyboard-symbolic",
+            icon_name: "prefs-shortcuts-symbolic",
         },
         NavSection {
             id: "plugins",
             title: crate::core::gettext("Plugins"),
             icon_resource: None,
-            icon_name: "system-software-install-symbolic",
+            icon_name: "prefs-plugins-symbolic",
         },
         NavSection {
             id: "about",
             title: crate::core::gettext("About"),
             icon_resource: None,
-            icon_name: "help-about-symbolic",
+            icon_name: "prefs-about-symbolic",
         },
     ];
 

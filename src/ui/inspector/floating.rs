@@ -26,7 +26,7 @@ pub fn create_floating_window(
 
     // Dock Button in Floating Header
     let dock_btn = gtk4::Button::builder()
-        .icon_name("sidebar-show-right-symbolic")
+        .icon_name("sidebar-inspector-symbolic")
         .tooltip_text(crate::core::gettext("Dock to sidebar"))
         .css_classes(["flat"])
         .focus_on_click(false)
@@ -72,7 +72,7 @@ pub fn create_floating_window(
         .build();
     tab_pill.set_cursor_from_name(Some("grab"));
 
-    let drag_icon = gtk4::Image::from_icon_name("list-drag-handle-symbolic");
+    let drag_icon = gtk4::Image::from_icon_name("drag-handle-symbolic");
     drag_icon.set_opacity(0.6);
     let icon_img = if let Some(res) = icon_res {
         crate::ui::icons::make_symbolic_image(res, 16)
@@ -155,7 +155,7 @@ pub fn create_floating_window(
     };
 
     let (btn_dock_top, _) = create_float_item(
-        "sidebar-show-right-symbolic",
+        "sidebar-inspector-symbolic",
         &crate::core::gettext("Dock into Top Bar"),
     );
     {
@@ -173,7 +173,7 @@ pub fn create_floating_window(
     float_menu_box.append(&btn_dock_top);
 
     let (btn_dock_bottom, _) = create_float_item(
-        "go-down-symbolic",
+        "layer-move-down-symbolic",
         &crate::core::gettext("Dock into New Section Below"),
     );
     {

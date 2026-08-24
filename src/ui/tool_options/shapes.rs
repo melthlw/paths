@@ -72,7 +72,7 @@ pub fn build_shape_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
     rect_radius_spin.set_valign(gtk4::Align::Center);
 
     let rect_split_btn = gtk4::ToggleButton::builder()
-        .icon_name("view-more-symbolic")
+        .icon_name("palette-more-symbolic")
         .tooltip_text(crate::core::gettext("Edit corners individually"))
         .css_classes(["flat"])
         .valign(gtk4::Align::Center)
@@ -568,7 +568,7 @@ pub fn build_shape_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
 
     // 1. União
     let btn_union = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/bool-union.svg",
+        "bool-union-symbolic",
         &crate::core::gettext("Union (Ctrl++)"),
     );
     let canvas_union = canvas.clone();
@@ -579,7 +579,7 @@ pub fn build_shape_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
 
     // 2. Diferença
     let btn_diff = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/bool-difference.svg",
+        "bool-difference-symbolic",
         &crate::core::gettext("Difference (Ctrl+-)"),
     );
     let canvas_diff = canvas.clone();
@@ -591,7 +591,7 @@ pub fn build_shape_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
 
     // 3. Interseção
     let btn_intersect = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/bool-intersection.svg",
+        "bool-intersection-symbolic",
         &crate::core::gettext("Intersection (Ctrl+*)"),
     );
     let canvas_inter = canvas.clone();
@@ -603,7 +603,7 @@ pub fn build_shape_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
 
     // 4. Exclusão
     let btn_excl = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/bool-exclusion.svg",
+        "bool-exclusion-symbolic",
         &crate::core::gettext("Exclusion (Ctrl+^)"),
     );
     let canvas_excl = canvas.clone();
@@ -614,7 +614,7 @@ pub fn build_shape_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
 
     // 5. Divisão
     let btn_div = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/bool-division.svg",
+        "bool-division-symbolic",
         &crate::core::gettext("Division (Ctrl+/)"),
     );
     let canvas_div = canvas.clone();
@@ -625,7 +625,7 @@ pub fn build_shape_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>>) 
 
     // 6. Cortar
     let btn_cut = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/bool-cut.svg",
+        "bool-cut-symbolic",
         &crate::core::gettext("Cut / Slice (Ctrl+Alt+/)"),
     );
     let canvas_cut = canvas.clone();

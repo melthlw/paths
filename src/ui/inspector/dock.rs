@@ -15,6 +15,7 @@ pub fn render_dock_sections(
     tab_order: &Rc<RefCell<Vec<usize>>>,
     tab_widgets: &[gtk4::Widget; 6],
     sections_container: &gtk4::Box,
+    header_add_btn: &gtk4::MenuButton,
     canvas: &CanvasWidget,
     refresh_fn: Rc<dyn Fn()>,
 ) {
@@ -55,22 +56,34 @@ pub fn render_dock_sections(
 
     // If no sections are docked
     if num_sections == 0 {
+        // Activate '+' button in header bar
+        let add_sec_pop = catalog::build_catalog_popover(
+            tab_info,
+            tab_locations,
+            active_section_tabs,
+            canvas,
+            refresh_fn.clone(),
+        );
+        header_add_btn.set_popover(Some(&add_sec_pop));
+        header_add_btn.set_visible(true);
+
         let has_floating = (0..6).any(|k| locs[k] == TabLocation::Floating);
         let empty_box = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Vertical)
-            .spacing(12)
+            .spacing(8)
             .valign(gtk4::Align::Center)
             .halign(gtk4::Align::Center)
             .vexpand(true)
+            .margin_top(48)
+            .margin_bottom(48)
             .margin_start(16)
             .margin_end(16)
-            .css_classes(["empty-tab-drop-zone"])
             .build();
 
         let empty_icon = gtk4::Image::from_icon_name(if has_floating {
-            "sidebar-show-right-symbolic"
+            "sidebar-inspector-symbolic"
         } else {
-            "view-grid-symbolic"
+            "sidebar-inspector-symbolic"
         });
         empty_icon.set_pixel_size(48);
         empty_icon.set_opacity(0.35);
@@ -82,14 +95,14 @@ pub fn render_dock_sections(
         };
         let empty_lbl = gtk4::Label::builder()
             .label(&title_text)
-            .css_classes(["heading"])
+            .css_classes(["dim-label", "title-4"])
             .build();
 
         let sub_text = if has_floating {
             crate::core::gettext("Drag a floating tab here\nto dock it back.")
         } else {
             crate::core::gettext(
-                "Click '+' above to open panels like\nAppearance, Alignment, Transform or Export.",
+                "Click '+' in the title above to open panels like\nAppearance, Alignment, Transform or Export.",
             )
         };
         let empty_sub = gtk4::Label::builder()
@@ -103,6 +116,7 @@ pub fn render_dock_sections(
         empty_box.append(&empty_sub);
         sections_container.append(&empty_box);
     } else {
+        header_add_btn.set_visible(false);
         for sec_idx in 0..num_sections {
             let tabs_in_sec: Vec<usize> = tab_order
                 .borrow()
@@ -420,7 +434,7 @@ pub fn render_dock_sections(
 
                 // Detach to Floating Window
                 let (btn_detach, _) = create_menu_item(
-                    "view-restore-symbolic",
+                    "panel-restore-dock-symbolic",
                     &crate::core::gettext("Detach into Floating Window"),
                 );
                 let locs_c = tab_locations.clone();
@@ -435,7 +449,7 @@ pub fn render_dock_sections(
 
                 // Move to New Section Below
                 let (btn_split, _) = create_menu_item(
-                    "go-down-symbolic",
+                    "layer-move-down-symbolic",
                     &crate::core::gettext("Move to New Section Below"),
                 );
                 let locs_c = tab_locations.clone();
@@ -466,7 +480,7 @@ pub fn render_dock_sections(
                 // Move to Section Above
                 if sec_idx > 0 {
                     let (btn_up, _) = create_menu_item(
-                        "go-up-symbolic",
+                        "layer-move-up-symbolic",
                         &crate::core::gettext("Move to Section Above"),
                     );
                     let locs_c = tab_locations.clone();
@@ -491,7 +505,7 @@ pub fn render_dock_sections(
 
                     if cur_pos_in_sec > 0 {
                         let (btn_l, _) = create_menu_item(
-                            "go-previous-symbolic",
+                            "tab-move-left-symbolic",
                             &crate::core::gettext("Move Tab Left"),
                         );
                         let order_c = tab_order.clone();
@@ -513,7 +527,7 @@ pub fn render_dock_sections(
 
                     if cur_pos_in_sec + 1 < tabs_in_sec.len() {
                         let (btn_r, _) = create_menu_item(
-                            "go-next-symbolic",
+                            "tab-move-right-symbolic",
                             &crate::core::gettext("Move Tab Right"),
                         );
                         let order_c = tab_order.clone();
@@ -537,7 +551,7 @@ pub fn render_dock_sections(
                 // Close Other Panels
                 menu_box.append(&gtk4::Separator::new(gtk4::Orientation::Horizontal));
                 let (btn_close_others, _) = create_menu_item(
-                    "view-paged-symbolic",
+                    "isolate-panel-symbolic",
                     &crate::core::gettext("Close Other Panels"),
                 );
                 let locs_c = tab_locations.clone();

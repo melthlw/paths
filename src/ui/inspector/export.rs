@@ -161,7 +161,7 @@ pub fn build_export_tab(
                     .valign(gtk4::Align::Center)
                     .build();
 
-                let icon = gtk4::Image::from_icon_name("document-page-symbolic");
+                let icon = gtk4::Image::from_icon_name("page-export-symbolic");
                 icon.set_opacity(0.65);
                 icon.set_valign(gtk4::Align::Center);
 

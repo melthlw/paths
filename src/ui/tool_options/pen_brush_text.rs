@@ -44,7 +44,7 @@ pub fn build_pen_brush_text_controls(
 
     // 1. Node Types: Corner, Smooth, Symmetric, Auto
     let btn_node_corner = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/node-corner.svg",
+        "node-corner-symbolic",
         &crate::core::gettext("Corner Node (Cusp)"),
     );
     let canvas_nc = canvas.clone();
@@ -54,7 +54,7 @@ pub fn build_pen_brush_text_controls(
     path_editor_box.append(&btn_node_corner);
 
     let btn_node_smooth = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/node-smooth.svg",
+        "node-smooth-symbolic",
         &crate::core::gettext("Smooth Node"),
     );
     let canvas_ns = canvas.clone();
@@ -64,7 +64,7 @@ pub fn build_pen_brush_text_controls(
     path_editor_box.append(&btn_node_smooth);
 
     let btn_node_symmetric = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/node-symmetric.svg",
+        "node-symmetric-symbolic",
         &crate::core::gettext("Symmetric Node"),
     );
     let canvas_nsym = canvas.clone();
@@ -74,7 +74,7 @@ pub fn build_pen_brush_text_controls(
     path_editor_box.append(&btn_node_symmetric);
 
     let btn_node_auto = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/node-auto.svg",
+        "node-auto-symbolic",
         &crate::core::gettext("Auto-Smooth Node"),
     );
     let canvas_na = canvas.clone();
@@ -92,7 +92,7 @@ pub fn build_pen_brush_text_controls(
 
     // 2. Segment Tools: Make Straight, Make Curve
     let btn_seg_line = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/segment-line.svg",
+        "segment-line-symbolic",
         &crate::core::gettext("Make Segment Straight"),
     );
     let canvas_sl = canvas.clone();
@@ -102,7 +102,7 @@ pub fn build_pen_brush_text_controls(
     path_editor_box.append(&btn_seg_line);
 
     let btn_seg_curve = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/segment-curve.svg",
+        "segment-curve-symbolic",
         &crate::core::gettext("Make Segment Curve"),
     );
     let canvas_sc = canvas.clone();
@@ -120,7 +120,7 @@ pub fn build_pen_brush_text_controls(
 
     // 3. Topology: Insert, Delete, Close, Reverse
     let btn_node_add = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/node-add.svg",
+        "node-add-symbolic",
         &crate::core::gettext("Insert Node into Segment"),
     );
     let canvas_na2 = canvas.clone();
@@ -130,7 +130,7 @@ pub fn build_pen_brush_text_controls(
     path_editor_box.append(&btn_node_add);
 
     let btn_node_del = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/node-delete.svg",
+        "node-delete-symbolic",
         &crate::core::gettext("Delete Selected Node(s) (Delete/Backspace)"),
     );
     let canvas_nd = canvas.clone();
@@ -140,7 +140,7 @@ pub fn build_pen_brush_text_controls(
     path_editor_box.append(&btn_node_del);
 
     let btn_node_close = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/path-close.svg",
+        "path-close-symbolic",
         &crate::core::gettext("Close / Open Path"),
     );
     let canvas_ncl = canvas.clone();
@@ -150,7 +150,7 @@ pub fn build_pen_brush_text_controls(
     path_editor_box.append(&btn_node_close);
 
     let btn_node_rev = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/path-reverse.svg",
+        "path-reverse-symbolic",
         &crate::core::gettext("Reverse Path Direction"),
     );
     let canvas_nr = canvas.clone();
@@ -168,7 +168,7 @@ pub fn build_pen_brush_text_controls(
 
     // 4. Node Alignment
     let btn_align_h = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/align-center-v.svg",
+        "align-center-v-symbolic",
         &crate::core::gettext("Align Nodes Horizontally"),
     );
     let canvas_ah = canvas.clone();
@@ -178,7 +178,7 @@ pub fn build_pen_brush_text_controls(
     path_editor_box.append(&btn_align_h);
 
     let btn_align_v = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/align-center-h.svg",
+        "align-center-h-symbolic",
         &crate::core::gettext("Align Nodes Vertically"),
     );
     let canvas_av = canvas.clone();
@@ -188,7 +188,7 @@ pub fn build_pen_brush_text_controls(
     path_editor_box.append(&btn_align_v);
 
     let btn_dist_h = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/distribute-horizontal.svg",
+        "distribute-horizontal-symbolic",
         &crate::core::gettext("Distribute Nodes Horizontally"),
     );
     let canvas_dh = canvas.clone();
@@ -198,7 +198,7 @@ pub fn build_pen_brush_text_controls(
     path_editor_box.append(&btn_dist_h);
 
     let btn_dist_v = create_resource_btn(
-        "/io/github/lewis/GnomePaths/icons/distribute-vertical.svg",
+        "distribute-vertical-symbolic",
         &crate::core::gettext("Distribute Nodes Vertically"),
     );
     let canvas_dv = canvas.clone();
@@ -453,7 +453,7 @@ pub fn build_pen_brush_text_controls(
         .valign(gtk4::Align::Center)
         .build();
 
-    let img_al = gtk4::Image::from_icon_name("format-justify-left-symbolic");
+    let img_al = gtk4::Image::from_icon_name("text-align-left-symbolic");
     img_al.set_pixel_size(16);
     let btn_align_left = gtk4::ToggleButton::builder()
         .child(&img_al)
@@ -463,7 +463,7 @@ pub fn build_pen_brush_text_controls(
         .focus_on_click(false)
         .build();
 
-    let img_ac = gtk4::Image::from_icon_name("format-justify-center-symbolic");
+    let img_ac = gtk4::Image::from_icon_name("text-align-center-symbolic");
     img_ac.set_pixel_size(16);
     let btn_align_center = gtk4::ToggleButton::builder()
         .child(&img_ac)
@@ -473,7 +473,7 @@ pub fn build_pen_brush_text_controls(
         .focus_on_click(false)
         .build();
 
-    let img_ar = gtk4::Image::from_icon_name("format-justify-right-symbolic");
+    let img_ar = gtk4::Image::from_icon_name("text-align-right-symbolic");
     img_ar.set_pixel_size(16);
     let btn_align_right = gtk4::ToggleButton::builder()
         .child(&img_ar)
@@ -483,7 +483,7 @@ pub fn build_pen_brush_text_controls(
         .focus_on_click(false)
         .build();
 
-    let img_aj = gtk4::Image::from_icon_name("format-justify-fill-symbolic");
+    let img_aj = gtk4::Image::from_icon_name("text-align-justify-symbolic");
     img_aj.set_pixel_size(16);
     let btn_align_justify = gtk4::ToggleButton::builder()
         .child(&img_aj)
@@ -752,7 +752,7 @@ pub fn build_pen_brush_text_controls(
     });
 
     let btn_orientation = gtk4::Button::builder()
-        .icon_name("object-rotate-right-symbolic")
+        .icon_name("rotate-right-symbolic")
         .tooltip_text(crate::core::gettext(
             "Toggle Orientation (Portrait / Landscape)",
         ))

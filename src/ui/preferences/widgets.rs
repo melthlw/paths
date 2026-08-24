@@ -27,7 +27,7 @@ pub fn make_color_swatches<T: Clone + PartialEq + 'static>(
     let buttons: Rc<RefCell<Vec<(gtk4::Button, gtk4::Image)>>> = Rc::new(RefCell::new(Vec::new()));
 
     for (name, chip_class, val) in items {
-        let check_img = gtk4::Image::from_icon_name("object-select-symbolic");
+        let check_img = gtk4::Image::from_icon_name("check-symbolic");
         check_img.set_pixel_size(14);
         check_img.set_valign(gtk4::Align::Center);
         check_img.set_halign(gtk4::Align::Center);
@@ -202,7 +202,7 @@ pub fn show_language_chooser_dialog(
 
         row.add_prefix(&radio);
 
-        let icon = gtk4::Image::from_icon_name("preferences-desktop-locale-symbolic");
+        let icon = gtk4::Image::from_icon_name("prefs-language-symbolic");
         icon.set_pixel_size(18);
         row.add_prefix(&icon);
 
@@ -214,7 +214,7 @@ pub fn show_language_chooser_dialog(
         row.add_suffix(&badge);
 
         if is_current {
-            let check_icon = gtk4::Image::from_icon_name("object-select-symbolic");
+            let check_icon = gtk4::Image::from_icon_name("check-symbolic");
             check_icon.set_pixel_size(16);
             check_icon.add_css_class("accent");
             row.add_suffix(&check_icon);

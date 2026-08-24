@@ -17,8 +17,8 @@ impl Default for ZoomStudioPlugin {
             ui: ToolUiItem::new(
                 "zoom",
                 "Zoom Tool",
-                "zoom-in-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-zoom.svg"),
+                "tool-zoom-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-zoom-symbolic.svg"),
                 "Zoom Tool (Z / Drag zoom box)",
                 50,
             )
@@ -64,8 +64,8 @@ impl Default for ZoomSelectionStudioPlugin {
             ui: ToolUiItem::new(
                 "zoom_selection",
                 "Zoom Selection",
-                "zoom-fit-best-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-zoom-selection.svg"),
+                "tool-zoom-fit-all-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-zoom-selection-symbolic.svg"),
                 "Zoom Selection (3)",
                 51,
             )
@@ -111,8 +111,8 @@ impl Default for ZoomFitAllStudioPlugin {
             ui: ToolUiItem::new(
                 "zoom_fit_all",
                 "Zoom Fit All",
-                "zoom-fit-best-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-zoom-fit-all.svg"),
+                "tool-zoom-fit-all-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-zoom-fit-all-symbolic.svg"),
                 "Zoom Fit All (4)",
                 52,
             )
@@ -158,8 +158,8 @@ impl Default for Zoom100StudioPlugin {
             ui: ToolUiItem::new(
                 "zoom_100",
                 "Zoom 1:1",
-                "zoom-original-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-zoom-100.svg"),
+                "tool-zoom-100-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-zoom-100-symbolic.svg"),
                 "Zoom 1:1 (1)",
                 53,
             )
@@ -205,8 +205,8 @@ impl Default for ZoomPageStudioPlugin {
             ui: ToolUiItem::new(
                 "zoom_fit_page",
                 "Zoom Page",
-                "zoom-fit-best-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-zoom-page.svg"),
+                "tool-zoom-fit-all-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-zoom-page-symbolic.svg"),
                 "Zoom Page (2)",
                 54,
             )
