@@ -34,6 +34,36 @@ impl VisualThemePreset {
         VisualThemePreset::Catppuccin,
     ];
 
+    pub fn id(self) -> &'static str {
+        match self {
+            Self::Adwaita => "adwaita",
+            Self::SolarizedLight => "solarized-light",
+            Self::SolarizedDark => "solarized-dark",
+            Self::Cobalt => "cobalt",
+            Self::Oblivion => "oblivion",
+            Self::Nord => "nord",
+            Self::Dracula => "dracula",
+            Self::Monokai => "monokai",
+            Self::Darker => "darker",
+            Self::Catppuccin => "catppuccin",
+        }
+    }
+
+    pub fn from_id(id: &str) -> Self {
+        match id.trim().to_lowercase().as_str() {
+            "solarized-light" | "solarized_light" => Self::SolarizedLight,
+            "solarized-dark" | "solarized_dark" => Self::SolarizedDark,
+            "cobalt" => Self::Cobalt,
+            "oblivion" => Self::Oblivion,
+            "nord" => Self::Nord,
+            "dracula" => Self::Dracula,
+            "monokai" => Self::Monokai,
+            "darker" => Self::Darker,
+            "catppuccin" => Self::Catppuccin,
+            _ => Self::Adwaita,
+        }
+    }
+
     pub fn title(self) -> String {
         match self {
             Self::Adwaita => crate::core::gettext("Adwaita (System)"),
@@ -425,6 +455,22 @@ pub enum ToolbarIconSize {
 }
 
 impl ToolbarIconSize {
+    pub fn id(self) -> &'static str {
+        match self {
+            Self::Small => "small",
+            Self::Medium => "medium",
+            Self::Large => "large",
+        }
+    }
+
+    pub fn from_id(id: &str) -> Self {
+        match id.trim().to_lowercase().as_str() {
+            "small" => Self::Small,
+            "large" => Self::Large,
+            _ => Self::Medium,
+        }
+    }
+
     pub fn to_index(self) -> u32 {
         match self {
             Self::Small => 0,
@@ -475,6 +521,24 @@ pub enum InterfaceScale {
 }
 
 impl InterfaceScale {
+    pub fn id(self) -> &'static str {
+        match self {
+            Self::Compact => "compact",
+            Self::Default => "default",
+            Self::Comfortable => "comfortable",
+            Self::Large => "large",
+        }
+    }
+
+    pub fn from_id(id: &str) -> Self {
+        match id.trim().to_lowercase().as_str() {
+            "compact" => Self::Compact,
+            "comfortable" => Self::Comfortable,
+            "large" => Self::Large,
+            _ => Self::Default,
+        }
+    }
+
     pub fn to_index(self) -> u32 {
         match self {
             Self::Compact => 0,

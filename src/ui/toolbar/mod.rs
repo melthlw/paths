@@ -41,7 +41,15 @@ impl FloatingToolbar {
 
         let buttons = Rc::new(RefCell::new(HashMap::new()));
         let is_updating = Rc::new(Cell::new(false));
-        let position = Rc::new(Cell::new(BarPosition::Bottom));
+        let saved_pos_str = crate::core::AppSettings::toolbar_position();
+        let initial_pos = match saved_pos_str.as_str() {
+            "top" => BarPosition::Top,
+            "left" => BarPosition::Left,
+            "right" => BarPosition::Right,
+            _ => BarPosition::Bottom,
+        };
+
+        let position = Rc::new(Cell::new(initial_pos));
         let popovers = Rc::new(RefCell::new(Vec::new()));
         let tool_icon_setters: Rc<RefCell<HashMap<&'static str, Box<dyn Fn()>>>> =
             Rc::new(RefCell::new(HashMap::new()));
@@ -115,6 +123,14 @@ impl FloatingToolbar {
 
             Rc::new(move |pos: BarPosition| {
                 pos_c.set(pos);
+                let pos_str = match pos {
+                    BarPosition::Top => "top",
+                    BarPosition::Left => "left",
+                    BarPosition::Right => "right",
+                    BarPosition::Bottom => "bottom",
+                };
+                crate::core::AppSettings::set_toolbar_position(pos_str);
+
                 match pos {
                     BarPosition::Bottom => {
                         dock_box_c.set_orientation(gtk4::Orientation::Horizontal);
@@ -225,6 +241,7 @@ impl FloatingToolbar {
 
             pos_box.append(&btn);
         }
+        apply_pos(initial_pos);
         menu_box.append(&pos_box);
 
         let sep = gtk4::Separator::new(gtk4::Orientation::Horizontal);

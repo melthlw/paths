@@ -103,6 +103,7 @@ pub fn build_appearance_page() -> gtk4::ScrolledWindow {
         let b_drk = b_drk.clone();
         move |_| {
             adw::StyleManager::default().set_color_scheme(adw::ColorScheme::Default);
+            crate::core::AppSettings::set_color_scheme("system");
             b_sys.add_css_class("active");
             b_lgt.remove_css_class("active");
             b_drk.remove_css_class("active");
@@ -115,6 +116,7 @@ pub fn build_appearance_page() -> gtk4::ScrolledWindow {
         let b_drk = b_drk.clone();
         move |_| {
             adw::StyleManager::default().set_color_scheme(adw::ColorScheme::ForceLight);
+            crate::core::AppSettings::set_color_scheme("light");
             b_sys.remove_css_class("active");
             b_lgt.add_css_class("active");
             b_drk.remove_css_class("active");
@@ -127,6 +129,7 @@ pub fn build_appearance_page() -> gtk4::ScrolledWindow {
         let b_drk = b_drk.clone();
         move |_| {
             adw::StyleManager::default().set_color_scheme(adw::ColorScheme::ForceDark);
+            crate::core::AppSettings::set_color_scheme("dark");
             b_sys.remove_css_class("active");
             b_lgt.remove_css_class("active");
             b_drk.add_css_class("active");
@@ -291,6 +294,7 @@ pub fn build_appearance_page() -> gtk4::ScrolledWindow {
                 b.remove_css_class("active");
             }
             set_visual_theme(p_val);
+            crate::core::AppSettings::set_visual_theme(p_val.id());
         });
     }
 
@@ -321,6 +325,7 @@ pub fn build_appearance_page() -> gtk4::ScrolledWindow {
     scale_dd.connect_selected_notify(move |dd| {
         let scale = InterfaceScale::from_index(dd.selected());
         set_interface_scale(scale);
+        crate::core::AppSettings::set_interface_scale(scale.id());
     });
 
     let scale_row = adw::ActionRow::builder()
@@ -344,6 +349,7 @@ pub fn build_appearance_page() -> gtk4::ScrolledWindow {
     icon_size_dd.connect_selected_notify(move |dd| {
         let size = ToolbarIconSize::from_index(dd.selected());
         set_toolbar_icon_size(size);
+        crate::core::AppSettings::set_toolbar_icon_size(size.id());
     });
 
     let icon_size_row = adw::ActionRow::builder()
@@ -384,8 +390,10 @@ pub fn build_appearance_page() -> gtk4::ScrolledWindow {
         |color_code| {
             if color_code == "system" {
                 crate::ui::theme::set_custom_accent(None);
+                crate::core::AppSettings::set_custom_accent_color(None);
             } else {
-                crate::ui::theme::set_custom_accent(Some(color_code));
+                crate::ui::theme::set_custom_accent(Some(color_code.clone()));
+                crate::core::AppSettings::set_custom_accent_color(Some(&color_code));
             }
         },
     );

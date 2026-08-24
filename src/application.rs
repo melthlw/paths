@@ -32,8 +32,36 @@ impl DesignApplication {
 
     fn setup_signals(&self) {
         self.app.connect_startup(|app| {
-            // Follow system color scheme (light or dark according to user settings)
-            adw::StyleManager::default().set_color_scheme(adw::ColorScheme::Default);
+            // Apply persisted language
+            let lang_code = crate::core::AppSettings::language();
+            if lang_code != "system" {
+                crate::core::set_language(crate::core::Language::from_code(&lang_code));
+            }
+
+            // Apply persisted color scheme
+            let scheme_str = crate::core::AppSettings::color_scheme();
+            match scheme_str.as_str() {
+                "light" => adw::StyleManager::default().set_color_scheme(adw::ColorScheme::ForceLight),
+                "dark" => adw::StyleManager::default().set_color_scheme(adw::ColorScheme::ForceDark),
+                _ => adw::StyleManager::default().set_color_scheme(adw::ColorScheme::Default),
+            }
+
+            // Apply persisted visual theme & custom accent
+            let theme_str = crate::core::AppSettings::visual_theme();
+            let theme = crate::ui::theme::VisualThemePreset::from_id(&theme_str);
+            crate::ui::theme::set_visual_theme(theme);
+
+            let custom_accent = crate::core::AppSettings::custom_accent_color();
+            crate::ui::theme::set_custom_accent(custom_accent);
+
+            // Apply persisted toolbar icon size & interface scale
+            let icon_size_str = crate::core::AppSettings::toolbar_icon_size();
+            let icon_size = crate::ui::theme::ToolbarIconSize::from_id(&icon_size_str);
+            crate::ui::theme::set_toolbar_icon_size(icon_size);
+
+            let scale_str = crate::core::AppSettings::interface_scale();
+            let scale = crate::ui::theme::InterfaceScale::from_id(&scale_str);
+            crate::ui::theme::set_interface_scale(scale);
 
             Self::load_css();
             Self::setup_actions(app);

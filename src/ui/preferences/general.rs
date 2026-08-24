@@ -86,7 +86,9 @@ pub fn build_general_page(window: &adw::Window, canvas: &CanvasWidget) -> gtk4::
     {
         let canvas_c = canvas.clone();
         hw_accel_row.connect_active_notify(move |sw| {
-            canvas_c.set_hardware_accelerated(sw.is_active());
+            let active = sw.is_active();
+            canvas_c.set_hardware_accelerated(active);
+            crate::core::AppSettings::set_hardware_acceleration(active);
         });
     }
     perf_group.add(&hw_accel_row);
@@ -99,7 +101,9 @@ pub fn build_general_page(window: &adw::Window, canvas: &CanvasWidget) -> gtk4::
     {
         let canvas_c = canvas.clone();
         msaa_row.connect_active_notify(move |sw| {
-            canvas_c.set_high_precision_aa(sw.is_active());
+            let active = sw.is_active();
+            canvas_c.set_high_precision_aa(active);
+            crate::core::AppSettings::set_high_precision_aa(active);
         });
     }
     perf_group.add(&msaa_row);

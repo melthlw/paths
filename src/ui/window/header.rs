@@ -140,7 +140,9 @@ pub fn build_header_bar(
         if is_syncing_g.get() {
             return;
         }
-        canvas_grid.set_grid_visible(btn.is_active());
+        let active = btn.is_active();
+        canvas_grid.set_grid_visible(active);
+        crate::core::AppSettings::set_show_grid(active);
     });
     start_box.append(&grid_btn);
 
@@ -157,7 +159,9 @@ pub fn build_header_bar(
         if is_syncing_r.get() {
             return;
         }
-        canvas_ruler.set_rulers_visible(btn.is_active());
+        let active = btn.is_active();
+        canvas_ruler.set_rulers_visible(active);
+        crate::core::AppSettings::set_show_rulers(active);
     });
     start_box.append(&ruler_btn);
 
@@ -174,7 +178,9 @@ pub fn build_header_bar(
         if is_syncing_s.get() {
             return;
         }
-        canvas_snap.set_snap_enabled(btn.is_active());
+        let active = btn.is_active();
+        canvas_snap.set_snap_enabled(active);
+        crate::core::AppSettings::set_snap_enabled(active);
     });
     start_box.append(&snap_btn);
 

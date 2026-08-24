@@ -12,6 +12,7 @@ pub mod renderer;
 pub mod path_editor_config;
 pub mod ruler;
 pub mod shortcuts;
+pub mod settings;
 pub mod snap;
 pub mod svg_export;
 pub mod svg_import;
@@ -39,6 +40,8 @@ pub use renderer::{
     ARTBOARD_HEIGHT, ARTBOARD_WIDTH,
 };
 pub use ruler::{Guide, GuideOrientation, RulerConfig};
+#[allow(unused_imports)]
+pub use settings::{settings, AppSettings, APP_SCHEMA_ID};
 pub use shortcuts::{KeyCombo, ShortcutAction, ShortcutCategory, ShortcutManager, ShortcutPreset};
 pub use snap::{SnapConfig, SnapEngine, SnapGuide};
 pub use svg_export::export_document_to_svg;

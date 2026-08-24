@@ -1,17 +1,166 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="gnome-paths">
   <schema id="io.github.lewis.GnomePaths" path="/io/github/lewis/GnomePaths/">
+    <!-- Window Geometry & State -->
     <key name="window-width" type="i">
-      <default>860</default>
-      <summary>Window width</summary>
+      <default>1280</default>
+      <summary>Window width in pixels</summary>
     </key>
     <key name="window-height" type="i">
-      <default>640</default>
-      <summary>Window height</summary>
+      <default>780</default>
+      <summary>Window height in pixels</summary>
     </key>
     <key name="is-maximized" type="b">
       <default>false</default>
       <summary>Window maximized state</summary>
+    </key>
+    <key name="is-fullscreen" type="b">
+      <default>false</default>
+      <summary>Window fullscreen state</summary>
+    </key>
+
+    <!-- Sidebar Panels -->
+    <key name="show-layers-sidebar" type="b">
+      <default>true</default>
+      <summary>Show or hide the layers panel</summary>
+    </key>
+    <key name="show-inspector-sidebar" type="b">
+      <default>true</default>
+      <summary>Show or hide the inspector panel</summary>
+    </key>
+
+    <!-- Active Zoom & Viewport -->
+    <key name="active-zoom" type="d">
+      <default>1.0</default>
+      <summary>Active canvas zoom factor</summary>
+    </key>
+
+    <!-- Display & Grid Preferences -->
+    <key name="show-grid" type="b">
+      <default>false</default>
+      <summary>Show canvas grid</summary>
+    </key>
+    <key name="show-rulers" type="b">
+      <default>true</default>
+      <summary>Show canvas rulers</summary>
+    </key>
+    <key name="show-guides" type="b">
+      <default>true</default>
+      <summary>Show canvas user guides</summary>
+    </key>
+    <key name="snap-enabled" type="b">
+      <default>true</default>
+      <summary>Enable magnetic snapping</summary>
+    </key>
+    <key name="snap-to-grid" type="b">
+      <default>false</default>
+      <summary>Snap to grid lines</summary>
+    </key>
+    <key name="snap-to-objects" type="b">
+      <default>true</default>
+      <summary>Snap to object geometries</summary>
+    </key>
+    <key name="snap-to-artboard" type="b">
+      <default>true</default>
+      <summary>Snap to artboard and page boundaries</summary>
+    </key>
+    <key name="snap-to-guides" type="b">
+      <default>true</default>
+      <summary>Snap to guide lines</summary>
+    </key>
+    <key name="grid-style" type="s">
+      <default>'dots'</default>
+      <summary>Grid visual style (dots, lines, isometric, cross)</summary>
+    </key>
+    <key name="grid-cell-size" type="d">
+      <default>20.0</default>
+      <summary>Grid cell size in pixels</summary>
+    </key>
+    <key name="grid-subdivisions" type="i">
+      <default>4</default>
+      <summary>Grid cell subdivisions</summary>
+    </key>
+
+    <!-- Workspace & Rendering Preferences -->
+    <key name="workspace-dots" type="b">
+      <default>true</default>
+      <summary>Show ambient dot pattern across canvas workspace</summary>
+    </key>
+    <key name="page-shadow" type="b">
+      <default>true</default>
+      <summary>Show drop shadow around artboards</summary>
+    </key>
+    <key name="page-border" type="b">
+      <default>true</default>
+      <summary>Show border around artboards</summary>
+    </key>
+    <key name="canvas-bg-color" type="s">
+      <default>'system'</default>
+      <summary>Canvas workspace background color hex or system</summary>
+    </key>
+    <key name="page-bg-color" type="s">
+      <default>'#ffffff'</default>
+      <summary>Artboard paper background color hex or transparent</summary>
+    </key>
+    <key name="hardware-acceleration" type="b">
+      <default>true</default>
+      <summary>Enable GPU / Skia hardware acceleration</summary>
+    </key>
+    <key name="high-precision-aa" type="b">
+      <default>true</default>
+      <summary>Enable high precision antialiasing</summary>
+    </key>
+
+    <!-- Appearance & Theme Preferences -->
+    <key name="color-scheme" type="s">
+      <default>'system'</default>
+      <summary>Adwaita color scheme (system, light, dark)</summary>
+    </key>
+    <key name="visual-theme" type="s">
+      <default>'adwaita'</default>
+      <summary>Visual theme preset name</summary>
+    </key>
+    <key name="custom-accent-color" type="s">
+      <default>''</default>
+      <summary>Custom accent color hex code</summary>
+    </key>
+    <key name="toolbar-icon-size" type="s">
+      <default>'medium'</default>
+      <summary>Toolbar icon size preset (small, medium, large)</summary>
+    </key>
+    <key name="interface-scale" type="s">
+      <default>'default'</default>
+      <summary>Interface scale preset (compact, default, comfortable, large)</summary>
+    </key>
+    <key name="toolbar-position" type="s">
+      <default>'bottom'</default>
+      <summary>Floating toolbar position (bottom, top, left, right)</summary>
+    </key>
+
+    <!-- System & Tooling Preferences -->
+    <key name="language" type="s">
+      <default>'system'</default>
+      <summary>Application UI language code</summary>
+    </key>
+    <key name="unit" type="s">
+      <default>'px'</default>
+      <summary>Default document measurement unit (px, mm, cm, in, pt, pc)</summary>
+    </key>
+    <key name="node-size" type="d">
+      <default>8.0</default>
+      <summary>Anchor node display size in pixels</summary>
+    </key>
+    <key name="handle-size" type="d">
+      <default>6.0</default>
+      <summary>Bézier handle endpoint display size in pixels</summary>
+    </key>
+    <key name="handle-display-mode" type="s">
+      <default>'selected'</default>
+      <summary>Handle display mode (selected, path, always)</summary>
+    </key>
+    <key name="shortcut-preset" type="s">
+      <default>'default'</default>
+      <summary>Keyboard shortcut preset (default, figma, illustrator, inkscape)</summary>
     </key>
   </schema>
 </schemalist>
