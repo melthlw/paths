@@ -50,6 +50,42 @@ Development roadmap structured by version milestones.
 
 ---
 
+## v0.2.2 — Asset Libraries & Design System Panel
+> **Focus**: Integrated multi-category asset libraries panel, live dynamic language switching, and design system presets.
+
+### Asset Libraries (Studio Modular Panel)
+- [x] **New "Libraries" Inspector Tab (Closed by default)**:
+  - [x] **Live Search & Filter**: Real-time cross-library search bar (`SearchEntry`) for immediate discovery of assets and styles.
+  - [x] **Category Pill Switcher**: Smooth animated category transitions between Swatches, Patterns, Icons, Shapes, Strokes, Typography, and Effects.
+  - [x] **Color Swatches & Palettes**:
+    - [x] Curated palettes: GNOME Adwaita Core, Tailwind Modern, Cyberpunk & Neon, and Pastel & Soft.
+    - [x] Antialiased rounded swatch tiles with tooltips and one-click fill application to active selection or canvas fill.
+  - [x] **Pattern & Texture Presets**:
+    - [x] Visual cards for Technical Grid, Halftone Dots, Diagonal Stripes, Checkerboard, and Hexagonal Honeycomb.
+    - [x] One-click pattern fill layer attachment to selected vector objects.
+  - [x] **Vector Symbolic Icons Library**:
+    - [x] Rich categorized vector icon collection (Home, User, Search, Settings, Heart, Star, Check, Close, Folder, Cloud, Trash, Edit, Play, Pause, Camera, Lock, Globe, Code).
+    - [x] Click-to-insert vector icons directly onto canvas as editable Bézier paths.
+  - [x] **Geometric Shapes & Badges Library**:
+    - [x] Ready-to-use vector shapes: Shield, 8-Point Badge, Ribbon, Speech Bubble, Lightning Bolt, Hexagon, Octagon, Price Tag, Directional Arrow, and Diamond.
+    - [x] Click-to-insert vector shapes with instant node editing and styling support.
+  - [x] **Stroke Styles & Dash Presets**:
+    - [x] Solid, Dashed, Dotted, and future engine placeholder presets (Calligraphic, Tapered, Rough Sketch).
+    - [x] One-click stroke layer application to selected elements.
+  - [x] **Typography & Hierarchy Presets**:
+    - [x] Display Hero (48pt Bold), Heading 1 (32pt Bold), Heading 2 (24pt SemiBold), Body (16pt Regular), Monospace Code (14pt), and Caption (11pt).
+    - [x] Instant font family, size, and weight application to selected text elements.
+  - [x] **Effects & Shadows**:
+    - [x] Soft Elevation, Floating Card, Glassmorphism, and Neon Ambient Glow blur presets.
+
+### Localization & UX
+- [x] **Prominent Language Selection Radio Group**:
+  - [x] Native `gtk4::CheckButton` radio group indicator with accent checkmark for "Padrão do Sistema" and selected languages.
+- [x] **Live Dynamic Language Switching**:
+  - [x] Instant UI rebuild without application restart via `on_language_change_local` event bus.
+
+---
+
 ## v0.3.0 — Gradients, Meshes & Pattern Engine
 > **Focus**: Advanced fill rendering, interactive meshes, and asset ecosystem.
 

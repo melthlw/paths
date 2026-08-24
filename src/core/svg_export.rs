@@ -273,18 +273,23 @@ fn render_blur_filter_def(blur: f32, id: &str, defs: &mut String) {
 
 fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
     let sz = fill.pattern_scale.clamp(4.0, 256.0);
+    let (tile_w, tile_h) = match fill.pattern_type {
+        PatternType::Hexagon => (sz, (sz * 1.7320508).max(4.0)),
+        PatternType::Brick | PatternType::Scales => (sz, (sz * 0.5).max(4.0)),
+        _ => (sz, sz),
+    };
     let c1 = color_to_svg(fill.color);
     let c2 = color_to_svg(fill.secondary_color);
 
     let _ = writeln!(
         defs,
         "    <pattern id=\"{}\" width=\"{:.2}\" height=\"{:.2}\" patternUnits=\"userSpaceOnUse\">",
-        id, sz, sz
+        id, tile_w, tile_h
     );
     let _ = writeln!(
         defs,
         "      <rect width=\"{:.2}\" height=\"{:.2}\" fill=\"{}\"/>",
-        sz, sz, c1
+        tile_w, tile_h, c1
     );
 
     match fill.pattern_type {
@@ -329,11 +334,95 @@ fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
             );
         }
         PatternType::Hexagon => {
-            let w = (sz * 0.1).max(1.0);
+            let w = (sz * 0.08).max(1.0);
+            let half_w = tile_w * 0.5;
+            let h = tile_h;
+            let h_6 = h / 6.0;
+            let h_2 = h * 0.5;
+            let h_23 = h * (2.0 / 3.0);
             let _ = writeln!(
                 defs,
-                "      <polygon points=\"{:.2},{:.2} {:.2},{:.2} {:.2},{:.2} {:.2},{:.2} {:.2},{:.2} {:.2},{:.2}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                sz * 0.5, 0.0, sz, sz * 0.25, sz, sz * 0.75, sz * 0.5, sz, 0.0, sz * 0.75, 0.0, sz * 0.25, c2, w
+                "      <polyline points=\"0,0 {:.2},{:.2} {:.2},{:.2} 0,{:.2} 0,{:.2}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                half_w, h_6, half_w, h_2, h_23, h, c2, w
+            );
+            let _ = writeln!(
+                defs,
+                "      <line x1=\"{:.2}\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                tile_w, half_w, h_6, c2, w
+            );
+            let _ = writeln!(
+                defs,
+                "      <polyline points=\"{:.2},{:.2} {:.2},{:.2} {:.2},{:.2}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                half_w, h_2, tile_w, h_23, tile_w, h, c2, w
+            );
+        }
+        PatternType::Brick => {
+            let w = (sz * 0.08).max(1.0);
+            let half_h = tile_h * 0.5;
+            let _ = writeln!(
+                defs,
+                "      <line x1=\"0\" y1=\"0\" x2=\"{:.2}\" y2=\"0\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                tile_w, c2, w
+            );
+            let _ = writeln!(
+                defs,
+                "      <line x1=\"0\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                half_h, tile_w, half_h, c2, w
+            );
+            let _ = writeln!(
+                defs,
+                "      <line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                half_h, c2, w
+            );
+            let _ = writeln!(
+                defs,
+                "      <line x1=\"{:.2}\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                tile_w, tile_w, half_h, c2, w
+            );
+            let _ = writeln!(
+                defs,
+                "      <line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                tile_w * 0.5, half_h, tile_w * 0.5, tile_h, c2, w
+            );
+        }
+        PatternType::Crosshatch => {
+            let w = (sz * 0.12).max(1.0);
+            let _ = writeln!(
+                defs,
+                "      <line x1=\"0\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/><line x1=\"0\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"0\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                sz, sz, c2, w, sz, sz, c2, w
+            );
+        }
+        PatternType::Scales => {
+            let w = (sz * 0.07).max(1.0);
+            let r_base = tile_w * 0.5;
+            let radii = [r_base, r_base * 0.70, r_base * 0.40];
+            let centers = [(tile_w * 0.5, tile_h), (0.0, 0.0), (tile_w, 0.0), (0.0, tile_h), (tile_w, tile_h)];
+            for (cx, cy) in centers {
+                for r in radii {
+                    let _ = writeln!(
+                        defs,
+                        "      <path d=\"M {:.2},{:.2} A {:.2},{:.2} 0 0,1 {:.2},{:.2}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                        cx - r, cy, r, r, cx + r, cy, c2, w
+                    );
+                }
+            }
+        }
+        PatternType::Houndstooth => {
+            let half = sz * 0.5;
+            let _ = writeln!(
+                defs,
+                "      <polygon points=\"0,0 {:.2},0 {:.2},{:.2} {:.2},{:.2} {:.2},{:.2} 0,{:.2}\" fill=\"{}\"/>",
+                half, sz, half, half, half, half, sz, half, c2
+            );
+        }
+        PatternType::Basketweave => {
+            let half = sz * 0.5;
+            let w = (sz * 0.15).max(1.0);
+            let _ = writeln!(
+                defs,
+                "      <line x1=\"0\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/><line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/><line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/><line x1=\"{:.2}\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
+                half * 0.5, half, half * 0.5, c2, w, half * 0.5, half, half * 0.5, sz, c2, w, half, sz * 0.75, sz, sz * 0.75, c2, w, sz * 0.75, sz * 0.75, half, c2, w
             );
         }
     }

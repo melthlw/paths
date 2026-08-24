@@ -353,5 +353,246 @@ impl CanvasWidget {
         ));
 
         area.add_controller(key_controller);
+
+        // 5. Drag and Drop Target (Assets, Swatches, Patterns, Icons, Shapes from Libraries)
+        let drop_target = gtk4::DropTarget::new(glib::types::Type::STRING, gdk::DragAction::COPY);
+        let state_drop = self.state.clone();
+        let area_drop = self.drawing_area.clone();
+        drop_target.connect_drop(move |_target, value, x, y| {
+            if let Ok(payload) = value.get::<String>() {
+                let screen_pt = Point::new(x as f32, y as f32);
+                let mut success = false;
+                if let Ok(mut state) = state_drop.try_borrow_mut() {
+                    let world_pt = state.viewport.screen_to_world(screen_pt, state.widget_size);
+                    success = handle_asset_drop(&mut state, &payload, world_pt);
+                    if success {
+                        state.notify_status();
+                    }
+                }
+                if success {
+                    area_drop.queue_draw();
+                }
+                success
+            } else {
+                false
+            }
+        });
+        area.add_controller(drop_target);
     }
+}
+
+pub fn handle_asset_drop(state: &mut super::state::CanvasState, payload: &str, world_pt: Point) -> bool {
+    use crate::core::element::{Element, FillLayer, FillStyle, PatternType, StrokeLayer, StrokeStyle};
+    use crate::core::Color;
+
+    if let Some(hex) = payload.strip_prefix("gnome-paths:swatch:") {
+        if let Some(col) = Color::from_hex(hex) {
+            state.document.snapshot();
+            if let Some(hit_id) = state.document.hit_test(world_pt) {
+                if let Some(el) = state.document.find_element_mut(hit_id) {
+                    let mut fills = el.fills().to_vec();
+                    if fills.is_empty() {
+                        fills.push(FillLayer::new(col));
+                    } else {
+                        fills[0].color = col;
+                        fills[0].style = FillStyle::Solid;
+                    }
+                    el.set_fills(fills);
+                }
+                state.document.selected_ids.clear();
+                state.document.selected_ids.insert(hit_id);
+            } else {
+                state.active_fill_color = col;
+                if !state.document.selected_ids.is_empty() {
+                    state.document.set_selected_fills(vec![FillLayer::new(col)]);
+                }
+            }
+            return true;
+        }
+    } else if let Some(pattern_str) = payload.strip_prefix("gnome-paths:pattern:") {
+        let parts: Vec<&str> = pattern_str.split(':').collect();
+        let pt = match parts.first().copied().unwrap_or("") {
+            "Grid" => PatternType::Grid,
+            "Dots" => PatternType::Dots,
+            "Stripes" => PatternType::Stripes,
+            "Checkerboard" => PatternType::Checkerboard,
+            "Hexagon" => PatternType::Hexagon,
+            "Crosshatch" => PatternType::Crosshatch,
+            "Brick" => PatternType::Brick,
+            "Scales" => PatternType::Scales,
+            "Houndstooth" => PatternType::Houndstooth,
+            "Basketweave" => PatternType::Basketweave,
+            _ => PatternType::Grid,
+        };
+        let scale: f32 = parts.get(1).and_then(|s| s.parse().ok()).unwrap_or(16.0);
+        let p_layer = FillLayer {
+            style: FillStyle::Pattern,
+            color: state.active_fill_color,
+            secondary_color: Color::new(0.12, 0.14, 0.18, 1.0),
+            angle: 0.0,
+            opacity: 1.0,
+            enabled: true,
+            pattern_type: pt,
+            pattern_scale: scale,
+            mesh: None,
+        };
+        state.document.snapshot();
+        if let Some(hit_id) = state.document.hit_test(world_pt) {
+            if let Some(el) = state.document.find_element_mut(hit_id) {
+                el.set_fills(vec![p_layer]);
+            }
+            state.document.selected_ids.clear();
+            state.document.selected_ids.insert(hit_id);
+        } else if !state.document.selected_ids.is_empty() {
+            state.document.set_selected_fills(vec![p_layer]);
+        } else {
+            let mut rect_elem = crate::core::element::RectElement::new(
+                crate::core::geometry::Rect::new(world_pt.x - 60.0, world_pt.y - 60.0, 120.0, 120.0),
+                None,
+                None,
+            );
+            rect_elem.fills = vec![p_layer];
+            let el = Element::Rect(rect_elem);
+            let id = el.id();
+            state.document.add_element(el);
+            state.document.selected_ids.clear();
+            state.document.selected_ids.insert(id);
+        }
+        return true;
+    } else if let Some(icon_str) = payload.strip_prefix("gnome-paths:icon:") {
+        if let Some(idx) = icon_str.find(':') {
+            let path_d = &icon_str[idx + 1..];
+            let nodes = crate::core::svg_import::parse_svg_path_data(path_d);
+            if !nodes.is_empty() {
+                state.document.snapshot();
+                let mut path_el = crate::core::element::PathElement::new(
+                    nodes,
+                    true,
+                    Some(state.active_fill_color),
+                    None,
+                    1.0,
+                );
+                let b = path_el.bounds();
+                let target_size = 64.0f32;
+                let max_dim = b.width.max(b.height);
+                if max_dim > 0.1 && max_dim < 36.0 {
+                    let scale = target_size / max_dim;
+                    let center_b = Point::new(b.x + b.width / 2.0, b.y + b.height / 2.0);
+                    path_el.scale(center_b, scale, scale);
+                }
+                let b_final = path_el.bounds();
+                let dx = world_pt.x - (b_final.x + b_final.width / 2.0);
+                let dy = world_pt.y - (b_final.y + b_final.height / 2.0);
+                path_el.translate(dx, dy);
+                let el = Element::Path(path_el);
+                let id = el.id();
+                state.document.add_element(el);
+                state.document.selected_ids.clear();
+                state.document.selected_ids.insert(id);
+                return true;
+            }
+        }
+    } else if let Some(shape_str) = payload.strip_prefix("gnome-paths:shape:") {
+        if let Some(idx) = shape_str.find(':') {
+            let path_d = &shape_str[idx + 1..];
+            let nodes = crate::core::svg_import::parse_svg_path_data(path_d);
+            if !nodes.is_empty() {
+                state.document.snapshot();
+                let mut path_el = crate::core::element::PathElement::new(
+                    nodes,
+                    true,
+                    Some(state.active_fill_color),
+                    None,
+                    1.0,
+                );
+                let b = path_el.bounds();
+                let target_size = 80.0f32;
+                let max_dim = b.width.max(b.height);
+                if max_dim > 0.1 && max_dim < 36.0 {
+                    let scale = target_size / max_dim;
+                    let center_b = Point::new(b.x + b.width / 2.0, b.y + b.height / 2.0);
+                    path_el.scale(center_b, scale, scale);
+                }
+                let b_final = path_el.bounds();
+                let dx = world_pt.x - (b_final.x + b_final.width / 2.0);
+                let dy = world_pt.y - (b_final.y + b_final.height / 2.0);
+                path_el.translate(dx, dy);
+                let el = Element::Path(path_el);
+                let id = el.id();
+                state.document.add_element(el);
+                state.document.selected_ids.clear();
+                state.document.selected_ids.insert(id);
+                return true;
+            }
+        }
+    } else if let Some(stroke_str) = payload.strip_prefix("gnome-paths:stroke:") {
+        let parts: Vec<&str> = stroke_str.split(':').collect();
+        let s_style = match parts.first().copied().unwrap_or("") {
+            "Solid" => StrokeStyle::Solid,
+            "Dashed" => StrokeStyle::Dashed,
+            "Dotted" => StrokeStyle::Dotted,
+            _ => StrokeStyle::Solid,
+        };
+        let s_layer = StrokeLayer {
+            color: state.active_stroke_color.unwrap_or(Color::BLACK),
+            width: state.active_stroke_width.max(1.5),
+            style: s_style,
+            opacity: 1.0,
+            enabled: true,
+        };
+        state.document.snapshot();
+        if let Some(hit_id) = state.document.hit_test(world_pt) {
+            if let Some(el) = state.document.find_element_mut(hit_id) {
+                let mut strokes = el.strokes().to_vec();
+                if strokes.is_empty() {
+                    strokes.push(s_layer);
+                } else {
+                    strokes[0] = s_layer;
+                }
+                el.set_strokes(strokes);
+            }
+            state.document.selected_ids.clear();
+            state.document.selected_ids.insert(hit_id);
+        } else {
+            state.active_stroke_width = s_layer.width;
+            if !state.document.selected_ids.is_empty() {
+                state.document.set_selected_strokes(vec![s_layer]);
+            }
+        }
+        return true;
+    } else if let Some(text_str) = payload.strip_prefix("gnome-paths:text:") {
+        let parts: Vec<&str> = text_str.split(':').collect();
+        let fam = parts.first().copied().unwrap_or("Sans");
+        let size: f32 = parts.get(1).and_then(|s| s.parse().ok()).unwrap_or(24.0);
+        let weight: u32 = parts.get(2).and_then(|s| s.parse().ok()).unwrap_or(400);
+        let sample = parts.get(3).copied().unwrap_or("Text");
+        state.document.snapshot();
+        if let Some(hit_id) = state.document.hit_test(world_pt) {
+            if let Some(el) = state.document.find_element_mut(hit_id) {
+                if let Element::Text(ref mut t) = el {
+                    t.font_family = fam.to_string();
+                    t.font_size = size;
+                    t.font_weight = weight;
+                }
+            }
+            state.document.selected_ids.clear();
+            state.document.selected_ids.insert(hit_id);
+        } else {
+            let mut text_elem = crate::core::element::TextElement::new(
+                world_pt,
+                sample.to_string(),
+                size,
+                state.active_fill_color,
+            );
+            text_elem.font_family = fam.to_string();
+            text_elem.font_weight = weight;
+            let el = Element::Text(text_elem);
+            let id = el.id();
+            state.document.add_element(el);
+            state.document.selected_ids.clear();
+            state.document.selected_ids.insert(id);
+        }
+        return true;
+    }
+    false
 }

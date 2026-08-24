@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use crate::core::element::{Element, PathElement, PathNode};
+use crate::core::element::{Element, PathElement};
 use crate::core::geometry::Point;
 use super::{BooleanOperation, Document};
 
@@ -155,36 +155,7 @@ impl Document {
                         converted_any = true;
                     }
                     Element::Brush(b) => {
-                        let mut nodes = Vec::new();
-                        if b.points.len() <= 4 {
-                            nodes = b.points.iter().map(|p| PathNode::new(*p)).collect();
-                        } else {
-                            let step = (b.points.len() / 20).max(1);
-                            let mut sampled: Vec<Point> =
-                                b.points.iter().step_by(step).cloned().collect();
-                            if let Some(last) = b.points.last() {
-                                if sampled.last() != Some(last) {
-                                    sampled.push(*last);
-                                }
-                            }
-                            for (i, pt) in sampled.iter().enumerate() {
-                                let mut node = PathNode::new(*pt);
-                                if i > 0 && i < sampled.len() - 1 {
-                                    let prev = sampled[i - 1];
-                                    let next = sampled[i + 1];
-                                    let tangent = Point::new(
-                                        (next.x - prev.x) * 0.25,
-                                        (next.y - prev.y) * 0.25,
-                                    );
-                                    node.handle_out =
-                                        Some(Point::new(pt.x + tangent.x, pt.y + tangent.y));
-                                    node.handle_in =
-                                        Some(Point::new(pt.x - tangent.x, pt.y - tangent.y));
-                                }
-                                nodes.push(node);
-                            }
-                        }
-                        let path = PathElement::new(nodes, false, None, Some(b.color), b.width);
+                        let path = b.to_path_element();
                         let path_id = path.id;
                         new_elements.push(Element::Path(path));
                         updated_selected_ids.insert(path_id);

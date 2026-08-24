@@ -855,3 +855,45 @@
 .theme-preset-card.active .heading {
     color: @accent_color;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Libraries & Assets Panel Styling (Libadwaita Pure)
+   ───────────────────────────────────────────────────────────── */
+.swatch-chip {
+    padding: 0;
+    margin: 0;
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 9999px;
+    transition: transform 120ms ease;
+}
+
+.swatch-chip:hover {
+    transform: scale(1.15);
+}
+
+.icon-library-tile {
+    border-radius: 8px;
+    padding: 4px 2px;
+    min-width: 48px;
+    min-height: 48px;
+    transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.shape-library-tile {
+    border-radius: 10px;
+    padding: 6px;
+    transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.pattern-preset-btn {
+    border-radius: 10px;
+    padding: 6px;
+    min-width: 100px;
+    min-height: 86px;
+    transition: transform 120ms ease, background-color 120ms ease, border-color 120ms ease;
+}
+
+.pattern-preset-btn:hover {
+    background-color: alpha(currentColor, 0.06);
+}

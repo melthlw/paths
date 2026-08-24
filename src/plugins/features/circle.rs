@@ -336,34 +336,27 @@ impl FeaturePlugin for CircleFeature {
             }
         }
 
-        // 2. Check if clicking on an existing circle to select it
-        let hit_circle = ctx.document.elements.iter().rev().find_map(|e| {
-            if let Element::Path(p) = e {
+        // 2. Check if clicking on ANY existing element to select it
+        if let Some(hit_id) = ctx.document.hit_test(event.world_pos) {
+            ctx.document.select(hit_id, event.shift_pressed);
+            if let Some(Element::Path(p)) = ctx.document.find_element(hit_id) {
                 if let Some(ShapeOrigin::Circle {
                     arc_mode,
                     start_angle,
                     end_angle,
                 }) = p.shape_origin
                 {
-                    if p.bounds().contains(event.world_pos) {
-                        return Some((e.id(), arc_mode, start_angle, end_angle));
-                    }
+                    self.arc_mode = arc_mode;
+                    self.start_angle = start_angle;
+                    self.end_angle = end_angle;
                 }
             }
-            None
-        });
-
-        if let Some((id, mode, s_ang, e_ang)) = hit_circle {
-            ctx.document.select(id, false);
-            self.arc_mode = mode;
-            self.start_angle = s_ang;
-            self.end_angle = e_ang;
             self.state = CircleToolState::MovingElement {
                 start_world: event.world_pos,
-                elem_id: id,
+                elem_id: hit_id,
                 has_dragged: false,
             };
-            ctx.set_cursor("pointer");
+            ctx.set_cursor("move");
             ctx.request_redraw();
             return;
         }

@@ -24,7 +24,11 @@ pub fn settings() -> Option<gio::Settings> {
                 if let Some(schema) = gio::SettingsSchemaSource::default()
                     .and_then(|source| source.lookup(APP_SCHEMA_ID, true))
                 {
-                    *borrow = Some(gio::Settings::new_full(&schema, None::<&gio::SettingsBackend>, None));
+                    *borrow = Some(gio::Settings::new_full(
+                        &schema,
+                        None::<&gio::SettingsBackend>,
+                        None,
+                    ));
                 } else {
                     // 2. Try GSETTINGS_SCHEMA_DIR or local development directory
                     let dev_paths = [
@@ -64,7 +68,6 @@ pub fn settings() -> Option<gio::Settings> {
 /// Typed helper struct for reading and persisting all GNOME Paths user and UI settings
 pub struct AppSettings;
 
-#[allow(dead_code)]
 impl AppSettings {
     // ─────────────────────────────────────────────────────────────
     // Window Geometry & State
@@ -87,7 +90,9 @@ impl AppSettings {
     }
 
     pub fn is_maximized() -> bool {
-        settings().map(|s| s.boolean("is-maximized")).unwrap_or(false)
+        settings()
+            .map(|s| s.boolean("is-maximized"))
+            .unwrap_or(false)
     }
 
     pub fn set_is_maximized(maximized: bool) {
@@ -184,7 +189,9 @@ impl AppSettings {
     }
 
     pub fn snap_enabled() -> bool {
-        settings().map(|s| s.boolean("snap-enabled")).unwrap_or(true)
+        settings()
+            .map(|s| s.boolean("snap-enabled"))
+            .unwrap_or(true)
     }
 
     pub fn set_snap_enabled(enabled: bool) {
@@ -235,6 +242,7 @@ impl AppSettings {
             .unwrap_or(true)
     }
 
+    #[allow(dead_code)]
     pub fn set_snap_to_guides(snap: bool) {
         if let Some(s) = settings() {
             let _ = s.set_boolean("snap-to-guides", snap);

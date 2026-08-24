@@ -2581,3 +2581,335 @@ msgstr "L"
 msgid "H"
 msgstr "A"
 
+msgid "Color Swatches"
+msgstr "Amostras de Cores"
+
+msgid "Patterns & Textures"
+msgstr "Padrões & Texturas"
+
+msgid "Vector Icons"
+msgstr "Ícones Vetoriais"
+
+msgid "Geometric Shapes"
+msgstr "Formas Geométricas"
+
+msgid "Stroke Styles"
+msgstr "Estilos de Contorno"
+
+msgid "Typography Presets"
+msgstr "Predefinições de Tipografia"
+
+msgid "Open Libraries Folder in .config"
+msgstr "Abrir Pasta de Bibliotecas em .config"
+
+msgid "Reload Libraries from disk"
+msgstr "Recarregar Bibliotecas do disco"
+
+msgid "Search assets and presets..."
+msgstr "Pesquisar recursos e predefinições..."
+
+msgid "colors"
+msgstr "cores"
+
+msgid "Click or drag to apply fill color"
+msgstr "Clique ou arraste para aplicar cor de preenchimento"
+
+msgid "Click or drag to apply pattern fill"
+msgstr "Clique ou arraste para aplicar padrão de preenchimento"
+
+msgid "Click or drag to insert vector icon"
+msgstr "Clique ou arraste para inserir ícone vetorial"
+
+msgid "Click or drag to insert vector shape"
+msgstr "Clique ou arraste para inserir forma vetorial"
+
+msgid "Click or drag to apply stroke to object"
+msgstr "Clique ou arraste para aplicar contorno ao objeto"
+
+msgid "Apply Stroke Style"
+msgstr "Aplicar Estilo de Contorno"
+
+msgid "Click to insert text or drag to position on canvas"
+msgstr "Clique para inserir texto ou arraste para posicionar na tela"
+
+msgid "GNOME Adwaita Core"
+msgstr "GNOME Adwaita Principal"
+
+msgid "Tailwind Modern"
+msgstr "Tailwind Moderno"
+
+msgid "Cyberpunk & Neon"
+msgstr "Cyberpunk & Neon"
+
+msgid "Pastel & Soft"
+msgstr "Pastel & Suave"
+
+msgid "Monochrome & Grayscale"
+msgstr "Monocromático & Escala de Cinza"
+
+msgid "Technical Grid"
+msgstr "Grade Técnica"
+
+msgid "Halftone Dots"
+msgstr "Pontilhado Halftone"
+
+msgid "Diagonal Stripes"
+msgstr "Listras Diagonais"
+
+msgid "Checkerboard"
+msgstr "Xadrez"
+
+msgid "Hexagonal Honeycomb"
+msgstr "Colmeia Hexagonal"
+
+msgid "Home"
+msgstr "Início"
+
+msgid "User"
+msgstr "Usuário"
+
+msgid "Search"
+msgstr "Pesquisar"
+
+msgid "Heart"
+msgstr "Coração"
+
+msgid "Star"
+msgstr "Estrela"
+
+msgid "Check"
+msgstr "Verificação"
+
+msgid "Close"
+msgstr "Fechar"
+
+msgid "Folder"
+msgstr "Pasta"
+
+msgid "Cloud"
+msgstr "Nuvem"
+
+msgid "Trash"
+msgstr "Lixeira"
+
+msgid "Edit"
+msgstr "Editar"
+
+msgid "Play"
+msgstr "Reproduzir"
+
+msgid "Pause"
+msgstr "Pausar"
+
+msgid "Camera"
+msgstr "Câmera"
+
+msgid "Lock"
+msgstr "Bloquear"
+
+msgid "Globe"
+msgstr "Globo"
+
+msgid "Code"
+msgstr "Código"
+
+msgid "Bell"
+msgstr "Sino"
+
+msgid "Mail"
+msgstr "Email"
+
+msgid "Shield"
+msgstr "Escudo"
+
+msgid "Vector Shield"
+msgstr "Escudo Vetorial"
+
+msgid "Badge 8P"
+msgstr "Selo 8 Pontas"
+
+msgid "8-Point Badge"
+msgstr "Selo de 8 Pontas"
+
+msgid "Ribbon"
+msgstr "Faixa"
+
+msgid "Banner Ribbon"
+msgstr "Faixa / Banner"
+
+msgid "Speech Bubble"
+msgstr "Balão de Diálogo"
+
+msgid "Dialog Bubble"
+msgstr "Balão de Fala"
+
+msgid "Lightning"
+msgstr "Raio"
+
+msgid "Energy Bolt"
+msgstr "Raio de Energia"
+
+msgid "Hexagon"
+msgstr "Hexágono"
+
+msgid "Hexagonal Polygon"
+msgstr "Polígono Hexagonal"
+
+msgid "Octagon"
+msgstr "Octógono"
+
+msgid "Octagonal Polygon"
+msgstr "Polígono Octogonal"
+
+msgid "Tag / Label"
+msgstr "Etiqueta"
+
+msgid "Price Tag"
+msgstr "Etiqueta de Preço"
+
+msgid "Arrow Right"
+msgstr "Seta Direita"
+
+msgid "Directional Arrow"
+msgstr "Seta Direcional"
+
+msgid "Diamond"
+msgstr "Losango"
+
+msgid "Perfect Diamond"
+msgstr "Losango Perfeito"
+
+msgid "Solid Stroke"
+msgstr "Contorno Sólido"
+
+msgid "Continuous vector stroke"
+msgstr "Contorno vetorial contínuo"
+
+msgid "Dashed Line"
+msgstr "Linha Tracejada"
+
+msgid "Standard dashed stroke"
+msgstr "Traço pontilhado padrão"
+
+msgid "Dotted Line"
+msgstr "Linha Pontilhada"
+
+msgid "Fine dotted stroke"
+msgstr "Traço pontilhado fino"
+
+msgid "Thick Outline"
+msgstr "Contorno Grosso"
+
+msgid "Prominent 4px stroke"
+msgstr "Contorno destacado de 4px"
+
+msgid "Hairline"
+msgstr "Linha Fina (Hairline)"
+
+msgid "Fine 1px line"
+msgstr "Linha fina técnica de 1px"
+
+msgid "Display Hero"
+msgstr "Título de Destaque (Display Hero)"
+
+msgid "Heading 1"
+msgstr "Título 1 (Heading 1)"
+
+msgid "Heading 2"
+msgstr "Título 2 (Heading 2)"
+
+msgid "Body Regular"
+msgstr "Corpo do Texto (Body Regular)"
+
+msgid "Code / Monospace"
+msgstr "Código / Monoespaçado"
+
+msgid "Caption"
+msgstr "Legenda / Rótulo"
+
+msgid "Colors & Swatches"
+msgstr "Cores & Amostras"
+
+msgid "Project Colors"
+msgstr "Cores do Projeto"
+
+msgid "Preset Palettes"
+msgstr "Paletas Predefinidas"
+
+msgid "Document Colors"
+msgstr "Cores do Documento"
+
+msgid "Colors used on the canvas will appear here automatically."
+msgstr "Cores usadas nos objetos na tela aparecem aqui automaticamente."
+
+msgid "My Custom Palette"
+msgstr "Minha Paleta Personalizada"
+
+msgid "Add Active Color to My Palette"
+msgstr "Adicionar Cor Ativa à Minha Paleta"
+
+msgid "Pick New Color from Dialog"
+msgstr "Escolher Nova Cor no Seletor"
+
+msgid "Right-click any custom swatch to remove it."
+msgstr "Clique com o botão direito para remover uma amostra."
+
+msgid "Pick Custom Color"
+msgstr "Escolher Cor Personalizada"
+
+msgid "Click or drag to insert GNOME icon"
+msgstr "Clique ou arraste para inserir o ícone do GNOME"
+
+msgid "Favorite"
+msgstr "Favorito"
+
+msgid "Check"
+msgstr "Confirmar"
+
+msgid "Close"
+msgstr "Fechar"
+
+msgid "New Document"
+msgstr "Novo Documento"
+
+msgid "Open"
+msgstr "Abrir"
+
+msgid "Save"
+msgstr "Salvar"
+
+msgid "Refresh"
+msgstr "Atualizar"
+
+msgid "Play"
+msgstr "Reproduzir"
+
+msgid "Pause"
+msgstr "Pausar"
+
+msgid "Palette"
+msgstr "Paleta"
+
+msgid "Bookmark"
+msgstr "Marcador"
+
+msgid "Printer"
+msgstr "Impressora"
+
+msgid "Sun"
+msgstr "Sol"
+
+msgid "Moon"
+msgstr "Lua"
+
+msgid "Network"
+msgstr "Rede"
+
+msgid "Lock"
+msgstr "Bloquear"
+
+msgid "Unlock"
+msgstr "Desbloquear"
+
+msgid "Info"
+msgstr "Informações"

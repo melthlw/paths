@@ -7,6 +7,7 @@ pub mod grid;
 pub mod i18n;
 pub mod io;
 pub mod layer;
+pub mod libraries_store;
 pub mod page;
 pub mod renderer;
 pub mod path_editor_config;
@@ -21,10 +22,10 @@ pub mod units;
 pub use color::Color;
 pub use document::{Document, TransformOptions};
 pub use element::{
-    dist_to_segment, get_system_font_families, ArcMode, BlendMode, BrushStroke, CornerRadii,
-    CornerStyle, Element, ElementId, FillLayer, FillStyle, Gradient, GradientType, ImageElement,
-    MeshGradient, PathElement, PathNode, PatternType, RectElement, ShapeOrigin, StrokeLayer,
-    StrokeStyle, TextAlign, TextElement,
+    dist_to_segment, get_system_font_families, ArcMode, BlendMode, BrushMode, BrushStroke,
+    BrushStyle, CornerRadii, CornerStyle, Element, ElementId, FillLayer, FillStyle, Gradient,
+    GradientType, ImageElement, MeshGradient, PathElement, PathNode, PatternType, RectElement,
+    ShapeOrigin, StrokeCap, StrokeJoin, StrokeLayer, StrokeStyle, TextAlign, TextElement,
 };
 pub use events::{KeyEvent, PointerButton, PointerEvent};
 pub use geometry::{

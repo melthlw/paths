@@ -1,3 +1,4 @@
+pub mod brush;
 pub mod helpers;
 pub mod pen;
 pub mod pen_brush_text;
@@ -8,6 +9,7 @@ use gtk4::prelude::*;
 use std::cell::Cell;
 use std::rc::Rc;
 
+use self::brush::{build_brush_controls, BrushControls};
 use self::pen::{build_pen_controls, PenControls};
 use self::pen_brush_text::build_pen_brush_text_controls;
 use self::select::build_select_controls;
@@ -29,6 +31,8 @@ pub struct ToolOptionsBar {
     shape_sep: gtk4::Separator,
     pen_box: gtk4::Box,
     pen_controls: PenControls,
+    brush_box: gtk4::Box,
+    brush_controls: BrushControls,
     // Shape-specific controls
     rect_radius_box: gtk4::Box,
     rect_r_lbl: gtk4::Label,
@@ -204,6 +208,10 @@ impl ToolOptionsBar {
         let pen_box = pen_controls.pen_box.clone();
         left_capsule.append(&pen_box);
 
+        let brush_controls = build_brush_controls(&canvas, &is_syncing);
+        let brush_box = brush_controls.brush_box.clone();
+        left_capsule.append(&brush_box);
+
         container.append(&left_capsule);
         container.append(&text_capsule);
         container.append(&page_capsule);
@@ -368,6 +376,8 @@ impl ToolOptionsBar {
             path_editor_box,
             pen_box,
             pen_controls,
+            brush_box,
+            brush_controls,
             canvas,
             is_syncing,
             is_top,
@@ -471,6 +481,7 @@ impl ToolOptionsBar {
             self.circle_box.set_visible(false);
             self.spiral_box.set_visible(false);
             self.pen_box.set_visible(false);
+            self.brush_box.set_visible(false);
 
             self.is_syncing.set(true);
             match tool_id {
@@ -631,6 +642,7 @@ impl ToolOptionsBar {
             self.general_box.set_visible(false);
             self.shape_options_box.set_visible(false);
             self.pen_box.set_visible(false);
+            self.brush_box.set_visible(false);
             self.path_editor_box.set_visible(true);
         } else if tool_id == "pen" || tool_id == "vector-pen" || tool_id == "vector_pen" {
             self.container.set_visible(true);
@@ -641,6 +653,7 @@ impl ToolOptionsBar {
             self.general_box.set_visible(false);
             self.shape_options_box.set_visible(false);
             self.path_editor_box.set_visible(false);
+            self.brush_box.set_visible(false);
             self.pen_box.set_visible(true);
 
             if let Ok(state_b) = self.canvas.state().try_borrow() {
@@ -680,6 +693,91 @@ impl ToolOptionsBar {
                     self.pen_controls.status_lbl.set_label(&crate::core::gettext("Ready to draw"));
                 }
             }
+        } else if tool_id == "brush" || tool_id == "pencil" {
+            self.container.set_visible(true);
+            self.text_capsule.set_visible(false);
+            self.page_capsule.set_visible(false);
+            self.left_capsule.set_visible(true);
+            self.right_capsule.set_visible(false);
+            self.general_box.set_visible(false);
+            self.shape_options_box.set_visible(false);
+            self.path_editor_box.set_visible(false);
+            self.pen_box.set_visible(false);
+            self.brush_box.set_visible(true);
+
+            if let Ok(state_b) = self.canvas.state().try_borrow() {
+                if let Some(feat) = state_b.plugin_manager.feature_by_id("brush") {
+                    if let Some(brush) = feat.as_brush_feature() {
+                        self.is_syncing.set(true);
+                        self.brush_controls
+                            .btn_mode_brush
+                            .set_active(brush.mode == crate::core::BrushMode::Brush);
+                        self.brush_controls
+                            .btn_mode_pencil
+                            .set_active(brush.mode == crate::core::BrushMode::Pencil);
+                        let style_idx = match brush.style {
+                            crate::core::BrushStyle::Round => 0,
+                            crate::core::BrushStyle::Pencil => 1,
+                            crate::core::BrushStyle::Calligraphy => 2,
+                            crate::core::BrushStyle::Ink => 3,
+                            crate::core::BrushStyle::Marker => 4,
+                            crate::core::BrushStyle::Airbrush => 5,
+                        };
+                        self.brush_controls.style_dd.set_selected(style_idx);
+                        self.brush_controls
+                            .calligraphy_box
+                            .set_visible(brush.style == crate::core::BrushStyle::Calligraphy);
+                        self.brush_controls
+                            .calligraphy_angle_spin
+                            .set_value(brush.calligraphy_angle as f64);
+                        self.brush_controls.width_spin.set_value(brush.width as f64);
+                        self.brush_controls
+                            .smoothing_spin
+                            .set_value((brush.smoothing * 100.0) as f64);
+                        self.brush_controls
+                            .btn_pressure
+                            .set_active(brush.pressure_dynamics);
+                        self.brush_controls
+                            .btn_taper_start
+                            .set_active(brush.taper_start);
+                        self.brush_controls.btn_taper_end.set_active(brush.taper_end);
+                        self.brush_controls
+                            .btn_auto_close
+                            .set_active(brush.auto_close);
+                        let cap_idx = match brush.cap_style {
+                            crate::core::StrokeCap::Round => 0,
+                            crate::core::StrokeCap::Square => 1,
+                            crate::core::StrokeCap::Butt => 2,
+                        };
+                        self.brush_controls.cap_dd.set_selected(cap_idx);
+
+                        let pts = brush.point_count();
+                        if pts > 0 {
+                            self.brush_controls.status_lbl.set_label(&format!(
+                                "{} ({} {})",
+                                crate::core::gettext("Drawing"),
+                                pts,
+                                if pts == 1 {
+                                    crate::core::gettext("pt")
+                                } else {
+                                    crate::core::gettext("pts")
+                                }
+                            ));
+                        } else {
+                            let msg = match brush.mode {
+                                crate::core::BrushMode::Brush => {
+                                    crate::core::gettext("Brush: Freehand Stroke")
+                                }
+                                crate::core::BrushMode::Pencil => {
+                                    crate::core::gettext("Pencil: Vector Bézier Curve")
+                                }
+                            };
+                            self.brush_controls.status_lbl.set_label(&msg);
+                        }
+                        self.is_syncing.set(false);
+                    }
+                }
+            }
         } else if has_selection {
             self.container.set_visible(true);
             self.text_capsule.set_visible(false);
@@ -690,6 +788,7 @@ impl ToolOptionsBar {
             self.shape_options_box.set_visible(false);
             self.path_editor_box.set_visible(false);
             self.pen_box.set_visible(false);
+            self.brush_box.set_visible(false);
 
             self.layer_box.set_visible(selected_count > 0);
             self.transform_modes_box.set_visible(true);
@@ -702,6 +801,7 @@ impl ToolOptionsBar {
             self.text_capsule.set_visible(false);
             self.page_capsule.set_visible(false);
             self.pen_box.set_visible(false);
+            self.brush_box.set_visible(false);
         }
 
         let (icon_res, tool_name) = match tool_id {

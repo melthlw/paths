@@ -1,8 +1,7 @@
-use gtk4::prelude::*;
-use crate::core::Point;
 use super::CanvasWidget;
+use crate::core::Point;
+use gtk4::prelude::*;
 
-#[allow(dead_code)]
 impl CanvasWidget {
     pub fn convert_selected_to_path(&self) {
         let mut state = self.state.borrow_mut();
@@ -440,6 +439,7 @@ impl CanvasWidget {
         self.drawing_area.queue_draw();
     }
 
+    #[allow(dead_code)]
     pub fn get_selected_node_coord(&self) -> Option<Point> {
         if let Ok(state) = self.state.try_borrow() {
             if let Some(feat) = state.plugin_manager.feature_by_id("path_editor") {
@@ -453,6 +453,7 @@ impl CanvasWidget {
         }
     }
 
+    #[allow(dead_code)]
     pub fn set_selected_node_coord(&self, new_pos: Point) {
         let mut state = self.state.borrow_mut();
         let selected_nodes = if let Some(feat) = state.plugin_manager.feature_by_id("path_editor") {

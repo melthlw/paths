@@ -12,7 +12,7 @@ pub use transform::TransformOptions;
 use std::collections::HashSet;
 
 use crate::core::color::Color;
-use crate::core::element::{BlendMode, Element, ElementId};
+use crate::core::element::{Element, ElementId};
 use crate::core::geometry::{Point, Rect};
 use crate::core::page::{Page, PageId};
 use crate::core::ruler::{Guide, GuideOrientation};
@@ -233,7 +233,6 @@ impl Document {
         Self::find_element_recursive(&self.elements, id)
     }
 
-    #[allow(dead_code)]
     pub fn find_element_mut(&mut self, id: ElementId) -> Option<&mut Element> {
         Self::find_element_mut_recursive(&mut self.elements, id)
     }
@@ -334,7 +333,9 @@ impl Document {
 pub mod tests {
     use super::*;
     use crate::core::color::Color;
-    use crate::core::element::{FillLayer, FillStyle, RectElement, StrokeLayer, StrokeStyle};
+    use crate::core::element::{
+        BlendMode, FillLayer, FillStyle, RectElement, StrokeLayer, StrokeStyle,
+    };
     use crate::core::ruler::{Guide, GuideOrientation};
 
     #[test]

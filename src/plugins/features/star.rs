@@ -425,34 +425,27 @@ impl FeaturePlugin for StarFeature {
             }
         }
 
-        // 2. Check if clicking on an existing star to select it
-        let hit_star = ctx.document.elements.iter().rev().find_map(|e| {
-            if let Element::Path(p) = e {
+        // 2. Check if clicking on ANY existing element to select it
+        if let Some(hit_id) = ctx.document.hit_test(event.world_pos) {
+            ctx.document.select(hit_id, event.shift_pressed);
+            if let Some(Element::Path(p)) = ctx.document.find_element(hit_id) {
                 if let Some(ShapeOrigin::Star {
                     points,
                     inner_ratio,
                     corner_radius,
                 }) = p.shape_origin
                 {
-                    if p.bounds().contains(event.world_pos) {
-                        return Some((e.id(), points, inner_ratio, corner_radius));
-                    }
+                    self.num_points = points;
+                    self.inner_ratio = inner_ratio;
+                    self.corner_radius = corner_radius;
                 }
             }
-            None
-        });
-
-        if let Some((id, pts, ratio, r_rad)) = hit_star {
-            ctx.document.select(id, false);
-            self.num_points = pts;
-            self.inner_ratio = ratio;
-            self.corner_radius = r_rad;
             self.state = StarToolState::MovingElement {
                 start_world: event.world_pos,
-                elem_id: id,
+                elem_id: hit_id,
                 has_dragged: false,
             };
-            ctx.set_cursor("pointer");
+            ctx.set_cursor("move");
             ctx.request_redraw();
             return;
         }

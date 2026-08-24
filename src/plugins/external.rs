@@ -58,7 +58,9 @@ pub fn scan_and_load_external_plugins() -> Vec<ExternalPlugin> {
                             loaded.push(p);
                         }
                         Err(e) => {
-                            eprintln!("Warning: Failed to load external plugin {:?}: {}", path, e);
+                            if std::env::var_os("GNOME_PATHS_DEBUG").is_some() {
+                                eprintln!("Debug: Skipped external library {:?}: {}", path, e);
+                            }
                         }
                     }
                 }

@@ -3,14 +3,14 @@ use gtk4::gio;
 use gtk4::prelude::*;
 use std::path::{Path, PathBuf};
 
+use super::CanvasWidget;
 use crate::core::{
     Color, ElementId, GridConfig, GridStyle, Point, RulerConfig, SnapConfig, ARTBOARD_HEIGHT,
     ARTBOARD_WIDTH,
 };
-use super::CanvasWidget;
 
-#[allow(dead_code)]
 impl CanvasWidget {
+    #[allow(dead_code)]
     pub fn is_dirty(&self) -> bool {
         self.state.try_borrow().map(|s| s.is_dirty).unwrap_or(false)
     }
@@ -196,11 +196,7 @@ impl CanvasWidget {
 
                         for mut elem in svg_res.elements {
                             if (scale - 1.0).abs() > 0.001 {
-                                elem.scale(
-                                    Point::new(orig_center_x, orig_center_y),
-                                    scale,
-                                    scale,
-                                );
+                                elem.scale(Point::new(orig_center_x, orig_center_y), scale, scale);
                             }
                             elem.translate(offset_x, offset_y);
                             state.document.add_element(elem);
@@ -273,6 +269,7 @@ impl CanvasWidget {
             .and_then(|s| s.current_file_path.clone())
     }
 
+    #[allow(dead_code)]
     pub fn clear_canvas(&self) {
         let mut state = self.state.borrow_mut();
         state.document.clear();
@@ -485,12 +482,18 @@ impl CanvasWidget {
 
     // Viewport & Zoom
     pub fn zoom(&self) -> f32 {
-        self.state.try_borrow().map(|s| s.viewport.zoom).unwrap_or(1.0)
+        self.state
+            .try_borrow()
+            .map(|s| s.viewport.zoom)
+            .unwrap_or(1.0)
     }
 
     pub fn set_zoom(&self, zoom: f32) {
         let mut state = self.state.borrow_mut();
-        state.viewport.zoom = zoom.clamp(crate::core::Viewport::MIN_ZOOM, crate::core::Viewport::MAX_ZOOM);
+        state.viewport.zoom = zoom.clamp(
+            crate::core::Viewport::MIN_ZOOM,
+            crate::core::Viewport::MAX_ZOOM,
+        );
         state.notify_status();
         drop(state);
         self.drawing_area.queue_draw();
@@ -595,6 +598,7 @@ impl CanvasWidget {
         self.drawing_area.queue_draw();
     }
 
+    #[allow(dead_code)]
     pub fn deselect_all(&self) {
         let mut state = self.state.borrow_mut();
         state.document.selected_ids.clear();
@@ -850,7 +854,11 @@ impl CanvasWidget {
 
     pub fn unlink_all_clones_for_master(&self, master_id: ElementId) {
         let mut state = self.state.borrow_mut();
-        if !state.document.unlink_all_clones_for_master(master_id).is_empty() {
+        if !state
+            .document
+            .unlink_all_clones_for_master(master_id)
+            .is_empty()
+        {
             state.notify_status();
             self.drawing_area.queue_draw();
         }
@@ -885,21 +893,29 @@ impl CanvasWidget {
         self.drawing_area.queue_draw();
     }
 
-    pub fn get_clones_for_master(&self, master_id: ElementId) -> Vec<crate::core::element::CloneElement> {
+    pub fn get_clones_for_master(
+        &self,
+        master_id: ElementId,
+    ) -> Vec<crate::core::element::CloneElement> {
         self.state
             .try_borrow()
             .map(|s| s.document.get_clones_for_master(master_id))
             .unwrap_or_default()
     }
 
-    pub fn get_all_clone_relationships(&self) -> Vec<(ElementId, Vec<crate::core::element::CloneElement>)> {
+    pub fn get_all_clone_relationships(
+        &self,
+    ) -> Vec<(ElementId, Vec<crate::core::element::CloneElement>)> {
         self.state
             .try_borrow()
             .map(|s| s.document.get_all_clone_relationships())
             .unwrap_or_default()
     }
 
-    pub fn get_master_for_clone(&self, clone_id: ElementId) -> Option<crate::core::element::Element> {
+    pub fn get_master_for_clone(
+        &self,
+        clone_id: ElementId,
+    ) -> Option<crate::core::element::Element> {
         self.state
             .try_borrow()
             .ok()
@@ -946,6 +962,7 @@ impl CanvasWidget {
         self.drawing_area.queue_draw();
     }
 
+    #[allow(dead_code)]
     pub fn graphics_device_info(&self) -> String {
         if let Some(display) = gtk4::gdk::Display::default() {
             let hw = self.state.borrow().render_options.hardware_accelerated;

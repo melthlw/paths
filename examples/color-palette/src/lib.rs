@@ -4,7 +4,6 @@
 //! with Fill/Stroke mode toggles, color presets, custom palette management,
 //! and 4-way screen repositioning.
 
-#[allow(dead_code)]
 pub struct ColorPalettePlugin {
     id: &'static str,
     name: &'static str,

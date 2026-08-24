@@ -6,9 +6,9 @@ use super::TabLocation;
 use crate::ui::canvas::CanvasWidget;
 
 pub fn build_catalog_popover(
-    tab_info: &[(String, Option<&'static str>, &'static str); 5],
-    tab_locations: &Rc<RefCell<[TabLocation; 5]>>,
-    active_section_tabs: &Rc<RefCell<[usize; 5]>>,
+    tab_info: &[(String, Option<&'static str>, &'static str); 6],
+    tab_locations: &Rc<RefCell<[TabLocation; 6]>>,
+    active_section_tabs: &Rc<RefCell<[usize; 6]>>,
     canvas: &CanvasWidget,
     refresh_fn: Rc<dyn Fn()>,
 ) -> gtk4::Popover {
@@ -203,28 +203,6 @@ pub fn build_catalog_popover(
         .spacing(6)
         .build();
 
-    let restore_btn = gtk4::Button::builder()
-        .label(crate::core::gettext("Open All"))
-        .icon_name("view-grid-symbolic")
-        .css_classes(["flat", "menu-item-btn"])
-        .hexpand(true)
-        .build();
-
-    let locs_rest = tab_locations.clone();
-    let re_rest = refresh_fn.clone();
-    let pop_r = add_pop.clone();
-    restore_btn.connect_clicked(move |_| {
-        pop_r.popdown();
-        *locs_rest.borrow_mut() = [
-            TabLocation::Docked(0),
-            TabLocation::Docked(0),
-            TabLocation::Docked(0),
-            TabLocation::Docked(0),
-            TabLocation::Docked(0),
-        ];
-        re_rest();
-    });
-
     let close_all_btn = gtk4::Button::builder()
         .label(crate::core::gettext("Close All"))
         .icon_name("window-close-symbolic")
@@ -243,11 +221,11 @@ pub fn build_catalog_popover(
             TabLocation::Closed,
             TabLocation::Closed,
             TabLocation::Closed,
+            TabLocation::Closed,
         ];
         re_close_all();
     });
 
-    bottom_btns_box.append(&restore_btn);
     bottom_btns_box.append(&close_all_btn);
     pop_wrapper.append(&bottom_btns_box);
 

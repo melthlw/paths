@@ -178,8 +178,9 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
 
                 for (idx, clone) in clones.iter().enumerate() {
                     let cid = clone.id;
+                    let title_text = clone.name.clone().unwrap_or_else(|| format!("Clone #{}", idx + 1));
                     let row = adw::ActionRow::builder()
-                        .title(clone.name.as_deref().unwrap_or(&format!("Clone #{}", idx + 1)))
+                        .title(glib::markup_escape_text(&title_text))
                         .subtitle(format!(
                             "X: {:.1} px  Y: {:.1} px • Scale: {:.0}% × {:.0}% • Rot: {:.1}°",
                             clone.offset.x,
@@ -396,8 +397,9 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
                             continue;
                         }
                         let s_id = sib.id;
+                        let title_text = sib.name.clone().unwrap_or_else(|| format!("Clone #{}", idx + 1));
                         let row = adw::ActionRow::builder()
-                            .title(sib.name.as_deref().unwrap_or(&format!("Clone #{}", idx + 1)))
+                            .title(glib::markup_escape_text(&title_text))
                             .subtitle(format!("X: {:.1} px  Y: {:.1} px", sib.offset.x, sib.offset.y))
                             .activatable(true)
                             .build();
@@ -491,7 +493,7 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
                 };
 
                 let expander = adw::ExpanderRow::builder()
-                    .title(&master_name)
+                    .title(glib::markup_escape_text(&master_name))
                     .subtitle(format!(
                         "{} {}",
                         clones.len(),
@@ -521,8 +523,9 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
 
                 for (idx, clone) in clones.iter().enumerate() {
                     let cid = clone.id;
+                    let title_text = clone.name.clone().unwrap_or_else(|| format!("Clone #{}", idx + 1));
                     let row = adw::ActionRow::builder()
-                        .title(clone.name.as_deref().unwrap_or(&format!("Clone #{}", idx + 1)))
+                        .title(glib::markup_escape_text(&title_text))
                         .subtitle(format!(
                             "X: {:.1} px  Y: {:.1} px • Scale: {:.0}%",
                             clone.offset.x,

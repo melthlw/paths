@@ -426,8 +426,9 @@ pub fn draw_snap_guides(canvas: &skia::Canvas, guides: &[SnapGuide], zoom: f32) 
 }
 
 pub fn draw_selection_highlight(canvas: &skia::Canvas, bounds: Rect, zoom: f32) {
-    let stroke_width = (1.2 / zoom).max(1.0);
-    let handle_size = (7.5 / zoom).clamp(4.5, 9.5);
+    let z = zoom.max(0.001);
+    let stroke_width = 1.2 / z;
+    let handle_size = 7.5 / z;
     let r = bounds.normalize();
     let theme_accent = crate::ui::theme::current_visual_theme().accent_color().to_skia();
 
@@ -435,7 +436,7 @@ pub fn draw_selection_highlight(canvas: &skia::Canvas, bounds: Rect, zoom: f32) 
     let mut shadow_stroke = Paint::default();
     shadow_stroke.set_color4f(Color4f::new(0.0, 0.0, 0.0, 0.22), None);
     shadow_stroke.set_style(PaintStyle::Stroke);
-    shadow_stroke.set_stroke_width(stroke_width + 1.0 / zoom);
+    shadow_stroke.set_stroke_width(stroke_width + 1.0 / z);
     shadow_stroke.set_anti_alias(true);
     canvas.draw_rect(r.to_skia(), &shadow_stroke);
 
@@ -476,12 +477,12 @@ pub fn draw_selection_highlight(canvas: &skia::Canvas, bounds: Rect, zoom: f32) 
     ];
 
     let half = handle_size / 2.0;
-    let corner_rad = (1.5 / zoom).clamp(1.0, 2.5);
+    let corner_rad = 1.5 / z;
 
     for p in points {
         let shadow_rect = skia::Rect::from_xywh(
             p.x - half,
-            p.y - half + 0.8 / zoom,
+            p.y - half + 0.8 / z,
             handle_size,
             handle_size,
         );
@@ -493,12 +494,12 @@ pub fn draw_selection_highlight(canvas: &skia::Canvas, bounds: Rect, zoom: f32) 
 
     // 4. Rotation Lollipop Handle
     let rot_top = Point::new(r.x + r.width / 2.0, r.y);
-    let rot_handle = Point::new(r.x + r.width / 2.0, r.y - 20.0 / zoom);
+    let rot_handle = Point::new(r.x + r.width / 2.0, r.y - 20.0 / z);
     let rot_radius = half * 1.15;
 
     canvas.draw_line(rot_top.to_skia(), rot_handle.to_skia(), &stroke_paint);
     canvas.draw_circle(
-        skia::Point::new(rot_handle.x, rot_handle.y + 0.8 / zoom),
+        skia::Point::new(rot_handle.x, rot_handle.y + 0.8 / z),
         rot_radius,
         &handle_shadow,
     );

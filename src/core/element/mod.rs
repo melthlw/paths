@@ -6,7 +6,7 @@ pub mod style;
 pub mod text;
 
 #[allow(unused_imports)]
-pub use brush::BrushStroke;
+pub use brush::{BrushMode, BrushStroke, BrushStyle, StrokeCap, StrokeJoin};
 #[allow(unused_imports)]
 pub use group::{CloneElement, GroupElement, ImageElement};
 #[allow(unused_imports)]
@@ -988,5 +988,32 @@ mod tests {
         path.bend_segment(0, Point::new(10.0, 20.0), 0.5);
         assert!(path.nodes[0].handle_out.is_some());
         assert!(path.nodes[1].handle_in.is_some());
+    }
+
+    #[test]
+    fn test_brush_stroke_and_path_conversion() {
+        let pts = vec![
+            Point::new(0.0, 0.0),
+            Point::new(50.0, 25.0),
+            Point::new(100.0, 0.0),
+            Point::new(150.0, 50.0),
+        ];
+        let mut stroke = BrushStroke::new(pts, Color::BLACK, 4.0);
+        stroke.style = BrushStyle::Calligraphy;
+        stroke.smoothing = 0.5;
+        stroke.auto_close = false;
+        stroke.cap_style = StrokeCap::Square;
+
+        assert_eq!(stroke.style, BrushStyle::Calligraphy);
+        assert_eq!(stroke.cap_style, StrokeCap::Square);
+        assert!(stroke.bounds().width > 0.0);
+
+        let path_elem = stroke.to_path_element();
+        assert_eq!(path_elem.nodes.len(), 4);
+        assert!(!path_elem.is_closed);
+        assert_eq!(path_elem.stroke_width, 4.0);
+        // Catmull-Rom generated smooth handles for intermediate nodes
+        assert!(path_elem.nodes[1].handle_in.is_some());
+        assert!(path_elem.nodes[1].handle_out.is_some());
     }
 }

@@ -4,7 +4,9 @@ pub mod items;
 #[allow(unused_imports)]
 pub use customizer::{show_customize_toolbar_dialog, show_customize_toolbar_dialog_standalone};
 #[allow(unused_imports)]
-pub use items::{generate_default_items, get_tool_meta, rebuild_toolbar_items, SubToolItem, ToolItem};
+pub use items::{
+    generate_default_items, get_tool_meta, rebuild_toolbar_items, SubToolItem, ToolItem,
+};
 
 use gtk4::prelude::*;
 use std::cell::{Cell, RefCell};
@@ -14,11 +16,16 @@ use std::rc::Rc;
 use crate::plugins::manifest::BarPosition;
 use crate::ui::canvas::CanvasWidget;
 
+#[allow(dead_code)]
 pub struct FloatingToolbar {
     container: gtk4::Box,
 }
 
 impl FloatingToolbar {
+    #[allow(dead_code)]
+    pub fn widget(&self) -> &gtk4::Box {
+        &self.container
+    }
     pub fn new(
         canvas: CanvasWidget,
         dock_box: gtk4::Box,
@@ -38,6 +45,7 @@ impl FloatingToolbar {
             .spacing(4)
             .build();
         container.append(&items_box);
+        dock_box.append(&container);
 
         let buttons = Rc::new(RefCell::new(HashMap::new()));
         let is_updating = Rc::new(Cell::new(false));
@@ -74,7 +82,9 @@ impl FloatingToolbar {
         grip.set_opacity(0.7);
         grip.set_margin_start(4);
         grip.set_margin_end(4);
-        grip.set_tooltip_text(Some(&crate::core::gettext("Toolbar Options and Customization")));
+        grip.set_tooltip_text(Some(&crate::core::gettext(
+            "Toolbar Options and Customization",
+        )));
         container.append(&grip);
 
         // Menu Popover attached to Grip
@@ -106,10 +116,26 @@ impl FloatingToolbar {
             .build();
 
         let positions = [
-            (crate::core::gettext("Bottom"), BarPosition::Bottom, "go-down-symbolic"),
-            (crate::core::gettext("Top"), BarPosition::Top, "go-up-symbolic"),
-            (crate::core::gettext("Left"), BarPosition::Left, "go-previous-symbolic"),
-            (crate::core::gettext("Right"), BarPosition::Right, "go-next-symbolic"),
+            (
+                crate::core::gettext("Bottom"),
+                BarPosition::Bottom,
+                "go-down-symbolic",
+            ),
+            (
+                crate::core::gettext("Top"),
+                BarPosition::Top,
+                "go-up-symbolic",
+            ),
+            (
+                crate::core::gettext("Left"),
+                BarPosition::Left,
+                "go-previous-symbolic",
+            ),
+            (
+                crate::core::gettext("Right"),
+                BarPosition::Right,
+                "go-next-symbolic",
+            ),
         ];
 
         let apply_pos = {
@@ -131,6 +157,15 @@ impl FloatingToolbar {
                 };
                 crate::core::AppSettings::set_toolbar_position(pos_str);
 
+                let reorder_dock = |first: &gtk4::Box, second: &gtk4::Box| {
+                    if first.parent().as_ref() == Some(dock_box_c.upcast_ref())
+                        && second.parent().as_ref() == Some(dock_box_c.upcast_ref())
+                    {
+                        dock_box_c.reorder_child_after(first, None::<&gtk4::Widget>);
+                        dock_box_c.reorder_child_after(second, Some(first));
+                    }
+                };
+
                 match pos {
                     BarPosition::Bottom => {
                         dock_box_c.set_orientation(gtk4::Orientation::Horizontal);
@@ -141,8 +176,7 @@ impl FloatingToolbar {
                         dock_box_c.set_margin_start(0);
                         dock_box_c.set_margin_end(0);
 
-                        dock_box_c.reorder_child_after(color_bar_c.widget(), None::<&gtk4::Widget>);
-                        dock_box_c.reorder_child_after(&container_c, Some(color_bar_c.widget()));
+                        reorder_dock(color_bar_c.widget(), &container_c);
 
                         color_bar_c.set_orientation(gtk4::Orientation::Horizontal);
                         container_c.set_orientation(gtk4::Orientation::Horizontal);
@@ -163,8 +197,7 @@ impl FloatingToolbar {
                         dock_box_c.set_margin_start(0);
                         dock_box_c.set_margin_end(0);
 
-                        dock_box_c.reorder_child_after(&container_c, None::<&gtk4::Widget>);
-                        dock_box_c.reorder_child_after(color_bar_c.widget(), Some(&container_c));
+                        reorder_dock(&container_c, color_bar_c.widget());
 
                         color_bar_c.set_orientation(gtk4::Orientation::Horizontal);
                         container_c.set_orientation(gtk4::Orientation::Horizontal);
@@ -185,8 +218,7 @@ impl FloatingToolbar {
                         dock_box_c.set_margin_top(0);
                         dock_box_c.set_margin_bottom(0);
 
-                        dock_box_c.reorder_child_after(color_bar_c.widget(), None::<&gtk4::Widget>);
-                        dock_box_c.reorder_child_after(&container_c, Some(color_bar_c.widget()));
+                        reorder_dock(color_bar_c.widget(), &container_c);
 
                         color_bar_c.set_orientation(gtk4::Orientation::Vertical);
                         container_c.set_orientation(gtk4::Orientation::Vertical);
@@ -207,8 +239,7 @@ impl FloatingToolbar {
                         dock_box_c.set_margin_top(0);
                         dock_box_c.set_margin_bottom(0);
 
-                        dock_box_c.reorder_child_after(&container_c, None::<&gtk4::Widget>);
-                        dock_box_c.reorder_child_after(color_bar_c.widget(), Some(&container_c));
+                        reorder_dock(&container_c, color_bar_c.widget());
 
                         color_bar_c.set_orientation(gtk4::Orientation::Vertical);
                         container_c.set_orientation(gtk4::Orientation::Vertical);
@@ -340,9 +371,5 @@ impl FloatingToolbar {
         }));
 
         toolbar
-    }
-
-    pub fn widget(&self) -> &gtk4::Box {
-        &self.container
     }
 }
