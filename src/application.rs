@@ -137,8 +137,8 @@ impl DesignApplication {
             .comments(&crate::core::gettext(
                 "Modern vector design editor accelerated by Skia GPU, built with GTK4, Libadwaita and Rust.",
             ))
-            .website("https://github.com/lewis/gnome-paths")
-            .issue_url("https://github.com/lewis/gnome-paths/issues")
+            .website("https://gitlab.com/lewisHeart/gnome-paths")
+            .issue_url("https://gitlab.com/lewisHeart/gnome-paths/-/issues")
             .build();
 
         if let Some(win) = active_window.as_ref() {

@@ -198,7 +198,7 @@ Community support is essential to help GNOME Paths grow. If you'd like to get in
 ### GNOME Builder
 
 1. Install **GNOME Builder** from Flathub.
-2. Clone the repository URL `https://gitlab.gnome.org/lewisHeart/gnome-paths.git`.
+2. Clone the repository URL `https://gitlab.com/lewisHeart/gnome-paths.git`.
 3. Select the Flatpak runtime configuration.
 4. Click **Run** to build and run the application.
 
@@ -248,7 +248,7 @@ Detailed instructions on contributing and managing translations can be found in 
 
 ## Repository and Support
 
-- **GitLab**: [gitlab.gnome.org/lewisHeart/gnome-paths](https://gitlab.gnome.org/lewisHeart/gnome-paths)
+- **GitLab**: [gitlab.com/lewisHeart/gnome-paths](https://gitlab.com/lewisHeart/gnome-paths)
 - **Ko-fi**: [ko-fi.com/lauel](https://ko-fi.com/lauel)
 
 ---

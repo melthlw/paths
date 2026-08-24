@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: gnome-paths 0.1.0\n"
-"Report-Msgid-Bugs-To: https://github.com/lewis/gnome-paths/issues\n"
+"Report-Msgid-Bugs-To: https://gitlab.com/lewisHeart/gnome-paths/-/issues\n"
 "POT-Creation-Date: 2026-08-22 16:30-0300\n"
 "POT-Creation-Date: 2026-08-22 16:30-0300\n"
 "Last-Translator: Lewis <EMAIL@ADDRESS>\n"

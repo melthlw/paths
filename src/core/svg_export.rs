@@ -119,7 +119,7 @@ pub fn export_document_to_svg(doc: &Document) -> String {
         svg,
         r#"<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     xmlns:gnomepaths="https://github.com/lewis/gnome-paths"
+     xmlns:gnomepaths="https://gitlab.com/lewisHeart/gnome-paths"
      width="{:.2}" height="{:.2}" viewBox="{:.2} {:.2} {:.2} {:.2}" version="1.1">"#,
         width, height, view_box_x, view_box_y, width, height
     );
