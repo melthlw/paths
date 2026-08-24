@@ -8,7 +8,7 @@ Development roadmap structured by version milestones.
 > **Focus**: State persistence, robust object manipulation, and linked clone management.
 
 ### Interface & System
-- [ ] **Session & Window State Persistence**: Save and restore UI state (window geometry, sidebar panel states, active zoom, and display preferences) via `GSettings` / D-Bus.
+- [x] **Session & Window State Persistence**: Save and restore UI state (window geometry, sidebar panel states, active zoom, and display preferences) via `GSettings` / D-Bus.
 
 ### Manipulation & Objects
 - [ ] **Linked Clones Decoupling**:

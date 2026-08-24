@@ -41,6 +41,7 @@ pub fn build_canvas_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
                     crate::core::Color::from_hex(&code)
                 };
                 c_c.set_canvas_bg_color(color);
+                crate::core::AppSettings::set_canvas_bg_color(&code);
             },
         );
         canvas_bg_row.add_suffix(&bg_swatches);
@@ -55,7 +56,9 @@ pub fn build_canvas_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
     {
         let c_c = canvas.clone();
         workspace_dots_row.connect_active_notify(move |sw| {
-            c_c.set_show_workspace_dots(sw.is_active());
+            let active = sw.is_active();
+            c_c.set_show_workspace_dots(active);
+            crate::core::AppSettings::set_workspace_dots(active);
         });
     }
     canvas_bg_group.add(&workspace_dots_row);
@@ -98,6 +101,7 @@ pub fn build_canvas_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
                     crate::core::Color::from_hex(&code)
                 };
                 c_c.set_page_bg_color(color);
+                crate::core::AppSettings::set_page_bg_color(&code);
             },
         );
         page_bg_row.add_suffix(&paper_swatches);
@@ -112,7 +116,9 @@ pub fn build_canvas_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
     {
         let c_c = canvas.clone();
         page_shadow_row.connect_active_notify(move |sw| {
-            c_c.set_page_shadow(sw.is_active());
+            let active = sw.is_active();
+            c_c.set_page_shadow(active);
+            crate::core::AppSettings::set_page_shadow(active);
         });
     }
     page_style_group.add(&page_shadow_row);
@@ -125,7 +131,9 @@ pub fn build_canvas_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
     {
         let c_c = canvas.clone();
         page_border_row.connect_active_notify(move |sw| {
-            c_c.set_page_border(sw.is_active());
+            let active = sw.is_active();
+            c_c.set_page_border(active);
+            crate::core::AppSettings::set_page_border(active);
         });
     }
     page_style_group.add(&page_border_row);
@@ -148,7 +156,9 @@ pub fn build_canvas_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
     {
         let c_c = canvas.clone();
         grid_vis_row.connect_active_notify(move |sw| {
-            c_c.set_grid_visible(sw.is_active());
+            let active = sw.is_active();
+            c_c.set_grid_visible(active);
+            crate::core::AppSettings::set_show_grid(active);
         });
     }
     grid_group.add(&grid_vis_row);
@@ -178,6 +188,7 @@ pub fn build_canvas_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
                     _ => crate::core::GridStyle::Lines,
                 };
                 c_c.set_grid_style(style);
+                crate::core::AppSettings::set_grid_style(code);
             },
         );
         grid_style_row.add_suffix(&style_capsule);
@@ -193,7 +204,9 @@ pub fn build_canvas_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
     {
         let c_c = canvas.clone();
         cell_row.connect_value_notify(move |spin| {
-            c_c.set_grid_cell_size(spin.value() as f32);
+            let val = spin.value();
+            c_c.set_grid_cell_size(val as f32);
+            crate::core::AppSettings::set_grid_cell_size(val);
         });
     }
     grid_group.add(&cell_row);
@@ -207,7 +220,9 @@ pub fn build_canvas_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
     {
         let c_c = canvas.clone();
         sub_row.connect_value_notify(move |spin| {
-            c_c.set_grid_subdivisions(spin.value() as u32);
+            let val = spin.value() as u32;
+            c_c.set_grid_subdivisions(val);
+            crate::core::AppSettings::set_grid_subdivisions(val);
         });
     }
     grid_group.add(&sub_row);
@@ -305,6 +320,7 @@ pub fn build_canvas_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
             move |u_str| {
                 if let Some(unit) = crate::core::Unit::from_suffix(&u_str) {
                     c_c.set_unit(unit);
+                    crate::core::AppSettings::set_unit(&u_str);
                 }
             },
         );
@@ -332,7 +348,9 @@ pub fn build_canvas_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
     {
         let canvas_c = canvas.clone();
         snap_grid_row.connect_active_notify(move |sw| {
-            canvas_c.set_snap_to_grid(sw.is_active());
+            let active = sw.is_active();
+            canvas_c.set_snap_to_grid(active);
+            crate::core::AppSettings::set_snap_to_grid(active);
         });
     }
     snap_group.add(&snap_grid_row);
@@ -347,7 +365,9 @@ pub fn build_canvas_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
     {
         let canvas_c = canvas.clone();
         snap_obj_row.connect_active_notify(move |sw| {
-            canvas_c.set_snap_to_objects(sw.is_active());
+            let active = sw.is_active();
+            canvas_c.set_snap_to_objects(active);
+            crate::core::AppSettings::set_snap_to_objects(active);
         });
     }
     snap_group.add(&snap_obj_row);
@@ -362,7 +382,9 @@ pub fn build_canvas_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
     {
         let canvas_c = canvas.clone();
         snap_artboard_row.connect_active_notify(move |sw| {
-            canvas_c.set_snap_to_artboard(sw.is_active());
+            let active = sw.is_active();
+            canvas_c.set_snap_to_artboard(active);
+            crate::core::AppSettings::set_snap_to_artboard(active);
         });
     }
     snap_group.add(&snap_artboard_row);
@@ -377,7 +399,9 @@ pub fn build_canvas_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
     {
         let canvas_c = canvas.clone();
         guides_vis_row.connect_active_notify(move |sw| {
-            canvas_c.set_guides_visible(sw.is_active());
+            let active = sw.is_active();
+            canvas_c.set_guides_visible(active);
+            crate::core::AppSettings::set_show_guides(active);
         });
     }
     snap_group.add(&guides_vis_row);

@@ -42,6 +42,7 @@ pub fn build_node_editor_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
                 let mut cfg = canvas_c.path_editor_config();
                 cfg.node_size = sz as f32;
                 canvas_c.set_path_editor_config(cfg);
+                crate::core::AppSettings::set_node_size(sz as f64);
             },
         );
         node_size_row.add_suffix(&size_capsule);
@@ -75,6 +76,7 @@ pub fn build_node_editor_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
                     _ => crate::core::HandleDisplayMode::SelectedOnly,
                 };
                 canvas_c.set_path_editor_config(cfg);
+                crate::core::AppSettings::set_handle_display_mode(code);
             },
         );
         handle_mode_row.add_suffix(&handle_capsule);
@@ -106,6 +108,7 @@ pub fn build_node_editor_page(canvas: &CanvasWidget) -> gtk4::ScrolledWindow {
                 let mut cfg = canvas_c.path_editor_config();
                 cfg.handle_size = sz as f32;
                 canvas_c.set_path_editor_config(cfg);
+                crate::core::AppSettings::set_handle_size(sz as f64);
             },
         );
         handle_size_row.add_suffix(&hsize_capsule);

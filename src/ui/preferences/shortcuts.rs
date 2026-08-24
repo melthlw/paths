@@ -57,6 +57,7 @@ pub fn build_shortcuts_page(window: &adw::Window, canvas: &CanvasWidget) -> gtk4
                     _ => ShortcutPreset::Default,
                 };
                 canvas_c.set_shortcut_preset(preset);
+                crate::core::AppSettings::set_shortcut_preset(code);
                 let sm = canvas_c.shortcuts();
                 for (act, lbl) in &*labels_c.borrow() {
                     if let Some(combo) = sm.get_shortcut(*act) {

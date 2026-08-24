@@ -23,6 +23,78 @@ pub struct DesignWindow {
 impl DesignWindow {
     pub fn new(app: &adw::Application) -> Self {
         let canvas = CanvasWidget::new();
+
+        // Restore Display & Canvas Preferences from AppSettings
+        let show_grid = crate::core::AppSettings::show_grid();
+        canvas.set_grid_visible(show_grid);
+
+        let grid_style_str = crate::core::AppSettings::grid_style();
+        let grid_style = match grid_style_str.as_str() {
+            "lines" => crate::core::GridStyle::Lines,
+            "none" => crate::core::GridStyle::None,
+            _ => crate::core::GridStyle::Dots,
+        };
+        canvas.set_grid_style(grid_style);
+        canvas.set_grid_cell_size(crate::core::AppSettings::grid_cell_size() as f32);
+        canvas.set_grid_subdivisions(crate::core::AppSettings::grid_subdivisions());
+
+        canvas.set_show_workspace_dots(crate::core::AppSettings::workspace_dots());
+        canvas.set_page_shadow(crate::core::AppSettings::page_shadow());
+        canvas.set_page_border(crate::core::AppSettings::page_border());
+
+        let canvas_bg = crate::core::AppSettings::canvas_bg_color();
+        let canvas_bg_col = if canvas_bg == "system" {
+            None
+        } else {
+            crate::core::Color::from_hex(&canvas_bg)
+        };
+        canvas.set_canvas_bg_color(canvas_bg_col);
+
+        let page_bg = crate::core::AppSettings::page_bg_color();
+        let page_bg_col = if page_bg == "transparent" {
+            Some(crate::core::Color::new(0.0, 0.0, 0.0, 0.0))
+        } else {
+            crate::core::Color::from_hex(&page_bg)
+        };
+        canvas.set_page_bg_color(page_bg_col);
+
+        canvas.set_hardware_accelerated(crate::core::AppSettings::hardware_acceleration());
+        canvas.set_high_precision_aa(crate::core::AppSettings::high_precision_aa());
+
+        canvas.set_rulers_visible(crate::core::AppSettings::show_rulers());
+        canvas.set_guides_visible(crate::core::AppSettings::show_guides());
+
+        canvas.set_snap_enabled(crate::core::AppSettings::snap_enabled());
+        canvas.set_snap_to_grid(crate::core::AppSettings::snap_to_grid());
+        canvas.set_snap_to_objects(crate::core::AppSettings::snap_to_objects());
+        canvas.set_snap_to_artboard(crate::core::AppSettings::snap_to_artboard());
+        canvas.set_snap_to_guides(crate::core::AppSettings::snap_to_guides());
+
+        let unit_str = crate::core::AppSettings::unit();
+        let unit = crate::core::Unit::from_suffix(&unit_str).unwrap_or(crate::core::Unit::Px);
+        canvas.set_unit(unit);
+
+        let mut pe_cfg = canvas.path_editor_config();
+        pe_cfg.node_size = crate::core::AppSettings::node_size() as f32;
+        pe_cfg.handle_size = crate::core::AppSettings::handle_size() as f32;
+        pe_cfg.handle_display_mode = match crate::core::AppSettings::handle_display_mode().as_str() {
+            "path" => crate::core::HandleDisplayMode::AllInSelectedPath,
+            "always" => crate::core::HandleDisplayMode::Always,
+            _ => crate::core::HandleDisplayMode::SelectedOnly,
+        };
+        canvas.set_path_editor_config(pe_cfg);
+
+        let sc_preset = match crate::core::AppSettings::shortcut_preset().as_str() {
+            "figma" => crate::core::ShortcutPreset::Figma,
+            "illustrator" => crate::core::ShortcutPreset::Illustrator,
+            "inkscape" => crate::core::ShortcutPreset::Inkscape,
+            _ => crate::core::ShortcutPreset::Default,
+        };
+        canvas.set_shortcut_preset(sc_preset);
+
+        let saved_zoom = crate::core::AppSettings::active_zoom() as f32;
+        canvas.set_zoom(saved_zoom);
+
         let main_win_holder: Rc<RefCell<Option<adw::ApplicationWindow>>> =
             Rc::new(RefCell::new(None));
         let color_bar = ColorControlBar::new(canvas.clone());
@@ -89,8 +161,9 @@ impl DesignWindow {
             canvas_zout.zoom_by(1.0 / 1.2);
         });
 
+        let zoom_pct = (saved_zoom * 100.0).round() as i32;
         let zoom_label = gtk4::Label::builder()
-            .label("100%")
+            .label(&format!("{}%", zoom_pct))
             .width_chars(5)
             .css_classes(["numeric"])
             .build();
@@ -138,12 +211,16 @@ impl DesignWindow {
         center_toolbar.add_top_bar(&header_comps.header_bar);
         center_toolbar.set_content(Some(&overlay));
 
+        // Restore sidebar visibility from AppSettings
+        let show_layers = crate::core::AppSettings::show_layers_sidebar();
+        let show_inspector = crate::core::AppSettings::show_inspector_sidebar();
+
         // Right OverlaySplitView for Inspector (PackType::End)
         let right_split_view = adw::OverlaySplitView::builder()
             .content(&center_toolbar)
             .sidebar(inspector_ref.widget())
             .sidebar_position(gtk4::PackType::End)
-            .show_sidebar(true)
+            .show_sidebar(show_inspector)
             .min_sidebar_width(250.0)
             .max_sidebar_width(300.0)
             .sidebar_width_fraction(0.18)
@@ -156,7 +233,7 @@ impl DesignWindow {
             .content(&right_split_view)
             .sidebar(layers_ref.widget())
             .sidebar_position(gtk4::PackType::Start)
-            .show_sidebar(true)
+            .show_sidebar(show_layers)
             .min_sidebar_width(240.0)
             .max_sidebar_width(300.0)
             .sidebar_width_fraction(0.18)
@@ -164,14 +241,21 @@ impl DesignWindow {
             .vexpand(true)
             .build();
 
+        header_comps.toggle_layers_btn.set_active(show_layers);
+        header_comps.toggle_sidebar_btn.set_active(show_inspector);
+
         let left_split_tgl = left_split_view.clone();
         header_comps.toggle_layers_btn.connect_toggled(move |btn| {
-            left_split_tgl.set_show_sidebar(btn.is_active());
+            let active = btn.is_active();
+            left_split_tgl.set_show_sidebar(active);
+            crate::core::AppSettings::set_show_layers_sidebar(active);
         });
 
         let right_split_tgl = right_split_view.clone();
         header_comps.toggle_sidebar_btn.connect_toggled(move |btn| {
-            right_split_tgl.set_show_sidebar(btn.is_active());
+            let active = btn.is_active();
+            right_split_tgl.set_show_sidebar(active);
+            crate::core::AppSettings::set_show_inspector_sidebar(active);
         });
 
         // Wire status & selection updates
@@ -218,6 +302,8 @@ impl DesignWindow {
                 if zoom_lbl_clone.text().as_str() != zoom_str.as_str() {
                     zoom_lbl_clone.set_label(&zoom_str);
                 }
+
+                crate::core::AppSettings::set_active_zoom(zoom as f64);
 
                 if undo_btn_clone.is_sensitive() != can_undo {
                     undo_btn_clone.set_sensitive(can_undo);
@@ -323,13 +409,61 @@ impl DesignWindow {
 
         toast_overlay.set_child(Some(&left_split_view));
 
+        let (win_w, win_h) = crate::core::AppSettings::window_size();
+        let is_maximized = crate::core::AppSettings::is_maximized();
+        let is_fullscreen = crate::core::AppSettings::is_fullscreen();
+
         let window = adw::ApplicationWindow::builder()
             .application(app)
             .title("gnome-paths")
-            .default_width(1280)
-            .default_height(780)
+            .default_width(win_w)
+            .default_height(win_h)
             .content(&toast_overlay)
             .build();
+
+        if is_maximized {
+            window.maximize();
+        }
+        if is_fullscreen {
+            window.fullscreen();
+        }
+
+        let win_close = window.clone();
+        let canvas_close = canvas.clone();
+        window.connect_close_request(move |_| {
+            let max = win_close.is_maximized();
+            let full = win_close.is_fullscreen();
+            crate::core::AppSettings::set_is_maximized(max);
+            crate::core::AppSettings::set_is_fullscreen(full);
+            if !max && !full {
+                crate::core::AppSettings::set_window_size(
+                    win_close.default_width(),
+                    win_close.default_height(),
+                );
+            }
+            crate::core::AppSettings::set_active_zoom(canvas_close.zoom() as f64);
+            glib::Propagation::Proceed
+        });
+
+        window.connect_notify(Some("maximized"), move |w, _| {
+            crate::core::AppSettings::set_is_maximized(w.is_maximized());
+        });
+
+        window.connect_notify(Some("fullscreened"), move |w, _| {
+            crate::core::AppSettings::set_is_fullscreen(w.is_fullscreen());
+        });
+
+        window.connect_notify(Some("default-width"), move |w, _| {
+            if !w.is_maximized() && !w.is_fullscreen() {
+                crate::core::AppSettings::set_window_size(w.default_width(), w.default_height());
+            }
+        });
+
+        window.connect_notify(Some("default-height"), move |w, _| {
+            if !w.is_maximized() && !w.is_fullscreen() {
+                crate::core::AppSettings::set_window_size(w.default_width(), w.default_height());
+            }
+        });
 
         *main_win_holder.borrow_mut() = Some(window.clone());
 

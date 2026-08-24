@@ -213,6 +213,7 @@ pub fn show_language_chooser_dialog(
         let win_close = window.clone();
         row.connect_activated(move |_| {
             crate::core::set_language(target_lang);
+            crate::core::AppSettings::set_language(target_lang.code());
             let updated_info = target_lang.info();
             lbl_update.set_label(updated_info.native_name);
             bdg_update.set_label(updated_info.code);

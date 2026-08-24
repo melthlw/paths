@@ -75,7 +75,22 @@ fn compile_blueprints(ui_dir: &Path) {
     }
 }
 
+fn compile_schemas(data_dir: &Path) {
+    let schema_file = data_dir.join("io.github.lewis.GnomePaths.gschema.xml");
+    if schema_file.exists() {
+        println!("cargo:rerun-if-changed={}", schema_file.display());
+        if let Ok(status) = Command::new("glib-compile-schemas").arg(data_dir).status() {
+            if !status.success() {
+                println!("cargo:warning=glib-compile-schemas returned non-zero exit code");
+            }
+        }
+    }
+}
+
 fn main() {
+    let data_dir = Path::new("data");
+    compile_schemas(data_dir);
+
     let resources_dir = Path::new("data/resources");
     let ui_dir = resources_dir.join("ui");
 

@@ -484,6 +484,18 @@ impl CanvasWidget {
     }
 
     // Viewport & Zoom
+    pub fn zoom(&self) -> f32 {
+        self.state.try_borrow().map(|s| s.viewport.zoom).unwrap_or(1.0)
+    }
+
+    pub fn set_zoom(&self, zoom: f32) {
+        let mut state = self.state.borrow_mut();
+        state.viewport.zoom = zoom.clamp(crate::core::Viewport::MIN_ZOOM, crate::core::Viewport::MAX_ZOOM);
+        state.notify_status();
+        drop(state);
+        self.drawing_area.queue_draw();
+    }
+
     pub fn reset_zoom(&self) {
         let mut state = self.state.borrow_mut();
         state.viewport.reset();
