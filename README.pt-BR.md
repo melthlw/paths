@@ -5,7 +5,7 @@
 <h1 align="center">GNOME Paths</h1>
 
 <p align="center">
-  <b>Estúdio moderno de ilustrações e computação gráfica vetorial acelerado por GPU para o GNOME.</b>
+  <b>Estúdio moderno de ilustrações e computação gráfica vetorial para o GNOME.</b>
 </p>
 
 <p align="center">
@@ -45,47 +45,47 @@
 
 ---
 
-## Principais Recursos
+## Recursos e Funcionalidades
 
 <table>
   <tr>
     <td width="50%">
       <h3>Edição Avançada de Nós e Curvas Bezier</h3>
-      <p>Editor de nós refinado com alças tangentes em tempo real, nós cúspides, suaves e simétricos, conversão de segmentos e suavização por algoritmo de de Casteljau.</p>
+      <p>Controle cirúrgico de caminhos com nós cúspides (canto vivo), suaves e simétricos. Manipulação interativa de alças tangentes, inserção e remoção de nós, conversão de segmentos (reta/curva) e suavização contínua com de Casteljau.</p>
+    </td>
+    <td width="50%">
+      <h3>Customização de Interface e Espaço de Trabalho</h3>
+      <p>Barra de ferramentas HUD flutuante ou acoplada com reorganização de ferramentas, painéis laterais retráteis (Inspetor de Propriedades, Camadas e Bibliotecas) e integração com tema claro e escuro do GNOME.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>Pranchetas Multipáginas (Artboards)</h3>
+      <p>Ambiente multipágina com suporte a múltiplas pranchetas independentes em um único documento. Controle de dimensões por prancheta, reordenação de páginas, navegação e exportação individual ou em lote.</p>
     </td>
     <td width="50%">
       <h3>Operações Booleanas em Vetores</h3>
-      <p>Geometria booleana em tempo real: <b>União</b>, <b>Diferença</b>, <b>Interseção</b>, <b>Exclusão</b>, <b>Divisão</b> e <b>Fatiar / Cortar</b>.</p>
+      <p>Combinação geométrica de caminhos em tempo real com algoritmos de <b>União</b>, <b>Diferença</b>, <b>Interseção</b>, <b>Exclusão</b>, <b>Divisão</b> e <b>Fatiamento / Corte</b>.</p>
     </td>
   </tr>
   <tr>
     <td width="50%">
       <h3>Gradientes em Malha (Mesh Gradient)</h3>
-      <p>Gradientes lineares, radiais e grades de malha 2D interativas na tela com controle ponto a ponto de cor e difusão.</p>
+      <p>Pintura vetorial avançada com gradientes lineares, radiais com múltiplos pontos de parada e grades de malha 2D editáveis diretamente sobre os objetos no canvas.</p>
     </td>
+    <td width="50%">
+      <h3>Clones Vinculados (Linked Clones)</h3>
+      <p>Instanciação de objetos vinculados com sincronização automática do elemento mestre e opção de desvinculação seletiva para criação de padrões complexos.</p>
+    </td>
+  </tr>
+  <tr>
     <td width="50%">
       <h3>Formas Geométricas Paramétricas</h3>
-      <p>Primitivas editáveis dinamicamente: Retângulos com raios de canto independentes, círculos, elipses, polígonos regulares, estrelas e espirais.</p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <h3>Pranchetas Multipáginas</h3>
-      <p>Crie projetos e brochuras com múltiplas pranchetas no mesmo documento, com exportação individual ou em lote.</p>
+      <p>Primitivas editáveis dinamicamente: retângulos com raios de canto independentes, círculos, elipses, polígonos regulares com ajuste de lados, estrelas e espirais.</p>
     </td>
     <td width="50%">
-      <h3>Ajuste Magnético e Guias</h3>
-      <p>Encaixe magnético inteligente em grades, caixas delimitadoras, centros de pranchetas, guias personalizadas e restrições de ângulo.</p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <h3>Aceleração de Hardware com Skia GPU</h3>
-      <p>Pipeline de renderização 2D ultrarrápido com precisão sub-pixel e zoom contínuo através da engine gráfica Skia.</p>
-    </td>
-    <td width="50%">
-      <h3>Ecossistema Modular de Plugins</h3>
-      <p>Arquitetura nativa de plugins em bibliotecas dinâmicas <code>.so</code> com barras de ferramentas HUD flutuantes ou acopladas configuráveis.</p>
+      <h3>Ajuste Magnético e Guias Inteligentes</h3>
+      <p>Encaixe magnético com alinhamento dinâmico a centros de pranchetas, caixas delimitadoras de objetos, nós vizinhos, réguas com origem configurável e linhas-guia.</p>
     </td>
   </tr>
 </table>
@@ -101,20 +101,6 @@
 | **PDF** | Sim | Não | Páginas vetoriais prontas para impressão e publicação |
 | **JPG** | Sim | Não | Imagens rasterizadas compactadas para web e pré-visualização |
 | **WebP** | Sim | Não | Formato moderno de alta fidelidade para gráficos na web |
-
----
-
-## Atalhos de Teclado Rápidos
-
-| Atalho | Ação | Atalho | Ação |
-| :--- | :--- | :--- | :--- |
-| <kbd>V</kbd> | Ferramenta de Seleção | <kbd>Ctrl</kbd> + <kbd>Z</kbd> | Desfazer |
-| <kbd>N</kbd> | Editor de Nós / Caminhos | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> | Refazer |
-| <kbd>P</kbd> | Caneta Vetorial (Pen) | <kbd>Ctrl</kbd> + <kbd>G</kbd> | Agrupar Selecionados |
-| <kbd>B</kbd> | Pincel Artístico (Brush) | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>G</kbd> | Desagrupar |
-| <kbd>R</kbd> | Ferramenta Retângulo | <kbd>Ctrl</kbd> + <kbd>E</kbd> | Exportação Rápida |
-| <kbd>E</kbd> | Ferramenta Círculo / Elipse | <kbd>Ctrl</kbd> + <kbd>0</kbd> | Ajustar à Janela |
-| <kbd>T</kbd> | Ferramenta de Texto | <kbd>1</kbd> | Zoom 100% |
 
 ---
 
@@ -185,7 +171,7 @@ Este projeto é ativamente desenvolvido com o auxílio de **inteligência artifi
 
 Prezamos pela transparência e colaboração aberta. Caso você prefira o fluxo de desenvolvimento tradicional sem ferramentas de IA, você é calorosamente convidado a contribuir via pull requests, revisões de código, desenvolvimento de plugins nativos, sugestões de design ou relatórios de bugs.
 
-### Possíveis Ideias Futuras 
+### Possíveis Ideias Futuras
 - **Espaços de Trabalho Dinâmicos**: Interfaces adaptativas que se reorganizam conforme o foco do trabalho (Ilustração, Editorial, Edição de Bitmap, Tipografia).
 - **Animação Vetorial**: Linha do tempo, interpolação por quadros-chave (keyframes) e curvas de movimento.
 - **Sistema de Nós Procedurais**: Operações e modificadores não-destrutivos baseados em grafos de nós.

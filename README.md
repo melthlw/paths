@@ -45,47 +45,47 @@
 
 ---
 
-## Key Features
+## Features and Capabilities
 
 <table>
   <tr>
     <td width="50%">
-      <h3>Bezier Path and Node Editing</h3>
-      <p>Fine-grained node editing with live tangent handles, cusp/smooth/symmetric node types, segment conversion, and de Casteljau curve smoothing.</p>
+      <h3>Advanced Bezier and Node Editing</h3>
+      <p>Precision path control with cusp, smooth, and symmetric node types. Interactive tangent handles, node insertion/deletion, segment conversion (line/curve), and continuous smoothing via de Casteljau algorithm.</p>
     </td>
     <td width="50%">
-      <h3>Boolean Path Operations</h3>
-      <p>Real-time geometry booleans: <b>Union</b>, <b>Difference</b>, <b>Intersection</b>, <b>Exclusion</b>, <b>Division</b>, and <b>Slice/Cut</b>.</p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <h3>Mesh and Multi-Stop Gradients</h3>
-      <p>Linear, radial, and multi-point 2D on-canvas mesh gradient grids with interactive color point positioning.</p>
-    </td>
-    <td width="50%">
-      <h3>Parametric Geometric Shapes</h3>
-      <p>Live editable primitives: Rectangles with independent corner radii, ellipses, regular polygons, stars, and spirals.</p>
+      <h3>Interface Customization and Workspace</h3>
+      <p>Flexible layout: floating or docked HUD toolbars with custom tool ordering, collapsible sidebars (Property Inspector, Layers, and Libraries), and native GNOME dark and light theme integration.</p>
     </td>
   </tr>
   <tr>
     <td width="50%">
       <h3>Multi-Page Artboards</h3>
-      <p>Design multi-page projects and booklets in a single document with individual artboard export and overview navigation.</p>
+      <p>Multi-page environment supporting multiple independent artboards in a single document. Individual dimension controls, page reordering, overview navigation, and selective or batch export.</p>
     </td>
     <td width="50%">
-      <h3>Magnetic Snapping and Guides</h3>
-      <p>Smart snapping to grid lines, object bounding boxes, geometry centers, user guidelines, and angle constraints.</p>
+      <h3>Boolean Path Operations</h3>
+      <p>Real-time geometric path combinations: <b>Union</b>, <b>Difference</b>, <b>Intersection</b>, <b>Exclusion</b>, <b>Division</b>, and <b>Slice/Cut</b>.</p>
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <h3>Skia GPU Acceleration</h3>
-      <p>Fast, hardware-accelerated 2D rendering pipeline powered by Skia with sub-pixel precision and fluid zoom levels.</p>
+      <h3>Mesh and Multi-Stop Gradients</h3>
+      <p>Advanced vector painting with linear and radial gradients featuring multiple color stops, plus on-canvas 2D mesh gradient grids for complex vector lighting.</p>
     </td>
     <td width="50%">
-      <h3>Modular Plugin Ecosystem</h3>
-      <p>Dynamic native <code>.so</code> plugin architecture with customizable floating or docked HUD toolbars and live extensions.</p>
+      <h3>Linked Clones</h3>
+      <p>Instantiate linked object clones with automatic transformation and style propagation from master elements, supporting selective unlinking for pattern design.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>Parametric Geometric Shapes</h3>
+      <p>Dynamically editable primitives: rectangles with independent corner radii, circles, ellipses, regular polygons with side controls, stars, and spirals.</p>
+    </td>
+    <td width="50%">
+      <h3>Smart Magnetic Snapping and Guides</h3>
+      <p>Magnetic alignment to artboard centers, object bounding boxes, adjacent nodes, customizable origin rulers, and draggable guide lines.</p>
     </td>
   </tr>
 </table>
@@ -101,20 +101,6 @@
 | **PDF** | Yes | No | Vector print-ready document pages |
 | **JPG** | Yes | No | Compressed raster images for web and preview |
 | **WebP** | Yes | No | Lightweight lossless and lossy web graphics |
-
----
-
-## Keyboard Shortcuts
-
-| Shortcut | Action | Shortcut | Action |
-| :--- | :--- | :--- | :--- |
-| <kbd>V</kbd> | Selection Tool | <kbd>Ctrl</kbd> + <kbd>Z</kbd> | Undo |
-| <kbd>N</kbd> | Node / Path Editor | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> | Redo |
-| <kbd>P</kbd> | Vector Pen | <kbd>Ctrl</kbd> + <kbd>G</kbd> | Group Selected |
-| <kbd>B</kbd> | Brush Tool | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>G</kbd> | Ungroup |
-| <kbd>R</kbd> | Rectangle Tool | <kbd>Ctrl</kbd> + <kbd>E</kbd> | Quick Export |
-| <kbd>E</kbd> | Ellipse / Circle Tool | <kbd>Ctrl</kbd> + <kbd>0</kbd> | Fit to Window |
-| <kbd>T</kbd> | Text Tool | <kbd>1</kbd> | Zoom 100% |
 
 ---
 
@@ -185,7 +171,7 @@ This project is actively developed and iterated with the assistance of **AI pair
 
 We champion transparency and open collaboration. If you prefer traditional hand-crafted development workflows without AI tools, you are warmly encouraged to contribute via pull requests, code reviews, native plugin creation, design suggestions, or bug reports.
 
-### Future Roadmap
+### Potential Future Ideas
 - **Dynamic Workspace Modes**: Adaptive UI layouts that reorganize tools based on workflow (Illustration, Editorial, Pixel/Raster, Typography).
 - **Vector Animation and Timeline**: Motion interpolation, keyframes, and path animation.
 - **Node Graphs (Procedural Modifiers)**: Non-destructive procedural path operations and modifiers.
