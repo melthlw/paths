@@ -22,10 +22,30 @@ impl Default for TransformOptions {
 }
 
 impl Document {
-    pub fn translate_selected(&mut self, dx: f32, dy: f32) {
+    fn translate_element_decoupled(&mut self, target_id: ElementId, dx: f32, dy: f32) {
+        let sel_ids = self.selected_ids.clone();
         for el in &mut self.elements {
-            if self.selected_ids.contains(&el.id()) {
+            if el.id() == target_id {
                 el.translate(dx, dy);
+            } else if let Element::Clone(ref mut c) = el {
+                if c.source_id == target_id && !sel_ids.contains(&c.id) {
+                    c.offset.x -= dx;
+                    c.offset.y -= dy;
+                }
+            }
+        }
+    }
+
+    pub fn translate_selected(&mut self, dx: f32, dy: f32) {
+        let sel_ids = self.selected_ids.clone();
+        for el in &mut self.elements {
+            if sel_ids.contains(&el.id()) {
+                el.translate(dx, dy);
+            } else if let Element::Clone(ref mut c) = el {
+                if sel_ids.contains(&c.source_id) {
+                    c.offset.x -= dx;
+                    c.offset.y -= dy;
+                }
             }
         }
     }
@@ -148,11 +168,14 @@ impl Document {
             None => return,
         };
         self.snapshot();
-        for el in &mut self.elements {
-            if self.selected_ids.contains(&el.id()) {
-                let dx = bounds.x - el.bounds().x;
-                el.translate(dx, 0.0);
-            }
+        let moves: Vec<(ElementId, f32)> = self
+            .elements
+            .iter()
+            .filter(|e| self.selected_ids.contains(&e.id()))
+            .map(|e| (e.id(), bounds.x - e.bounds().x))
+            .collect();
+        for (id, dx) in moves {
+            self.translate_element_decoupled(id, dx, 0.0);
         }
     }
 
@@ -163,12 +186,17 @@ impl Document {
         };
         self.snapshot();
         let target_center_x = bounds.x + bounds.width / 2.0;
-        for el in &mut self.elements {
-            if self.selected_ids.contains(&el.id()) {
-                let el_center_x = el.bounds().x + el.bounds().width / 2.0;
-                let dx = target_center_x - el_center_x;
-                el.translate(dx, 0.0);
-            }
+        let moves: Vec<(ElementId, f32)> = self
+            .elements
+            .iter()
+            .filter(|e| self.selected_ids.contains(&e.id()))
+            .map(|e| {
+                let el_center_x = e.bounds().x + e.bounds().width / 2.0;
+                (e.id(), target_center_x - el_center_x)
+            })
+            .collect();
+        for (id, dx) in moves {
+            self.translate_element_decoupled(id, dx, 0.0);
         }
     }
 
@@ -179,12 +207,17 @@ impl Document {
         };
         self.snapshot();
         let target_right = bounds.x + bounds.width;
-        for el in &mut self.elements {
-            if self.selected_ids.contains(&el.id()) {
-                let el_right = el.bounds().x + el.bounds().width;
-                let dx = target_right - el_right;
-                el.translate(dx, 0.0);
-            }
+        let moves: Vec<(ElementId, f32)> = self
+            .elements
+            .iter()
+            .filter(|e| self.selected_ids.contains(&e.id()))
+            .map(|e| {
+                let el_right = e.bounds().x + e.bounds().width;
+                (e.id(), target_right - el_right)
+            })
+            .collect();
+        for (id, dx) in moves {
+            self.translate_element_decoupled(id, dx, 0.0);
         }
     }
 
@@ -194,11 +227,14 @@ impl Document {
             None => return,
         };
         self.snapshot();
-        for el in &mut self.elements {
-            if self.selected_ids.contains(&el.id()) {
-                let dy = bounds.y - el.bounds().y;
-                el.translate(0.0, dy);
-            }
+        let moves: Vec<(ElementId, f32)> = self
+            .elements
+            .iter()
+            .filter(|e| self.selected_ids.contains(&e.id()))
+            .map(|e| (e.id(), bounds.y - e.bounds().y))
+            .collect();
+        for (id, dy) in moves {
+            self.translate_element_decoupled(id, 0.0, dy);
         }
     }
 
@@ -209,12 +245,17 @@ impl Document {
         };
         self.snapshot();
         let target_center_y = bounds.y + bounds.height / 2.0;
-        for el in &mut self.elements {
-            if self.selected_ids.contains(&el.id()) {
-                let el_center_y = el.bounds().y + el.bounds().height / 2.0;
-                let dy = target_center_y - el_center_y;
-                el.translate(0.0, dy);
-            }
+        let moves: Vec<(ElementId, f32)> = self
+            .elements
+            .iter()
+            .filter(|e| self.selected_ids.contains(&e.id()))
+            .map(|e| {
+                let el_center_y = e.bounds().y + e.bounds().height / 2.0;
+                (e.id(), target_center_y - el_center_y)
+            })
+            .collect();
+        for (id, dy) in moves {
+            self.translate_element_decoupled(id, 0.0, dy);
         }
     }
 
@@ -225,12 +266,17 @@ impl Document {
         };
         self.snapshot();
         let target_bottom = bounds.y + bounds.height;
-        for el in &mut self.elements {
-            if self.selected_ids.contains(&el.id()) {
-                let el_bottom = el.bounds().y + el.bounds().height;
-                let dy = target_bottom - el_bottom;
-                el.translate(0.0, dy);
-            }
+        let moves: Vec<(ElementId, f32)> = self
+            .elements
+            .iter()
+            .filter(|e| self.selected_ids.contains(&e.id()))
+            .map(|e| {
+                let el_bottom = e.bounds().y + e.bounds().height;
+                (e.id(), target_bottom - el_bottom)
+            })
+            .collect();
+        for (id, dy) in moves {
+            self.translate_element_decoupled(id, 0.0, dy);
         }
     }
 
@@ -267,10 +313,15 @@ impl Document {
         let gap = (last_right - first_x - total_width) / (indexed.len() as f32 - 1.0);
 
         let mut cursor = first_x + indexed[0].2 + gap;
+        let mut moves: Vec<(ElementId, f32)> = Vec::new();
         for item in indexed.iter().skip(1).take(indexed.len() - 2) {
             let dx = cursor - item.1;
-            self.elements[item.0].translate(dx, 0.0);
+            let el_id = self.elements[item.0].id();
+            moves.push((el_id, dx));
             cursor += item.2 + gap;
+        }
+        for (id, dx) in moves {
+            self.translate_element_decoupled(id, dx, 0.0);
         }
     }
 
@@ -303,10 +354,15 @@ impl Document {
         let gap = (last_bottom - first_y - total_height) / (indexed.len() as f32 - 1.0);
 
         let mut cursor = first_y + indexed[0].2 + gap;
+        let mut moves: Vec<(ElementId, f32)> = Vec::new();
         for item in indexed.iter().skip(1).take(indexed.len() - 2) {
             let dy = cursor - item.1;
-            self.elements[item.0].translate(0.0, dy);
+            let el_id = self.elements[item.0].id();
+            moves.push((el_id, dy));
             cursor += item.2 + gap;
+        }
+        for (id, dy) in moves {
+            self.translate_element_decoupled(id, 0.0, dy);
         }
     }
 

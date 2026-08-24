@@ -8,14 +8,18 @@ Development roadmap structured by version milestones.
 > **Focus**: State persistence, robust object manipulation, and linked clone management.
 
 ### Interface & System
-- [x] **Session & Window State Persistence**: Save and restore UI state (window geometry, sidebar panel states, active zoom, and display preferences) via `GSettings` / D-Bus.
+- [x] **Session & Window State Persistence**:
+  - [x] Save and restore UI state (window geometry, sidebar panel widths and visibility, active zoom/pan coordinates) via `GSettings` schema.
+  - [x] Persist preferences across sessions (canvas background, grid/snap, themes, icon sizes, and language with System Default automatic detection).
 
 ### Manipulation & Objects
-- [ ] **Linked Clones Decoupling**:
-  - [ ] Decouple spatial transformations (position, rotation, scale) so cloned instances can be moved independently while keeping the master path and styling synchronized.
-- [ ] **Clone Management Panel**:
-  - [ ] Inspect and list all instances linked to each master element.
-  - [ ] Quick action to unlink clones and convert them into independent vector objects.
+- [x] **Linked Clones Decoupling**:
+  - [x] Decouple spatial transformations (position, rotation, scale) so cloned instances can be moved independently while keeping the master path and styling synchronized.
+  - [x] Counter-adjust unselected clones when masters are translated, aligned, or dragged on canvas.
+- [x] **Clone Management Panel**:
+  - [x] Inspect and list all instances linked to each master element in a dedicated Studio Inspector panel.
+  - [x] Quick action to unlink single or all clones and convert them into independent vector objects.
+  - [x] Full integration into the Studio modular dock, section splitting, and detached floating windows.
 
 ---
 

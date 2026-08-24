@@ -163,6 +163,34 @@ impl Document {
         new_ids
     }
 
+    pub(crate) fn convert_clone_to_concrete(c: &CloneElement, master: &Element) -> Element {
+        let mut concrete = master.clone_with_new_id();
+        concrete.translate(c.offset.x, c.offset.y);
+        if (c.scale.x - 1.0).abs() > 0.001 || (c.scale.y - 1.0).abs() > 0.001 {
+            let b = concrete.bounds();
+            concrete.scale(
+                Point::new(b.x, b.y),
+                c.scale.x,
+                c.scale.y,
+            );
+        }
+        if c.rotation.abs() > 0.001 {
+            let b = concrete.bounds();
+            concrete.rotate(
+                Point::new(b.x + b.width * 0.5, b.y + b.height * 0.5),
+                c.rotation,
+            );
+        }
+        concrete.set_opacity(c.opacity * concrete.opacity());
+        if c.blend_mode != BlendMode::Normal {
+            concrete.set_blend_mode(c.blend_mode);
+        }
+        if c.blur_radius > 0.001 {
+            concrete.set_blur(c.blur_radius);
+        }
+        concrete
+    }
+
     pub fn unlink_selected_clones(&mut self) -> Vec<ElementId> {
         if !self.has_clones_selected() {
             return Vec::new();
@@ -176,29 +204,7 @@ impl Document {
             if self.selected_ids.contains(&el.id()) {
                 if let Element::Clone(ref c) = el {
                     if let Some(master) = Self::find_element_recursive(&old_elements, c.source_id) {
-                        let mut concrete = master.clone_with_new_id();
-                        concrete.translate(c.offset.x, c.offset.y);
-                        if (c.scale.x - 1.0).abs() > 0.001 || (c.scale.y - 1.0).abs() > 0.001 {
-                            concrete.scale(
-                                Point::new(concrete.bounds().x, concrete.bounds().y),
-                                c.scale.x,
-                                c.scale.y,
-                            );
-                        }
-                        if c.rotation.abs() > 0.001 {
-                            let b = concrete.bounds();
-                            concrete.rotate(
-                                Point::new(b.x + b.width * 0.5, b.y + b.height * 0.5),
-                                c.rotation,
-                            );
-                        }
-                        concrete.set_opacity(c.opacity * concrete.opacity());
-                        if c.blend_mode != BlendMode::Normal {
-                            concrete.set_blend_mode(c.blend_mode);
-                        }
-                        if c.blur_radius > 0.001 {
-                            concrete.set_blur(c.blur_radius);
-                        }
+                        let concrete = Self::convert_clone_to_concrete(c, master);
                         unlinked_ids.push(concrete.id());
                         new_elements.push(concrete);
                         continue;
@@ -214,6 +220,102 @@ impl Document {
             self.selected_ids.insert(*id);
         }
         unlinked_ids
+    }
+
+    pub fn unlink_clone_by_id(&mut self, clone_id: ElementId) -> Option<ElementId> {
+        self.snapshot();
+        let old_elements = self.elements.clone();
+        let mut unlinked_id = None;
+        let mut new_elements = Vec::new();
+
+        for el in self.elements.drain(..) {
+            if el.id() == clone_id {
+                if let Element::Clone(ref c) = el {
+                    if let Some(master) = Self::find_element_recursive(&old_elements, c.source_id) {
+                        let concrete = Self::convert_clone_to_concrete(c, master);
+                        let nid = concrete.id();
+                        unlinked_id = Some(nid);
+                        new_elements.push(concrete);
+                        continue;
+                    }
+                }
+            }
+            new_elements.push(el);
+        }
+
+        self.elements = new_elements;
+        if let Some(nid) = unlinked_id {
+            if self.selected_ids.contains(&clone_id) {
+                self.selected_ids.remove(&clone_id);
+                self.selected_ids.insert(nid);
+            }
+        }
+        unlinked_id
+    }
+
+    pub fn unlink_all_clones_for_master(&mut self, master_id: ElementId) -> Vec<ElementId> {
+        self.snapshot();
+        let old_elements = self.elements.clone();
+        let mut unlinked_ids = Vec::new();
+        let mut new_elements = Vec::new();
+
+        for el in self.elements.drain(..) {
+            if let Element::Clone(ref c) = el {
+                if c.source_id == master_id {
+                    if let Some(master) = Self::find_element_recursive(&old_elements, c.source_id) {
+                        let concrete = Self::convert_clone_to_concrete(c, master);
+                        let nid = concrete.id();
+                        unlinked_ids.push(nid);
+                        if self.selected_ids.contains(&c.id) {
+                            self.selected_ids.remove(&c.id);
+                            self.selected_ids.insert(nid);
+                        }
+                        new_elements.push(concrete);
+                        continue;
+                    }
+                }
+            }
+            new_elements.push(el);
+        }
+
+        self.elements = new_elements;
+        unlinked_ids
+    }
+
+    pub fn get_clones_for_master(&self, master_id: ElementId) -> Vec<CloneElement> {
+        let mut clones = Vec::new();
+        for el in &self.elements {
+            if let Element::Clone(c) = el {
+                if c.source_id == master_id {
+                    clones.push(c.clone());
+                }
+            }
+        }
+        clones
+    }
+
+    pub fn get_all_clone_relationships(&self) -> Vec<(ElementId, Vec<CloneElement>)> {
+        let mut map: std::collections::BTreeMap<u64, (ElementId, Vec<CloneElement>)> = std::collections::BTreeMap::new();
+        for el in &self.elements {
+            if let Element::Clone(c) = el {
+                map.entry(c.source_id.0)
+                    .or_insert_with(|| (c.source_id, Vec::new()))
+                    .1
+                    .push(c.clone());
+            }
+        }
+        map.into_values().collect()
+    }
+
+    pub fn get_master_for_clone(&self, clone_id: ElementId) -> Option<&Element> {
+        for el in &self.elements {
+            if let Element::Clone(c) = el {
+                if c.id == clone_id {
+                    return self.find_element(c.source_id);
+                }
+            }
+        }
+        None
     }
 
     pub fn select_original_element(&mut self) {

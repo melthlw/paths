@@ -6,8 +6,8 @@ use super::TabLocation;
 use crate::ui::canvas::CanvasWidget;
 
 pub fn build_catalog_popover(
-    tab_info: &[(String, Option<&'static str>, &'static str); 4],
-    tab_locations: &Rc<RefCell<[TabLocation; 4]>>,
+    tab_info: &[(String, Option<&'static str>, &'static str); 5],
+    tab_locations: &Rc<RefCell<[TabLocation; 5]>>,
     active_section_tabs: &Rc<RefCell<[usize; 5]>>,
     canvas: &CanvasWidget,
     refresh_fn: Rc<dyn Fn()>,
@@ -220,6 +220,7 @@ pub fn build_catalog_popover(
             TabLocation::Docked(0),
             TabLocation::Docked(0),
             TabLocation::Docked(0),
+            TabLocation::Docked(0),
         ];
         re_rest();
     });
@@ -237,6 +238,7 @@ pub fn build_catalog_popover(
     close_all_btn.connect_clicked(move |_| {
         pop_ca.popdown();
         *locs_close_all.borrow_mut() = [
+            TabLocation::Closed,
             TabLocation::Closed,
             TabLocation::Closed,
             TabLocation::Closed,

@@ -1,6 +1,7 @@
 pub mod alignment;
 pub mod appearance;
 pub mod catalog;
+pub mod clones;
 pub mod dock;
 pub mod export;
 pub mod floating;
@@ -17,6 +18,7 @@ use std::rc::Rc;
 
 use self::alignment::build_alignment_section;
 use self::appearance::{rebuild_fill_list, rebuild_stroke_list};
+use self::clones::build_clones_section;
 use self::export::build_export_tab;
 use self::swatch::PillSlider;
 use self::transform::build_transform_section;
@@ -59,6 +61,7 @@ pub struct InspectorSidebar {
     is_updating: Rc<Cell<bool>>,
     convert_path_row: adw::ActionRow,
 
+    update_clones_section: Rc<dyn Fn()>,
     update_export_pages: Rc<dyn Fn()>,
 }
 
@@ -430,6 +433,9 @@ impl InspectorSidebar {
         let convert_path_row = trans_sec.convert_path_row;
         let transform_body = trans_sec.container;
 
+        // 4. CLONES SECTION
+        let (clones_body, update_clones_section) = build_clones_section(&canvas);
+
         // 5. EXPORT SECTION
         let (export_body, update_export_pages) = build_export_tab(&canvas, &main_win_holder);
 
@@ -438,17 +444,19 @@ impl InspectorSidebar {
             TabLocation::Docked(0), // 0: Appearance
             TabLocation::Docked(0), // 1: Alignment
             TabLocation::Closed,    // 2: Transform
-            TabLocation::Closed,    // 3: Export
+            TabLocation::Closed,    // 3: Clones
+            TabLocation::Closed,    // 4: Export
         ]));
-        let tab_order = Rc::new(RefCell::new(vec![0usize, 1usize, 2usize, 3usize]));
-        let active_section_tabs = Rc::new(RefCell::new([0usize, 1usize, 2usize, 3usize, 0usize]));
-        let floating_wins: Rc<RefCell<[Option<adw::Window>; 4]>> =
-            Rc::new(RefCell::new([None, None, None, None]));
+        let tab_order = Rc::new(RefCell::new(vec![0usize, 1usize, 2usize, 3usize, 4usize]));
+        let active_section_tabs = Rc::new(RefCell::new([0usize, 1usize, 2usize, 3usize, 4usize]));
+        let floating_wins: Rc<RefCell<[Option<adw::Window>; 5]>> =
+            Rc::new(RefCell::new([None, None, None, None, None]));
 
-        let tab_widgets: [gtk4::Widget; 4] = [
+        let tab_widgets: [gtk4::Widget; 5] = [
             fill_stroke_body.upcast(),
             align_container.upcast(),
             transform_body.upcast(),
+            clones_body,
             export_body,
         ];
 
@@ -499,9 +507,9 @@ impl InspectorSidebar {
                 if let Ok(s) = value.get::<String>() {
                     if let Some(idx_str) = s.strip_prefix("tab:") {
                         if let Ok(idx) = idx_str.parse::<usize>() {
-                            if idx < 4 {
+                            if idx < 5 {
                                 let cur_locs = *locs_drop.borrow();
-                                let max_sec = (0..4)
+                                let max_sec = (0..5)
                                     .filter_map(|k| {
                                         if let TabLocation::Docked(s) = cur_locs[k] {
                                             Some(s)
@@ -517,7 +525,7 @@ impl InspectorSidebar {
                                     if y < 80.0 {
                                         // Insert section at top
                                         let mut new_locs = cur_locs;
-                                        for k in 0..4 {
+                                        for k in 0..5 {
                                             if let TabLocation::Docked(s) = new_locs[k] {
                                                 new_locs[k] = TabLocation::Docked(s + 1);
                                             }
@@ -568,7 +576,7 @@ impl InspectorSidebar {
             let canvas_c = canvas.clone();
 
             Rc::new(move || {
-                let tab_info: [(String, Option<&'static str>, &'static str); 4] = [
+                let tab_info: [(String, Option<&'static str>, &'static str); 5] = [
                     (
                         crate::core::gettext("Appearance"),
                         Some("/io/github/lewis/GnomePaths/icons/panel-appearance.svg"),
@@ -585,6 +593,11 @@ impl InspectorSidebar {
                         "transform-symbolic",
                     ),
                     (
+                        crate::core::gettext("Clones"),
+                        Some("/io/github/lewis/GnomePaths/icons/clone.svg"),
+                        "object-select-symbolic",
+                    ),
+                    (
                         crate::core::gettext("Export"),
                         None,
                         "document-save-symbolic",
@@ -594,7 +607,7 @@ impl InspectorSidebar {
                 let locs = *tab_locations.borrow();
 
                 // 1. Clean up floating windows that are no longer floating before building docked sections
-                for i in 0..4 {
+                for i in 0..5 {
                     if locs[i] != TabLocation::Floating {
                         let maybe_w = floating_wins.borrow_mut()[i].take();
                         if let Some(w) = maybe_w {
@@ -618,7 +631,7 @@ impl InspectorSidebar {
                 );
 
                 // 5. Floating Windows Management
-                for i in 0..4 {
+                for i in 0..5 {
                     if locs[i] == TabLocation::Floating {
                         if floating_wins.borrow()[i].is_none() {
                             let (title, icon_res, icon_name) = &tab_info[i];
@@ -702,6 +715,7 @@ impl InspectorSidebar {
             canvas: canvas.clone(),
             is_updating,
             convert_path_row,
+            update_clones_section,
             update_export_pages,
         };
 
@@ -813,6 +827,10 @@ impl InspectorSidebar {
         (self.update_export_pages)();
     }
 
+    pub fn refresh_clones_section(&self) {
+        (self.update_clones_section)();
+    }
+
     pub fn update_context(
         &self,
         _tool_id: &str,
@@ -825,6 +843,7 @@ impl InspectorSidebar {
     ) {
         let has_selection = selected_count >= 1;
         self.refresh_export_pages();
+        self.refresh_clones_section();
 
         // Keep inspector functional and interactive
         self.align_box.set_sensitive(has_selection);
