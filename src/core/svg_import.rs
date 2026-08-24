@@ -874,7 +874,9 @@ mod tests {
     #[test]
     fn test_parse_svg_path_data() {
         let d = "M 10 10 L 50 10 L 50 50 Z";
-        let nodes = parse_svg_path_data(d);
+        let subpaths = parse_svg_path_data_subpaths(d);
+        assert_eq!(subpaths.len(), 1);
+        let nodes = &subpaths[0];
         assert_eq!(nodes.len(), 3);
         assert_eq!(nodes[0].point.x, 10.0);
         assert_eq!(nodes[1].point.x, 50.0);

@@ -15,15 +15,17 @@ pub struct ExternalPlugin {
 impl ExternalPlugin {
     /// Load an external plugin from a .so shared library file
     pub unsafe fn load(path: &Path) -> Result<Self, Box<dyn std::error::Error>> {
-        let lib = Library::new(path)?;
-        let create_symbol: libloading::Symbol<PluginCreateFn> =
-            lib.get(b"gnome_paths_plugin_create\0")?;
-        let raw_ptr = create_symbol();
-        if raw_ptr.is_null() {
-            return Err("Plugin constructor returned NULL pointer".into());
+        unsafe {
+            let lib = Library::new(path)?;
+            let create_symbol: libloading::Symbol<PluginCreateFn> =
+                lib.get(b"gnome_paths_plugin_create\0")?;
+            let raw_ptr = create_symbol();
+            if raw_ptr.is_null() {
+                return Err("Plugin constructor returned NULL pointer".into());
+            }
+            let plugin = Box::from_raw(raw_ptr);
+            Ok(Self { _lib: lib, plugin })
         }
-        let plugin = Box::from_raw(raw_ptr);
-        Ok(Self { _lib: lib, plugin })
     }
 }
 

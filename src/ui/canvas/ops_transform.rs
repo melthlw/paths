@@ -192,7 +192,8 @@ impl CanvasWidget {
         if let Some(bounds) = state.document.selection_bounds() {
             let dx = new_x - bounds.x;
             state.document.snapshot();
-            state.document.translate_selected(dx, 0.0);
+            let opts = state.transform_options;
+            state.document.translate_selected_with_options(dx, 0.0, &opts);
             drop(state);
             self.notify_status();
             self.drawing_area.queue_draw();
@@ -220,7 +221,8 @@ impl CanvasWidget {
         if let Some(bounds) = state.document.selection_bounds() {
             let dy = new_y - bounds.y;
             state.document.snapshot();
-            state.document.translate_selected(0.0, dy);
+            let opts = state.transform_options;
+            state.document.translate_selected_with_options(0.0, dy, &opts);
             drop(state);
             self.notify_status();
             self.drawing_area.queue_draw();
@@ -235,7 +237,8 @@ impl CanvasWidget {
                 let sy = if keep_aspect { sx } else { 1.0 };
                 let origin = Point::new(bounds.x, bounds.y);
                 state.document.snapshot();
-                state.document.scale_selected(origin, sx, sy);
+                let opts = state.transform_options;
+                state.document.scale_selected_with_options(origin, sx, sy, &opts);
                 state.notify_status();
                 self.drawing_area.queue_draw();
             }
@@ -250,7 +253,8 @@ impl CanvasWidget {
                 let sx = if keep_aspect { sy } else { 1.0 };
                 let origin = Point::new(bounds.x, bounds.y);
                 state.document.snapshot();
-                state.document.scale_selected(origin, sx, sy);
+                let opts = state.transform_options;
+                state.document.scale_selected_with_options(origin, sx, sy, &opts);
                 state.notify_status();
                 self.drawing_area.queue_draw();
             }

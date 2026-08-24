@@ -559,7 +559,7 @@ impl FeaturePlugin for PathEditorFeature {
         }
 
         // Box selecting nodes
-        if let (Some(start), Some(ref mut cur)) =
+        if let (Some(start), Some(cur)) =
             (self.box_select_start, &mut self.box_select_current)
         {
             *cur = event.world_pos;

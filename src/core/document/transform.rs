@@ -27,7 +27,7 @@ impl Document {
         for el in &mut self.elements {
             if el.id() == target_id {
                 el.translate(dx, dy);
-            } else if let Element::Clone(ref mut c) = el {
+            } else if let Element::Clone(c) = el {
                 if c.source_id == target_id && !sel_ids.contains(&c.id) {
                     c.offset.x -= dx;
                     c.offset.y -= dy;
@@ -37,11 +37,20 @@ impl Document {
     }
 
     pub fn translate_selected(&mut self, dx: f32, dy: f32) {
+        self.translate_selected_with_options(dx, dy, &TransformOptions::default());
+    }
+
+    pub fn translate_selected_with_options(
+        &mut self,
+        dx: f32,
+        dy: f32,
+        options: &TransformOptions,
+    ) {
         let sel_ids = self.selected_ids.clone();
         for el in &mut self.elements {
             if sel_ids.contains(&el.id()) {
-                el.translate(dx, dy);
-            } else if let Element::Clone(ref mut c) = el {
+                el.translate_with_options(dx, dy, options);
+            } else if let Element::Clone(c) = el {
                 if sel_ids.contains(&c.source_id) {
                     c.offset.x -= dx;
                     c.offset.y -= dy;
@@ -366,13 +375,19 @@ impl Document {
         }
     }
 
-    pub fn scale_selected(&mut self, origin: Point, sx: f32, sy: f32) {
+    pub fn scale_selected_with_options(
+        &mut self,
+        origin: Point,
+        sx: f32,
+        sy: f32,
+        options: &TransformOptions,
+    ) {
         if self.selected_ids.is_empty() {
             return;
         }
         for el in &mut self.elements {
             if self.selected_ids.contains(&el.id()) {
-                el.scale(origin, sx, sy);
+                el.scale_with_options(origin, sx, sy, options);
             }
         }
     }

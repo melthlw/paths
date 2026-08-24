@@ -597,7 +597,7 @@ pub fn handle_asset_drop(state: &mut super::state::CanvasState, payload: &str, w
         state.document.snapshot();
         if let Some(hit_id) = state.document.hit_test(world_pt) {
             if let Some(el) = state.document.find_element_mut(hit_id) {
-                if let Element::Text(ref mut t) = el {
+                if let Element::Text(t) = el {
                     t.font_family = fam.to_string();
                     t.font_size = size;
                     t.font_weight = weight;

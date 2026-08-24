@@ -13,6 +13,7 @@ pub struct PluginContext<'a> {
     pub snap_config: &'a SnapConfig,
     pub ruler_config: &'a RulerConfig,
     pub path_editor_config: &'a PathEditorConfig,
+    pub transform_options: &'a crate::core::TransformOptions,
     pub active_snap_guides: &'a mut Vec<SnapGuide>,
     pub active_fill_color: Color,
     pub active_stroke_color: Option<Color>,
