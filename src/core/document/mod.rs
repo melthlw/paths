@@ -207,29 +207,7 @@ impl Document {
             if let Element::Clone(ref c) = el {
                 if deleted_ids.contains(&c.source_id) {
                     if let Some(master) = Self::find_element_recursive(&old_elements, c.source_id) {
-                        let mut concrete = master.clone_with_new_id();
-                        concrete.translate(c.offset.x, c.offset.y);
-                        if (c.scale.x - 1.0).abs() > 0.001 || (c.scale.y - 1.0).abs() > 0.001 {
-                            concrete.scale(
-                                Point::new(concrete.bounds().x, concrete.bounds().y),
-                                c.scale.x,
-                                c.scale.y,
-                            );
-                        }
-                        if c.rotation.abs() > 0.001 {
-                            let b = concrete.bounds();
-                            concrete.rotate(
-                                Point::new(b.x + b.width * 0.5, b.y + b.height * 0.5),
-                                c.rotation,
-                            );
-                        }
-                        concrete.set_opacity(c.opacity * concrete.opacity());
-                        if c.blend_mode != BlendMode::Normal {
-                            concrete.set_blend_mode(c.blend_mode);
-                        }
-                        if c.blur_radius > 0.001 {
-                            concrete.set_blur(c.blur_radius);
-                        }
+                        let concrete = Self::convert_clone_to_concrete(c, master);
                         new_elements.push(concrete);
                         continue;
                     }
@@ -762,15 +740,15 @@ pub mod tests {
         assert!(doc.element_hit_test(clone_el, Point::new(80.0, 80.0)));
         assert!(!doc.element_hit_test(clone_el, Point::new(10.0, 10.0)));
 
-        // 3. Move master: clone dynamically updates its world bounds!
+        // 3. Move master: spatial transformations are decoupled so unselected clone stays at (70.0, 70.0)
         doc.select(master_id, false);
         assert!(!doc.has_clones_selected());
         assert!(doc.has_masters_selected());
         doc.translate_selected(30.0, 10.0);
         let clone_el_updated = doc.find_element(clone_id).unwrap();
         let updated_bounds = doc.element_bounds(clone_el_updated);
-        assert_eq!(updated_bounds.x, 100.0);
-        assert_eq!(updated_bounds.y, 80.0);
+        assert_eq!(updated_bounds.x, 70.0);
+        assert_eq!(updated_bounds.y, 70.0);
 
         // 4. Select master from clone
         doc.select(clone_id, false);
@@ -787,11 +765,11 @@ pub mod tests {
         assert_eq!(doc.elements.len(), 2);
         assert!(!doc.has_clones_selected());
 
-        // The unlinked element is now an independent Rect at (100.0, 80.0)
+        // The unlinked element is now an independent Rect at (70.0, 70.0)
         let unlinked_el = doc.find_element(unlinked_ids[0]).unwrap();
         assert!(matches!(unlinked_el, Element::Rect(_)));
-        assert_eq!(unlinked_el.bounds().x, 100.0);
-        assert_eq!(unlinked_el.bounds().y, 80.0);
+        assert_eq!(unlinked_el.bounds().x, 70.0);
+        assert_eq!(unlinked_el.bounds().y, 70.0);
     }
 
     #[test]
@@ -818,5 +796,98 @@ pub mod tests {
         assert!(!matches!(doc.elements[0], Element::Clone(_)));
         assert_eq!(doc.elements[0].bounds().x, 30.0);
         assert_eq!(doc.elements[0].bounds().y, 30.0);
+    }
+
+    #[test]
+    fn test_linked_clones_spatial_decoupling() {
+        let mut doc = Document::new();
+        let master = Element::Rect(crate::core::RectElement::new(
+            Rect::new(100.0, 100.0, 60.0, 40.0),
+            Some(Color::RED),
+            None,
+        ));
+        let master_id = master.id();
+        doc.add_element(master);
+        doc.select(master_id, false);
+
+        // Create two clones
+        let clone_ids1 = doc.clone_selected();
+        let clone1_id = clone_ids1[0];
+
+        doc.select(master_id, false);
+        let clone_ids2 = doc.clone_selected();
+        let clone2_id = clone_ids2[0];
+
+        // Move clone2 independently to offset (150, 80)
+        doc.select(clone2_id, false);
+        doc.translate_selected(130.0, 60.0);
+
+        let b_master = doc.find_element(master_id).unwrap().bounds();
+        let b_clone1 = doc.element_bounds(doc.find_element(clone1_id).unwrap());
+        let b_clone2 = doc.element_bounds(doc.find_element(clone2_id).unwrap());
+
+        assert_eq!(b_master, Rect::new(100.0, 100.0, 60.0, 40.0));
+        assert_eq!(b_clone1, Rect::new(120.0, 120.0, 60.0, 40.0));
+        assert_eq!(b_clone2, Rect::new(250.0, 180.0, 60.0, 40.0));
+
+        // Now move master by (50, 30) - clones should remain decoupled and stay at (120, 120) and (250, 180)
+        doc.select(master_id, false);
+        doc.translate_selected(50.0, 30.0);
+
+        let b_master_after = doc.find_element(master_id).unwrap().bounds();
+        let b_clone1_after = doc.element_bounds(doc.find_element(clone1_id).unwrap());
+        let b_clone2_after = doc.element_bounds(doc.find_element(clone2_id).unwrap());
+
+        assert_eq!(b_master_after, Rect::new(150.0, 130.0, 60.0, 40.0));
+        assert_eq!(b_clone1_after, Rect::new(120.0, 120.0, 60.0, 40.0));
+        assert_eq!(b_clone2_after, Rect::new(250.0, 180.0, 60.0, 40.0));
+    }
+
+    #[test]
+    fn test_clone_management_queries_and_selective_unlinking() {
+        let mut doc = Document::new();
+        let master1 = Element::Rect(crate::core::RectElement::new(
+            Rect::new(0.0, 0.0, 50.0, 50.0),
+            Some(Color::EMERALD),
+            None,
+        ));
+        let master1_id = master1.id();
+        doc.add_element(master1);
+
+        doc.select(master1_id, false);
+        let c1_ids = doc.clone_selected();
+        let c1 = c1_ids[0];
+
+        doc.select(master1_id, false);
+        let c2_ids = doc.clone_selected();
+        let _c2 = c2_ids[0];
+
+        // Verify relationships
+        let clones = doc.get_clones_for_master(master1_id);
+        assert_eq!(clones.len(), 2);
+
+        let all_rels = doc.get_all_clone_relationships();
+        assert_eq!(all_rels.len(), 1);
+        assert_eq!(all_rels[0].0, master1_id);
+        assert_eq!(all_rels[0].1.len(), 2);
+
+        let master_of_c1 = doc.get_master_for_clone(c1).unwrap();
+        assert_eq!(master_of_c1.id(), master1_id);
+
+        // Unlink single clone c1
+        let unlinked = doc.unlink_clone_by_id(c1);
+        assert!(unlinked.is_some());
+        let unlinked_id = unlinked.unwrap();
+
+        // c1 is now a concrete element and no longer in get_clones_for_master
+        assert_eq!(doc.get_clones_for_master(master1_id).len(), 1);
+        let concrete = doc.find_element(unlinked_id).unwrap();
+        assert!(matches!(concrete, Element::Rect(_)));
+
+        // Unlink all remaining clones for master1
+        let remaining_unlinked = doc.unlink_all_clones_for_master(master1_id);
+        assert_eq!(remaining_unlinked.len(), 1);
+        assert!(doc.get_clones_for_master(master1_id).is_empty());
+        assert!(doc.get_all_clone_relationships().is_empty());
     }
 }

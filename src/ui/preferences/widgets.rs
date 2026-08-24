@@ -169,8 +169,14 @@ pub fn show_language_chooser_dialog(
 
     let all_languages = crate::core::Language::all_info();
     for info in all_languages {
+        let title_str = if info.lang == crate::core::Language::System {
+            crate::core::gettext("System Default")
+        } else {
+            info.native_name.to_string()
+        };
+
         let row = adw::ActionRow::builder()
-            .title(info.native_name)
+            .title(&title_str)
             .subtitle(format!(
                 "{} • {}",
                 crate::core::gettext(info.localized_name),
@@ -215,7 +221,12 @@ pub fn show_language_chooser_dialog(
             crate::core::set_language(target_lang);
             crate::core::AppSettings::set_language(target_lang.code());
             let updated_info = target_lang.info();
-            lbl_update.set_label(updated_info.native_name);
+            let display_name = if target_lang == crate::core::Language::System {
+                crate::core::gettext("System Default")
+            } else {
+                updated_info.native_name.to_string()
+            };
+            lbl_update.set_label(&display_name);
             bdg_update.set_label(updated_info.code);
             win_close.close();
         });

@@ -840,6 +840,37 @@ impl CanvasWidget {
         }
     }
 
+    pub fn unlink_clone_by_id(&self, clone_id: ElementId) {
+        let mut state = self.state.borrow_mut();
+        if state.document.unlink_clone_by_id(clone_id).is_some() {
+            state.notify_status();
+            self.drawing_area.queue_draw();
+        }
+    }
+
+    pub fn unlink_all_clones_for_master(&self, master_id: ElementId) {
+        let mut state = self.state.borrow_mut();
+        if !state.document.unlink_all_clones_for_master(master_id).is_empty() {
+            state.notify_status();
+            self.drawing_area.queue_draw();
+        }
+    }
+
+    pub fn select_element_by_id(&self, id: ElementId) {
+        let mut state = self.state.borrow_mut();
+        state.document.select(id, false);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn clone_master_by_id(&self, master_id: ElementId) {
+        let mut state = self.state.borrow_mut();
+        state.document.select(master_id, false);
+        state.document.clone_selected();
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
     pub fn select_original_element(&self) {
         let mut state = self.state.borrow_mut();
         state.document.select_original_element();
@@ -852,6 +883,27 @@ impl CanvasWidget {
         state.document.select_linked_clones();
         state.notify_status();
         self.drawing_area.queue_draw();
+    }
+
+    pub fn get_clones_for_master(&self, master_id: ElementId) -> Vec<crate::core::element::CloneElement> {
+        self.state
+            .try_borrow()
+            .map(|s| s.document.get_clones_for_master(master_id))
+            .unwrap_or_default()
+    }
+
+    pub fn get_all_clone_relationships(&self) -> Vec<(ElementId, Vec<crate::core::element::CloneElement>)> {
+        self.state
+            .try_borrow()
+            .map(|s| s.document.get_all_clone_relationships())
+            .unwrap_or_default()
+    }
+
+    pub fn get_master_for_clone(&self, clone_id: ElementId) -> Option<crate::core::element::Element> {
+        self.state
+            .try_borrow()
+            .ok()
+            .and_then(|s| s.document.get_master_for_clone(clone_id).cloned())
     }
 
     pub fn has_clones_selected(&self) -> bool {

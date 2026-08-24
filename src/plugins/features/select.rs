@@ -75,6 +75,7 @@ enum SelectState {
         start_world: Point,
         initial_bounds: Rect,
         initial_elements: Vec<(ElementId, Element)>,
+        initial_unselected_clones: Vec<(ElementId, Point)>,
         hit_id: ElementId,
         has_dragged: bool,
     },
@@ -226,10 +227,29 @@ impl FeaturePlugin for SelectFeature {
                 ctx.document.snapshot();
                 let initial_bounds = ctx.document.selection_bounds().unwrap_or(Rect::ZERO);
                 let initial_elements = Self::collect_selected_elements(ctx);
+                let initial_unselected_clones: Vec<(ElementId, Point)> = ctx
+                    .document
+                    .elements
+                    .iter()
+                    .filter_map(|el| {
+                        if let Element::Clone(c) = el {
+                            if !ctx.document.selected_ids.contains(&c.id)
+                                && ctx.document.selected_ids.contains(&c.source_id)
+                            {
+                                Some((c.id, c.offset))
+                            } else {
+                                None
+                            }
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
                 self.state = SelectState::DraggingElements {
                     start_world: event.world_pos,
                     initial_bounds,
                     initial_elements,
+                    initial_unselected_clones,
                     hit_id: id,
                     has_dragged: false,
                 };
@@ -366,6 +386,7 @@ impl FeaturePlugin for SelectFeature {
                 start_world,
                 initial_bounds,
                 initial_elements,
+                initial_unselected_clones,
                 has_dragged,
                 ..
             } => {
@@ -403,6 +424,13 @@ impl FeaturePlugin for SelectFeature {
                         let mut modified = initial_el.clone();
                         modified.translate(final_dx, final_dy);
                         *el = modified;
+                    }
+                }
+
+                for (cid, init_offset) in initial_unselected_clones.iter() {
+                    if let Some(Element::Clone(c)) = ctx.document.elements.iter_mut().find(|e| e.id() == *cid) {
+                        c.offset.x = init_offset.x - final_dx;
+                        c.offset.y = init_offset.y - final_dy;
                     }
                 }
 

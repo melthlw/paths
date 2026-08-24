@@ -13,12 +13,18 @@ pub fn build_general_page(window: &adw::Window, canvas: &CanvasWidget) -> gtk4::
         ))
         .build();
 
-    let cur_info = crate::core::get_language().info();
+    let cur_lang = crate::core::get_language();
+    let cur_info = cur_lang.info();
+    let display_name = if cur_lang == crate::core::Language::System {
+        crate::core::gettext("System Default")
+    } else {
+        cur_info.native_name.to_string()
+    };
 
     let lang_row = adw::ActionRow::builder()
         .title(crate::core::gettext("Application Language"))
         .subtitle(crate::core::gettext(
-            "Change user interface language and regional translation",
+            "Change user interface language and regional translation (restart required)",
         ))
         .activatable(true)
         .build();
@@ -34,7 +40,7 @@ pub fn build_general_page(window: &adw::Window, canvas: &CanvasWidget) -> gtk4::
         .build();
 
     let lang_lbl = gtk4::Label::builder()
-        .label(cur_info.native_name)
+        .label(&display_name)
         .css_classes(["heading"])
         .build();
 
