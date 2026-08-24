@@ -50,5 +50,8 @@ pub use settings::{settings, AppSettings, APP_SCHEMA_ID};
 pub use shortcuts::{KeyCombo, ShortcutAction, ShortcutCategory, ShortcutManager, ShortcutPreset};
 pub use snap::{SnapConfig, SnapEngine, SnapGuide};
 pub use svg_export::export_document_to_svg;
-pub use svg_import::parse_svg;
+#[allow(unused_imports)]
+pub use svg_import::{
+    parse_svg, parse_svg_path_data, parse_svg_path_data_subpaths, parse_svg_path_to_elements,
+};
 pub use units::{eval_math_expression, Unit};
