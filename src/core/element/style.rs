@@ -1189,5 +1189,32 @@ mod tests {
         assert_eq!(mesh.cols, 3);
         assert_eq!(mesh.nodes.len(), 12);
     }
+
+    #[test]
+    fn test_gradient_stop_manipulation() {
+        let mut grad = Gradient::new_linear(
+            Point::new(0.0, 0.0),
+            Point::new(100.0, 0.0),
+            Color::RED,
+            Color::BLUE,
+        );
+        assert_eq!(grad.stops.len(), 2);
+        assert_eq!(grad.stops[0].offset, 0.0);
+        assert_eq!(grad.stops[1].offset, 1.0);
+
+        // Add middle stop
+        grad.stops.push(GradientStop::new(0.5, Color::EMERALD));
+        grad.stops.sort_by(|a, b| a.offset.partial_cmp(&b.offset).unwrap());
+        assert_eq!(grad.stops.len(), 3);
+        assert_eq!(grad.stops[1].color, Color::EMERALD);
+
+        // Reverse stops
+        for s in &mut grad.stops {
+            s.offset = (1.0 - s.offset).clamp(0.0, 1.0);
+        }
+        grad.stops.sort_by(|a, b| a.offset.partial_cmp(&b.offset).unwrap());
+        assert_eq!(grad.stops[0].color, Color::BLUE);
+        assert_eq!(grad.stops[2].color, Color::RED);
+    }
 }
 

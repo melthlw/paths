@@ -126,9 +126,13 @@ impl ColorPickerPopover {
         show_mode_switcher: bool,
     ) -> Self {
         let initial_mesh_info = canvas.get_active_mesh_info();
-        let init_mesh_node = initial_mesh_info.map(|(n, _, _, _, _)| n).unwrap_or(0);
+        let init_mesh_node = initial_mesh_info.as_ref().map(|(n, _, _, _, _)| *n).unwrap_or(0);
+        let initial_grad_info = canvas.get_active_gradient_info();
+        let init_grad_stop = initial_grad_info.as_ref().map(|(s, _, _, _, _)| *s).unwrap_or(0);
         let actual_init_color = if initial_mode == 2 {
-            initial_mesh_info.map(|(_, _, _, c, _)| c).unwrap_or(initial_color)
+            initial_mesh_info.as_ref().map(|(_, _, _, c, _)| *c).unwrap_or(initial_color)
+        } else if initial_mode == 1 {
+            initial_grad_info.as_ref().map(|(_, _, _, _, c)| *c).unwrap_or(initial_color)
         } else {
             initial_color
         };
@@ -139,7 +143,7 @@ impl ColorPickerPopover {
         let val = Rc::new(Cell::new(v));
         let alpha = Rc::new(Cell::new(actual_init_color.a));
         let current_mode = Rc::new(Cell::new(initial_mode));
-        let active_grad_stop = Rc::new(Cell::new(0usize));
+        let active_grad_stop = Rc::new(Cell::new(init_grad_stop));
         let active_mesh_node = Rc::new(Cell::new(init_mesh_node));
         let is_updating = Rc::new(Cell::new(false));
         let on_change: Rc<RefCell<Option<Box<dyn Fn(Color)>>>> = Rc::new(RefCell::new(None));
@@ -521,21 +525,8 @@ impl ColorPickerPopover {
         let stops_actions_row = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Horizontal)
             .spacing(4)
-            .halign(gtk4::Align::Fill)
+            .halign(gtk4::Align::End)
             .build();
-
-        let stop_pills_scroller = gtk4::ScrolledWindow::builder()
-            .hscrollbar_policy(gtk4::PolicyType::Automatic)
-            .vscrollbar_policy(gtk4::PolicyType::Never)
-            .hexpand(true)
-            .build();
-
-        let stop_pills_box = gtk4::Box::builder()
-            .orientation(gtk4::Orientation::Horizontal)
-            .spacing(3)
-            .build();
-        stop_pills_scroller.set_child(Some(&stop_pills_box));
-        stops_actions_row.append(&stop_pills_scroller);
 
         // Actions: Invert, Add, Delete
         let grad_invert_btn = gtk4::Button::builder()
@@ -561,81 +552,17 @@ impl ColorPickerPopover {
         stops_actions_row.append(&grad_del_btn);
         gradient_panel.append(&stops_actions_row);
 
-        // ── Function to rebuild stop pills ──
+        // ── Function to update stop actions sensitivity ──
         let rebuild_stop_pills = {
-            let sp_box = stop_pills_box.clone();
             let g_stops = grad_stops_ref.clone();
             let act_s = active_grad_stop.clone();
-            let ltc = load_tuner_color.clone();
-            let da_redraw = grad_track_da.clone();
-            let cv = canvas.clone();
             let del_b = grad_del_btn.clone();
 
             Rc::new(move || {
-                while let Some(child) = sp_box.first_child() {
-                    sp_box.remove(&child);
-                }
-
                 let stops = g_stops.borrow().clone();
                 del_b.set_sensitive(stops.len() > 2);
-
                 let active_idx = act_s.get().min(stops.len().saturating_sub(1));
                 act_s.set(active_idx);
-
-                let pill_btns: Rc<RefCell<Vec<gtk4::Button>>> = Rc::new(RefCell::new(Vec::new()));
-
-                for (idx, stop) in stops.iter().enumerate() {
-                    let btn = gtk4::Button::builder()
-                        .css_classes(["flat", "color-stop-btn"])
-                        .tooltip_text(&format!("Stop {} ({}%)", idx + 1, (stop.offset * 100.0).round() as i32))
-                        .build();
-
-                    if idx == active_idx {
-                        btn.add_css_class("active");
-                    }
-
-                    let btn_box = gtk4::Box::builder()
-                        .orientation(gtk4::Orientation::Horizontal)
-                        .spacing(4)
-                        .valign(gtk4::Align::Center)
-                        .build();
-
-                    let col_cell = Rc::new(Cell::new(stop.color));
-                    let da = create_swatch_da(col_cell, 14);
-                    btn_box.append(&da);
-
-                    let pct_lbl = gtk4::Label::builder()
-                        .label(&format!("{}%", (stop.offset * 100.0).round() as i32))
-                        .css_classes(["caption"])
-                        .build();
-                    btn_box.append(&pct_lbl);
-                    btn.set_child(Some(&btn_box));
-
-                    pill_btns.borrow_mut().push(btn.clone());
-
-                    let all_pills = pill_btns.clone();
-                    let act_s_cl = act_s.clone();
-                    let ltc_cl = ltc.clone();
-                    let da_cl = da_redraw.clone();
-                    let s_col = stop.color;
-                    let cv_cl = cv.clone();
-
-                    btn.connect_clicked(move |_| {
-                        act_s_cl.set(idx);
-                        for (k, b) in all_pills.borrow().iter().enumerate() {
-                            if k == idx {
-                                b.add_css_class("active");
-                            } else {
-                                b.remove_css_class("active");
-                            }
-                        }
-                        ltc_cl(s_col);
-                        da_cl.queue_draw();
-                        cv_cl.set_active_tool("gradient");
-                    });
-
-                    sp_box.append(&btn);
-                }
             })
         };
 
@@ -1564,7 +1491,8 @@ impl ColorPickerPopover {
                             cv_s.set_fill_color(col);
                         }
                         1 => {
-                            let stop_idx = act_g.get();
+                            let stop_idx = cv_s.get_active_gradient_info().map(|(s, _, _, _, _)| s).unwrap_or_else(|| act_g.get());
+                            act_g.set(stop_idx);
                             {
                                 let mut stops = g_stops.borrow_mut();
                                 if stop_idx < stops.len() {
@@ -1822,7 +1750,8 @@ impl ColorPickerPopover {
                         cv.set_fill_color(new_col);
                     }
                     1 => {
-                        let stop_idx = act_grad_stop.get();
+                        let stop_idx = cv.get_active_gradient_info().map(|(s, _, _, _, _)| s).unwrap_or_else(|| act_grad_stop.get());
+                        act_grad_stop.set(stop_idx);
                         {
                             let mut stops = g_stops.borrow_mut();
                             if stop_idx < stops.len() {

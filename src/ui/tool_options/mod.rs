@@ -1,4 +1,5 @@
 pub mod brush;
+pub mod gradient;
 pub mod helpers;
 pub mod mesh;
 pub mod pen;
@@ -11,6 +12,7 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 use self::brush::{build_brush_controls, BrushControls};
+use self::gradient::{build_gradient_controls, GradientControls};
 use self::mesh::{build_mesh_controls, MeshControls};
 use self::pen::{build_pen_controls, PenControls};
 use self::pen_brush_text::build_pen_brush_text_controls;
@@ -93,6 +95,8 @@ pub struct ToolOptionsBar {
     path_editor_box: gtk4::Box,
     mesh_box: gtk4::Box,
     mesh_controls: MeshControls,
+    grad_box: gtk4::Box,
+    grad_controls: GradientControls,
     canvas: CanvasWidget,
     is_syncing: Rc<Cell<bool>>,
     is_top: Rc<Cell<bool>>,
@@ -219,6 +223,10 @@ impl ToolOptionsBar {
         let mesh_controls = build_mesh_controls(&canvas, &is_syncing);
         let mesh_box = mesh_controls.mesh_box.clone();
         left_capsule.append(&mesh_box);
+
+        let grad_controls = build_gradient_controls(&canvas, &is_syncing);
+        let grad_box = grad_controls.grad_box.clone();
+        left_capsule.append(&grad_box);
 
         container.append(&left_capsule);
         container.append(&text_capsule);
@@ -388,6 +396,8 @@ impl ToolOptionsBar {
             brush_controls,
             mesh_box,
             mesh_controls,
+            grad_box,
+            grad_controls,
             canvas,
             is_syncing,
             is_top,
@@ -493,6 +503,7 @@ impl ToolOptionsBar {
             self.pen_box.set_visible(false);
             self.brush_box.set_visible(false);
             self.mesh_box.set_visible(false);
+            self.grad_box.set_visible(false);
 
             self.is_syncing.set(true);
             match tool_id {
@@ -655,6 +666,7 @@ impl ToolOptionsBar {
             self.pen_box.set_visible(false);
             self.brush_box.set_visible(false);
             self.mesh_box.set_visible(false);
+            self.grad_box.set_visible(false);
             self.path_editor_box.set_visible(true);
         } else if tool_id == "pen" || tool_id == "vector-pen" || tool_id == "vector_pen" {
             self.container.set_visible(true);
@@ -667,6 +679,7 @@ impl ToolOptionsBar {
             self.path_editor_box.set_visible(false);
             self.brush_box.set_visible(false);
             self.mesh_box.set_visible(false);
+            self.grad_box.set_visible(false);
             self.pen_box.set_visible(true);
 
             if let Ok(state_b) = self.canvas.state().try_borrow() {
@@ -699,6 +712,7 @@ impl ToolOptionsBar {
             self.path_editor_box.set_visible(false);
             self.pen_box.set_visible(false);
             self.mesh_box.set_visible(false);
+            self.grad_box.set_visible(false);
             self.brush_box.set_visible(true);
 
             if let Ok(state_b) = self.canvas.state().try_borrow() {
@@ -761,6 +775,7 @@ impl ToolOptionsBar {
             self.path_editor_box.set_visible(false);
             self.pen_box.set_visible(false);
             self.brush_box.set_visible(false);
+            self.grad_box.set_visible(false);
             self.mesh_box.set_visible(true);
 
             if let Some((node_idx, rows, cols, color, smooth_curves)) = self.canvas.get_active_mesh_info() {
@@ -777,6 +792,40 @@ impl ToolOptionsBar {
                 )));
                 self.is_syncing.set(false);
             }
+        } else if tool_id == "gradient" {
+            self.container.set_visible(true);
+            self.text_capsule.set_visible(false);
+            self.page_capsule.set_visible(false);
+            self.left_capsule.set_visible(true);
+            self.right_capsule.set_visible(false);
+            self.general_box.set_visible(false);
+            self.shape_options_box.set_visible(false);
+            self.path_editor_box.set_visible(false);
+            self.pen_box.set_visible(false);
+            self.brush_box.set_visible(false);
+            self.mesh_box.set_visible(false);
+            self.grad_box.set_visible(true);
+
+            if let Some((stop_idx, kind, angle, stops, color)) = self.canvas.get_active_gradient_info() {
+                self.is_syncing.set(true);
+                let is_radial = kind == crate::core::GradientType::Radial;
+                self.grad_controls.btn_type_linear.set_active(!is_radial);
+                self.grad_controls.btn_type_radial.set_active(is_radial);
+                self.grad_controls.angle_box.set_visible(!is_radial);
+                self.grad_controls.angle_spin.set_value(angle as f64);
+                self.grad_controls.btn_delete_stop.set_sensitive(stops.len() > 2);
+                let cur_pos = stops.get(stop_idx).map(|s| (s.offset * 100.0) as f64).unwrap_or(0.0);
+                self.grad_controls.stop_pos_spin.set_value(cur_pos);
+                self.grad_controls.stop_color_cell.set(color);
+                self.grad_controls.color_da.queue_draw();
+                self.grad_controls.color_btn.set_tooltip_text(Some(&format!(
+                    "{} (#{} - Stop {})",
+                    crate::core::gettext("Selected Gradient Stop Color"),
+                    color.to_hex_rgba(),
+                    stop_idx + 1
+                )));
+                self.is_syncing.set(false);
+            }
         } else if has_selection {
             self.container.set_visible(true);
             self.text_capsule.set_visible(false);
@@ -789,6 +838,7 @@ impl ToolOptionsBar {
             self.pen_box.set_visible(false);
             self.brush_box.set_visible(false);
             self.mesh_box.set_visible(false);
+            self.grad_box.set_visible(false);
 
             self.layer_box.set_visible(selected_count > 0);
             self.transform_modes_box.set_visible(true);

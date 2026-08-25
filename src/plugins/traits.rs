@@ -140,6 +140,14 @@ pub trait FeaturePlugin: 'static + Send + Sync {
 
     /// Set active selected mesh node index
     fn set_active_mesh_node(&mut self, _idx: usize) {}
+
+    /// Get active selected gradient stop index
+    fn get_active_gradient_stop(&self) -> Option<usize> {
+        None
+    }
+
+    /// Set active selected gradient stop index
+    fn set_active_gradient_stop(&mut self, _idx: usize) {}
 }
 
 pub struct PluginRenderContext<'a> {

@@ -37,6 +37,12 @@ impl CanvasWidget {
             } else {
                 None
             };
+            let is_grad_tool = state.plugin_manager.active_id() == "gradient";
+            let active_grad_stop = if is_grad_tool {
+                state.plugin_manager.active_feature().and_then(|f| f.get_active_gradient_stop())
+            } else {
+                None
+            };
 
             for el in &mut state.document.elements {
                 if selected_ids.contains(&el.id()) {
@@ -60,6 +66,39 @@ impl CanvasWidget {
                                     m.nodes[node_idx].color = color;
                                     updated = true;
                                 }
+                            }
+                        }
+                        if updated {
+                            el.set_fills(fills);
+                            continue;
+                        }
+                    }
+                    if let Some(stop_idx) = active_grad_stop {
+                        let grad_mut = match el {
+                            crate::core::Element::Rect(r) => &mut r.gradient,
+                            crate::core::Element::Path(p) => &mut p.gradient,
+                            _ => &mut None,
+                        };
+                        let mut updated = false;
+                        if let Some(g) = grad_mut {
+                            if stop_idx < g.stops.len() {
+                                g.stops[stop_idx].color = color;
+                                updated = true;
+                            }
+                        }
+                        let mut fills = el.fills();
+                        if let Some(f0) = fills.first_mut() {
+                            let mut eff = f0.effective_stops();
+                            if stop_idx < eff.len() {
+                                eff[stop_idx].color = color;
+                                f0.stops = eff.clone();
+                                if stop_idx == 0 {
+                                    f0.color = color;
+                                }
+                                if stop_idx == eff.len() - 1 {
+                                    f0.secondary_color = color;
+                                }
+                                updated = true;
                             }
                         }
                         if updated {
@@ -511,6 +550,271 @@ impl CanvasWidget {
             }
             if let Some(feat) = state.plugin_manager.active_feature_mut() {
                 feat.set_active_mesh_node(0);
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn get_active_gradient_info(
+        &self,
+    ) -> Option<(usize, crate::core::GradientType, f32, Vec<crate::core::GradientStop>, Color)> {
+        let state = self.state.try_borrow().ok()?;
+        let selected_id = state.document.selected_ids.iter().next()?;
+        let el = state.document.elements.iter().find(|e| e.id() == *selected_id)?;
+        let fills = el.fills();
+        let f0 = fills.first()?;
+        let kind = match f0.style {
+            crate::core::FillStyle::RadialGradient => crate::core::GradientType::Radial,
+            _ => crate::core::GradientType::Linear,
+        };
+        let stops = f0.effective_stops();
+        let active_stop = state
+            .plugin_manager
+            .active_feature()
+            .and_then(|f| f.get_active_gradient_stop())
+            .unwrap_or(0)
+            .min(stops.len().saturating_sub(1));
+        let col = stops.get(active_stop).map(|s| s.color).unwrap_or(Color::BLACK);
+        Some((active_stop, kind, f0.angle, stops, col))
+    }
+
+    pub fn set_gradient_type(&self, kind: crate::core::GradientType) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let grad_mut = match el {
+                        crate::core::Element::Rect(r) => &mut r.gradient,
+                        crate::core::Element::Path(p) => &mut p.gradient,
+                        _ => &mut None,
+                    };
+                    if let Some(g) = grad_mut {
+                        g.kind = kind;
+                    }
+                    let mut fills = el.fills();
+                    if fills.is_empty() {
+                        fills.push(crate::core::FillLayer::default());
+                    }
+                    if let Some(f0) = fills.first_mut() {
+                        f0.style = match kind {
+                            crate::core::GradientType::Radial => crate::core::FillStyle::RadialGradient,
+                            _ => crate::core::FillStyle::LinearGradient,
+                        };
+                    }
+                    el.set_fills(fills);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_gradient_angle(&self, angle: f32) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let b = el.bounds();
+                    let cx = b.x + b.width * 0.5;
+                    let cy = b.y + b.height * 0.5;
+                    let rad = angle.to_radians();
+                    let len = (b.width.hypot(b.height) * 0.5).max(1.0);
+                    let dx = rad.cos() * len;
+                    let dy = rad.sin() * len;
+
+                    let grad_mut = match el {
+                        crate::core::Element::Rect(r) => &mut r.gradient,
+                        crate::core::Element::Path(p) => &mut p.gradient,
+                        _ => &mut None,
+                    };
+                    if let Some(g) = grad_mut {
+                        g.start = crate::core::Point::new(cx - dx, cy - dy);
+                        g.end = crate::core::Point::new(cx + dx, cy + dy);
+                    }
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        f0.angle = angle;
+                    }
+                    el.set_fills(fills);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn reverse_selected_gradient_stops(&self) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let grad_mut = match el {
+                        crate::core::Element::Rect(r) => &mut r.gradient,
+                        crate::core::Element::Path(p) => &mut p.gradient,
+                        _ => &mut None,
+                    };
+                    if let Some(g) = grad_mut {
+                        for s in &mut g.stops {
+                            s.offset = (1.0 - s.offset).clamp(0.0, 1.0);
+                        }
+                        g.stops.sort_by(|a, b| a.offset.partial_cmp(&b.offset).unwrap());
+                    }
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        let mut eff = f0.effective_stops();
+                        for s in &mut eff {
+                            s.offset = (1.0 - s.offset).clamp(0.0, 1.0);
+                        }
+                        eff.sort_by(|a, b| a.offset.partial_cmp(&b.offset).unwrap());
+                        f0.stops = eff.clone();
+                        f0.color = eff.first().map(|s| s.color).unwrap_or(f0.color);
+                        f0.secondary_color = eff.last().map(|s| s.color).unwrap_or(f0.secondary_color);
+                    }
+                    el.set_fills(fills);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn add_selected_gradient_stop(&self) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            let mut new_sel = None;
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let grad_mut = match el {
+                        crate::core::Element::Rect(r) => &mut r.gradient,
+                        crate::core::Element::Path(p) => &mut p.gradient,
+                        _ => &mut None,
+                    };
+                    let mut new_stop = None;
+                    if let Some(g) = grad_mut {
+                        let c1 = g.stops.first().map(|s| s.color).unwrap_or(Color::BLACK);
+                        let c2 = g.stops.last().map(|s| s.color).unwrap_or(Color::WHITE);
+                        let mid_col = Color::new(
+                            (c1.r + c2.r) * 0.5,
+                            (c1.g + c2.g) * 0.5,
+                            (c1.b + c2.b) * 0.5,
+                            (c1.a + c2.a) * 0.5,
+                        );
+                        let s = crate::core::GradientStop::new(0.5, mid_col);
+                        g.stops.push(s.clone());
+                        g.stops.sort_by(|a, b| a.offset.partial_cmp(&b.offset).unwrap());
+                        new_stop = Some(s);
+                        if let Some(pos) = g.stops.iter().position(|st| (st.offset - 0.5).abs() < 0.001) {
+                            new_sel = Some(pos);
+                        }
+                    }
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        let mut eff = f0.effective_stops();
+                        let c1 = eff.first().map(|s| s.color).unwrap_or(Color::BLACK);
+                        let c2 = eff.last().map(|s| s.color).unwrap_or(Color::WHITE);
+                        let mid_col = Color::new(
+                            (c1.r + c2.r) * 0.5,
+                            (c1.g + c2.g) * 0.5,
+                            (c1.b + c2.b) * 0.5,
+                            (c1.a + c2.a) * 0.5,
+                        );
+                        let s = new_stop.unwrap_or_else(|| crate::core::GradientStop::new(0.5, mid_col));
+                        eff.push(s);
+                        eff.sort_by(|a, b| a.offset.partial_cmp(&b.offset).unwrap());
+                        f0.stops = eff;
+                    }
+                    el.set_fills(fills);
+                }
+            }
+            if let Some(idx) = new_sel {
+                if let Some(feat) = state.plugin_manager.active_feature_mut() {
+                    feat.set_active_gradient_stop(idx);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn delete_selected_gradient_stop(&self) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            let active_stop = state
+                .plugin_manager
+                .active_feature()
+                .and_then(|f| f.get_active_gradient_stop())
+                .unwrap_or(0);
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let grad_mut = match el {
+                        crate::core::Element::Rect(r) => &mut r.gradient,
+                        crate::core::Element::Path(p) => &mut p.gradient,
+                        _ => &mut None,
+                    };
+                    if let Some(g) = grad_mut {
+                        if g.stops.len() > 2 && active_stop < g.stops.len() {
+                            g.stops.remove(active_stop);
+                        }
+                    }
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        let mut eff = f0.effective_stops();
+                        if eff.len() > 2 && active_stop < eff.len() {
+                            eff.remove(active_stop);
+                            f0.stops = eff.clone();
+                            f0.color = eff.first().map(|s| s.color).unwrap_or(f0.color);
+                            f0.secondary_color = eff.last().map(|s| s.color).unwrap_or(f0.secondary_color);
+                        }
+                    }
+                    el.set_fills(fills);
+                }
+            }
+            if let Some(feat) = state.plugin_manager.active_feature_mut() {
+                feat.set_active_gradient_stop(0);
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_gradient_stop_color(&self, stop_idx: usize, color: Color) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let grad_mut = match el {
+                        crate::core::Element::Rect(r) => &mut r.gradient,
+                        crate::core::Element::Path(p) => &mut p.gradient,
+                        _ => &mut None,
+                    };
+                    if let Some(g) = grad_mut {
+                        if stop_idx < g.stops.len() {
+                            g.stops[stop_idx].color = color;
+                        }
+                    }
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        let mut eff = f0.effective_stops();
+                        if stop_idx < eff.len() {
+                            eff[stop_idx].color = color;
+                            f0.stops = eff.clone();
+                            if stop_idx == 0 {
+                                f0.color = color;
+                            }
+                            if stop_idx == eff.len() - 1 {
+                                f0.secondary_color = color;
+                            }
+                        }
+                    }
+                    el.set_fills(fills);
+                }
             }
             state.notify_status();
         }

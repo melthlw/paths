@@ -1,3 +1,4 @@
+use gtk4::gdk;
 use skia_safe as skia;
 
 use crate::core::{
@@ -315,6 +316,51 @@ impl FeaturePlugin for MeshGradientFeature {
             ctx.document.snapshot();
             ctx.request_redraw();
         }
+    }
+
+    fn on_key_down(&mut self, ctx: &mut PluginContext, event: &crate::core::KeyEvent) -> bool {
+        if event.key == gdk::Key::Delete || event.key == gdk::Key::BackSpace {
+            if let Some(active_node) = self.selected_node_idx {
+                if let Some(first_id) = ctx.document.selected_ids.iter().next().copied() {
+                    ctx.document.snapshot();
+                    let mut deleted = false;
+                    for el in &mut ctx.document.elements {
+                        if el.id() == first_id {
+                            let mesh_mut = match el {
+                                Element::Rect(r) => &mut r.mesh_gradient,
+                                Element::Path(p) => &mut p.mesh_gradient,
+                                _ => &mut None,
+                            };
+                            let mut updated_mesh = None;
+                            if let Some(m) = mesh_mut {
+                                if m.delete_node(active_node) {
+                                    updated_mesh = Some(m.clone());
+                                    deleted = true;
+                                }
+                            }
+                            let mut fills = el.fills();
+                            if let Some(f0) = fills.first_mut() {
+                                if let Some(um) = updated_mesh.clone() {
+                                    f0.mesh = Some(um);
+                                } else if let Some(m) = &mut f0.mesh {
+                                    if m.delete_node(active_node) {
+                                        deleted = true;
+                                    }
+                                }
+                            }
+                            el.set_fills(fills);
+                            break;
+                        }
+                    }
+                    if deleted {
+                        self.selected_node_idx = Some(0);
+                        ctx.request_redraw();
+                        return true;
+                    }
+                }
+            }
+        }
+        false
     }
 
     fn on_cancel(&mut self, ctx: &mut PluginContext) {

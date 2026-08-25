@@ -1,7 +1,8 @@
+use gtk4::gdk;
 use skia_safe as skia;
 
 use crate::core::{
-    Color, Element, ElementId, Gradient, GradientType, Point, PointerButton, PointerEvent, Viewport,
+    Color, Element, ElementId, Gradient, GradientStop, GradientType, Point, PointerButton, PointerEvent, Viewport,
 };
 use crate::plugins::traits::{FeaturePlugin, PluginContext, PluginRenderContext};
 
@@ -12,8 +13,20 @@ enum DraggingHandle {
     Stop(usize),
 }
 
+fn distance_to_segment(p: Point, a: Point, b: Point) -> (f32, f32) {
+    let seg = b - a;
+    let len_sq = seg.x * seg.x + seg.y * seg.y;
+    if len_sq < 0.0001 {
+        return (p.distance_to(a), 0.0);
+    }
+    let t = (((p.x - a.x) * seg.x + (p.y - a.y) * seg.y) / len_sq).clamp(0.0, 1.0);
+    let proj = Point::new(a.x + t * seg.x, a.y + t * seg.y);
+    (p.distance_to(proj), t)
+}
+
 pub struct GradientFeature {
     target_id: Option<ElementId>,
+    selected_stop_idx: Option<usize>,
     is_dragging: bool,
     drag_handle: Option<DraggingHandle>,
     drag_start: Option<Point>,
@@ -30,6 +43,7 @@ impl GradientFeature {
     pub fn new() -> Self {
         Self {
             target_id: None,
+            selected_stop_idx: Some(0),
             is_dragging: false,
             drag_handle: None,
             drag_start: None,
@@ -38,6 +52,25 @@ impl GradientFeature {
     }
 
     fn find_or_init_target(&mut self, ctx: &mut PluginContext, point: Point) -> Option<ElementId> {
+        let hit_radius = 16.0 / ctx.viewport.zoom;
+
+        // Check if hitting handle or line of currently active gradient
+        if let (Some(first_selected), Some(grad)) = (ctx.document.selected_ids.iter().next(), &self.live_gradient) {
+            if point.distance_to(grad.start) <= hit_radius || point.distance_to(grad.end) <= hit_radius {
+                return Some(*first_selected);
+            }
+            for stop in &grad.stops {
+                let stop_pt = grad.start + (grad.end - grad.start) * stop.offset;
+                if point.distance_to(stop_pt) <= hit_radius {
+                    return Some(*first_selected);
+                }
+            }
+            let (dist_to_line, _) = distance_to_segment(point, grad.start, grad.end);
+            if dist_to_line <= hit_radius {
+                return Some(*first_selected);
+            }
+        }
+
         // First check currently selected elements
         if let Some(&first_selected) = ctx.document.selected_ids.iter().next() {
             if let Some(elem) = ctx
@@ -67,6 +100,18 @@ impl GradientFeature {
 impl FeaturePlugin for GradientFeature {
     fn on_activate(&mut self, ctx: &mut PluginContext) {
         ctx.set_cursor("tool:gradient");
+        if let Some(&first) = ctx.document.selected_ids.iter().next() {
+            self.target_id = Some(first);
+            self.selected_stop_idx = Some(0);
+        }
+    }
+
+    fn get_active_gradient_stop(&self) -> Option<usize> {
+        self.selected_stop_idx
+    }
+
+    fn set_active_gradient_stop(&mut self, idx: usize) {
+        self.selected_stop_idx = Some(idx);
     }
 
     fn on_pointer_down(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
@@ -108,6 +153,7 @@ impl FeaturePlugin for GradientFeature {
                             if f0.style == crate::core::FillStyle::RadialGradient {
                                 g.kind = GradientType::Radial;
                             }
+                            g.stops = f0.effective_stops();
                             self.live_gradient = Some(g);
                         }
                     }
@@ -117,9 +163,9 @@ impl FeaturePlugin for GradientFeature {
         }
 
         // Check if clicked near an existing handle
+        let hit_radius = 16.0 / ctx.viewport.zoom;
         let mut handle_hit = None;
         if let Some(grad) = &self.live_gradient {
-            let hit_radius = 8.0 / ctx.viewport.zoom;
             if event.world_pos.distance_to(grad.start) <= hit_radius {
                 handle_hit = Some(DraggingHandle::Start);
             } else if event.world_pos.distance_to(grad.end) <= hit_radius {
@@ -142,21 +188,102 @@ impl FeaturePlugin for GradientFeature {
             if let Some(grad) = &self.live_gradient {
                 match handle {
                     DraggingHandle::Start => {
+                        self.selected_stop_idx = Some(0);
                         if let Some(s0) = grad.stops.first() {
                             ctx.active_fill_color = s0.color;
                         }
                     }
                     DraggingHandle::End => {
+                        self.selected_stop_idx = Some(grad.stops.len().saturating_sub(1));
                         if let Some(s_end) = grad.stops.last() {
                             ctx.active_fill_color = s_end.color;
                         }
                     }
                     DraggingHandle::Stop(idx) => {
+                        self.selected_stop_idx = Some(idx);
                         if let Some(s) = grad.stops.get(idx) {
                             ctx.active_fill_color = s.color;
                         }
                     }
                 }
+            }
+        } else if let Some(grad) = &mut self.live_gradient {
+            // Check if clicked on/near the gradient line segment
+            let (dist, t) = distance_to_segment(event.world_pos, grad.start, grad.end);
+            if dist <= hit_radius && t > 0.02 && t < 0.98 {
+                // Click on gradient line: Insert new color stop at projection offset!
+                let mut left_stop = (0.0f32, Color::BLACK);
+                let mut right_stop = (1.0f32, Color::WHITE);
+                for s in &grad.stops {
+                    if s.offset <= t && s.offset >= left_stop.0 {
+                        left_stop = (s.offset, s.color);
+                    }
+                    if s.offset >= t && s.offset <= right_stop.0 {
+                        right_stop = (s.offset, s.color);
+                    }
+                }
+                let span = (right_stop.0 - left_stop.0).max(0.0001);
+                let factor = ((t - left_stop.0) / span).clamp(0.0, 1.0);
+                let interp_c = Color::new(
+                    left_stop.1.r + factor * (right_stop.1.r - left_stop.1.r),
+                    left_stop.1.g + factor * (right_stop.1.g - left_stop.1.g),
+                    left_stop.1.b + factor * (right_stop.1.b - left_stop.1.b),
+                    left_stop.1.a + factor * (right_stop.1.a - left_stop.1.a),
+                );
+                let new_stop = GradientStop::new(t, interp_c);
+                grad.stops.push(new_stop);
+                grad.stops.sort_by(|a, b| a.offset.partial_cmp(&b.offset).unwrap());
+
+                let new_idx = grad.stops.iter().position(|s| (s.offset - t).abs() < 0.001).unwrap_or(0);
+                self.selected_stop_idx = Some(new_idx);
+                ctx.active_fill_color = interp_c;
+                self.drag_handle = Some(DraggingHandle::Stop(new_idx));
+                self.is_dragging = true;
+
+                // Sync with document element
+                if let Some(id) = self.target_id {
+                    ctx.document.snapshot();
+                    for el in &mut ctx.document.elements {
+                        if el.id() == id {
+                            match el {
+                                Element::Rect(r) => r.gradient = Some(grad.clone()),
+                                Element::Path(p) => p.gradient = Some(grad.clone()),
+                                _ => {}
+                            }
+                            let mut fills = el.fills();
+                            if let Some(f0) = fills.first_mut() {
+                                f0.stops = grad.stops.clone();
+                            }
+                            el.set_fills(fills);
+                            break;
+                        }
+                    }
+                }
+            } else {
+                // Click away from existing line: Start a new gradient drag line
+                self.drag_start = Some(event.world_pos);
+                self.is_dragging = true;
+                self.drag_handle = Some(DraggingHandle::End);
+
+                let primary = ctx.active_fill_color;
+                let secondary = ctx.active_stroke_color.unwrap_or(Color::WHITE);
+                let kind = if event.shift_pressed {
+                    GradientType::Radial
+                } else {
+                    GradientType::Linear
+                };
+
+                let mut grad = Gradient::new_linear(
+                    event.world_pos,
+                    event.world_pos + Point::new(1.0, 1.0),
+                    primary,
+                    secondary,
+                );
+                if kind == GradientType::Radial {
+                    grad.kind = GradientType::Radial;
+                }
+                self.live_gradient = Some(grad);
+                self.selected_stop_idx = Some(0);
             }
         } else {
             // Start a new gradient drag line
@@ -182,6 +309,7 @@ impl FeaturePlugin for GradientFeature {
                 grad.kind = GradientType::Radial;
             }
             self.live_gradient = Some(grad);
+            self.selected_stop_idx = Some(0);
         }
 
         ctx.request_redraw();
@@ -189,7 +317,26 @@ impl FeaturePlugin for GradientFeature {
 
     fn on_pointer_move(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
         if !self.is_dragging {
-            ctx.set_cursor("tool:gradient");
+            let hit_radius = 16.0 / ctx.viewport.zoom;
+            if let Some(grad) = &self.live_gradient {
+                if event.world_pos.distance_to(grad.start) <= hit_radius || event.world_pos.distance_to(grad.end) <= hit_radius {
+                    ctx.set_cursor("grab");
+                } else if grad.stops.iter().any(|s| {
+                    let p = grad.start + (grad.end - grad.start) * s.offset;
+                    event.world_pos.distance_to(p) <= hit_radius
+                }) {
+                    ctx.set_cursor("grab");
+                } else {
+                    let (dist, t) = distance_to_segment(event.world_pos, grad.start, grad.end);
+                    if dist <= hit_radius && t > 0.02 && t < 0.98 {
+                        ctx.set_cursor("copy");
+                    } else {
+                        ctx.set_cursor("tool:gradient");
+                    }
+                }
+            } else {
+                ctx.set_cursor("tool:gradient");
+            }
             return;
         }
 
@@ -232,9 +379,12 @@ impl FeaturePlugin for GradientFeature {
                                 GradientType::Radial => crate::core::FillStyle::RadialGradient,
                                 _ => crate::core::FillStyle::LinearGradient,
                             };
+                            f0.stops = grad.stops.clone();
                             f0.color = grad.stops.first().map(|s| s.color).unwrap_or(Color::BLACK);
                             f0.secondary_color =
                                 grad.stops.last().map(|s| s.color).unwrap_or(Color::WHITE);
+                            let angle = (grad.end.y - grad.start.y).atan2(grad.end.x - grad.start.x).to_degrees();
+                            f0.angle = if angle < 0.0 { angle + 360.0 } else { angle };
                         }
                         el.set_fills(fills);
                         break;
@@ -269,9 +419,12 @@ impl FeaturePlugin for GradientFeature {
                                 GradientType::Radial => crate::core::FillStyle::RadialGradient,
                                 _ => crate::core::FillStyle::LinearGradient,
                             };
+                            f0.stops = grad.stops.clone();
                             f0.color = grad.stops.first().map(|s| s.color).unwrap_or(Color::BLACK);
                             f0.secondary_color =
                                 grad.stops.last().map(|s| s.color).unwrap_or(Color::WHITE);
+                            let angle = (grad.end.y - grad.start.y).atan2(grad.end.x - grad.start.x).to_degrees();
+                            f0.angle = if angle < 0.0 { angle + 360.0 } else { angle };
                         }
                         el.set_fills(fills);
                         break;
@@ -280,6 +433,38 @@ impl FeaturePlugin for GradientFeature {
             }
         }
         ctx.request_redraw();
+    }
+
+    fn on_key_down(&mut self, ctx: &mut PluginContext, event: &crate::core::KeyEvent) -> bool {
+        if event.key == gdk::Key::Delete || event.key == gdk::Key::BackSpace {
+            if let (Some(id), Some(stop_idx), Some(grad)) = (self.target_id, self.selected_stop_idx, &mut self.live_gradient) {
+                if grad.stops.len() > 2 && stop_idx < grad.stops.len() {
+                    grad.stops.remove(stop_idx);
+                    let new_idx = stop_idx.min(grad.stops.len() - 1);
+                    self.selected_stop_idx = Some(new_idx);
+                    ctx.active_fill_color = grad.stops[new_idx].color;
+                    ctx.document.snapshot();
+                    for el in &mut ctx.document.elements {
+                        if el.id() == id {
+                            match el {
+                                Element::Rect(r) => r.gradient = Some(grad.clone()),
+                                Element::Path(p) => p.gradient = Some(grad.clone()),
+                                _ => {}
+                            }
+                            let mut fills = el.fills();
+                            if let Some(f0) = fills.first_mut() {
+                                f0.stops = grad.stops.clone();
+                            }
+                            el.set_fills(fills);
+                            break;
+                        }
+                    }
+                    ctx.request_redraw();
+                    return true;
+                }
+            }
+        }
+        false
     }
 
     fn on_cancel(&mut self, ctx: &mut PluginContext) {
@@ -309,14 +494,14 @@ impl FeaturePlugin for GradientFeature {
         // 1. Draw gradient vector axis
         let mut axis_paint = skia::Paint::default();
         axis_paint.set_color4f(skia::Color4f::new(0.1, 0.1, 0.15, 0.9), None);
-        axis_paint.set_stroke_width(2.0 / zoom);
+        axis_paint.set_stroke_width(2.5 / zoom);
         axis_paint.set_style(skia::PaintStyle::Stroke);
         axis_paint.set_anti_alias(true);
         canvas.draw_line(p1.to_skia(), p2.to_skia(), &axis_paint);
 
         let mut axis_inner = skia::Paint::default();
-        axis_inner.set_color4f(skia::Color4f::new(1.0, 1.0, 1.0, 0.9), None);
-        axis_inner.set_stroke_width(1.0 / zoom);
+        axis_inner.set_color4f(skia::Color4f::new(1.0, 1.0, 1.0, 0.95), None);
+        axis_inner.set_stroke_width(1.2 / zoom);
         axis_inner.set_style(skia::PaintStyle::Stroke);
         axis_inner.set_anti_alias(true);
         let intervals = [4.0 / zoom, 4.0 / zoom];
@@ -337,28 +522,46 @@ impl FeaturePlugin for GradientFeature {
         }
 
         // 3. Draw intermediate color stops
-        for stop in &grad.stops {
+        for (idx, stop) in grad.stops.iter().enumerate() {
+            let is_sel = self.selected_stop_idx == Some(idx);
             let stop_pt = p1 + (p2 - p1) * stop.offset;
+            let radius = if is_sel { 7.5 / zoom } else { 5.0 / zoom };
+
+            if is_sel {
+                let mut halo = skia::Paint::default();
+                halo.set_color4f(skia::Color4f::new(0.15, 0.55, 1.0, 0.45), None);
+                halo.set_style(skia::PaintStyle::Fill);
+                halo.set_anti_alias(true);
+                canvas.draw_circle(stop_pt.to_skia(), radius + 3.5 / zoom, &halo);
+            }
+
             let mut stop_fill = skia::Paint::default();
             stop_fill.set_color4f(stop.color.to_skia(), None);
             stop_fill.set_style(skia::PaintStyle::Fill);
             stop_fill.set_anti_alias(true);
-            canvas.draw_circle(stop_pt.to_skia(), 4.5 / zoom, &stop_fill);
+            canvas.draw_circle(stop_pt.to_skia(), radius, &stop_fill);
 
             let mut stop_border = skia::Paint::default();
-            stop_border.set_color4f(skia::Color4f::new(1.0, 1.0, 1.0, 1.0), None);
+            if is_sel {
+                stop_border.set_color4f(skia::Color4f::new(1.0, 1.0, 1.0, 1.0), None);
+                stop_border.set_stroke_width(2.5 / zoom);
+            } else {
+                stop_border.set_color4f(skia::Color4f::new(0.05, 0.05, 0.1, 0.85), None);
+                stop_border.set_stroke_width(1.5 / zoom);
+            }
             stop_border.set_style(skia::PaintStyle::Stroke);
-            stop_border.set_stroke_width(1.5 / zoom);
             stop_border.set_anti_alias(true);
-            canvas.draw_circle(stop_pt.to_skia(), 4.5 / zoom, &stop_border);
+            canvas.draw_circle(stop_pt.to_skia(), radius, &stop_border);
         }
 
-        // 4. Draw Start Handle (Square)
+        // 4. Draw Start Handle (Square / Origin)
+        let is_start_sel = self.selected_stop_idx == Some(0);
+        let s_size = if is_start_sel { 14.0 / zoom } else { 10.0 / zoom };
         let s_rect = skia::Rect::from_xywh(
-            p1.x - 5.0 / zoom,
-            p1.y - 5.0 / zoom,
-            10.0 / zoom,
-            10.0 / zoom,
+            p1.x - s_size * 0.5,
+            p1.y - s_size * 0.5,
+            s_size,
+            s_size,
         );
         let mut handle_paint = skia::Paint::default();
         if let Some(first) = grad.stops.first() {
@@ -371,13 +574,20 @@ impl FeaturePlugin for GradientFeature {
         canvas.draw_rect(s_rect, &handle_paint);
 
         let mut handle_border = skia::Paint::default();
-        handle_border.set_color4f(skia::Color4f::new(0.1, 0.1, 0.1, 1.0), None);
+        if is_start_sel {
+            handle_border.set_color4f(skia::Color4f::new(1.0, 1.0, 1.0, 1.0), None);
+            handle_border.set_stroke_width(2.5 / zoom);
+        } else {
+            handle_border.set_color4f(skia::Color4f::new(0.1, 0.1, 0.1, 0.9), None);
+            handle_border.set_stroke_width(1.5 / zoom);
+        }
         handle_border.set_style(skia::PaintStyle::Stroke);
-        handle_border.set_stroke_width(1.5 / zoom);
         handle_border.set_anti_alias(true);
         canvas.draw_rect(s_rect, &handle_border);
 
-        // 5. Draw End Handle (Circle)
+        // 5. Draw End Handle (Circle / Terminal)
+        let is_end_sel = self.selected_stop_idx == Some(grad.stops.len().saturating_sub(1));
+        let end_radius = if is_end_sel { 7.5 / zoom } else { 5.5 / zoom };
         let mut end_paint = skia::Paint::default();
         if let Some(last) = grad.stops.last() {
             end_paint.set_color4f(last.color.to_skia(), None);
@@ -386,13 +596,18 @@ impl FeaturePlugin for GradientFeature {
         }
         end_paint.set_style(skia::PaintStyle::Fill);
         end_paint.set_anti_alias(true);
-        canvas.draw_circle(p2.to_skia(), 5.0 / zoom, &end_paint);
+        canvas.draw_circle(p2.to_skia(), end_radius, &end_paint);
 
         let mut end_border = skia::Paint::default();
-        end_border.set_color4f(skia::Color4f::new(0.1, 0.1, 0.1, 1.0), None);
+        if is_end_sel {
+            end_border.set_color4f(skia::Color4f::new(1.0, 1.0, 1.0, 1.0), None);
+            end_border.set_stroke_width(2.5 / zoom);
+        } else {
+            end_border.set_color4f(skia::Color4f::new(0.1, 0.1, 0.1, 0.9), None);
+            end_border.set_stroke_width(1.5 / zoom);
+        }
         end_border.set_style(skia::PaintStyle::Stroke);
-        end_border.set_stroke_width(1.5 / zoom);
         end_border.set_anti_alias(true);
-        canvas.draw_circle(p2.to_skia(), 5.0 / zoom, &end_border);
+        canvas.draw_circle(p2.to_skia(), end_radius, &end_border);
     }
 }

@@ -676,6 +676,8 @@ impl CanvasState {
                     Element::Rect(r) => {
                         if r.mesh_gradient.is_some() || cur_tool == "mesh_gradient" {
                             Some("mesh_gradient")
+                        } else if r.gradient.is_some() || cur_tool == "gradient" || r.fills.first().map(|f| f.style == crate::core::FillStyle::LinearGradient || f.style == crate::core::FillStyle::RadialGradient).unwrap_or(false) {
+                            Some("gradient")
                         } else {
                             Some("rectangle")
                         }
@@ -687,6 +689,8 @@ impl CanvasState {
                     Element::Path(p) => {
                         if p.mesh_gradient.is_some() || cur_tool == "mesh_gradient" {
                             Some("mesh_gradient")
+                        } else if p.gradient.is_some() || cur_tool == "gradient" || p.fills.first().map(|f| f.style == crate::core::FillStyle::LinearGradient || f.style == crate::core::FillStyle::RadialGradient).unwrap_or(false) {
+                            Some("gradient")
                         } else {
                             match &p.shape_origin {
                                 Some(crate::core::ShapeOrigin::Rectangle { .. }) => Some("rectangle"),
@@ -865,6 +869,107 @@ impl CanvasState {
                 self.document.duplicate_selected();
             }
             crate::core::ShortcutAction::Delete => {
+                let cur_tool = self.plugin_manager.active_id();
+                if cur_tool == "path_editor" {
+                    let selected_nodes = if let Some(feat) = self.plugin_manager.feature_by_id("path_editor") {
+                        feat.get_selected_nodes()
+                    } else {
+                        Vec::new()
+                    };
+                    if !selected_nodes.is_empty() {
+                        self.document.delete_selected_nodes_op(&selected_nodes);
+                        if let Some(feat) = self.plugin_manager.feature_by_id_mut("path_editor") {
+                            feat.clear_selected_nodes();
+                        }
+                        self.notify_status();
+                        return true;
+                    }
+                } else if cur_tool == "gradient" {
+                    let active_stop = self
+                        .plugin_manager
+                        .active_feature()
+                        .and_then(|f| f.get_active_gradient_stop())
+                        .unwrap_or(0);
+                    let selected_ids = self.document.selected_ids.clone();
+                    let mut deleted = false;
+                    for el in &mut self.document.elements {
+                        if selected_ids.contains(&el.id()) {
+                            let grad_mut = match el {
+                                crate::core::Element::Rect(r) => &mut r.gradient,
+                                crate::core::Element::Path(p) => &mut p.gradient,
+                                _ => &mut None,
+                            };
+                            if let Some(g) = grad_mut {
+                                if g.stops.len() > 2 && active_stop < g.stops.len() {
+                                    g.stops.remove(active_stop);
+                                    deleted = true;
+                                }
+                            }
+                            let mut fills = el.fills();
+                            if let Some(f0) = fills.first_mut() {
+                                let mut eff = f0.effective_stops();
+                                if eff.len() > 2 && active_stop < eff.len() {
+                                    eff.remove(active_stop);
+                                    f0.stops = eff.clone();
+                                    f0.color = eff.first().map(|s| s.color).unwrap_or(f0.color);
+                                    f0.secondary_color =
+                                        eff.last().map(|s| s.color).unwrap_or(f0.secondary_color);
+                                    deleted = true;
+                                }
+                            }
+                            if deleted {
+                                el.set_fills(fills);
+                            }
+                        }
+                    }
+                    if deleted {
+                        if let Some(feat) = self.plugin_manager.active_feature_mut() {
+                            feat.set_active_gradient_stop(0);
+                        }
+                        self.notify_status();
+                        return true;
+                    }
+                } else if cur_tool == "mesh_gradient" {
+                    let active_node = self
+                        .plugin_manager
+                        .active_feature()
+                        .and_then(|f| f.get_active_mesh_node())
+                        .unwrap_or(0);
+                    let selected_ids = self.document.selected_ids.clone();
+                    let mut deleted = false;
+                    for el in &mut self.document.elements {
+                        if selected_ids.contains(&el.id()) {
+                            let mesh_mut = match el {
+                                crate::core::Element::Rect(r) => &mut r.mesh_gradient,
+                                crate::core::Element::Path(p) => &mut p.mesh_gradient,
+                                _ => &mut None,
+                            };
+                            if let Some(m) = mesh_mut {
+                                if m.delete_node(active_node) {
+                                    deleted = true;
+                                }
+                            }
+                            let mut fills = el.fills();
+                            if let Some(f0) = fills.first_mut() {
+                                if let Some(m) = &mut f0.mesh {
+                                    if m.delete_node(active_node) {
+                                        deleted = true;
+                                    }
+                                }
+                            }
+                            if deleted {
+                                el.set_fills(fills);
+                            }
+                        }
+                    }
+                    if deleted {
+                        if let Some(feat) = self.plugin_manager.active_feature_mut() {
+                            feat.set_active_mesh_node(0);
+                        }
+                        self.notify_status();
+                        return true;
+                    }
+                }
                 self.document.remove_selected();
             }
             crate::core::ShortcutAction::SelectAll => {
