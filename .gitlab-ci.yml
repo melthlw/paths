@@ -24,15 +24,9 @@ flatpak-test:
   extends: .flatpak-setup
   stage: test
   script:
-    - >
-      flatpak-builder --force-clean --disable-rofiles-fuse
-      --build-only build-dir
-      io.gitlab.lewisHeart.GnomePaths.json
-    - >
-      flatpak-builder --run build-dir
-      io.gitlab.lewisHeart.GnomePaths.json
-      cargo test
-
+    - cd src
+    - cargo test --locked
+    
 flatpak-bundle:
   extends: .flatpak-setup
   stage: flatpak
