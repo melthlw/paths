@@ -1,11 +1,11 @@
 use crate::core::document::Document;
 use crate::core::geometry::Rect;
 use crate::core::page::Page;
-use crate::core::svg_export::{export_document_to_svg, DocumentProjectData};
+use crate::core::svg_export::{DocumentProjectData, export_document_to_svg};
 use crate::core::svg_import::parse_svg;
 use std::path::Path;
 
-/// Saves a document to a file in SVG format with embedded lossless GNOME Paths metadata
+/// Saves a document to a file in SVG format with embedded lossless Paths metadata
 pub fn save_document_to_file(doc: &Document, path: &Path) -> Result<(), String> {
     let svg_content = export_document_to_svg(doc);
     std::fs::write(path, svg_content)
@@ -13,7 +13,7 @@ pub fn save_document_to_file(doc: &Document, path: &Path) -> Result<(), String> 
     Ok(())
 }
 
-/// Loads a document from an SVG string (either a GNOME Paths project SVG or standard external SVG)
+/// Loads a document from an SVG string (either a Paths project SVG or standard external SVG)
 pub fn load_document_from_svg(content: &str) -> Result<Document, String> {
     // 1. Check for Paths lossless project metadata in <metadata>
     let meta_tag_start = content
@@ -161,7 +161,7 @@ mod tests {
         let mut doc = Document::default();
         let text_elem = crate::core::element::TextElement::new(
             Point::new(100.0, 150.0),
-            "GNOME Paths Vector".to_string(),
+            "Paths Vector".to_string(),
             24.0,
             Color::BLACK,
         );
@@ -185,7 +185,7 @@ mod tests {
 
         let svg_str = export_document_to_svg(&doc);
         assert!(svg_str.contains("<text"));
-        assert!(svg_str.contains("GNOME Paths Vector"));
+        assert!(svg_str.contains("Paths Vector"));
         assert!(svg_str.contains("<g"));
 
         let loaded = load_document_from_svg(&svg_str).expect("Should parse");

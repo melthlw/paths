@@ -162,7 +162,7 @@ pub fn build_main_menu(
     // 8. About Item
     let about_btn = create_menu_btn(
         "prefs-about-symbolic",
-        &crate::core::gettext("About GNOME Paths"),
+        &crate::core::gettext("About Paths"),
         None,
     );
 

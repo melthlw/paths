@@ -1,5 +1,5 @@
-# English translation for GNOME Paths.
-# Copyright (C) 2026 GNOME Paths Authors
+# English translation for Paths.
+# Copyright (C) 2026 Paths Authors
 # This file is distributed under the same license as the gnome-paths package.
 # Lewis <EMAIL@ADDRESS>, 2026.
 #
@@ -76,8 +76,8 @@ msgstr "90° Increments (Orthogonal)"
 msgid "About"
 msgstr "About"
 
-msgid "About GNOME Paths"
-msgstr "About GNOME Paths"
+msgid "About Paths"
+msgstr "About Paths"
 
 msgid "Accent Color"
 msgstr "Accent Color"
@@ -676,11 +676,11 @@ msgstr "GNOME Blue (#3584E4)"
 msgid "GNOME Blue (Default)"
 msgstr "GNOME Blue (Default)"
 
-msgid "GNOME Paths"
-msgstr "GNOME Paths"
+msgid "Paths"
+msgstr "Paths"
 
-msgid "GNOME Paths Default"
-msgstr "GNOME Paths Default"
+msgid "Paths Default"
+msgstr "Paths Default"
 
 msgid "General and System"
 msgstr "General and System"
@@ -853,8 +853,8 @@ msgstr "Layers"
 msgid "Layers Panel"
 msgstr "Layers Panel"
 
-msgid "Layers — GNOME Paths"
-msgstr "Layers — GNOME Paths"
+msgid "Layers — Paths"
+msgstr "Layers — Paths"
 
 msgid "Left"
 msgstr "Left"
@@ -1580,8 +1580,8 @@ msgstr "Units and Measurements"
 msgid "Unlock"
 msgstr "Unlock"
 
-msgid "Unsaved changes — GNOME Paths"
-msgstr "Unsaved changes — GNOME Paths"
+msgid "Unsaved changes — Paths"
+msgstr "Unsaved changes — Paths"
 
 msgid "Untitled"
 msgstr "Untitled"
@@ -2006,8 +2006,8 @@ msgstr "Search shortcuts..."
 msgid "Click row to customize shortcut"
 msgstr "Click row to customize shortcut"
 
-msgid "Reverts all keys to the default GNOME Paths scheme"
-msgstr "Reverts all keys to the default GNOME Paths scheme"
+msgid "Reverts all keys to the default Paths scheme"
+msgstr "Reverts all keys to the default Paths scheme"
 
 msgid "Manage external extensions added to the studio"
 msgstr "Manage external extensions added to the studio"
@@ -2361,8 +2361,8 @@ msgstr "Zoom In"
 msgid "Zoom Out"
 msgstr "Zoom Out"
 
-msgid "{} — GNOME Paths"
-msgstr "{} — GNOME Paths"
+msgid "{} — Paths"
+msgstr "{} — Paths"
 
 msgid "X:"
 msgstr "X:"

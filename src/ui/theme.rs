@@ -501,65 +501,73 @@ impl ToolbarIconSize {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub enum InterfaceScale {
-    Compact, // 90%
-    #[default]
-    Default, // 100%
-    Comfortable, // 110%
-    Large,   // 125%
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct InterfaceScale(pub u32);
+
+impl Default for InterfaceScale {
+    fn default() -> Self {
+        Self(100)
+    }
 }
 
 impl InterfaceScale {
-    pub fn id(self) -> &'static str {
-        match self {
-            Self::Compact => "compact",
-            Self::Default => "default",
-            Self::Comfortable => "comfortable",
-            Self::Large => "large",
+    pub const DEFAULT: Self = Self(100);
+
+    pub fn percent(self) -> u32 {
+        if self.0 == 0 {
+            100
+        } else {
+            self.0.clamp(75, 150)
+        }
+    }
+
+    pub fn id(self) -> String {
+        match self.percent() {
+            90 => "compact".to_string(),
+            100 => "default".to_string(),
+            110 => "comfortable".to_string(),
+            125 => "large".to_string(),
+            p => format!("{}%", p),
         }
     }
 
     pub fn from_id(id: &str) -> Self {
-        match id.trim().to_lowercase().as_str() {
-            "compact" => Self::Compact,
-            "comfortable" => Self::Comfortable,
-            "large" => Self::Large,
-            _ => Self::Default,
+        let trimmed = id.trim().to_lowercase();
+        match trimmed.as_str() {
+            "compact" => Self(90),
+            "default" => Self(100),
+            "comfortable" => Self(110),
+            "large" => Self(125),
+            _ => {
+                let digits: String = trimmed.chars().filter(|c| c.is_ascii_digit()).collect();
+                if let Ok(val) = digits.parse::<u32>() {
+                    Self(val.clamp(75, 150))
+                } else {
+                    Self(100)
+                }
+            }
         }
     }
 
-    pub fn to_index(self) -> u32 {
-        match self {
-            Self::Compact => 0,
-            Self::Default => 1,
-            Self::Comfortable => 2,
-            Self::Large => 3,
+    pub fn css(self) -> String {
+        let p = self.percent() as f64 / 100.0;
+        if (p - 1.0).abs() < 0.01 {
+            return String::new();
         }
-    }
+        let font_size = (13.0 * p * 10.0).round() / 10.0;
+        let btn_min_h = (32.0 * p).round() as i32;
+        let entry_min_h = (30.0 * p).round() as i32;
+        let pad_v = (5.0 * p).round() as i32;
+        let pad_h = (8.0 * p).round() as i32;
 
-    pub fn from_index(idx: u32) -> Self {
-        match idx {
-            0 => Self::Compact,
-            1 => Self::Default,
-            2 => Self::Comfortable,
-            _ => Self::Large,
-        }
-    }
-
-    pub fn css(self) -> &'static str {
-        match self {
-            Self::Compact => {
-                "window { font-size: 12px; } .toolbar { padding: 3px 6px; } entry.numeric { min-height: 28px; } button { min-height: 28px; }"
-            }
-            Self::Default => "",
-            Self::Comfortable => {
-                "window { font-size: 14.5px; } .toolbar { padding: 6px 10px; } entry.numeric { min-height: 36px; } button { min-height: 36px; }"
-            }
-            Self::Large => {
-                "window { font-size: 16px; } .toolbar { padding: 8px 14px; } entry.numeric { min-height: 40px; } button { min-height: 40px; }"
-            }
-        }
+        format!(
+            "window, .background {{ font-size: {:.1}px; }} \
+             .toolbar {{ padding: {}px {}px; }} \
+             entry.numeric, entry {{ min-height: {}px; }} \
+             button {{ min-height: {}px; }} \
+             .sidebar {{ font-size: {:.1}px; }}",
+            font_size, pad_v, pad_h, entry_min_h, btn_min_h, font_size
+        )
     }
 }
 
@@ -573,7 +581,7 @@ thread_local! {
     static CURRENT_ICON_SIZE: Cell<ToolbarIconSize> = const { Cell::new(ToolbarIconSize::Medium) };
     static ICON_SIZE_CSS_PROVIDER: RefCell<Option<gtk4::CssProvider>> = const { RefCell::new(None) };
 
-    static CURRENT_SCALE: Cell<InterfaceScale> = const { Cell::new(InterfaceScale::Default) };
+    static CURRENT_SCALE: Cell<InterfaceScale> = const { Cell::new(InterfaceScale::DEFAULT) };
     static SCALE_CSS_PROVIDER: RefCell<Option<gtk4::CssProvider>> = const { RefCell::new(None) };
 }
 
@@ -720,7 +728,7 @@ pub fn set_interface_scale(scale: InterfaceScale) {
         }
 
         if let Some(ref provider) = *p_borrow {
-            provider.load_from_string(scale.css());
+            provider.load_from_string(&scale.css());
         }
     });
 }

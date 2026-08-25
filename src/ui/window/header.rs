@@ -189,7 +189,7 @@ pub fn build_header_bar(
     // Window Title
     let title_widget = adw::WindowTitle::builder()
         .title(&crate::core::gettext("Untitled"))
-        .subtitle(&crate::core::gettext("GNOME Paths"))
+        .subtitle(&crate::core::gettext("Paths"))
         .build();
     header_bar.set_title_widget(Some(&title_widget));
 
@@ -202,10 +202,10 @@ pub fn build_header_bar(
             .unwrap_or(&default_name);
         if is_dirty {
             title_widget_file.set_title(&format!("● {}", name));
-            title_widget_file.set_subtitle(&crate::core::gettext("Unsaved changes — GNOME Paths"));
+            title_widget_file.set_subtitle(&crate::core::gettext("Unsaved changes — Paths"));
         } else {
             title_widget_file.set_title(name);
-            title_widget_file.set_subtitle(&crate::core::gettext("GNOME Paths"));
+            title_widget_file.set_subtitle(&crate::core::gettext("Paths"));
         }
     });
 

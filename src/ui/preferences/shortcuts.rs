@@ -284,7 +284,7 @@ pub fn build_shortcuts_page(window: &adw::Window, canvas: &CanvasWidget) -> gtk4
     let reset_row = adw::ActionRow::builder()
         .title(crate::core::gettext("Restore all shortcuts"))
         .subtitle(crate::core::gettext(
-            "Reverts all keys to the default GNOME Paths scheme",
+            "Reverts all keys to the default Paths scheme",
         ))
         .activatable(true)
         .build();
@@ -350,7 +350,11 @@ pub fn show_shortcut_editor_dialog(
         ));
 
     let window = adw::Window::builder()
-        .title(format!("{}: {}", crate::core::gettext("Edit Shortcut"), action_name))
+        .title(format!(
+            "{}: {}",
+            crate::core::gettext("Edit Shortcut"),
+            action_name
+        ))
         .modal(true)
         .default_width(440)
         .default_height(290)

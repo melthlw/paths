@@ -1,5 +1,5 @@
-# Brazilian Portuguese translation for GNOME Paths.
-# Copyright (C) 2026 GNOME Paths Authors
+# Brazilian Portuguese translation for Paths.
+# Copyright (C) 2026 Paths Authors
 # This file is distributed under the same license as the gnome-paths package.
 # Lewis <EMAIL@ADDRESS>, 2026.
 #
@@ -76,8 +76,8 @@ msgstr "Incrementos de 90° (Ortogonal)"
 msgid "About"
 msgstr "Sobre"
 
-msgid "About GNOME Paths"
-msgstr "Sobre o GNOME Paths"
+msgid "About Paths"
+msgstr "Sobre o Paths"
 
 msgid "Accent Color"
 msgstr "Cor de Destaque"
@@ -676,11 +676,11 @@ msgstr "Azul"
 msgid "GNOME Blue (Default)"
 msgstr "Azul"
 
-msgid "GNOME Paths"
-msgstr "GNOME Paths"
+msgid "Paths"
+msgstr "Paths"
 
-msgid "GNOME Paths Default"
-msgstr "Padrão GNOME Paths"
+msgid "Paths Default"
+msgstr "Padrão Paths"
 
 msgid "General and System"
 msgstr "Geral e Sistema"
@@ -853,8 +853,8 @@ msgstr "Camadas"
 msgid "Layers Panel"
 msgstr "Painel de Camadas"
 
-msgid "Layers — GNOME Paths"
-msgstr "Camadas — GNOME Paths"
+msgid "Layers — Paths"
+msgstr "Camadas — Paths"
 
 msgid "Left"
 msgstr "Esquerda"
@@ -1580,8 +1580,8 @@ msgstr "Unidades e Medidas"
 msgid "Unlock"
 msgstr "Desbloquear"
 
-msgid "Unsaved changes — GNOME Paths"
-msgstr "Alterações não salvas — GNOME Paths"
+msgid "Unsaved changes — Paths"
+msgstr "Alterações não salvas — Paths"
 
 msgid "Untitled"
 msgstr "Sem título"
@@ -2013,8 +2013,8 @@ msgstr "Buscar atalhos de teclado..."
 msgid "Click row to customize shortcut"
 msgstr "Clique na linha para personalizar o atalho"
 
-msgid "Reverts all keys to the default GNOME Paths scheme"
-msgstr "Restaura todas as teclas para o esquema padrão do GNOME Paths"
+msgid "Reverts all keys to the default Paths scheme"
+msgstr "Restaura todas as teclas para o esquema padrão do Paths"
 
 msgid "Manage external extensions added to the studio"
 msgstr "Gerencie extensões externas adicionadas ao estúdio"
@@ -2052,8 +2052,8 @@ msgstr "Aumentar Zoom"
 msgid "Zoom Out"
 msgstr "Diminuir Zoom"
 
-msgid "{} — GNOME Paths"
-msgstr "{} — GNOME Paths"
+msgid "{} — Paths"
+msgstr "{} — Paths"
 
 msgid "Customize the color of toolbar, tool options and inspector icons"
 msgstr ""

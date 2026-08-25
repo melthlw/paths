@@ -1,5 +1,5 @@
-# Brazilian Portuguese translation for GNOME Paths.
-# Copyright (C) 2026 GNOME Paths Authors
+# Brazilian Portuguese translation for Paths.
+# Copyright (C) 2026 Paths Authors
 # This file is distributed under the same license as the gnome-paths package.
 # Lewis <EMAIL@ADDRESS>, 2026.
 #
@@ -76,7 +76,7 @@ msgstr ""
 msgid "About"
 msgstr ""
 
-msgid "About GNOME Paths"
+msgid "About Paths"
 msgstr ""
 
 msgid "Accent Color"
@@ -676,10 +676,10 @@ msgstr ""
 msgid "GNOME Blue (Default)"
 msgstr ""
 
-msgid "GNOME Paths"
+msgid "Paths"
 msgstr ""
 
-msgid "GNOME Paths Default"
+msgid "Paths Default"
 msgstr ""
 
 msgid "General and System"
@@ -853,7 +853,7 @@ msgstr ""
 msgid "Layers Panel"
 msgstr ""
 
-msgid "Layers — GNOME Paths"
+msgid "Layers — Paths"
 msgstr ""
 
 msgid "Left"
@@ -1572,7 +1572,7 @@ msgstr ""
 msgid "Unlock"
 msgstr ""
 
-msgid "Unsaved changes — GNOME Paths"
+msgid "Unsaved changes — Paths"
 msgstr ""
 
 msgid "Untitled"
@@ -1990,7 +1990,7 @@ msgstr ""
 msgid "Click row to customize shortcut"
 msgstr ""
 
-msgid "Reverts all keys to the default GNOME Paths scheme"
+msgid "Reverts all keys to the default Paths scheme"
 msgstr ""
 
 msgid "Manage external extensions added to the studio"

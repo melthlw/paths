@@ -1,4 +1,4 @@
-# Roadmap — GNOME Paths
+# Roadmap — Paths
 
 Development roadmap structured by version milestones.
 

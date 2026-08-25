@@ -1,6 +1,6 @@
-# GNOME Paths Translations (i18n)
+# Paths Translations (i18n)
 
-This directory contains GNU gettext translations for **GNOME Paths**, configured for seamless integration with **Weblate** and GNOME translation workflows.
+This directory contains GNU gettext translations for **Paths**, configured for seamless integration with **Weblate** and GNOME translation workflows.
 
 ## Supported Languages
 - `en` - English (Base / Source)

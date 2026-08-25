@@ -1,6 +1,6 @@
-# GNOME Paths — Template de Plugin Nativo (.so)
+# Paths — Template de Plugin Nativo (.so)
 
-Este diretório contém a estrutura modelo para criação e compilação de plugins externos em formato nativo Linux (`.so`) para o GNOME Paths.
+Este diretório contém a estrutura modelo para criação e compilação de plugins externos em formato nativo Linux (`.so`) para o Paths.
 
 ## Como Compilar
 
@@ -14,7 +14,7 @@ O arquivo gerado estará em `target/release/libgnome_paths_example_plugin.so`.
 ## Como Instalar
 
 ### Opção 1: Pela Interface Gráfica
-1. Abra o GNOME Paths
+1. Abra o Paths
 2. Vá em **Menu Principal → Preferências → Plugins**
 3. Clique em **"Instalar novo plugin (.so)..."** e selecione o arquivo `.so` compilado.
 

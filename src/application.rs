@@ -136,7 +136,7 @@ impl DesignApplication {
         let active_window = app.active_window();
 
         let dialog = adw::AboutDialog::builder()
-            .application_name("GNOME Paths")
+            .application_name("Paths")
             .application_icon("io.gitlab.lewisHeart.GnomePaths")
             .developer_name("Lewis")
             .version("0.3.0")

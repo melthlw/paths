@@ -1,6 +1,6 @@
-# GNOME Paths — Example Plugin: Color Palette Toolbar
+# Paths — Example Plugin: Color Palette Toolbar
 
-This directory contains the source code for the **Color Palette Toolbar** plugin for GNOME Paths.
+This directory contains the source code for the **Color Palette Toolbar** plugin for Paths.
 
 ---
 
@@ -35,10 +35,10 @@ target/release/libcolor_palette_plugin.so
 
 ---
 
-## 📦 Installation in GNOME Paths
+## 📦 Installation in Paths
 
 ### Option 1: Via the User Interface
-1. Launch **GNOME Paths**.
+1. Launch **Paths**.
 2. Open **Main Menu (Hamburger) → Preferences → Plugins**.
 3. Under the *Plugin Management* section, click **"Install plugin"** and select the built `libcolor_palette_plugin.so` file.
 
@@ -48,5 +48,5 @@ Copy the compiled shared library directly into the user plugins directory:
 mkdir -p ~/.local/share/gnome-paths/plugins
 cp target/release/libcolor_palette_plugin.so ~/.local/share/gnome-paths/plugins/
 ```
-Restart GNOME Paths to load the plugin.
+Restart Paths to load the plugin.
 

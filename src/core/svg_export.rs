@@ -1,8 +1,8 @@
 use crate::core::color::Color;
 use crate::core::document::Document;
 use crate::core::element::{
-    BlendMode, Element, FillLayer, FillStyle, Gradient, GradientType, PathElement, PathNode, PatternType,
-    StrokeStyle, TextAlign,
+    BlendMode, Element, FillLayer, FillStyle, Gradient, GradientType, PathElement, PathNode,
+    PatternType, StrokeStyle, TextAlign,
 };
 use crate::core::geometry::Rect;
 use crate::core::page::{Page, PageId};
@@ -102,7 +102,7 @@ pub fn color_to_svg(color: Color) -> String {
     }
 }
 
-/// Generates a full SVG document representing the GNOME Paths work
+/// Generates a full SVG document representing the Paths work
 pub fn export_document_to_svg(doc: &Document) -> String {
     let page_rect = doc
         .active_page()
@@ -276,7 +276,7 @@ fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
     let (tile_w, tile_h) = match fill.pattern_type {
         PatternType::Hexagon => (sz, (sz * 1.7320508).max(4.0)),
         PatternType::Brick | PatternType::Scales => (sz, (sz * 0.5).max(4.0)),
-            _ => (sz, sz),
+        _ => (sz, sz),
     };
     let c1 = color_to_svg(fill.color);
     let c2 = color_to_svg(fill.secondary_color);
@@ -285,9 +285,15 @@ fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
     let has_trans = fill.pattern_offset.x.abs() > 0.001 || fill.pattern_offset.y.abs() > 0.001;
     let has_rot = fill.angle.abs() > 0.01;
     if has_trans && has_rot {
-        transform_attrs = format!(" patternTransform=\"translate({:.2} {:.2}) rotate({:.2})\"", fill.pattern_offset.x, fill.pattern_offset.y, fill.angle);
+        transform_attrs = format!(
+            " patternTransform=\"translate({:.2} {:.2}) rotate({:.2})\"",
+            fill.pattern_offset.x, fill.pattern_offset.y, fill.angle
+        );
     } else if has_trans {
-        transform_attrs = format!(" patternTransform=\"translate({:.2} {:.2})\"", fill.pattern_offset.x, fill.pattern_offset.y);
+        transform_attrs = format!(
+            " patternTransform=\"translate({:.2} {:.2})\"",
+            fill.pattern_offset.x, fill.pattern_offset.y
+        );
     } else if has_rot {
         transform_attrs = format!(" patternTransform=\"rotate({:.2})\"", fill.angle);
     }
@@ -333,9 +339,22 @@ fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
             let _ = writeln!(
                 defs,
                 "      <line x1=\"0\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>\n      <line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>\n      <line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                sz, sz, c2, w,
-                -sz * 0.5, sz * 0.5, sz * 0.5, sz * 1.5, c2, w,
-                sz * 0.5, -sz * 0.5, sz * 1.5, sz * 0.5, c2, w
+                sz,
+                sz,
+                c2,
+                w,
+                -sz * 0.5,
+                sz * 0.5,
+                sz * 0.5,
+                sz * 1.5,
+                c2,
+                w,
+                sz * 0.5,
+                -sz * 0.5,
+                sz * 1.5,
+                sz * 0.5,
+                c2,
+                w
             );
         }
         PatternType::Grid => {
@@ -379,14 +398,12 @@ fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
             let _ = writeln!(
                 defs,
                 "      <line x1=\"0\" y1=\"0\" x2=\"{:.2}\" y2=\"0\" stroke=\"{}\" stroke-width=\"{:.2}\"/>\n      <line x1=\"0\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                w, c2, stroke_w,
-                half_h, w, half_h, c2, stroke_w
+                w, c2, stroke_w, half_h, w, half_h, c2, stroke_w
             );
             let _ = writeln!(
                 defs,
                 "      <line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>\n      <line x1=\"{:.2}\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                half_h, c2, stroke_w,
-                w, w, half_h, c2, stroke_w
+                half_h, c2, stroke_w, w, w, half_h, c2, stroke_w
             );
             let _ = writeln!(
                 defs,
@@ -399,8 +416,7 @@ fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
             let _ = writeln!(
                 defs,
                 "      <line x1=\"0\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>\n      <line x1=\"0\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"0\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                sz, sz, c2, w,
-                sz, sz, c2, w
+                sz, sz, c2, w, sz, sz, c2, w
             );
         }
         PatternType::Scales => {
@@ -413,7 +429,14 @@ fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
                 let _ = writeln!(
                     defs,
                     "      <path d=\"M {:.2} {:.2} A {:.2} {:.2} 0 0 1 {:.2} {:.2}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                    (w * 0.5) - r, h, r, r, (w * 0.5) + r, h, c2, stroke_w
+                    (w * 0.5) - r,
+                    h,
+                    r,
+                    r,
+                    (w * 0.5) + r,
+                    h,
+                    c2,
+                    stroke_w
                 );
                 let _ = writeln!(
                     defs,
@@ -423,7 +446,12 @@ fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
                 let _ = writeln!(
                     defs,
                     "      <path d=\"M {:.2} 0 A {:.2} {:.2} 0 0 1 {:.2} 0\" fill=\"none\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                    w - r, r, r, w + r, c2, stroke_w
+                    w - r,
+                    r,
+                    r,
+                    w + r,
+                    c2,
+                    stroke_w
                 );
             }
         }
@@ -441,7 +469,28 @@ fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
             let _ = writeln!(
                 defs,
                 "      <line x1=\"0\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/><line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/><line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/><line x1=\"{:.2}\" y1=\"0\" x2=\"{:.2}\" y2=\"{:.2}\" stroke=\"{}\" stroke-width=\"{:.2}\"/>",
-                half * 0.5, half, half * 0.5, c2, w, half * 0.5, half, half * 0.5, sz, c2, w, half, sz * 0.75, sz, sz * 0.75, c2, w, sz * 0.75, sz * 0.75, half, c2, w
+                half * 0.5,
+                half,
+                half * 0.5,
+                c2,
+                w,
+                half * 0.5,
+                half,
+                half * 0.5,
+                sz,
+                c2,
+                w,
+                half,
+                sz * 0.75,
+                sz,
+                sz * 0.75,
+                c2,
+                w,
+                sz * 0.75,
+                sz * 0.75,
+                half,
+                c2,
+                w
             );
         }
         PatternType::Custom => {
@@ -449,7 +498,11 @@ fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
             if let Some(ref path_str) = fill.custom_pattern_path {
                 let p = std::path::Path::new(path_str);
                 if p.exists() {
-                    let ext = p.extension().and_then(|e| e.to_str()).map(|s| s.to_ascii_lowercase()).unwrap_or_default();
+                    let ext = p
+                        .extension()
+                        .and_then(|e| e.to_str())
+                        .map(|s| s.to_ascii_lowercase())
+                        .unwrap_or_default();
                     if ext == "svg" {
                         if let Ok(svg_content) = std::fs::read_to_string(p) {
                             if let Ok(imported) = crate::core::svg_import::parse_svg(&svg_content) {
@@ -457,8 +510,15 @@ fn render_pattern_def(fill: &FillLayer, id: &str, defs: &mut String) {
                                     match elem {
                                         crate::core::Element::Path(pe) => {
                                             let d = path_nodes_to_svg_d(&pe.nodes, pe.is_closed);
-                                            let col = pe.fill_color.map(color_to_svg).unwrap_or_else(|| c2.clone());
-                                            let _ = writeln!(defs, "      <path d=\"{}\" fill=\"{}\"/>", d, col);
+                                            let col = pe
+                                                .fill_color
+                                                .map(color_to_svg)
+                                                .unwrap_or_else(|| c2.clone());
+                                            let _ = writeln!(
+                                                defs,
+                                                "      <path d=\"{}\" fill=\"{}\"/>",
+                                                d, col
+                                            );
                                         }
                                         _ => {}
                                     }
@@ -570,7 +630,16 @@ fn render_element_to_svg(elem: &Element, svg: &mut String, indent_level: usize) 
             let _ = writeln!(
                 svg,
                 "{indent}<rect {id_attr}x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\" rx=\"{:.2}\" ry=\"{:.2}\" fill=\"{}\" stroke=\"{}\" stroke-width=\"{:.2}\" {stroke_dash}opacity=\"{:.3}\" {filter_attr}{blend_attr}/>",
-                norm.x, norm.y, norm.width, norm.height, rad, rad, fill_str, stroke_str, stroke_w, r.opacity
+                norm.x,
+                norm.y,
+                norm.width,
+                norm.height,
+                rad,
+                rad,
+                fill_str,
+                stroke_str,
+                stroke_w,
+                r.opacity
             );
         }
         Element::Path(p) => {
@@ -674,7 +743,15 @@ fn render_element_to_svg(elem: &Element, svg: &mut String, indent_level: usize) 
             let _ = writeln!(
                 svg,
                 "{indent}<text {id_attr}x=\"{:.2}\" y=\"{:.2}\" font-family=\"{}\" font-size=\"{:.2}\" font-weight=\"{}\" fill=\"{}\" text-anchor=\"{}\" opacity=\"{:.3}\" {filter_attr}{blend_attr}>{}</text>",
-                t.position.x, t.position.y + t.font_size, xml_escape(&t.font_family), t.font_size, t.font_weight, fill_str, anchor, t.opacity, xml_escape(&t.text)
+                t.position.x,
+                t.position.y + t.font_size,
+                xml_escape(&t.font_family),
+                t.font_size,
+                t.font_weight,
+                fill_str,
+                anchor,
+                t.opacity,
+                xml_escape(&t.text)
             );
         }
         Element::Image(i) => {

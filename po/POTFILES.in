@@ -1,4 +1,4 @@
-# List of source files containing translatable strings for GNOME Paths / Weblate
+# List of source files containing translatable strings for Paths / Weblate
 src/main.rs
 src/core/i18n.rs
 src/core/shortcuts.rs

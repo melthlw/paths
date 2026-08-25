@@ -60,12 +60,7 @@ pub fn create_floating_window(
     let tab_pill = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Horizontal)
         .spacing(6)
-        .css_classes([
-            "flat",
-            "studio-tab-btn",
-            "active",
-            "floating-tab-pill",
-        ])
+        .css_classes(["flat", "studio-tab-btn", "active", "floating-tab-pill"])
         .tooltip_text(crate::core::gettext(
             "Drag to sidebar or right click to dock/close",
         ))
@@ -80,7 +75,7 @@ pub fn create_floating_window(
         crate::ui::icons::make_symbolic_image(icon_name, 16)
     };
     let lbl = gtk4::Label::builder()
-        .label(&crate::i18n!("{} — GNOME Paths", title))
+        .label(&crate::i18n!("{} — Paths", title))
         .css_classes(["heading"])
         .build();
 
@@ -243,7 +238,7 @@ pub fn create_floating_window(
     tb_view.set_content(Some(&float_scroll));
 
     let float_win = adw::Window::builder()
-        .title(&format!("{} — GNOME Paths", title))
+        .title(&format!("{} — Paths", title))
         .default_width(320)
         .default_height(560)
         .content(&tb_view)

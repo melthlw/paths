@@ -310,29 +310,58 @@ pub fn build_appearance_page() -> gtk4::ScrolledWindow {
         ))
         .build();
 
-    // Interface Scale Row
+    // Interface Scale Slider Row
     let cur_scale = current_interface_scale();
-    let scale_names = [
-        crate::core::gettext("Compact (90%)"),
-        crate::core::gettext("Default (100%)"),
-        crate::core::gettext("Comfortable (110%)"),
-        crate::core::gettext("Large (125%)"),
-    ];
-    let scale_str_list: Vec<&str> = scale_names.iter().map(|s| s.as_str()).collect();
-    let scale_dd = gtk4::DropDown::from_strings(&scale_str_list);
-    scale_dd.set_selected(cur_scale.to_index());
-    scale_dd.set_valign(gtk4::Align::Center);
-    scale_dd.connect_selected_notify(move |dd| {
-        let scale = InterfaceScale::from_index(dd.selected());
+    let initial_pct = cur_scale.percent() as f64;
+
+    let scale_slider = gtk4::Scale::with_range(
+        gtk4::Orientation::Horizontal,
+        75.0,
+        150.0,
+        5.0,
+    );
+    scale_slider.set_value(initial_pct);
+    scale_slider.set_draw_value(false);
+    scale_slider.set_width_request(200);
+    scale_slider.set_valign(gtk4::Align::Center);
+
+    scale_slider.add_mark(75.0, gtk4::PositionType::Bottom, Some("75%"));
+    scale_slider.add_mark(100.0, gtk4::PositionType::Bottom, Some("100%"));
+    scale_slider.add_mark(125.0, gtk4::PositionType::Bottom, Some("125%"));
+    scale_slider.add_mark(150.0, gtk4::PositionType::Bottom, Some("150%"));
+
+    let scale_badge = gtk4::Label::builder()
+        .label(format!("{}%", initial_pct as u32))
+        .css_classes(["heading", "numeric"])
+        .valign(gtk4::Align::Center)
+        .width_request(48)
+        .build();
+
+    let slider_box = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Horizontal)
+        .spacing(12)
+        .valign(gtk4::Align::Center)
+        .margin_top(4)
+        .margin_bottom(4)
+        .build();
+
+    slider_box.append(&scale_slider);
+    slider_box.append(&scale_badge);
+
+    let b_lbl = scale_badge.clone();
+    scale_slider.connect_value_changed(move |sc| {
+        let val = sc.value().round() as u32;
+        b_lbl.set_label(&format!("{}%", val));
+        let scale = InterfaceScale(val);
         set_interface_scale(scale);
-        crate::core::AppSettings::set_interface_scale(scale.id());
+        crate::core::AppSettings::set_interface_scale(&scale.id());
     });
 
     let scale_row = adw::ActionRow::builder()
         .title(crate::core::gettext("Interface Scale"))
         .subtitle(crate::core::gettext("Scale controls, fonts, and panel proportions"))
         .build();
-    scale_row.add_suffix(&scale_dd);
+    scale_row.add_suffix(&slider_box);
     layout_group.add(&scale_row);
 
     // Toolbar Icon Size Row

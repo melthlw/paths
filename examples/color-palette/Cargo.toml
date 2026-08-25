@@ -3,7 +3,7 @@ name = "color-palette-plugin"
 version = "0.1.0"
 edition = "2021"
 authors = ["Lewis"]
-description = "Plugin de Paleta de Cores com Toolbar Lateral para o GNOME Paths"
+description = "Plugin de Paleta de Cores com Toolbar Lateral para o Paths"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

@@ -1,6 +1,6 @@
-# Translating GNOME Paths
+# Translating Paths
 
-GNOME Paths uses the standard GNU gettext translation system. Translations are maintained in the `po/` directory using `.po` (Portable Object) files.
+Paths uses the standard GNU gettext translation system. Translations are maintained in the `po/` directory using `.po` (Portable Object) files.
 
 ---
 

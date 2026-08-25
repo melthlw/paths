@@ -131,9 +131,7 @@ thread_local! {
 }
 
 pub fn config_file_path() -> PathBuf {
-    glib::user_config_dir()
-        .join("paths")
-        .join("settings.json")
+    glib::user_config_dir().join("paths").join("settings.json")
 }
 
 fn load_initial_config() -> AppConfig {
@@ -289,7 +287,7 @@ fn save_config_internal(config: &AppConfig) {
     }
 }
 
-/// Returns the thread-local `gio::Settings` instance for GNOME Paths.
+/// Returns the thread-local `gio::Settings` instance for Paths.
 /// Automatically resolves from standard system locations or local development `data/` directory.
 pub fn settings() -> Option<gio::Settings> {
     SETTINGS_INSTANCE.with(|cell| {
@@ -344,7 +342,7 @@ pub fn settings() -> Option<gio::Settings> {
     })
 }
 
-/// Typed helper struct for reading and persisting all GNOME Paths user and UI settings
+/// Typed helper struct for reading and persisting all Paths user and UI settings
 pub struct AppSettings;
 
 impl AppSettings {

@@ -11,7 +11,7 @@ pub struct LanguageInfo {
     pub region: &'static str,
 }
 
-/// Supported languages for GNOME Paths
+/// Supported languages for Paths
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, Default)]
 pub enum Language {
     #[default]
@@ -57,8 +57,6 @@ impl Language {
             _ => Language::System,
         }
     }
-
-
 
     pub fn all_info() -> &'static [LanguageInfo] {
         &[
@@ -142,7 +140,6 @@ impl Language {
             .cloned()
             .unwrap_or(Self::all_info()[0].clone())
     }
-
 }
 
 /// Global I18n Manager with embedded catalogs for standalone/cargo execution and GNU gettext compatibility
@@ -374,8 +371,6 @@ pub fn on_language_change_local<F: Fn(Language) + 'static>(callback: F) {
     });
 }
 
-
-
 /// Set user preferred language, save preference, and notify all listeners
 pub fn set_language(lang: Language) {
     {
@@ -409,8 +404,6 @@ pub fn get_language() -> Language {
     let mgr = lock.get_or_insert_with(I18nManager::new);
     mgr.configured_language
 }
-
-
 
 /// Replaces `{}` placeholders sequentially in translated templates
 pub fn format_i18n(template: &str, args: &[&dyn std::fmt::Display]) -> String {

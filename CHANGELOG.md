@@ -59,7 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-08-02
 
 ### Added
-- Initial release of GNOME Paths vector graphics editor built with GTK4, Libadwaita, Rust, and Skia 2D GPU.
+- Initial release of Paths vector graphics editor built with GTK4, Libadwaita, Rust, and Skia 2D GPU.
 - Interactive Bezier path node editor supporting cusp, smooth, and symmetric control handles.
 - Parametric shape primitives including rectangles with independent corner radii, circles, regular polygons, stars, and spirals.
 - Real-time geometric boolean operations: Union, Difference, Intersection, Exclusion, Division, and Slice.

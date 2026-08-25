@@ -3,7 +3,7 @@ name = "gnome-paths-example-plugin"
 version = "0.1.0"
 edition = "2021"
 authors = ["Lewis"]
-description = "Template de plugin nativo (.so) para o GNOME Paths"
+description = "Template de plugin nativo (.so) para o Paths"
 
 [lib]
 crate-type = ["cdylib"]

@@ -1,6 +1,6 @@
-//! GNOME Paths — Example Plugin: Color Palette Toolbar
+//! Paths — Example Plugin: Color Palette Toolbar
 //!
-//! This plugin provides a dynamic floating color palette toolbar for GNOME Paths,
+//! This plugin provides a dynamic floating color palette toolbar for Paths,
 //! with Fill/Stroke mode toggles, color presets, custom palette management,
 //! and 4-way screen repositioning.
 
@@ -25,10 +25,10 @@ impl Default for ColorPalettePlugin {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Dynamic FFI Export for GNOME Paths (.so)
+// Dynamic FFI Export for Paths (.so)
 // ─────────────────────────────────────────────────────────────
 
-/// Entry point inspected by the GNOME Paths external plugin loader.
+/// Entry point inspected by the Paths external plugin loader.
 #[no_mangle]
 pub unsafe extern "C" fn gnome_paths_plugin_info() -> *const u8 {
     b"Color Palette Toolbar Plugin\0".as_ptr()
