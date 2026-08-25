@@ -15,7 +15,7 @@ impl Default for SelectStudioPlugin {
                 "select",
                 "Select & Move",
                 "tool-select-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-select-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-select-symbolic.svg"),
                 "Select & Move (V)",
                 10,
             ),

@@ -84,7 +84,7 @@ pub fn show_preferences_window(parent: &impl IsA<gtk4::Widget>, canvas: CanvasWi
         NavSection {
             id: "appearance",
             title: crate::core::gettext("Appearance"),
-            icon_resource: Some("/io/github/lewis/GnomePaths/icons/panel-appearance.svg"),
+            icon_resource: Some("/io/gitlab/lewisHeart/GnomePaths/icons/panel-appearance.svg"),
             icon_name: "panel-appearance-symbolic",
         },
         NavSection {
@@ -96,7 +96,7 @@ pub fn show_preferences_window(parent: &impl IsA<gtk4::Widget>, canvas: CanvasWi
         NavSection {
             id: "node_editor",
             title: crate::core::gettext("Path and Node Editor"),
-            icon_resource: Some("/io/github/lewis/GnomePaths/icons/tool-path-editor.svg"),
+            icon_resource: Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-path-editor.svg"),
             icon_name: "edit-symbolic",
         },
         NavSection {

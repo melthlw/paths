@@ -1007,36 +1007,58 @@ impl InspectorSidebar {
         // Sync all fills and strokes without unnecessarily destroying rows when contents are identical
         if has_selection {
             if let Some((sel_fills, sel_strokes)) = fills_and_strokes {
-                let fills_changed = *self.fills.borrow() != sel_fills;
-                let strokes_changed = *self.strokes.borrow() != sel_strokes;
+                let fills_changed = self
+                    .fills
+                    .try_borrow()
+                    .map(|f| *f != sel_fills)
+                    .unwrap_or(false);
+                let strokes_changed = self
+                    .strokes
+                    .try_borrow()
+                    .map(|s| *s != sel_strokes)
+                    .unwrap_or(false);
 
                 if fills_changed {
-                    *self.fills.borrow_mut() = sel_fills;
-                    if !appearance::is_any_popover_visible(self.fill_list_box.upcast_ref()) {
-                        self.rebuild_fill_rows();
+                    if let Ok(mut fills) = self.fills.try_borrow_mut() {
+                        *fills = sel_fills;
+                        drop(fills);
+                        if !appearance::is_any_popover_visible(self.fill_list_box.upcast_ref()) {
+                            self.rebuild_fill_rows();
+                        }
                     }
                 }
                 if strokes_changed {
-                    *self.strokes.borrow_mut() = sel_strokes;
-                    if !appearance::is_any_popover_visible(self.stroke_list_box.upcast_ref()) {
-                        self.rebuild_stroke_rows();
+                    if let Ok(mut strokes) = self.strokes.try_borrow_mut() {
+                        *strokes = sel_strokes;
+                        drop(strokes);
+                        if !appearance::is_any_popover_visible(self.stroke_list_box.upcast_ref()) {
+                            self.rebuild_stroke_rows();
+                        }
                     }
                 }
             } else {
-                let was_not_empty =
-                    !self.fills.borrow().is_empty() || !self.strokes.borrow().is_empty();
-                self.fills.borrow_mut().clear();
-                self.strokes.borrow_mut().clear();
+                let was_not_empty = self.fills.try_borrow().map(|f| !f.is_empty()).unwrap_or(false)
+                    || self.strokes.try_borrow().map(|s| !s.is_empty()).unwrap_or(false);
+                if let Ok(mut fills) = self.fills.try_borrow_mut() {
+                    fills.clear();
+                }
+                if let Ok(mut strokes) = self.strokes.try_borrow_mut() {
+                    strokes.clear();
+                }
                 if was_not_empty {
                     self.rebuild_fill_rows();
                     self.rebuild_stroke_rows();
                 }
             }
         } else {
-            let was_not_empty =
-                !self.fills.borrow().is_empty() || !self.strokes.borrow().is_empty();
-            self.fills.borrow_mut().clear();
-            self.strokes.borrow_mut().clear();
+            let was_not_empty = self.fills.try_borrow().map(|f| !f.is_empty()).unwrap_or(false)
+                || self.strokes.try_borrow().map(|s| !s.is_empty()).unwrap_or(false);
+            if let Ok(mut fills) = self.fills.try_borrow_mut() {
+                fills.clear();
+            }
+            if let Ok(mut strokes) = self.strokes.try_borrow_mut() {
+                strokes.clear();
+            }
             if was_not_empty {
                 self.rebuild_fill_rows();
                 self.rebuild_stroke_rows();

@@ -15,7 +15,7 @@ impl Default for PageStudioPlugin {
                 "page",
                 "Page Tool",
                 "tool-page-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-page-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-page-symbolic.svg"),
                 "Page Tool (Shift+P)",
                 99,
             ),

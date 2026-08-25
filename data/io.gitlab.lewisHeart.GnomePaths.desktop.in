@@ -2,7 +2,7 @@
 Name=GNOME Paths
 Comment=Create and edit vector graphics and illustrations
 Exec=gnome-paths %F
-Icon=io.github.lewis.GnomePaths
+Icon=io.gitlab.lewisHeart.GnomePaths
 Terminal=false
 Type=Application
 Categories=GNOME;GTK;Graphics;VectorGraphics;2DGraphics;

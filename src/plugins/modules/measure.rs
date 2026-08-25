@@ -15,7 +15,7 @@ impl Default for MeasureStudioPlugin {
                 "measure",
                 "Ruler / Measure",
                 "tool-measure-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-measure-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-measure-symbolic.svg"),
                 "Ruler / Measure (M)",
                 41,
             ),

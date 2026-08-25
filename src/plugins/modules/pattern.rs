@@ -15,7 +15,7 @@ impl Default for PatternStudioPlugin {
                 "pattern",
                 "Pattern",
                 "tool-pattern-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-pattern-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-pattern-symbolic.svg"),
                 "Pattern Tool (Shift+P)",
                 38,
             )

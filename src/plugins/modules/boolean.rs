@@ -16,7 +16,7 @@ impl Default for BooleanUnionStudioPlugin {
                 "boolean-union",
                 "Union",
                 "bool-union-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/bool-union-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/bool-union-symbolic.svg"),
                 "Union (Ctrl++)",
                 30,
             )
@@ -66,7 +66,7 @@ impl Default for BooleanDifferenceStudioPlugin {
                 "boolean-difference",
                 "Difference",
                 "bool-difference-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/bool-difference-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/bool-difference-symbolic.svg"),
                 "Difference (Ctrl+-)",
                 31,
             )
@@ -116,7 +116,7 @@ impl Default for BooleanIntersectionStudioPlugin {
                 "boolean-intersection",
                 "Intersection",
                 "bool-intersection-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/bool-intersection-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/bool-intersection-symbolic.svg"),
                 "Intersection (Ctrl+*)",
                 32,
             )
@@ -166,7 +166,7 @@ impl Default for BooleanExclusionStudioPlugin {
                 "boolean-exclusion",
                 "Exclusion",
                 "bool-exclusion-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/bool-exclusion-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/bool-exclusion-symbolic.svg"),
                 "Exclusion (Ctrl+^)",
                 33,
             )
@@ -212,7 +212,7 @@ impl Default for BooleanDivisionStudioPlugin {
                 "boolean-division",
                 "Division",
                 "bool-division-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/bool-division-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/bool-division-symbolic.svg"),
                 "Division (Ctrl+/)",
                 34,
             )
@@ -258,7 +258,7 @@ impl Default for BooleanCutStudioPlugin {
                 "boolean-cut",
                 "Cut / Slice",
                 "bool-cut-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/bool-cut-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/bool-cut-symbolic.svg"),
                 "Cut / Slice (Ctrl+Alt+/)",
                 35,
             )

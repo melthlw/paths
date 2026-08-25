@@ -220,7 +220,7 @@ impl FloatingToolbar {
                         dock_box_c.set_margin_top(0);
                         dock_box_c.set_margin_bottom(0);
 
-                        reorder_dock(color_bar_c.widget(), &container_c);
+                        reorder_dock(&container_c, color_bar_c.widget());
 
                         color_bar_c.set_orientation(gtk4::Orientation::Vertical);
                         container_c.set_orientation(gtk4::Orientation::Vertical);

@@ -15,7 +15,7 @@ impl Default for PenStudioPlugin {
                 "pen",
                 "Vector Pen",
                 "tool-vector-pen-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-vector-pen-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-vector-pen-symbolic.svg"),
                 "Vector Pen (P)",
                 16,
             )

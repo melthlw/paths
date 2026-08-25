@@ -3,7 +3,7 @@ use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 
-pub const APP_SCHEMA_ID: &str = "io.github.lewis.GnomePaths";
+pub const APP_SCHEMA_ID: &str = "io.gitlab.lewisHeart.GnomePaths";
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct AppConfig {
@@ -131,7 +131,9 @@ thread_local! {
 }
 
 pub fn config_file_path() -> PathBuf {
-    glib::user_config_dir().join("gnome-paths").join("settings.json")
+    glib::user_config_dir()
+        .join("gnome-paths")
+        .join("settings.json")
 }
 
 fn load_initial_config() -> AppConfig {
@@ -1090,7 +1092,11 @@ mod tests {
         AppSettings::set_plugin_enabled("color_palette", false);
         assert!(!AppSettings::is_plugin_enabled("color_palette"));
 
-        let locs = vec!["docked:0".to_string(), "closed".to_string(), "docked:1".to_string()];
+        let locs = vec![
+            "docked:0".to_string(),
+            "closed".to_string(),
+            "docked:1".to_string(),
+        ];
         AppSettings::set_inspector_tab_locations(locs.clone());
         assert_eq!(AppSettings::inspector_tab_locations(), locs);
     }

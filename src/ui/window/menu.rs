@@ -213,7 +213,7 @@ pub fn build_main_menu(
             if let Some(win) = win_holder.borrow().as_ref() {
                 let about = adw::AboutDialog::builder()
                     .application_name("GNOME Paths")
-                    .application_icon("io.github.lewis.GnomePaths")
+                    .application_icon("io.gitlab.lewisHeart.GnomePaths")
                     .version("0.3.0-alpha")
                     .developer_name("Lewis")
                     .developers(["Lewis"])

@@ -13,7 +13,7 @@ project(
 i18n = import('i18n')
 gnome = import('gnome')
 
-base_id = 'io.github.lewis.GnomePaths'
+base_id = 'io.gitlab.lewisHeart.GnomePaths'
 
 prefix = get_option('prefix')
 bindir = prefix / get_option('bindir')

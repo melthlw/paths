@@ -15,7 +15,7 @@ impl Default for BrushStudioPlugin {
                 "brush",
                 "Pencil & Brush",
                 "tool-brush-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-brush-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-brush-symbolic.svg"),
                 "Pencil & Brush (B)",
                 18,
             )

@@ -91,7 +91,7 @@ impl DockLayoutManager {
             // Sort by priority (lower priority = closer to edge)
             edge_items.sort_by_key(|item| item.priority);
 
-            let gap = 8;
+            let gap = 12;
             let mut current_offset = 0;
 
             for (idx, item) in edge_items.iter().enumerate() {
@@ -128,7 +128,18 @@ impl DockLayoutManager {
                     }
                 }
 
-                current_offset = margin + item.thickness;
+                let measured_thickness = match pos {
+                    BarPosition::Top | BarPosition::Bottom => {
+                        let h = item.widget.height();
+                        if h > 10 { h } else { item.thickness }
+                    }
+                    BarPosition::Left | BarPosition::Right => {
+                        let w = item.widget.width();
+                        if w > 10 { w } else { item.thickness }
+                    }
+                };
+
+                current_offset = margin + measured_thickness;
             }
         }
     }

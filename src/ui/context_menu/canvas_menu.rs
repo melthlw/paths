@@ -83,12 +83,12 @@ pub fn build_canvas_menu(
     let sep_canvas_tools = gtk4::Separator::new(gtk4::Orientation::Horizontal);
 
     let (zoom_fit_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/tool-zoom-fit-all.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/tool-zoom-fit-all.svg",
         &crate::core::gettext("Fit to Window"),
         Some("Ctrl + 0"),
     );
     let (zoom_100_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/tool-zoom-100.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/tool-zoom-100.svg",
         &crate::core::gettext("Actual Size (100%)"),
         Some("Ctrl + 1"),
     );
@@ -106,7 +106,7 @@ pub fn build_canvas_menu(
     let sep_canvas_zoom = gtk4::Separator::new(gtk4::Orientation::Horizontal);
 
     let (add_page_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/tool-page.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/tool-page.svg",
         &crate::core::gettext("Add New Page"),
         Some("Ctrl + Shift + N"),
     );
@@ -145,37 +145,37 @@ pub fn build_canvas_menu(
     insert_box.append(&gtk4::Separator::new(gtk4::Orientation::Horizontal));
 
     let (tool_rect_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/tool-square.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/tool-square.svg",
         &crate::core::gettext("Rectangle"),
         Some("R"),
     );
     let (tool_circle_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/tool-circle.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/tool-circle.svg",
         &crate::core::gettext("Circle / Ellipse"),
         Some("O"),
     );
     let (tool_star_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/tool-star.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/tool-star.svg",
         &crate::core::gettext("Star"),
         Some("S"),
     );
     let (tool_triangle_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/tool-triangle.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/tool-triangle.svg",
         &crate::core::gettext("Triangle / Polygon"),
         Some("P"),
     );
     let (tool_spiral_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/tool-spiral.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/tool-spiral.svg",
         &crate::core::gettext("Spiral"),
         Some("E"),
     );
     let (tool_text_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/tool-text.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/tool-text.svg",
         &crate::core::gettext("Text"),
         Some("T"),
     );
     let (tool_pen_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/tool-pen.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/tool-pen.svg",
         &crate::core::gettext("Bézier Pen"),
         Some("B"),
     );

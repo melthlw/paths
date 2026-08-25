@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="gnome-paths">
-  <schema id="io.github.lewis.GnomePaths" path="/io/github/lewis/GnomePaths/">
+  <schema id="io.gitlab.lewisHeart.GnomePaths" path="/io/gitlab/lewisHeart/GnomePaths/">
     <!-- Window Geometry & State -->
     <key name="window-width" type="i">
       <default>1280</default>

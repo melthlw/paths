@@ -828,25 +828,25 @@ impl Element {
 
     pub fn icon_name(&self) -> &'static str {
         match self {
-            Element::Rect(_) => "/io/github/lewis/GnomePaths/icons/tool-square.svg",
-            Element::Brush(_) => "/io/github/lewis/GnomePaths/icons/tool-pen.svg",
+            Element::Rect(_) => "/io/gitlab/lewisHeart/GnomePaths/icons/tool-square.svg",
+            Element::Brush(_) => "/io/gitlab/lewisHeart/GnomePaths/icons/tool-pen.svg",
             Element::Path(p) => match &p.shape_origin {
                 Some(ShapeOrigin::Rectangle { .. }) => {
-                    "/io/github/lewis/GnomePaths/icons/tool-square.svg"
+                    "/io/gitlab/lewisHeart/GnomePaths/icons/tool-square.svg"
                 }
                 Some(ShapeOrigin::Triangle { .. }) => {
-                    "/io/github/lewis/GnomePaths/icons/tool-triangle.svg"
+                    "/io/gitlab/lewisHeart/GnomePaths/icons/tool-triangle.svg"
                 }
-                Some(ShapeOrigin::Star { .. }) => "/io/github/lewis/GnomePaths/icons/tool-star.svg",
+                Some(ShapeOrigin::Star { .. }) => "/io/gitlab/lewisHeart/GnomePaths/icons/tool-star.svg",
                 Some(ShapeOrigin::Circle { .. }) => {
-                    "/io/github/lewis/GnomePaths/icons/tool-circle.svg"
+                    "/io/gitlab/lewisHeart/GnomePaths/icons/tool-circle.svg"
                 }
                 Some(ShapeOrigin::Spiral { .. }) => {
-                    "/io/github/lewis/GnomePaths/icons/tool-spiral.svg"
+                    "/io/gitlab/lewisHeart/GnomePaths/icons/tool-spiral.svg"
                 }
-                None => "/io/github/lewis/GnomePaths/icons/tool-vector-pen.svg",
+                None => "/io/gitlab/lewisHeart/GnomePaths/icons/tool-vector-pen.svg",
             },
-            Element::Text(_) => "/io/github/lewis/GnomePaths/icons/tool-text.svg",
+            Element::Text(_) => "/io/gitlab/lewisHeart/GnomePaths/icons/tool-text.svg",
             Element::Group(g) => {
                 if g.clip_element.is_some() {
                     "crop-symbolic"
@@ -855,7 +855,7 @@ impl Element {
                 }
             }
             Element::Image(_) => "image-x-generic-symbolic",
-            Element::Clone(_) => "/io/github/lewis/GnomePaths/icons/clone.svg",
+            Element::Clone(_) => "/io/gitlab/lewisHeart/GnomePaths/icons/clone.svg",
         }
     }
 

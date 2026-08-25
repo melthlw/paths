@@ -101,32 +101,32 @@ pub fn build_alignment_section(canvas: &CanvasWidget) -> AlignmentSection {
 
     let align_btns: Vec<(&str, String, Box<dyn Fn(&CanvasWidget)>)> = vec![
         (
-            "/io/github/lewis/GnomePaths/icons/align-left.svg",
+            "/io/gitlab/lewisHeart/GnomePaths/icons/align-left.svg",
             crate::core::gettext("Align left"),
             Box::new(|c| c.align_left()),
         ),
         (
-            "/io/github/lewis/GnomePaths/icons/align-center-h.svg",
+            "/io/gitlab/lewisHeart/GnomePaths/icons/align-center-h.svg",
             crate::core::gettext("Center horizontally"),
             Box::new(|c| c.align_center_h()),
         ),
         (
-            "/io/github/lewis/GnomePaths/icons/align-right.svg",
+            "/io/gitlab/lewisHeart/GnomePaths/icons/align-right.svg",
             crate::core::gettext("Align right"),
             Box::new(|c| c.align_right()),
         ),
         (
-            "/io/github/lewis/GnomePaths/icons/align-top.svg",
+            "/io/gitlab/lewisHeart/GnomePaths/icons/align-top.svg",
             crate::core::gettext("Align top"),
             Box::new(|c| c.align_top()),
         ),
         (
-            "/io/github/lewis/GnomePaths/icons/align-center-v.svg",
+            "/io/gitlab/lewisHeart/GnomePaths/icons/align-center-v.svg",
             crate::core::gettext("Center vertically"),
             Box::new(|c| c.align_center_v()),
         ),
         (
-            "/io/github/lewis/GnomePaths/icons/align-bottom.svg",
+            "/io/gitlab/lewisHeart/GnomePaths/icons/align-bottom.svg",
             crate::core::gettext("Align bottom"),
             Box::new(|c| c.align_bottom()),
         ),
@@ -154,12 +154,12 @@ pub fn build_alignment_section(canvas: &CanvasWidget) -> AlignmentSection {
 
     let dist_btns: Vec<(&str, String, Box<dyn Fn(&CanvasWidget)>)> = vec![
         (
-            "/io/github/lewis/GnomePaths/icons/distribute-horizontal.svg",
+            "/io/gitlab/lewisHeart/GnomePaths/icons/distribute-horizontal.svg",
             crate::core::gettext("Distribute horizontally"),
             Box::new(|c| c.distribute_h()),
         ),
         (
-            "/io/github/lewis/GnomePaths/icons/distribute-vertical.svg",
+            "/io/gitlab/lewisHeart/GnomePaths/icons/distribute-vertical.svg",
             crate::core::gettext("Distribute vertically"),
             Box::new(|c| c.distribute_v()),
         ),

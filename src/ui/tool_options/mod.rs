@@ -9,7 +9,7 @@ pub mod select;
 pub mod shapes;
 
 use gtk4::prelude::*;
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use self::brush::{build_brush_controls, BrushControls};
@@ -104,12 +104,14 @@ pub struct ToolOptionsBar {
     canvas: CanvasWidget,
     is_syncing: Rc<Cell<bool>>,
     is_top: Rc<Cell<bool>>,
+    on_reposition: Rc<RefCell<Option<Box<dyn Fn(bool)>>>>,
 }
 
 impl ToolOptionsBar {
     pub fn new(canvas: CanvasWidget) -> Self {
         let is_syncing = Rc::new(Cell::new(false));
         let is_top = Rc::new(Cell::new(true));
+        let on_reposition: Rc<RefCell<Option<Box<dyn Fn(bool)>>>> = Rc::new(RefCell::new(None));
 
         let container = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Horizontal)
@@ -266,28 +268,22 @@ impl ToolOptionsBar {
             .homogeneous(true)
             .build();
 
-        let container_pos = container.clone();
         let pop_close_opt = options_popover.clone();
 
+        let on_reposition_c = on_reposition.clone();
         let make_opt_pos_btn = |icon_name: &'static str, tooltip: String, is_top_val: bool| {
             let btn = gtk4::Button::builder()
                 .icon_name(icon_name)
                 .tooltip_text(&tooltip)
                 .css_classes(["flat"])
                 .build();
-            let c = container_pos.clone();
             let p = pop_close_opt.clone();
             let is_top_cell = is_top.clone();
+            let on_rep = on_reposition_c.clone();
             btn.connect_clicked(move |_| {
                 is_top_cell.set(is_top_val);
-                if is_top_val {
-                    c.set_valign(gtk4::Align::Start);
-                    c.set_margin_top(32);
-                    c.set_margin_bottom(0);
-                } else {
-                    c.set_valign(gtk4::Align::End);
-                    c.set_margin_bottom(96);
-                    c.set_margin_top(0);
+                if let Some(ref cb) = *on_rep.borrow() {
+                    cb(is_top_val);
                 }
                 p.popdown();
             });
@@ -411,7 +407,12 @@ impl ToolOptionsBar {
             canvas,
             is_syncing,
             is_top,
+            on_reposition,
         }
+    }
+
+    pub fn set_on_reposition<F: Fn(bool) + 'static>(&self, cb: F) {
+        *self.on_reposition.borrow_mut() = Some(Box::new(cb));
     }
 
     pub fn widget(&self) -> &gtk4::Box {

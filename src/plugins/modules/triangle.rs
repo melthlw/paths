@@ -15,7 +15,7 @@ impl Default for TriangleStudioPlugin {
                 "triangle",
                 "Triangle",
                 "tool-triangle-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-triangle-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-triangle-symbolic.svg"),
                 "Triangle (Y)",
                 17,
             )

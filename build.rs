@@ -76,7 +76,7 @@ fn compile_blueprints(ui_dir: &Path) {
 }
 
 fn compile_schemas(data_dir: &Path) {
-    let schema_file = data_dir.join("io.github.lewis.GnomePaths.gschema.xml");
+    let schema_file = data_dir.join("io.gitlab.lewisHeart.GnomePaths.gschema.xml");
     if schema_file.exists() {
         println!("cargo:rerun-if-changed={}", schema_file.display());
         if let Ok(status) = Command::new("glib-compile-schemas").arg(data_dir).status() {

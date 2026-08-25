@@ -15,7 +15,7 @@ impl Default for CircleStudioPlugin {
                 "circle",
                 "Circle",
                 "tool-circle-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-circle-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-circle-symbolic.svg"),
                 "Circle (C)",
                 15,
             )

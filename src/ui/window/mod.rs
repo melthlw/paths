@@ -322,9 +322,9 @@ impl DesignWindow {
             _ => crate::plugins::manifest::BarPosition::Bottom,
         };
 
-        dock_manager.register("main_toolbar", &bottom_dock, initial_tb_pos, 0, 56, 24);
-        dock_manager.register("tool_options", tool_options.widget(), crate::plugins::manifest::BarPosition::Top, 1, 48, 32);
-        dock_manager.register("color_palette", palette_bar_ref.widget(), crate::plugins::manifest::BarPosition::Left, 2, 48, 24);
+        dock_manager.register("main_toolbar", &bottom_dock, initial_tb_pos, 0, 64, 24);
+        dock_manager.register("tool_options", tool_options.widget(), crate::plugins::manifest::BarPosition::Top, 1, 54, 32);
+        dock_manager.register("color_palette", palette_bar_ref.widget(), crate::plugins::manifest::BarPosition::Left, 2, 50, 24);
 
         let _toolbar = FloatingToolbar::new(
             canvas.clone(),
@@ -466,6 +466,17 @@ impl DesignWindow {
         let dm_pal = dock_manager.clone();
         palette_bar_ref.set_on_reposition(move |pos| {
             dm_pal.update_position("color_palette", pos.into());
+        });
+
+        let dm_opt = dock_manager.clone();
+        tool_options.set_on_reposition(move |is_top| {
+            let pos = if is_top {
+                crate::plugins::manifest::BarPosition::Top
+            } else {
+                crate::plugins::manifest::BarPosition::Bottom
+            };
+            let base_margin = if is_top { 32 } else { 24 };
+            dm_opt.update_position_and_base_margin("tool_options", pos, base_margin);
         });
 
         // Wire status & selection updates

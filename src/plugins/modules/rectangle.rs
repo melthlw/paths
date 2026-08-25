@@ -15,7 +15,7 @@ impl Default for RectangleStudioPlugin {
                 "rectangle",
                 "Rectangle & Shapes",
                 "tool-square-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-square-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-square-symbolic.svg"),
                 "Rectangle & Shapes (R)",
                 14,
             )

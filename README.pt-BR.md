@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="data/icons/hicolor/scalable/apps/io.github.lewis.GnomePaths.svg" alt="Logotipo do GNOME Paths" height="128">
+  <img src="data/icons/hicolor/scalable/apps/io.gitlab.lewisHeart.GnomePaths.svg" alt="Logotipo do GNOME Paths" height="128">
 </p>
 
 <h1 align="center">GNOME Paths</h1>
@@ -135,10 +135,10 @@ flatpak install flathub \
   org.freedesktop.Sdk.Extension.rust-stable//25.08
 
 # Compilar e instalar o pacote Flatpak
-flatpak-builder --user --install --force-clean build-dir io.github.lewis.GnomePaths.json
+flatpak-builder --user --install --force-clean build-dir io.gitlab.lewisHeart.GnomePaths.json
 
 # Executar o aplicativo
-flatpak run io.github.lewis.GnomePaths
+flatpak run io.gitlab.lewisHeart.GnomePaths
 ```
 
 ### 4. Meson e Ninja

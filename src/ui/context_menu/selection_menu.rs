@@ -64,12 +64,12 @@ pub fn build_selection_menu(
     let sep_clip = gtk4::Separator::new(gtk4::Orientation::Horizontal);
 
     let (duplicate_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/duplicate.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/duplicate.svg",
         &crate::core::gettext("Duplicate"),
         Some("Ctrl + D"),
     );
     let (clone_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/clone.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/clone.svg",
         &crate::core::gettext("Clone"),
         Some("Alt + D"),
     );
@@ -84,7 +84,7 @@ pub fn build_selection_menu(
         Some("Shift + D"),
     );
     let (select_clones_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/clone.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/clone.svg",
         &crate::core::gettext("Select Linked Clones"),
         None,
     );
@@ -97,27 +97,27 @@ pub fn build_selection_menu(
     let sep_edit = gtk4::Separator::new(gtk4::Orientation::Horizontal);
 
     let (convert_path_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/object-to-path.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/object-to-path.svg",
         &crate::core::gettext("Convert to Path"),
         None,
     );
     let (bring_front_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/layer-bring-to-front.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/layer-bring-to-front.svg",
         &crate::core::gettext("Bring to Front"),
         Some("Ctrl + Shift + ]"),
     );
     let (bring_forward_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/layer-bring-forward.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/layer-bring-forward.svg",
         &crate::core::gettext("Bring Forward"),
         Some("Ctrl + ]"),
     );
     let (send_backward_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/layer-send-backward.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/layer-send-backward.svg",
         &crate::core::gettext("Send Backward"),
         Some("Ctrl + ["),
     );
     let (send_back_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/layer-send-to-back.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/layer-send-to-back.svg",
         &crate::core::gettext("Send to Back"),
         Some("Ctrl + Shift + ["),
     );
@@ -125,7 +125,7 @@ pub fn build_selection_menu(
     let sep_arrange = gtk4::Separator::new(gtk4::Orientation::Horizontal);
 
     let (group_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/group.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/group.svg",
         &crate::core::gettext("Group"),
         Some("Ctrl + G"),
     );
@@ -135,7 +135,7 @@ pub fn build_selection_menu(
         None,
     );
     let (ungroup_btn, _) = create_item(
-        "/io/github/lewis/GnomePaths/icons/ungroup.svg",
+        "/io/gitlab/lewisHeart/GnomePaths/icons/ungroup.svg",
         &crate::core::gettext("Ungroup"),
         Some("Shift + Ctrl + G"),
     );

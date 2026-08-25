@@ -15,7 +15,7 @@ impl Default for EyedropperStudioPlugin {
                 "eyedropper",
                 "Eyedropper",
                 "tool-eyedropper-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-eyedropper-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-eyedropper-symbolic.svg"),
                 "Eyedropper (I)",
                 40,
             ),

@@ -15,7 +15,7 @@ impl Default for GradientStudioPlugin {
                 "gradient",
                 "Gradient",
                 "tool-gradient-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-gradient-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-gradient-symbolic.svg"),
                 "Gradient (G)",
                 36,
             )

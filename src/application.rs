@@ -7,8 +7,8 @@ use libadwaita::prelude::*;
 
 use crate::ui::DesignWindow;
 
-pub const APP_ID: &str = "io.github.lewis.GnomePaths";
-pub const RESOURCE_PATH: &str = "/io/github/lewis/GnomePaths";
+pub const APP_ID: &str = "io.gitlab.lewisHeart.GnomePaths";
+pub const RESOURCE_PATH: &str = "/io/gitlab/lewisHeart/GnomePaths";
 
 pub struct DesignApplication {
     app: adw::Application,
@@ -137,7 +137,7 @@ impl DesignApplication {
 
         let dialog = adw::AboutDialog::builder()
             .application_name("GNOME Paths")
-            .application_icon("io.github.lewis.GnomePaths")
+            .application_icon("io.gitlab.lewisHeart.GnomePaths")
             .developer_name("Lewis")
             .version("0.3.0")
             .copyright("© 2026 Lewis")

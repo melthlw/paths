@@ -20,7 +20,7 @@ pub fn build_about_page() -> gtk4::ScrolledWindow {
         .margin_bottom(16)
         .build();
 
-    let logo_img = gtk4::Image::from_icon_name("io.github.lewis.GnomePaths");
+    let logo_img = gtk4::Image::from_icon_name("io.gitlab.lewisHeart.GnomePaths");
     logo_img.set_pixel_size(64);
     let name_lbl = gtk4::Label::builder()
         .label("GNOME Paths")

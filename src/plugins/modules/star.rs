@@ -15,7 +15,7 @@ impl Default for StarStudioPlugin {
                 "star",
                 "Star",
                 "tool-star-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-star-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-star-symbolic.svg"),
                 "Star (S)",
                 16,
             )

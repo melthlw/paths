@@ -15,7 +15,7 @@ impl Default for PaintBucketStudioPlugin {
                 "paint_bucket",
                 "Paint Bucket",
                 "tool-paint-bucket-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-paint-bucket-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-paint-bucket-symbolic.svg"),
                 "Paint Bucket (K)",
                 35,
             )

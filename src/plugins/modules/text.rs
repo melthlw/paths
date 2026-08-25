@@ -15,7 +15,7 @@ impl Default for TextStudioPlugin {
                 "text",
                 "Text",
                 "tool-text-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-text-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-text-symbolic.svg"),
                 "Text (T)",
                 20,
             ),

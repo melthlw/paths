@@ -15,7 +15,7 @@ impl Default for SpiralStudioPlugin {
                 "spiral",
                 "Spiral",
                 "tool-spiral-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-spiral-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-spiral-symbolic.svg"),
                 "Spiral (W)",
                 18,
             )

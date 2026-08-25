@@ -1,4 +1,4 @@
-app-id: io.github.lewis.GnomePaths
+app-id: io.gitlab.lewisHeart.GnomePaths
 runtime: org.gnome.Platform
 runtime-version: '50'
 sdk: org.gnome.Sdk
@@ -13,7 +13,7 @@ finish-args:
   - --filesystem=xdg-documents
   - --filesystem=xdg-pictures
   - --filesystem=xdg-download
-  - --metadata=X-DConf=migrate-path=/io/github/lewis/GnomePaths/
+  - --metadata=X-DConf=migrate-path=/io/gitlab/lewisHeart/GnomePaths/
 build-options:
   append-path: /usr/lib/sdk/rust-stable/bin
   env:

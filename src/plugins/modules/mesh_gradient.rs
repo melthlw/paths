@@ -15,7 +15,7 @@ impl Default for MeshGradientStudioPlugin {
                 "mesh_gradient",
                 "Mesh Gradient",
                 "tool-mesh-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-mesh-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-mesh-symbolic.svg"),
                 "Mesh Gradient (U)",
                 37,
             )

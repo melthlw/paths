@@ -15,7 +15,7 @@ impl Default for PathEditorStudioPlugin {
                 "path_editor",
                 "Path Node Editor",
                 "tool-path-editor-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/tool-path-editor-symbolic.svg"),
+                Some("/io/gitlab/lewisHeart/GnomePaths/icons/tool-path-editor-symbolic.svg"),
                 "Path Node Editor (A)",
                 12,
             ),
