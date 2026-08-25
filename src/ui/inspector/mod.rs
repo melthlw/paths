@@ -84,11 +84,20 @@ impl InspectorSidebar {
             .show_end_title_buttons(false)
             .build();
 
+        let title_box = gtk4::Box::builder()
+            .orientation(gtk4::Orientation::Horizontal)
+            .spacing(6)
+            .halign(gtk4::Align::Center)
+            .build();
+        let title_icon = gtk4::Image::from_icon_name("sidebar-inspector-symbolic");
+        title_icon.set_pixel_size(16);
         let title_lbl = gtk4::Label::builder()
             .label(crate::core::gettext("Panels"))
             .css_classes(["heading"])
             .build();
-        header_bar.set_title_widget(Some(&title_lbl));
+        title_box.append(&title_icon);
+        title_box.append(&title_lbl);
+        header_bar.set_title_widget(Some(&title_box));
 
         let header_add_btn = gtk4::MenuButton::builder()
             .icon_name("list-add-symbolic")
@@ -596,7 +605,7 @@ impl InspectorSidebar {
                 let tab_info: [(String, Option<&'static str>, &'static str); 6] = [
                     (
                         crate::core::gettext("Appearance"),
-                        Some("/io/github/lewis/GnomePaths/icons/panel-appearance.svg"),
+                        None,
                         "panel-appearance-symbolic",
                     ),
                     (
@@ -606,23 +615,23 @@ impl InspectorSidebar {
                     ),
                     (
                         crate::core::gettext("Transform"),
-                        Some("/io/github/lewis/GnomePaths/icons/transform.svg"),
+                        None,
                         "transform-symbolic",
                     ),
                     (
                         crate::core::gettext("Clones"),
-                        Some("/io/github/lewis/GnomePaths/icons/clone.svg"),
-                        "check-symbolic",
+                        None,
+                        "clone-symbolic",
                     ),
                     (
                         crate::core::gettext("Export"),
                         None,
-                        "document-save-symbolic",
+                        "page-export-symbolic",
                     ),
                     (
                         crate::core::gettext("Libraries"),
                         None,
-                        "clone-master-symbolic",
+                        "library-insert-symbolic",
                     ),
                 ];
 

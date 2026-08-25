@@ -108,10 +108,31 @@ impl ColorControlBar {
 
         let fill_btn = gtk4::Button::builder()
             .child(&fill_area)
-            .tooltip_text(&crate::core::gettext("Fill"))
+            .tooltip_text(&crate::core::gettext("Fill (Click to choose, drag onto object)"))
             .css_classes(["flat"])
             .focus_on_click(false)
             .build();
+
+        let drag_fill = gtk4::DragSource::builder()
+            .actions(gdk::DragAction::COPY)
+            .build();
+        let fill_paintable = gtk4::WidgetPaintable::new(Some(&fill_area));
+        drag_fill.set_icon(Some(&fill_paintable), 11, 11);
+        let cur_fill_drag = current_fill.clone();
+        drag_fill.connect_prepare(move |_, _, _| {
+            let payload = if let Some(rgba) = cur_fill_drag.get() {
+                if rgba.alpha() > 0.01 {
+                    let col = Color::new(rgba.red(), rgba.green(), rgba.blue(), rgba.alpha());
+                    format!("gnome-paths:fill:{}", col.to_hex())
+                } else {
+                    "gnome-paths:fill-none".to_string()
+                }
+            } else {
+                "gnome-paths:fill-none".to_string()
+            };
+            Some(gdk::ContentProvider::for_value(&payload.to_value()))
+        });
+        fill_btn.add_controller(drag_fill);
 
         let fill_picker =
             ColorPickerPopover::new(canvas.clone(), Color::BLACK, 0);
@@ -203,10 +224,31 @@ impl ColorControlBar {
 
         let stroke_btn = gtk4::Button::builder()
             .child(&stroke_area)
-            .tooltip_text(&crate::core::gettext("Stroke"))
+            .tooltip_text(&crate::core::gettext("Stroke (Click to choose, drag onto object)"))
             .css_classes(["flat"])
             .focus_on_click(false)
             .build();
+
+        let drag_stroke = gtk4::DragSource::builder()
+            .actions(gdk::DragAction::COPY)
+            .build();
+        let stroke_paintable = gtk4::WidgetPaintable::new(Some(&stroke_area));
+        drag_stroke.set_icon(Some(&stroke_paintable), 11, 11);
+        let cur_stroke_drag = current_stroke.clone();
+        drag_stroke.connect_prepare(move |_, _, _| {
+            let payload = if let Some(rgba) = cur_stroke_drag.get() {
+                if rgba.alpha() > 0.01 {
+                    let col = Color::new(rgba.red(), rgba.green(), rgba.blue(), rgba.alpha());
+                    format!("gnome-paths:stroke:{}", col.to_hex())
+                } else {
+                    "gnome-paths:stroke-none".to_string()
+                }
+            } else {
+                "gnome-paths:stroke-none".to_string()
+            };
+            Some(gdk::ContentProvider::for_value(&payload.to_value()))
+        });
+        stroke_btn.add_controller(drag_stroke);
 
         let stroke_picker = ColorPickerPopover::new(canvas.clone(), Color::BLACK, 0);
         stroke_picker.attach_to(&stroke_btn);

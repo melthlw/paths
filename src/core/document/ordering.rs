@@ -1,4 +1,5 @@
 use crate::core::element::{BlendMode, Element, ElementId, FillLayer, GroupElement, StrokeLayer};
+use crate::core::Color;
 use super::Document;
 
 impl Document {
@@ -152,6 +153,18 @@ impl Document {
         }
     }
 
+    pub fn set_selected_fill_color(&mut self, color: Option<Color>) {
+        if self.selected_ids.is_empty() {
+            return;
+        }
+        self.snapshot();
+        for id in &self.selected_ids {
+            if let Some(el) = Self::find_element_mut_recursive(&mut self.elements, *id) {
+                el.set_fill_color(color);
+            }
+        }
+    }
+
     pub fn set_selected_strokes(&mut self, strokes: Vec<StrokeLayer>) {
         if self.selected_ids.is_empty() {
             return;
@@ -160,6 +173,18 @@ impl Document {
         for id in &self.selected_ids {
             if let Some(el) = Self::find_element_mut_recursive(&mut self.elements, *id) {
                 el.set_strokes(strokes.clone());
+            }
+        }
+    }
+
+    pub fn set_selected_stroke_color(&mut self, color: Option<Color>) {
+        if self.selected_ids.is_empty() {
+            return;
+        }
+        self.snapshot();
+        for id in &self.selected_ids {
+            if let Some(el) = Self::find_element_mut_recursive(&mut self.elements, *id) {
+                el.set_stroke_color(color);
             }
         }
     }

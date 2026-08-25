@@ -279,51 +279,91 @@ impl Element {
         match self {
             Element::Rect(r) => {
                 if let Some(fc) = r.fill_color {
-                    out.push(Some(fc));
+                    if fc.a > 0.001 {
+                        out.push(Some(fc));
+                    }
                 }
                 for f in &r.fills {
                     if f.enabled {
-                        out.push(Some(f.color));
-                        if f.secondary_color.a > 0.01 {
+                        if f.color.a > 0.001 {
+                            out.push(Some(f.color));
+                        }
+                        if f.style != FillStyle::Solid && f.secondary_color.a > 0.001 {
                             out.push(Some(f.secondary_color));
+                        }
+                        for stop in &f.stops {
+                            if stop.color.a > 0.001 {
+                                out.push(Some(stop.color));
+                            }
+                        }
+                        if let Some(ref m) = f.mesh {
+                            for node in &m.nodes {
+                                if node.color.a > 0.001 {
+                                    out.push(Some(node.color));
+                                }
+                            }
                         }
                     }
                 }
                 if let Some(s) = r.stroke_color {
-                    out.push(Some(s));
+                    if s.a > 0.001 {
+                        out.push(Some(s));
+                    }
                 }
                 for s in &r.strokes {
-                    if s.enabled {
+                    if s.enabled && s.color.a > 0.001 {
                         out.push(Some(s.color));
                     }
                 }
             }
             Element::Path(p) => {
                 if let Some(fc) = p.fill_color {
-                    out.push(Some(fc));
+                    if fc.a > 0.001 {
+                        out.push(Some(fc));
+                    }
                 }
                 for f in &p.fills {
                     if f.enabled {
-                        out.push(Some(f.color));
-                        if f.secondary_color.a > 0.01 {
+                        if f.color.a > 0.001 {
+                            out.push(Some(f.color));
+                        }
+                        if f.style != FillStyle::Solid && f.secondary_color.a > 0.001 {
                             out.push(Some(f.secondary_color));
+                        }
+                        for stop in &f.stops {
+                            if stop.color.a > 0.001 {
+                                out.push(Some(stop.color));
+                            }
+                        }
+                        if let Some(ref m) = f.mesh {
+                            for node in &m.nodes {
+                                if node.color.a > 0.001 {
+                                    out.push(Some(node.color));
+                                }
+                            }
                         }
                     }
                 }
                 if let Some(s) = p.stroke_color {
-                    out.push(Some(s));
+                    if s.a > 0.001 {
+                        out.push(Some(s));
+                    }
                 }
                 for s in &p.strokes {
-                    if s.enabled {
+                    if s.enabled && s.color.a > 0.001 {
                         out.push(Some(s.color));
                     }
                 }
             }
             Element::Text(t) => {
-                out.push(Some(t.color));
+                if t.color.a > 0.001 {
+                    out.push(Some(t.color));
+                }
             }
             Element::Brush(b) => {
-                out.push(Some(b.color));
+                if b.color.a > 0.001 {
+                    out.push(Some(b.color));
+                }
             }
             Element::Group(g) => {
                 for child in &g.children {

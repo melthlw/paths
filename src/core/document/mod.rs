@@ -306,14 +306,16 @@ impl Document {
     }
 
     pub fn get_document_colors(&self) -> Vec<Option<Color>> {
-        let mut colors: Vec<Option<Color>> = vec![None];
+        let mut colors: Vec<Option<Color>> = Vec::new();
         for el in &self.elements {
             el.collect_colors(&mut colors);
         }
         let mut unique = Vec::new();
         for c in colors {
-            if !unique.contains(&c) {
-                unique.push(c);
+            if let Some(col) = c {
+                if !unique.contains(&Some(col)) {
+                    unique.push(Some(col));
+                }
             }
         }
         unique
@@ -940,5 +942,25 @@ pub mod tests {
         assert_eq!(doc.get_clones_for_master(master_id).len(), 0);
         doc.redo();
         assert_eq!(doc.get_clones_for_master(master_id).len(), 5);
+    }
+
+    #[test]
+    fn test_document_colors_collection() {
+        let mut doc = Document::default();
+        assert_eq!(doc.get_document_colors().len(), 0);
+
+        let red = Color::new(1.0, 0.0, 0.0, 1.0);
+        let green = Color::new(0.0, 1.0, 0.0, 1.0);
+        let blue = Color::new(0.0, 0.0, 1.0, 1.0);
+
+        let mut rect = RectElement::new(Rect::new(0.0, 0.0, 100.0, 100.0), Some(red), Some(green));
+        rect.fills[0].stops.push(crate::core::element::style::GradientStop::new(0.5, blue));
+        doc.add_element(Element::Rect(rect));
+
+        let doc_colors = doc.get_document_colors();
+        assert_eq!(doc_colors.len(), 3);
+        assert!(doc_colors.contains(&Some(red)));
+        assert!(doc_colors.contains(&Some(green)));
+        assert!(doc_colors.contains(&Some(blue)));
     }
 }

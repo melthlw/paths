@@ -280,6 +280,15 @@ pub fn build_libraries_section(canvas: &CanvasWidget) -> gtk4::Widget {
         });
     }
 
+    {
+        let rebuild_c = rebuild_view_stack.clone();
+        view_stack.connect_visible_child_notify(move |st| {
+            if st.visible_child_name().as_deref() == Some("swatches") {
+                rebuild_c();
+            }
+        });
+    }
+
     // Connect Search Entry to filter all pages in real-time and auto-switch
     {
         let view_stack_s = view_stack.clone();
@@ -520,20 +529,8 @@ fn build_swatches_page(
         .build();
 
     // 1. GROUP: CORES DO DOCUMENTO
-    let doc_colors: Vec<Color> = if let Ok(state) = canvas.state().try_borrow() {
-        state
-            .document
-            .get_document_colors()
-            .into_iter()
-            .flatten()
-            .collect()
-    } else {
-        Vec::new()
-    };
-
     let doc_group = adw::PreferencesGroup::builder()
         .title(glib::markup_escape_text(&crate::core::gettext("Document Colors")))
-        .description(glib::markup_escape_text(&format!("{} {}", doc_colors.len(), crate::core::gettext("colors"))))
         .margin_start(12)
         .margin_end(12)
         .build();
@@ -543,38 +540,65 @@ fn build_swatches_page(
         .css_classes(["card"])
         .build();
 
-    if doc_colors.is_empty() {
-        let empty_lbl = gtk4::Label::builder()
-            .label(&crate::core::gettext("Colors used on the canvas will appear here automatically."))
-            .css_classes(["caption", "dim-label"])
-            .wrap(true)
-            .margin_start(12)
-            .margin_end(12)
-            .margin_top(12)
-            .margin_bottom(12)
-            .build();
-        doc_card.append(&empty_lbl);
-    } else {
-        let doc_grid = gtk4::FlowBox::builder()
-            .selection_mode(gtk4::SelectionMode::None)
-            .max_children_per_line(8)
-            .min_children_per_line(6)
-            .homogeneous(true)
-            .row_spacing(6)
-            .column_spacing(6)
-            .margin_start(10)
-            .margin_end(10)
-            .margin_top(10)
-            .margin_bottom(10)
-            .build();
+    let rebuild_doc_colors = {
+        let canvas = canvas.clone();
+        let doc_group = doc_group.clone();
+        let doc_card = doc_card.clone();
+        Rc::new(move || {
+            let doc_colors: Vec<Color> = canvas
+                .get_document_colors()
+                .into_iter()
+                .flatten()
+                .collect();
 
-        for col in doc_colors {
-            let hex = col.to_hex();
-            let chip = create_swatch_button(canvas, &hex, &hex, false, None);
-            doc_grid.append(&chip);
-        }
-        doc_card.append(&doc_grid);
-    }
+            doc_group.set_description(Some(&format!(
+                "{} {}",
+                doc_colors.len(),
+                crate::core::gettext("colors")
+            )));
+
+            while let Some(child) = doc_card.first_child() {
+                doc_card.remove(&child);
+            }
+
+            if doc_colors.is_empty() {
+                let empty_lbl = gtk4::Label::builder()
+                    .label(&crate::core::gettext(
+                        "Colors used on the canvas will appear here automatically.",
+                    ))
+                    .css_classes(["caption", "dim-label"])
+                    .wrap(true)
+                    .margin_start(12)
+                    .margin_end(12)
+                    .margin_top(12)
+                    .margin_bottom(12)
+                    .build();
+                doc_card.append(&empty_lbl);
+            } else {
+                let doc_grid = gtk4::FlowBox::builder()
+                    .selection_mode(gtk4::SelectionMode::None)
+                    .max_children_per_line(8)
+                    .min_children_per_line(6)
+                    .homogeneous(true)
+                    .row_spacing(6)
+                    .column_spacing(6)
+                    .margin_start(10)
+                    .margin_end(10)
+                    .margin_top(10)
+                    .margin_bottom(10)
+                    .build();
+
+                for col in doc_colors {
+                    let hex = col.to_hex();
+                    let chip = create_swatch_button(&canvas, &hex, &hex, false, None);
+                    doc_grid.append(&chip);
+                }
+                doc_card.append(&doc_grid);
+            }
+        })
+    };
+
+    rebuild_doc_colors();
     doc_group.add(&doc_card);
     project_box.append(&doc_group);
 
@@ -740,6 +764,15 @@ fn build_swatches_page(
         Some("project"),
         &crate::core::gettext("Project Colors"),
     );
+
+    {
+        let reb = rebuild_doc_colors.clone();
+        sub_stack.connect_visible_child_notify(move |st| {
+            if st.visible_child_name().as_deref() == Some("project") {
+                reb();
+            }
+        });
+    }
 
     // ─────────────────────────────────────────────────────────────
     // TAB 2: PRESET PALETTES (LIBADWAITA PREFERENCES GROUPS)

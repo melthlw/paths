@@ -2696,3 +2696,9 @@ msgstr "O documento aberto contém alterações não salvas. Se você não salva
 
 msgid "Discard Changes"
 msgstr "Descartar alterações"
+
+msgid "Fill (Click to choose, drag onto object)"
+msgstr "Preenchimento (Clique para escolher, arraste para o objeto)"
+
+msgid "Stroke (Click to choose, drag onto object)"
+msgstr "Contorno (Clique para escolher, arraste para o objeto)"

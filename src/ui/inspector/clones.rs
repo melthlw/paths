@@ -466,6 +466,7 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
                                 }
                             ))
                             .build();
+                        expander.add_prefix(&gtk4::Image::from_icon_name("clone-master-symbolic"));
 
                         let btn_sel_master = gtk4::Button::builder()
                             .icon_name("eyedropper-pick-symbolic")
@@ -495,6 +496,7 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
                                 ))
                                 .activatable(true)
                                 .build();
+                            row.add_prefix(&gtk4::Image::from_icon_name("clone-symbolic"));
 
                             let btn_sel = gtk4::Button::builder()
                                 .icon_name("eyedropper-pick-symbolic")
@@ -750,6 +752,7 @@ fn build_tiled_clones_card(
         .title(crate::core::gettext("Shift & Spacing"))
         .subtitle(crate::core::gettext("Offset percentage per row / column"))
         .build();
+    shift_expander.add_prefix(&gtk4::Image::from_icon_name("transform-symbolic"));
 
     let shift_x_row = adw::ActionRow::builder()
         .title(crate::core::gettext("Shift X (% width)"))
@@ -808,6 +811,7 @@ fn build_tiled_clones_card(
         .title(crate::core::gettext("Scale & Progression"))
         .subtitle(crate::core::gettext("Scale growth or reduction per step"))
         .build();
+    scale_expander.add_prefix(&gtk4::Image::from_icon_name("transform-scale-stroke-symbolic"));
 
     let scale_x_row = adw::ActionRow::builder()
         .title(crate::core::gettext("Scale X Delta (% / col)"))
@@ -864,6 +868,7 @@ fn build_tiled_clones_card(
         .title(crate::core::gettext("Rotation & Angle"))
         .subtitle(crate::core::gettext("Angle increments per row / column"))
         .build();
+    rot_expander.add_prefix(&gtk4::Image::from_icon_name("rotate-right-symbolic"));
 
     let rot_col_row = adw::ActionRow::builder()
         .title(crate::core::gettext("Angle / Col (°)"))
@@ -920,6 +925,7 @@ fn build_tiled_clones_card(
         .title(crate::core::gettext("Opacity & Radial"))
         .subtitle(crate::core::gettext("Fade gradients and ring distribution"))
         .build();
+    op_expander.add_prefix(&gtk4::Image::from_icon_name("blend-mode-symbolic"));
 
     let op_fade_row = adw::ActionRow::builder()
         .title(crate::core::gettext("Fade / Step (%)"))

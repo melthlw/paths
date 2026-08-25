@@ -65,7 +65,11 @@ fn get_preset_colors(preset: PalettePreset, canvas: &CanvasWidget) -> Vec<Option
             Some(Color::new(0.369, 0.361, 0.392, 1.0)), // Warm Gray #5e5c64
             Some(Color::new(0.871, 0.867, 0.855, 1.0)), // Light Gray #deddda
         ],
-        PalettePreset::DocumentColors => get_document_colors(canvas),
+        PalettePreset::DocumentColors => {
+            let mut res = vec![None];
+            res.extend(get_document_colors(canvas));
+            res
+        },
         PalettePreset::Custom => vec![],
         PalettePreset::PastelSoft => vec![
             None,
@@ -640,10 +644,12 @@ impl ColorPaletteBar {
         };
 
         if self.current_preset.get() == PalettePreset::DocumentColors {
-            let mut unique = Vec::new();
+            let mut unique = vec![None];
             for c in doc_colors {
-                if !unique.contains(c) {
-                    unique.push(*c);
+                if let Some(col) = c {
+                    if !unique.contains(&Some(*col)) {
+                        unique.push(Some(*col));
+                    }
                 }
             }
             if *self.swatches.borrow() != unique {
@@ -759,6 +765,27 @@ impl ColorPaletteBar {
                 .css_classes(["flat", "color-swatch-circle-btn"])
                 .focus_on_click(false)
                 .build();
+
+            let drag_swatch = gtk4::DragSource::builder()
+                .actions(gdk::DragAction::COPY)
+                .build();
+            let swatch_paintable = gtk4::WidgetPaintable::new(Some(&swatch_area));
+            drag_swatch.set_icon(Some(&swatch_paintable), 16, 16);
+            let b_drag = self.clone();
+            drag_swatch.connect_prepare(move |_, _, _| {
+                let payload = match color_opt {
+                    Some(c) => match b_drag.target_mode.get() {
+                        PaletteTargetMode::Fill => format!("gnome-paths:fill:{}", c.to_hex()),
+                        PaletteTargetMode::Stroke => format!("gnome-paths:stroke:{}", c.to_hex()),
+                    },
+                    None => match b_drag.target_mode.get() {
+                        PaletteTargetMode::Fill => "gnome-paths:fill-none".to_string(),
+                        PaletteTargetMode::Stroke => "gnome-paths:stroke-none".to_string(),
+                    },
+                };
+                Some(gdk::ContentProvider::for_value(&payload.to_value()))
+            });
+            btn.add_controller(drag_swatch);
 
             let b_clone = self.clone();
             btn.connect_clicked(move |_| {

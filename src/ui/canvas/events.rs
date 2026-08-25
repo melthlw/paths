@@ -402,26 +402,83 @@ pub fn handle_asset_drop(state: &mut super::state::CanvasState, payload: &str, w
     use crate::core::element::{Element, FillLayer, FillStyle, PatternType, StrokeLayer, StrokeStyle};
     use crate::core::Color;
 
-    if let Some(hex) = payload.strip_prefix("gnome-paths:swatch:") {
+    if let Some(hex) = payload.strip_prefix("gnome-paths:fill:") {
         if let Some(col) = Color::from_hex(hex) {
             state.document.snapshot();
             if let Some(hit_id) = state.document.hit_test(world_pt) {
                 if let Some(el) = state.document.find_element_mut(hit_id) {
-                    let mut fills = el.fills().to_vec();
-                    if fills.is_empty() {
-                        fills.push(FillLayer::new(col));
-                    } else {
-                        fills[0].color = col;
-                        fills[0].style = FillStyle::Solid;
-                    }
-                    el.set_fills(fills);
+                    el.set_fill_color(Some(col));
                 }
                 state.document.selected_ids.clear();
                 state.document.selected_ids.insert(hit_id);
             } else {
                 state.active_fill_color = col;
                 if !state.document.selected_ids.is_empty() {
-                    state.document.set_selected_fills(vec![FillLayer::new(col)]);
+                    state.document.set_selected_fill_color(Some(col));
+                }
+            }
+            return true;
+        }
+    } else if payload == "gnome-paths:fill-none" {
+        state.document.snapshot();
+        if let Some(hit_id) = state.document.hit_test(world_pt) {
+            if let Some(el) = state.document.find_element_mut(hit_id) {
+                el.set_fill_color(None);
+            }
+            state.document.selected_ids.clear();
+            state.document.selected_ids.insert(hit_id);
+        } else {
+            state.active_fill_color = Color::new(0.0, 0.0, 0.0, 0.0);
+            if !state.document.selected_ids.is_empty() {
+                state.document.set_selected_fill_color(None);
+            }
+        }
+        return true;
+    } else if let Some(hex) = payload.strip_prefix("gnome-paths:stroke:") {
+        if let Some(col) = Color::from_hex(hex) {
+            state.document.snapshot();
+            if let Some(hit_id) = state.document.hit_test(world_pt) {
+                if let Some(el) = state.document.find_element_mut(hit_id) {
+                    el.set_stroke_color(Some(col));
+                }
+                state.document.selected_ids.clear();
+                state.document.selected_ids.insert(hit_id);
+            } else {
+                state.active_stroke_color = Some(col);
+                if !state.document.selected_ids.is_empty() {
+                    state.document.set_selected_stroke_color(Some(col));
+                }
+            }
+            return true;
+        }
+    } else if payload == "gnome-paths:stroke-none" {
+        state.document.snapshot();
+        if let Some(hit_id) = state.document.hit_test(world_pt) {
+            if let Some(el) = state.document.find_element_mut(hit_id) {
+                el.set_stroke_color(None);
+            }
+            state.document.selected_ids.clear();
+            state.document.selected_ids.insert(hit_id);
+        } else {
+            state.active_stroke_color = None;
+            if !state.document.selected_ids.is_empty() {
+                state.document.set_selected_stroke_color(None);
+            }
+        }
+        return true;
+    } else if let Some(hex) = payload.strip_prefix("gnome-paths:swatch:") {
+        if let Some(col) = Color::from_hex(hex) {
+            state.document.snapshot();
+            if let Some(hit_id) = state.document.hit_test(world_pt) {
+                if let Some(el) = state.document.find_element_mut(hit_id) {
+                    el.set_fill_color(Some(col));
+                }
+                state.document.selected_ids.clear();
+                state.document.selected_ids.insert(hit_id);
+            } else {
+                state.active_fill_color = col;
+                if !state.document.selected_ids.is_empty() {
+                    state.document.set_selected_fill_color(Some(col));
                 }
             }
             return true;
@@ -651,4 +708,48 @@ pub fn handle_asset_drop(state: &mut super::state::CanvasState, payload: &str, w
         return true;
     }
     false
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::core::element::RectElement;
+    use crate::core::geometry::Rect;
+    use crate::core::{Color, Element};
+
+    #[test]
+    fn test_handle_asset_drop_fill_and_stroke() {
+        let mut state = crate::ui::canvas::state::CanvasState::new();
+
+        let red = Color::new(1.0, 0.0, 0.0, 1.0);
+        let green = Color::new(0.0, 1.0, 0.0, 1.0);
+        let rect = RectElement::new(Rect::new(0.0, 0.0, 100.0, 100.0), Some(Color::BLACK), None);
+        let rect_id = rect.id;
+        state.document.add_element(Element::Rect(rect));
+
+        // 1. Drag fill onto unselected element
+        let success = handle_asset_drop(&mut state, &format!("gnome-paths:fill:{}", red.to_hex()), Point::new(50.0, 50.0));
+        assert!(success);
+        let el = state.document.find_element(rect_id).unwrap();
+        assert_eq!(el.fill_color(), Some(red));
+        assert!(state.document.selected_ids.contains(&rect_id));
+
+        // 2. Drag stroke onto element
+        let success_stroke = handle_asset_drop(&mut state, &format!("gnome-paths:stroke:{}", green.to_hex()), Point::new(50.0, 50.0));
+        assert!(success_stroke);
+        let el_after_stroke = state.document.find_element(rect_id).unwrap();
+        assert_eq!(el_after_stroke.stroke_color(), Some(green));
+
+        // 3. Drag fill-none onto element
+        let success_none = handle_asset_drop(&mut state, "gnome-paths:fill-none", Point::new(50.0, 50.0));
+        assert!(success_none);
+        let el_no_fill = state.document.find_element(rect_id).unwrap();
+        assert_eq!(el_no_fill.fill_color(), None);
+
+        // 4. Drag stroke-none onto element
+        let success_stroke_none = handle_asset_drop(&mut state, "gnome-paths:stroke-none", Point::new(50.0, 50.0));
+        assert!(success_stroke_none);
+        let el_no_stroke = state.document.find_element(rect_id).unwrap();
+        assert_eq!(el_no_stroke.stroke_color(), None);
+    }
 }

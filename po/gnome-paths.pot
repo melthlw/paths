@@ -2004,3 +2004,9 @@ msgstr ""
 
 msgid "Discard Changes"
 msgstr ""
+
+msgid "Fill (Click to choose, drag onto object)"
+msgstr ""
+
+msgid "Stroke (Click to choose, drag onto object)"
+msgstr ""

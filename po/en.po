@@ -2684,3 +2684,9 @@ msgstr "Open document contains unsaved changes. If you don't save, changes will 
 
 msgid "Discard Changes"
 msgstr "Discard Changes"
+
+msgid "Fill (Click to choose, drag onto object)"
+msgstr "Fill (Click to choose, drag onto object)"
+
+msgid "Stroke (Click to choose, drag onto object)"
+msgstr "Stroke (Click to choose, drag onto object)"

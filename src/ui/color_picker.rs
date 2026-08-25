@@ -1,3 +1,4 @@
+use gtk4::gdk;
 use gtk4::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -1454,6 +1455,18 @@ impl ColorPickerPopover {
                 let _ = cr.stroke();
             });
             btn.set_child(Some(&da));
+
+            let drag_swatch = gtk4::DragSource::builder()
+                .actions(gdk::DragAction::COPY)
+                .build();
+            let paintable = gtk4::WidgetPaintable::new(Some(&da));
+            drag_swatch.set_icon(Some(&paintable), 10, 10);
+            let hex_val = col.to_hex();
+            drag_swatch.connect_prepare(move |_, _, _| {
+                let payload = format!("gnome-paths:fill:{}", hex_val);
+                Some(gdk::ContentProvider::for_value(&payload.to_value()))
+            });
+            btn.add_controller(drag_swatch);
 
             let ltc = load_tuner_color.clone();
             let cv_s = canvas.clone();

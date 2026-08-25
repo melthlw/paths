@@ -39,11 +39,20 @@ impl LayersSidebar {
             .show_end_title_buttons(false)
             .build();
 
+        let title_box = gtk4::Box::builder()
+            .orientation(gtk4::Orientation::Horizontal)
+            .spacing(6)
+            .halign(gtk4::Align::Center)
+            .build();
+        let title_icon = gtk4::Image::from_icon_name("sidebar-layers-symbolic");
+        title_icon.set_pixel_size(16);
         let title_lbl = gtk4::Label::builder()
             .label(&crate::core::gettext("Layers"))
             .css_classes(["heading"])
             .build();
-        header_bar.set_title_widget(Some(&title_lbl));
+        title_box.append(&title_icon);
+        title_box.append(&title_lbl);
+        header_bar.set_title_widget(Some(&title_box));
 
         // Action buttons inside HeaderBar (initially hidden until something is selected)
         let actions_box = gtk4::Box::builder()
