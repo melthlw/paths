@@ -27,6 +27,17 @@
   </a>
 </div>
 
+<br/>
+
+<div align="center">
+
+> [!CAUTION]
+> **⚠️ Extremely Experimental Software**
+>
+> This program is in an **extremely early and experimental stage**. It is **incomplete**, likely **full of bugs**, and may **crash, corrupt files, or behave unexpectedly** at any time. Use it **at your own risk** and do **not** rely on it for production work. Expect breaking changes at any point without prior notice.
+
+</div>
+
 ---
 
 ## Screenshots
