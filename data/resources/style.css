@@ -556,6 +556,16 @@
     background-color: alpha(currentColor, 0.10);
 }
 
+.layer-row.drop-above {
+    border-top: 2px solid @accent_color;
+    background-color: alpha(@accent_color, 0.12);
+}
+
+.layer-row.drop-below {
+    border-bottom: 2px solid @accent_color;
+    background-color: alpha(@accent_color, 0.12);
+}
+
 .layer-row-box {
     padding: 4px 6px;
     min-height: 32px;

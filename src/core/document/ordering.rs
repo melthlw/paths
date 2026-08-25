@@ -392,4 +392,105 @@ impl Document {
         self.selected_ids.insert(group_id);
         Some(group_id)
     }
+
+    pub fn move_layer_relative(
+        &mut self,
+        src_id: ElementId,
+        target_id: ElementId,
+        insert_above_in_ui: bool,
+    ) {
+        if src_id == target_id {
+            return;
+        }
+
+        self.snapshot();
+
+        let src_elem = match Self::remove_element_from_vec(&mut self.elements, src_id) {
+            Some(el) => el,
+            None => return,
+        };
+
+        if let Some(uninserted) = Self::insert_element_relative_in_vec(
+            &mut self.elements,
+            src_elem,
+            target_id,
+            insert_above_in_ui,
+        ) {
+            self.elements.push(uninserted);
+        }
+    }
+
+    fn remove_element_from_vec(vec: &mut Vec<Element>, id: ElementId) -> Option<Element> {
+        if let Some(pos) = vec.iter().position(|e| e.id() == id) {
+            return Some(vec.remove(pos));
+        }
+        for el in vec.iter_mut() {
+            if let Element::Group(g) = el {
+                if let Some(found) = Self::remove_element_from_vec(&mut g.children, id) {
+                    return Some(found);
+                }
+            }
+        }
+        None
+    }
+
+    fn insert_element_relative_in_vec(
+        vec: &mut Vec<Element>,
+        to_insert: Element,
+        target_id: ElementId,
+        insert_above_in_ui: bool,
+    ) -> Option<Element> {
+        if let Some(pos) = vec.iter().position(|e| e.id() == target_id) {
+            let insert_idx = if insert_above_in_ui { pos + 1 } else { pos };
+            vec.insert(insert_idx, to_insert);
+            return None;
+        }
+        let mut current = to_insert;
+        for el in vec.iter_mut() {
+            if let Element::Group(g) = el {
+                if let Some(returned) = Self::insert_element_relative_in_vec(
+                    &mut g.children,
+                    current,
+                    target_id,
+                    insert_above_in_ui,
+                ) {
+                    current = returned;
+                } else {
+                    return None;
+                }
+            }
+        }
+        Some(current)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::core::element::PathElement;
+
+    #[test]
+    fn test_move_layer_relative_above_and_below() {
+        let mut doc = Document::new();
+        let e1 = Element::Path(PathElement::new(Vec::new(), false, None, None, 1.0));
+        let e2 = Element::Path(PathElement::new(Vec::new(), false, None, None, 1.0));
+        let e3 = Element::Path(PathElement::new(Vec::new(), false, None, None, 1.0));
+        let id1 = e1.id();
+        let id2 = e2.id();
+        let id3 = e3.id();
+
+        doc.elements = vec![e1, e2, e3]; // elements: [e1 (index 0), e2 (index 1), e3 (index 2)]
+
+        // Move e1 above e3 in UI (highest z-index / end of elements)
+        doc.move_layer_relative(id1, id3, true);
+        assert_eq!(doc.elements[0].id(), id2);
+        assert_eq!(doc.elements[1].id(), id3);
+        assert_eq!(doc.elements[2].id(), id1);
+
+        // Move e1 below e2 in UI (lowest z-index / start of elements)
+        doc.move_layer_relative(id1, id2, false);
+        assert_eq!(doc.elements[0].id(), id1);
+        assert_eq!(doc.elements[1].id(), id2);
+        assert_eq!(doc.elements[2].id(), id3);
+    }
 }

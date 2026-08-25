@@ -575,6 +575,15 @@ impl CanvasWidget {
         self.drawing_area.queue_draw();
     }
 
+    pub fn reorder_layer(&self, src_id: ElementId, target_id: ElementId, insert_above_in_ui: bool) {
+        let mut state = self.state.borrow_mut();
+        state
+            .document
+            .move_layer_relative(src_id, target_id, insert_above_in_ui);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
     pub fn select_layer(&self, id: ElementId, additive: bool) {
         let mut state = self.state.borrow_mut();
         state.document.select(id, additive);

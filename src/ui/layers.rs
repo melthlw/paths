@@ -526,6 +526,73 @@ impl LayersSidebar {
 
         item_box.append(&actions_box);
 
+        // 5. Drag & Drop controllers for layer reordering
+        let drag_source = gtk4::DragSource::builder()
+            .actions(gdk::DragAction::MOVE)
+            .build();
+
+        let layer_id_str = layer.id.0.to_string();
+        drag_source.connect_prepare(move |_, _, _| {
+            let value = layer_id_str.to_value();
+            Some(gdk::ContentProvider::for_value(&value))
+        });
+        row.add_controller(drag_source);
+
+        let drop_target = gtk4::DropTarget::new(glib::Type::STRING, gdk::DragAction::MOVE);
+
+        let row_enter = row.clone();
+        drop_target.connect_enter(move |_, _, y| {
+            let height = row_enter.height() as f64;
+            if y < height / 2.0 {
+                row_enter.add_css_class("drop-above");
+                row_enter.remove_css_class("drop-below");
+            } else {
+                row_enter.add_css_class("drop-below");
+                row_enter.remove_css_class("drop-above");
+            }
+            gdk::DragAction::MOVE
+        });
+
+        let row_motion = row.clone();
+        drop_target.connect_motion(move |_, _, y| {
+            let height = row_motion.height() as f64;
+            if y < height / 2.0 {
+                row_motion.add_css_class("drop-above");
+                row_motion.remove_css_class("drop-below");
+            } else {
+                row_motion.add_css_class("drop-below");
+                row_motion.remove_css_class("drop-above");
+            }
+            gdk::DragAction::MOVE
+        });
+
+        let row_leave = row.clone();
+        drop_target.connect_leave(move |_| {
+            row_leave.remove_css_class("drop-above");
+            row_leave.remove_css_class("drop-below");
+        });
+
+        let row_drop = row.clone();
+        let target_id = layer.id;
+        let canvas_drop = self.canvas.clone();
+        drop_target.connect_drop(move |_, value, _, y| {
+            row_drop.remove_css_class("drop-above");
+            row_drop.remove_css_class("drop-below");
+
+            if let Ok(src_str) = value.get::<String>() {
+                if let Ok(src_val) = src_str.parse::<u64>() {
+                    let src_id = ElementId(src_val);
+                    if src_id != target_id {
+                        let height = row_drop.height() as f64;
+                        let insert_above_in_ui = y < height / 2.0;
+                        canvas_drop.reorder_layer(src_id, target_id, insert_above_in_ui);
+                    }
+                }
+            }
+            true
+        });
+        row.add_controller(drop_target);
+
         row.set_child(Some(&item_box));
         row
     }
