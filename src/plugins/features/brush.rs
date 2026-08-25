@@ -1,7 +1,7 @@
 use skia_safe as skia;
 
 use crate::core::{
-    hit_transform_handle, BrushMode, BrushStroke, BrushStyle, Element, ElementId, Point,
+    hit_transform_handle, BrushMode, BrushStroke, BrushStyle, Element, ElementId, MarkerShape, Point,
     PointerButton, PointerEvent, Rect, StrokeCap, StrokeJoin, TransformHandle, Viewport,
 };
 use crate::plugins::traits::{FeaturePlugin, PluginContext, PluginRenderContext};
@@ -43,6 +43,11 @@ pub struct BrushFeature {
     pub auto_close: bool,
     pub cap_style: StrokeCap,
     pub join_style: StrokeJoin,
+    pub start_marker: MarkerShape,
+    pub body_marker: MarkerShape,
+    pub end_marker: MarkerShape,
+    pub body_spacing: f32,
+    pub marker_scale: f32,
 }
 
 impl Default for BrushFeature {
@@ -62,6 +67,11 @@ impl Default for BrushFeature {
             auto_close: false,
             cap_style: StrokeCap::Round,
             join_style: StrokeJoin::Round,
+            start_marker: MarkerShape::None,
+            body_marker: MarkerShape::None,
+            end_marker: MarkerShape::None,
+            body_spacing: 2.0,
+            marker_scale: 1.0,
         }
     }
 }
@@ -330,6 +340,11 @@ impl FeaturePlugin for BrushFeature {
                             stroke.join_style = self.join_style;
                             stroke.taper_start = self.taper_start;
                             stroke.taper_end = self.taper_end;
+                            stroke.start_marker = self.start_marker.clone();
+                            stroke.body_marker = self.body_marker.clone();
+                            stroke.end_marker = self.end_marker.clone();
+                            stroke.body_spacing = self.body_spacing;
+                            stroke.marker_scale = self.marker_scale;
                             let stroke_id = stroke.id;
                             ctx.document.add_element(Element::Brush(stroke));
                             ctx.document.select(stroke_id, false);
@@ -374,6 +389,11 @@ impl FeaturePlugin for BrushFeature {
             stroke.auto_close = self.auto_close;
             stroke.cap_style = self.cap_style;
             stroke.join_style = self.join_style;
+            stroke.start_marker = self.start_marker.clone();
+            stroke.body_marker = self.body_marker.clone();
+            stroke.end_marker = self.end_marker.clone();
+            stroke.body_spacing = self.body_spacing;
+            stroke.marker_scale = self.marker_scale;
             stroke.render(canvas);
         }
     }

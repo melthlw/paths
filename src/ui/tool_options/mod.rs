@@ -747,6 +747,14 @@ impl ToolOptionsBar {
                             crate::core::BrushStyle::Ink => 3,
                             crate::core::BrushStyle::Marker => 4,
                             crate::core::BrushStyle::Airbrush => 5,
+                            crate::core::BrushStyle::Charcoal => 6,
+                            crate::core::BrushStyle::Watercolor => 7,
+                            crate::core::BrushStyle::NeonGlow => 8,
+                            crate::core::BrushStyle::Chalk => 9,
+                            crate::core::BrushStyle::SprayPaint => 10,
+                            crate::core::BrushStyle::StarTrail => 11,
+                            crate::core::BrushStyle::BeadChain => 12,
+                            crate::core::BrushStyle::ArrowTrail => 13,
                         };
                         self.brush_controls.style_dd.set_selected(style_idx);
                         self.brush_controls

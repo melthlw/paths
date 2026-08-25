@@ -7,6 +7,8 @@ pub struct SelectionMenuWidgets {
     pub copy_btn: gtk4::Button,
     pub cut_btn: gtk4::Button,
     pub paste_btn: gtk4::Button,
+    pub copy_style_btn: gtk4::Button,
+    pub paste_style_btn: gtk4::Button,
     pub sep_clip: gtk4::Separator,
 
     pub duplicate_btn: gtk4::Button,
@@ -18,6 +20,8 @@ pub struct SelectionMenuWidgets {
     pub sep_edit: gtk4::Separator,
 
     pub convert_path_btn: gtk4::Button,
+    pub attach_path_btn: gtk4::Button,
+    pub detach_path_btn: gtk4::Button,
     pub bring_front_btn: gtk4::Button,
     pub bring_forward_btn: gtk4::Button,
     pub send_backward_btn: gtk4::Button,
@@ -60,6 +64,16 @@ pub fn build_selection_menu(
         &crate::core::gettext("Paste"),
         Some("Ctrl + V"),
     );
+    let (copy_style_btn, _) = create_item(
+        "edit-copy-symbolic",
+        &crate::core::gettext("Copy Style"),
+        Some("Ctrl + Alt + C"),
+    );
+    let (paste_style_btn, _) = create_item(
+        "edit-paste-symbolic",
+        &crate::core::gettext("Paste Style"),
+        Some("Ctrl + Alt + V"),
+    );
 
     let sep_clip = gtk4::Separator::new(gtk4::Orientation::Horizontal);
 
@@ -99,6 +113,16 @@ pub fn build_selection_menu(
     let (convert_path_btn, _) = create_item(
         "/io/gitlab/lewisHeart/GnomePaths/icons/object-to-path.svg",
         &crate::core::gettext("Convert to Path"),
+        None,
+    );
+    let (attach_path_btn, _) = create_item(
+        "insert-link-symbolic",
+        &crate::core::gettext("Attach Text to Path"),
+        None,
+    );
+    let (detach_path_btn, _) = create_item(
+        "edit-delete-symbolic",
+        &crate::core::gettext("Detach Text from Path"),
         None,
     );
     let (bring_front_btn, _) = create_item(
@@ -253,7 +277,23 @@ pub fn build_selection_menu(
         let canvas = canvas.clone();
         let popover = popover.clone();
         paste_btn.connect_clicked(move |_| {
-            canvas.paste(None);
+            canvas.paste_from_clipboard();
+            popover.popdown();
+        });
+    }
+    {
+        let canvas = canvas.clone();
+        let popover = popover.clone();
+        copy_style_btn.connect_clicked(move |_| {
+            canvas.copy_selected_style();
+            popover.popdown();
+        });
+    }
+    {
+        let canvas = canvas.clone();
+        let popover = popover.clone();
+        paste_style_btn.connect_clicked(move |_| {
+            canvas.paste_style_to_selected();
             popover.popdown();
         });
     }
@@ -310,6 +350,22 @@ pub fn build_selection_menu(
         let popover = popover.clone();
         convert_path_btn.connect_clicked(move |_| {
             canvas.convert_selected_to_path();
+            popover.popdown();
+        });
+    }
+    {
+        let canvas = canvas.clone();
+        let popover = popover.clone();
+        attach_path_btn.connect_clicked(move |_| {
+            canvas.attach_selected_text_to_path();
+            popover.popdown();
+        });
+    }
+    {
+        let canvas = canvas.clone();
+        let popover = popover.clone();
+        detach_path_btn.connect_clicked(move |_| {
+            canvas.detach_selected_text_from_path();
             popover.popdown();
         });
     }
@@ -422,6 +478,8 @@ pub fn build_selection_menu(
         copy_btn,
         cut_btn,
         paste_btn,
+        copy_style_btn,
+        paste_style_btn,
         sep_clip,
         duplicate_btn,
         clone_btn,
@@ -431,6 +489,8 @@ pub fn build_selection_menu(
         delete_btn,
         sep_edit,
         convert_path_btn,
+        attach_path_btn,
+        detach_path_btn,
         bring_front_btn,
         bring_forward_btn,
         send_backward_btn,

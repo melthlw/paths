@@ -24,6 +24,18 @@ pub enum BlendMode {
     Luminosity,
 }
 
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct ElementStyleSnapshot {
+    pub fill_color: Option<Color>,
+    pub stroke_color: Option<Color>,
+    pub stroke_width: f32,
+    pub fills: Vec<FillLayer>,
+    pub strokes: Vec<StrokeLayer>,
+    pub opacity: f32,
+    pub blend_mode: BlendMode,
+    pub blur: f32,
+}
+
 impl BlendMode {
     pub fn to_skia(self) -> skia::BlendMode {
         match self {

@@ -322,13 +322,20 @@ pub fn build_appearance_page() -> gtk4::ScrolledWindow {
     );
     scale_slider.set_value(initial_pct);
     scale_slider.set_draw_value(false);
-    scale_slider.set_width_request(200);
+    scale_slider.set_width_request(180);
     scale_slider.set_valign(gtk4::Align::Center);
 
-    scale_slider.add_mark(75.0, gtk4::PositionType::Bottom, Some("75%"));
-    scale_slider.add_mark(100.0, gtk4::PositionType::Bottom, Some("100%"));
-    scale_slider.add_mark(125.0, gtk4::PositionType::Bottom, Some("125%"));
-    scale_slider.add_mark(150.0, gtk4::PositionType::Bottom, Some("150%"));
+    let lbl_min = gtk4::Label::builder()
+        .label("75%")
+        .css_classes(["caption", "dim-label"])
+        .valign(gtk4::Align::Center)
+        .build();
+
+    let lbl_max = gtk4::Label::builder()
+        .label("150%")
+        .css_classes(["caption", "dim-label"])
+        .valign(gtk4::Align::Center)
+        .build();
 
     let scale_badge = gtk4::Label::builder()
         .label(format!("{}%", initial_pct as u32))
@@ -339,13 +346,15 @@ pub fn build_appearance_page() -> gtk4::ScrolledWindow {
 
     let slider_box = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Horizontal)
-        .spacing(12)
+        .spacing(8)
         .valign(gtk4::Align::Center)
         .margin_top(4)
         .margin_bottom(4)
         .build();
 
+    slider_box.append(&lbl_min);
     slider_box.append(&scale_slider);
+    slider_box.append(&lbl_max);
     slider_box.append(&scale_badge);
 
     let b_lbl = scale_badge.clone();

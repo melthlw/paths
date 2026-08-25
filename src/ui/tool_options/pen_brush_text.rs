@@ -235,8 +235,47 @@ pub fn build_pen_brush_text_controls(
     let system_fonts = crate::core::get_system_font_families();
     let font_strs: Vec<&str> = system_fonts.iter().map(|s| s.as_str()).collect();
     let font_model = gtk4::StringList::new(&font_strs);
+
+    let font_factory = gtk4::SignalListItemFactory::new();
+    font_factory.connect_setup(|_, list_item| {
+        let item = list_item
+            .downcast_ref::<gtk4::ListItem>()
+            .expect("ListItem expected");
+        let label = gtk4::Label::builder()
+            .xalign(0.0)
+            .margin_start(6)
+            .margin_end(6)
+            .margin_top(4)
+            .margin_bottom(4)
+            .build();
+        item.set_child(Some(&label));
+    });
+    font_factory.connect_bind(|_, list_item| {
+        let item = list_item
+            .downcast_ref::<gtk4::ListItem>()
+            .expect("ListItem expected");
+        let label = item
+            .child()
+            .and_downcast::<gtk4::Label>()
+            .expect("Label expected");
+        let st_obj = item
+            .item()
+            .and_downcast::<gtk4::StringObject>()
+            .expect("StringObject expected");
+        let font_name = st_obj.string();
+
+        let mut font_desc = gtk4::pango::FontDescription::from_string(&font_name);
+        font_desc.set_size(13 * gtk4::pango::SCALE);
+        let attr_list = gtk4::pango::AttrList::new();
+        attr_list.insert(gtk4::pango::AttrFontDesc::new(&font_desc));
+
+        label.set_attributes(Some(&attr_list));
+        label.set_text(&font_name);
+    });
+
     let font_dd = gtk4::DropDown::builder()
         .model(&font_model)
+        .factory(&font_factory)
         .selected(0)
         .enable_search(true)
         .expression(gtk4::PropertyExpression::new(
@@ -653,6 +692,57 @@ pub fn build_pen_brush_text_controls(
         canvas_ws.set_selected_word_spacing(spin.value() as f32);
     });
     text_capsule.append(&ws_box);
+
+    let sep_text_7 = gtk4::Separator::builder()
+        .orientation(gtk4::Orientation::Vertical)
+        .margin_start(2)
+        .margin_end(2)
+        .build();
+    text_capsule.append(&sep_text_7);
+
+    let btn_path_text = gtk4::Button::builder()
+        .icon_name("insert-link-symbolic")
+        .tooltip_text(crate::core::gettext("Attach Text to Path / Detach"))
+        .css_classes(["flat"])
+        .valign(gtk4::Align::Center)
+        .focus_on_click(false)
+        .build();
+    let canvas_pt = canvas.clone();
+    btn_path_text.connect_clicked(move |_| {
+        if !canvas_pt.attach_selected_text_to_path() {
+            canvas_pt.detach_selected_text_from_path();
+        }
+    });
+
+    let canvas_pt_sens = canvas.clone();
+    let btn_pt_c = btn_path_text.clone();
+    btn_path_text.add_tick_callback(move |_, _| {
+        let state_rc = canvas_pt_sens.state();
+        let state = state_rc.borrow();
+        let sel_ids = &state.document.selected_ids;
+        let elems: Vec<&crate::core::Element> = sel_ids
+            .iter()
+            .filter_map(|id| state.document.find_element(*id))
+            .collect();
+
+        let has_text = elems.iter().any(|e| matches!(e, crate::core::Element::Text(_)));
+        let has_path = elems.iter().any(|e| !matches!(e, crate::core::Element::Text(_)));
+        let is_attached = elems.iter().any(|e| {
+            if let crate::core::Element::Text(t) = e {
+                t.path_id.is_some()
+            } else {
+                false
+            }
+        });
+
+        let can_act = (has_text && has_path) || is_attached;
+        if btn_pt_c.is_sensitive() != can_act {
+            btn_pt_c.set_sensitive(can_act);
+        }
+        glib::ControlFlow::Continue
+    });
+
+    text_capsule.append(&btn_path_text);
 
     // 4. PAGE CAPSULE: Page Tool Options
     let page_capsule = gtk4::Box::builder()

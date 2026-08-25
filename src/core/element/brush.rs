@@ -44,6 +44,37 @@ impl StrokeJoin {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, Default)]
+pub enum MarkerShape {
+    #[default]
+    None,
+    Arrow,
+    StealthArrow,
+    Circle,
+    Diamond,
+    Square,
+    Triangle,
+    Star,
+    CustomPath(String),
+}
+
+impl MarkerShape {
+    #[allow(dead_code)]
+    pub fn name(&self) -> String {
+        match self {
+            MarkerShape::None => crate::core::gettext("None"),
+            MarkerShape::Arrow => crate::core::gettext("Arrow"),
+            MarkerShape::StealthArrow => crate::core::gettext("Stealth Arrow"),
+            MarkerShape::Circle => crate::core::gettext("Circle Cap"),
+            MarkerShape::Diamond => crate::core::gettext("Diamond"),
+            MarkerShape::Square => crate::core::gettext("Square Block"),
+            MarkerShape::Triangle => crate::core::gettext("Triangle Point"),
+            MarkerShape::Star => crate::core::gettext("Star Motif"),
+            MarkerShape::CustomPath(_) => crate::core::gettext("Custom Path"),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, Default)]
 pub enum BrushStyle {
     #[default]
@@ -53,6 +84,56 @@ pub enum BrushStyle {
     Ink,
     Marker,
     Airbrush,
+    Charcoal,
+    Watercolor,
+    NeonGlow,
+    Chalk,
+    SprayPaint,
+    StarTrail,
+    BeadChain,
+    ArrowTrail,
+}
+
+impl BrushStyle {
+    #[allow(dead_code)]
+    pub fn name(self) -> String {
+        match self {
+            BrushStyle::Round => crate::core::gettext("Solid Round"),
+            BrushStyle::Pencil => crate::core::gettext("Pencil Graphite"),
+            BrushStyle::Calligraphy => crate::core::gettext("Calligraphy Ribbon"),
+            BrushStyle::Ink => crate::core::gettext("Ink Pen"),
+            BrushStyle::Marker => crate::core::gettext("Highlighter Marker"),
+            BrushStyle::Airbrush => crate::core::gettext("Airbrush Soft"),
+            BrushStyle::Charcoal => crate::core::gettext("Charcoal Sketch"),
+            BrushStyle::Watercolor => crate::core::gettext("Watercolor Wash"),
+            BrushStyle::NeonGlow => crate::core::gettext("Neon Glow Ribbon"),
+            BrushStyle::Chalk => crate::core::gettext("Grainy Chalk"),
+            BrushStyle::SprayPaint => crate::core::gettext("Spray Splatter"),
+            BrushStyle::StarTrail => crate::core::gettext("Star Trail"),
+            BrushStyle::BeadChain => crate::core::gettext("Pearl Bead Chain"),
+            BrushStyle::ArrowTrail => crate::core::gettext("Vector Arrow Trail"),
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn desc(self) -> String {
+        match self {
+            BrushStyle::Round => crate::core::gettext("Smooth uniform solid vector stroke"),
+            BrushStyle::Pencil => crate::core::gettext("Fine textured graphite pencil line"),
+            BrushStyle::Calligraphy => crate::core::gettext("45° chisel nib calligraphy ribbon"),
+            BrushStyle::Ink => crate::core::gettext("Tapered fluid inking pen"),
+            BrushStyle::Marker => crate::core::gettext("Semi-transparent multiplicative highlighter"),
+            BrushStyle::Airbrush => crate::core::gettext("Soft radial blur spray wash"),
+            BrushStyle::Charcoal => crate::core::gettext("Rough grainy sketching charcoal"),
+            BrushStyle::Watercolor => crate::core::gettext("Soft blended wet paint wash"),
+            BrushStyle::NeonGlow => crate::core::gettext("Vibrant glowing light ribbon"),
+            BrushStyle::Chalk => crate::core::gettext("Textured pastel chalk line"),
+            BrushStyle::SprayPaint => crate::core::gettext("Multi-particle spray splatter"),
+            BrushStyle::StarTrail => crate::core::gettext("Repeated star motif contour"),
+            BrushStyle::BeadChain => crate::core::gettext("Connected pearl bead chain"),
+            BrushStyle::ArrowTrail => crate::core::gettext("Sequential vector arrow trail"),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, Default)]
@@ -77,6 +158,11 @@ pub struct BrushStroke {
     pub join_style: StrokeJoin,
     pub taper_start: bool,
     pub taper_end: bool,
+    pub start_marker: MarkerShape,
+    pub body_marker: MarkerShape,
+    pub end_marker: MarkerShape,
+    pub body_spacing: f32,
+    pub marker_scale: f32,
     pub name: Option<String>,
     pub visible: bool,
     pub locked: bool,
@@ -102,6 +188,11 @@ impl BrushStroke {
             join_style: StrokeJoin::Round,
             taper_start: false,
             taper_end: false,
+            start_marker: MarkerShape::None,
+            body_marker: MarkerShape::None,
+            end_marker: MarkerShape::None,
+            body_spacing: 2.0,
+            marker_scale: 1.0,
             name: None,
             visible: true,
             locked: false,
@@ -269,8 +360,48 @@ impl BrushStroke {
             paint.set_blend_mode(skia::BlendMode::Multiply);
         }
 
+        if self.style == BrushStyle::Watercolor {
+            base_color.a *= 0.35;
+            paint.set_color4f(base_color.to_skia(), None);
+            paint.set_blend_mode(skia::BlendMode::Multiply);
+            if let Some(mask) = skia::MaskFilter::blur(skia::BlurStyle::Normal, self.width * 0.5, false) {
+                paint.set_mask_filter(mask);
+            }
+        }
+
         paint.set_color4f(base_color.to_skia(), None);
         paint.set_anti_alias(true);
+
+        if self.style == BrushStyle::NeonGlow {
+            let mut glow_paint = paint.clone();
+            glow_paint.set_style(skia::PaintStyle::Stroke);
+            glow_paint.set_stroke_width(self.width * 2.2);
+            if let Some(mask) = skia::MaskFilter::blur(skia::BlurStyle::Normal, self.width * 0.8, false) {
+                glow_paint.set_mask_filter(mask);
+            }
+            let mut glow_path = skia::PathBuilder::new();
+            if !self.points.is_empty() {
+                glow_path.move_to(self.points[0].to_skia());
+                for p in &self.points[1..] {
+                    glow_path.line_to(p.to_skia());
+                }
+            }
+            canvas.draw_path(&glow_path.detach(), &glow_paint);
+
+            let mut core_paint = paint.clone();
+            core_paint.set_color4f(skia::Color4f::new(1.0, 1.0, 1.0, 0.95), None);
+            core_paint.set_stroke_width((self.width * 0.4).max(1.5));
+            core_paint.set_mask_filter(None);
+            let mut core_path = skia::PathBuilder::new();
+            if !self.points.is_empty() {
+                core_path.move_to(self.points[0].to_skia());
+                for p in &self.points[1..] {
+                    core_path.line_to(p.to_skia());
+                }
+            }
+            canvas.draw_path(&core_path.detach(), &core_paint);
+            return;
+        }
 
         if self.blur > 0.001 || self.style == BrushStyle::Airbrush {
             let blur_amt = if self.style == BrushStyle::Airbrush {
@@ -346,6 +477,87 @@ impl BrushStroke {
             }
         }
 
+        // Special Preset Style Renderers
+        if self.style == BrushStyle::SprayPaint {
+            let mut dot_paint = paint.clone();
+            dot_paint.set_style(skia::PaintStyle::Fill);
+            let radius = (self.width * 0.8).max(3.0);
+
+            for (idx, p) in self.points.iter().enumerate() {
+                let seed = (p.x * 12.9898 + p.y * 78.233 + (idx as f32) * 43758.5453).sin().abs();
+                let num_dots = 6 + ((seed * 8.0) as usize);
+
+                for d in 0..num_dots {
+                    let angle = (seed * 17.0 + d as f32 * 2.39).sin() * std::f32::consts::PI * 2.0;
+                    let dist = ((seed * 31.0 + d as f32 * 1.7).cos().abs()) * radius;
+                    let dot_x = p.x + angle.cos() * dist;
+                    let dot_y = p.y + angle.sin() * dist;
+                    let dot_r = (1.0 + (seed * 3.0)).min(radius * 0.4);
+
+                    let mut col = base_color;
+                    col.a *= (0.2 + (seed * 0.6)).min(1.0);
+                    dot_paint.set_color4f(col.to_skia(), None);
+                    canvas.draw_circle(skia::Point::new(dot_x, dot_y), dot_r, &dot_paint);
+                }
+            }
+            return;
+        }
+
+        if self.style == BrushStyle::Charcoal || self.style == BrushStyle::Chalk {
+            let mut stroke_paint = paint.clone();
+            stroke_paint.set_style(skia::PaintStyle::Stroke);
+            stroke_paint.set_stroke_width((self.width * 0.5).max(1.0));
+
+            if self.style == BrushStyle::Chalk {
+                if let Some(pe) = skia::PathEffect::dash(&[6.0, 4.0, 2.0, 3.0], 0.0) {
+                    stroke_paint.set_path_effect(pe);
+                }
+            }
+
+            let offsets = [
+                (0.0f32, 0.0f32, 0.7f32),
+                (0.8f32, -0.6f32, 0.35f32),
+                (-0.7f32, 0.8f32, 0.35f32),
+            ];
+
+            for (dx, dy, opacity_mult) in offsets {
+                let mut path_b = skia::PathBuilder::new();
+                if !self.points.is_empty() {
+                    path_b.move_to(skia::Point::new(self.points[0].x + dx, self.points[0].y + dy));
+                    for p in &self.points[1..] {
+                        path_b.line_to(skia::Point::new(p.x + dx, p.y + dy));
+                    }
+                }
+                let mut c = base_color;
+                c.a *= opacity_mult;
+                stroke_paint.set_color4f(c.to_skia(), None);
+                canvas.draw_path(&path_b.detach(), &stroke_paint);
+            }
+            return;
+        }
+
+        if self.style == BrushStyle::Pencil {
+            let mut stroke_paint = paint.clone();
+            stroke_paint.set_style(skia::PaintStyle::Stroke);
+            stroke_paint.set_stroke_width((self.width * 0.4).max(1.0));
+
+            let offsets = [(0.0f32, 0.0f32, 0.6f32), (0.4f32, -0.3f32, 0.4f32)];
+            for (dx, dy, opacity_mult) in offsets {
+                let mut path_b = skia::PathBuilder::new();
+                if !self.points.is_empty() {
+                    path_b.move_to(skia::Point::new(self.points[0].x + dx, self.points[0].y + dy));
+                    for p in &self.points[1..] {
+                        path_b.line_to(skia::Point::new(p.x + dx, p.y + dy));
+                    }
+                }
+                let mut c = base_color;
+                c.a *= opacity_mult;
+                stroke_paint.set_color4f(c.to_skia(), None);
+                canvas.draw_path(&path_b.detach(), &stroke_paint);
+            }
+            return;
+        }
+
         if self.auto_close {
             builder.close();
             let path = builder.detach();
@@ -360,5 +572,175 @@ impl BrushStroke {
             let path = builder.detach();
             canvas.draw_path(&path, &paint);
         }
+
+        // Determine Effective Markers for Presets
+        let effective_start_marker = if self.style == BrushStyle::StarTrail {
+            MarkerShape::Star
+        } else if self.style == BrushStyle::ArrowTrail {
+            MarkerShape::Arrow
+        } else {
+            self.start_marker.clone()
+        };
+
+        let effective_body_marker = if self.style == BrushStyle::StarTrail {
+            MarkerShape::Star
+        } else if self.style == BrushStyle::BeadChain {
+            MarkerShape::Circle
+        } else if self.style == BrushStyle::ArrowTrail {
+            MarkerShape::StealthArrow
+        } else {
+            self.body_marker.clone()
+        };
+
+        let effective_end_marker = if self.style == BrushStyle::StarTrail {
+            MarkerShape::Star
+        } else if self.style == BrushStyle::ArrowTrail {
+            MarkerShape::Arrow
+        } else {
+            self.end_marker.clone()
+        };
+
+        // Render Start, Body/Middle, and End Markers
+        let n = self.points.len();
+        if n >= 2 {
+            let marker_scale_factor = (self.marker_scale * (self.width / 6.0)).max(0.2);
+
+            // Start Marker
+            if effective_start_marker != MarkerShape::None {
+                let p0 = self.points[0];
+                let p1 = self.points[1];
+                let angle = (p1.y - p0.y).atan2(p1.x - p0.x);
+                draw_marker_shape(canvas, &effective_start_marker, p0, angle, marker_scale_factor, base_color);
+            }
+
+            // End Marker
+            if effective_end_marker != MarkerShape::None {
+                let p_last = self.points[n - 1];
+                let p_prev = self.points[n - 2];
+                let angle = (p_last.y - p_prev.y).atan2(p_last.x - p_prev.x);
+                draw_marker_shape(canvas, &effective_end_marker, p_last, angle, marker_scale_factor, base_color);
+            }
+
+            // Body / Middle Repeat Marker
+            if effective_body_marker != MarkerShape::None {
+                let step_dist = (self.body_spacing * self.width).max(8.0);
+                let mut accumulated = 0.0;
+                for i in 0..n - 1 {
+                    let p0 = self.points[i];
+                    let p1 = self.points[i + 1];
+                    let seg_len = p0.distance_to(p1);
+                    let angle = (p1.y - p0.y).atan2(p1.x - p0.x);
+
+                    while accumulated + step_dist <= seg_len {
+                        accumulated += step_dist;
+                        let t = accumulated / seg_len;
+                        let pos = Point::new(p0.x + t * (p1.x - p0.x), p0.y + t * (p1.y - p0.y));
+                        draw_marker_shape(canvas, &effective_body_marker, pos, angle, marker_scale_factor, base_color);
+                    }
+                    accumulated -= seg_len;
+                    if accumulated < 0.0 { accumulated = 0.0; }
+                }
+            }
+        }
     }
+}
+
+fn draw_marker_shape(
+    canvas: &skia::Canvas,
+    shape: &MarkerShape,
+    pos: Point,
+    angle_rad: f32,
+    scale: f32,
+    color: Color,
+) {
+    if *shape == MarkerShape::None {
+        return;
+    }
+    let mut paint = skia::Paint::default();
+    paint.set_color4f(color.to_skia(), None);
+    paint.set_anti_alias(true);
+    paint.set_style(skia::PaintStyle::Fill);
+
+    canvas.save();
+    canvas.translate((pos.x, pos.y));
+    canvas.rotate(angle_rad.to_degrees(), None);
+    canvas.scale((scale, scale));
+
+    match shape {
+        MarkerShape::Arrow => {
+            let mut builder = skia::PathBuilder::new();
+            builder.move_to((10.0, 0.0));
+            builder.line_to((-10.0, -7.0));
+            builder.line_to((-6.0, 0.0));
+            builder.line_to((-10.0, 7.0));
+            builder.close();
+            canvas.draw_path(&builder.detach(), &paint);
+        }
+        MarkerShape::StealthArrow => {
+            let mut builder = skia::PathBuilder::new();
+            builder.move_to((12.0, 0.0));
+            builder.line_to((-10.0, -8.0));
+            builder.line_to((-4.0, 0.0));
+            builder.line_to((-10.0, 8.0));
+            builder.close();
+            canvas.draw_path(&builder.detach(), &paint);
+        }
+        MarkerShape::Circle => {
+            canvas.draw_circle((0.0, 0.0), 6.0, &paint);
+        }
+        MarkerShape::Diamond => {
+            let mut builder = skia::PathBuilder::new();
+            builder.move_to((8.0, 0.0));
+            builder.line_to((0.0, -6.0));
+            builder.line_to((-8.0, 0.0));
+            builder.line_to((0.0, 6.0));
+            builder.close();
+            canvas.draw_path(&builder.detach(), &paint);
+        }
+        MarkerShape::Square => {
+            let rect = skia::Rect::from_point_and_size((-6.0, -6.0), (12.0, 12.0));
+            canvas.draw_rect(rect, &paint);
+        }
+        MarkerShape::Triangle => {
+            let mut builder = skia::PathBuilder::new();
+            builder.move_to((10.0, 0.0));
+            builder.line_to((-8.0, -7.0));
+            builder.line_to((-8.0, 7.0));
+            builder.close();
+            canvas.draw_path(&builder.detach(), &paint);
+        }
+        MarkerShape::Star => {
+            let mut builder = skia::PathBuilder::new();
+            for i in 0..10 {
+                let r = if i % 2 == 0 { 8.0 } else { 3.5 };
+                let a = (i as f32) * std::f32::consts::PI / 5.0;
+                let px = a.cos() * r;
+                let py = a.sin() * r;
+                if i == 0 {
+                    builder.move_to((px, py));
+                } else {
+                    builder.line_to((px, py));
+                }
+            }
+            builder.close();
+            canvas.draw_path(&builder.detach(), &paint);
+        }
+        MarkerShape::CustomPath(path_d) => {
+            let subpaths = crate::core::svg_import::parse_svg_path_data_subpaths(path_d);
+            let mut builder = skia::PathBuilder::new();
+            for sub in &subpaths {
+                if sub.is_empty() {
+                    continue;
+                }
+                builder.move_to((sub[0].point.x, sub[0].point.y));
+                for n in sub.iter().skip(1) {
+                    builder.line_to((n.point.x, n.point.y));
+                }
+            }
+            canvas.draw_path(&builder.detach(), &paint);
+        }
+        MarkerShape::None => {}
+    }
+
+    canvas.restore();
 }

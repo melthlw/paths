@@ -5,7 +5,7 @@ pub mod rect;
 pub mod style;
 pub mod text;
 
-pub use brush::{BrushMode, BrushStroke, BrushStyle, StrokeCap, StrokeJoin};
+pub use brush::{BrushMode, BrushStroke, BrushStyle, MarkerShape, StrokeCap, StrokeJoin};
 
 pub use group::{CloneElement, GroupElement, ImageElement};
 
@@ -14,11 +14,14 @@ pub use path::{ArcMode, PathElement, PathNode, ShapeOrigin, dist_to_segment};
 pub use rect::{CornerRadii, CornerStyle, RectElement};
 
 pub use style::{
-    BlendMode, FillLayer, FillStyle, Gradient, GradientStop, GradientType, MeshGradient,
-    PatternType, StrokeLayer, StrokeStyle,
+    BlendMode, ElementStyleSnapshot, FillLayer, FillStyle, Gradient, GradientStop, GradientType,
+    MeshGradient, PatternType, StrokeLayer, StrokeStyle,
 };
 
-pub use text::{TextAlign, TextElement, get_system_font_families};
+pub use text::{
+    OpenTypeFeatures, PathGlyphOrientation, PathVerticalAlign, TextAlign, TextBaseline, TextCase,
+    TextElement, get_curated_font_glyphs, get_system_font_families,
+};
 
 use skia_safe as skia;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -216,7 +219,13 @@ impl Element {
             Element::Rect(r) => r.stroke_color,
             Element::Path(p) => p.stroke_color,
             Element::Brush(b) => Some(b.color),
-            Element::Text(_) => None,
+            Element::Text(t) => {
+                if !t.strokes.is_empty() {
+                    t.strokes.iter().find(|s| s.enabled).map(|s| s.color)
+                } else {
+                    t.stroke_color
+                }
+            }
             Element::Group(g) => g.children.first().and_then(|c| c.stroke_color()),
             Element::Image(_) => None,
             Element::Clone(_) => None,
@@ -408,7 +417,19 @@ impl Element {
                     b.color = c;
                 }
             }
-            Element::Text(_) => {}
+            Element::Text(t) => {
+                t.stroke_color = color;
+                if let Some(c) = color {
+                    if t.strokes.is_empty() {
+                        t.strokes.push(StrokeLayer::new(c, t.stroke_width));
+                    } else {
+                        t.strokes[0].color = c;
+                        t.strokes[0].enabled = true;
+                    }
+                } else {
+                    t.strokes.clear();
+                }
+            }
             Element::Group(g) => {
                 for c in &mut g.children {
                     c.set_stroke_color(color);
@@ -464,11 +485,15 @@ impl Element {
     }
 
     pub fn render(&self, canvas: &skia::Canvas) {
+        self.render_with_doc(canvas, None);
+    }
+
+    pub fn render_with_doc(&self, canvas: &skia::Canvas, doc: Option<&crate::core::document::Document>) {
         match self {
             Element::Rect(r) => r.render(canvas),
             Element::Brush(b) => b.render(canvas),
             Element::Path(p) => p.render(canvas),
-            Element::Text(t) => t.render(canvas),
+            Element::Text(t) => t.render_with_doc(canvas, doc),
             Element::Group(g) => g.render(canvas),
             Element::Image(i) => i.render(canvas),
             Element::Clone(c) => c.render(canvas),
@@ -477,10 +502,34 @@ impl Element {
 
     pub fn stroke_width(&self) -> f32 {
         match self {
-            Element::Rect(r) => r.stroke_width,
+            Element::Rect(r) => {
+                if !r.strokes.is_empty() {
+                    r.strokes.iter().find(|s| s.enabled).map(|s| s.width).unwrap_or(0.0)
+                } else if r.stroke_color.is_some() {
+                    r.stroke_width
+                } else {
+                    0.0
+                }
+            }
             Element::Brush(b) => b.width,
-            Element::Path(p) => p.stroke_width,
-            Element::Text(_) => 0.0,
+            Element::Path(p) => {
+                if !p.strokes.is_empty() {
+                    p.strokes.iter().find(|s| s.enabled).map(|s| s.width).unwrap_or(0.0)
+                } else if p.stroke_color.is_some() {
+                    p.stroke_width
+                } else {
+                    0.0
+                }
+            }
+            Element::Text(t) => {
+                if !t.strokes.is_empty() {
+                    t.strokes.iter().find(|s| s.enabled).map(|s| s.width).unwrap_or(0.0)
+                } else if t.stroke_color.is_some() {
+                    t.stroke_width
+                } else {
+                    0.0
+                }
+            }
             Element::Group(g) => g.children.first().map(|c| c.stroke_width()).unwrap_or(0.0),
             Element::Image(_) => 0.0,
             Element::Clone(_) => 0.0,
@@ -780,7 +829,15 @@ impl Element {
                 }
             }
             Element::Brush(b) => vec![StrokeLayer::new(b.color, b.width)],
-            Element::Text(_) => vec![],
+            Element::Text(t) => {
+                if !t.strokes.is_empty() {
+                    t.strokes.clone()
+                } else if let Some(s) = t.stroke_color {
+                    vec![StrokeLayer::new(s, t.stroke_width)]
+                } else {
+                    vec![]
+                }
+            }
             Element::Group(_) => vec![],
             Element::Image(_) => vec![],
             Element::Clone(_) => vec![],
@@ -819,11 +876,81 @@ impl Element {
                     b.width = s.width;
                 }
             }
-            Element::Text(_) => {}
+            Element::Text(t) => {
+                t.stroke_color = strokes
+                    .iter()
+                    .find(|s| s.enabled)
+                    .map(|s| s.color.with_alpha(s.color.a * s.opacity));
+                t.stroke_width = strokes
+                    .iter()
+                    .find(|s| s.enabled)
+                    .map(|s| s.width)
+                    .unwrap_or(1.0);
+                t.strokes = strokes;
+            }
             Element::Group(_) => {}
             Element::Image(_) => {}
             Element::Clone(_) => {}
         }
+    }
+
+    pub fn set_stroke_width(&mut self, width: f32) {
+        match self {
+            Element::Rect(r) => {
+                r.stroke_width = width;
+                if !r.strokes.is_empty() {
+                    r.strokes[0].width = width;
+                }
+            }
+            Element::Brush(b) => b.width = width,
+            Element::Path(p) => {
+                p.stroke_width = width;
+                if !p.strokes.is_empty() {
+                    p.strokes[0].width = width;
+                }
+            }
+            Element::Text(t) => {
+                t.stroke_width = width;
+                if !t.strokes.is_empty() {
+                    t.strokes[0].width = width;
+                }
+            }
+            Element::Group(_) => {}
+            Element::Image(_) => {}
+            Element::Clone(_) => {}
+        }
+    }
+
+    pub fn extract_style_snapshot(&self) -> ElementStyleSnapshot {
+        ElementStyleSnapshot {
+            fill_color: self.fill_color(),
+            stroke_color: self.stroke_color(),
+            stroke_width: self.stroke_width(),
+            fills: self.fills(),
+            strokes: self.strokes(),
+            opacity: self.opacity(),
+            blend_mode: self.blend_mode(),
+            blur: self.blur(),
+        }
+    }
+
+    pub fn apply_style_snapshot(&mut self, style: &ElementStyleSnapshot) {
+        if !style.fills.is_empty() {
+            self.set_fills(style.fills.clone());
+        } else {
+            self.set_fill_color(style.fill_color);
+        }
+
+        if !style.strokes.is_empty() {
+            self.set_strokes(style.strokes.clone());
+        } else {
+            self.set_stroke_color(style.stroke_color);
+            self.set_stroke_width(style.stroke_width);
+        }
+
+        self.set_opacity(style.opacity);
+        self.set_blend_mode(style.blend_mode);
+        self.set_blur(style.blur);
     }
 
     pub fn icon_name(&self) -> &'static str {

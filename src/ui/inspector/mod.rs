@@ -8,6 +8,7 @@ pub mod floating;
 pub mod libraries;
 pub mod swatch;
 pub mod transform;
+pub mod typography;
 
 use gtk4::gdk;
 use gtk4::glib;
@@ -24,6 +25,7 @@ use self::export::build_export_tab;
 use self::libraries::build_libraries_section;
 use self::swatch::PillSlider;
 use self::transform::build_transform_section;
+use self::typography::build_typography_section;
 use crate::core::{Color, FillLayer, StrokeLayer};
 use crate::ui::canvas::CanvasWidget;
 
@@ -454,13 +456,16 @@ impl InspectorSidebar {
         let convert_path_row = trans_sec.convert_path_row;
         let transform_body = trans_sec.container;
 
-        // 4. CLONES SECTION
+        // 5. TYPOGRAPHY SECTION
+        let typography_body = build_typography_section(&canvas);
+
+        // 6. CLONES SECTION
         let (clones_body, update_clones_section) = build_clones_section(&canvas);
 
-        // 5. EXPORT SECTION
+        // 7. EXPORT SECTION
         let (export_body, update_export_pages) = build_export_tab(&canvas, &main_win_holder);
 
-        // 6. LIBRARIES SECTION
+        // 8. LIBRARIES SECTION
         let libraries_body = build_libraries_section(&canvas);
 
         // Setup Dynamic Multi-Section Tab Bar & Split System
@@ -469,12 +474,13 @@ impl InspectorSidebar {
             TabLocation::Docked(0), // 0: Appearance
             TabLocation::Docked(0), // 1: Alignment
             TabLocation::Closed,    // 2: Transform
-            TabLocation::Closed,    // 3: Clones
-            TabLocation::Closed,    // 4: Export
-            TabLocation::Closed,    // 5: Libraries
+            TabLocation::Closed,    // 3: Typography
+            TabLocation::Closed,    // 4: Clones
+            TabLocation::Closed,    // 5: Export
+            TabLocation::Closed,    // 6: Libraries
         ];
-        if saved_loc_strings.len() >= 6 {
-            for (i, s) in saved_loc_strings.iter().enumerate().take(6) {
+        if saved_loc_strings.len() >= 7 {
+            for (i, s) in saved_loc_strings.iter().enumerate().take(7) {
                 if s == "closed" {
                     initial_locs[i] = TabLocation::Closed;
                 } else if s == "floating" {
@@ -488,30 +494,31 @@ impl InspectorSidebar {
         }
 
         let saved_active = crate::core::AppSettings::inspector_active_tabs();
-        let mut initial_active = [0usize, 1usize, 2usize, 3usize, 4usize, 5usize];
-        if saved_active.len() >= 6 {
-            for (i, &t) in saved_active.iter().enumerate().take(6) {
+        let mut initial_active = [0usize, 1usize, 2usize, 3usize, 4usize, 5usize, 6usize];
+        if saved_active.len() >= 7 {
+            for (i, &t) in saved_active.iter().enumerate().take(7) {
                 initial_active[i] = t;
             }
         }
 
         let saved_order = crate::core::AppSettings::inspector_tab_order();
-        let initial_order = if saved_order.len() == 6 {
+        let initial_order = if saved_order.len() == 7 {
             saved_order
         } else {
-            vec![0usize, 1usize, 2usize, 3usize, 4usize, 5usize]
+            vec![0usize, 1usize, 2usize, 3usize, 4usize, 5usize, 6usize]
         };
 
         let tab_locations = Rc::new(RefCell::new(initial_locs));
         let tab_order = Rc::new(RefCell::new(initial_order));
         let active_section_tabs = Rc::new(RefCell::new(initial_active));
-        let floating_wins: Rc<RefCell<[Option<adw::Window>; 6]>> =
-            Rc::new(RefCell::new([None, None, None, None, None, None]));
+        let floating_wins: Rc<RefCell<[Option<adw::Window>; 7]>> =
+            Rc::new(RefCell::new([None, None, None, None, None, None, None]));
 
-        let tab_widgets: [gtk4::Widget; 6] = [
+        let tab_widgets: [gtk4::Widget; 7] = [
             fill_stroke_body.upcast(),
             align_container.upcast(),
             transform_body.upcast(),
+            typography_body.upcast(),
             clones_body,
             export_body,
             libraries_body,
@@ -633,7 +640,7 @@ impl InspectorSidebar {
             let canvas_c = canvas.clone();
 
             Rc::new(move || {
-                let tab_info: [(String, Option<&'static str>, &'static str); 6] = [
+                let tab_info: [(String, Option<&'static str>, &'static str); 7] = [
                     (
                         crate::core::gettext("Appearance"),
                         None,
@@ -648,6 +655,11 @@ impl InspectorSidebar {
                         crate::core::gettext("Transform"),
                         None,
                         "transform-symbolic",
+                    ),
+                    (
+                        crate::core::gettext("Typography"),
+                        None,
+                        "tool-text-symbolic",
                     ),
                     (
                         crate::core::gettext("Clones"),
@@ -669,7 +681,7 @@ impl InspectorSidebar {
                 let locs = *tab_locations.borrow();
 
                 // 1. Clean up floating windows that are no longer floating before building docked sections
-                for i in 0..6 {
+                for i in 0..7 {
                     if locs[i] != TabLocation::Floating {
                         let maybe_w = floating_wins.borrow_mut()[i].take();
                         if let Some(w) = maybe_w {
@@ -694,7 +706,7 @@ impl InspectorSidebar {
                 );
 
                 // 5. Floating Windows Management
-                for i in 0..6 {
+                for i in 0..7 {
                     if locs[i] == TabLocation::Floating {
                         if floating_wins.borrow()[i].is_none() {
                             let (title, icon_res, icon_name) = &tab_info[i];

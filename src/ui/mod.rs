@@ -2,6 +2,7 @@ pub mod canvas;
 pub mod color_bar;
 pub mod color_picker;
 pub mod context_menu;
+pub mod dialogs;
 pub mod dock_manager;
 pub mod icons;
 pub mod inspector;

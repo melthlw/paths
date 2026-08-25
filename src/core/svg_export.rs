@@ -723,6 +723,8 @@ fn render_element_to_svg(elem: &Element, svg: &mut String, indent_level: usize) 
         }
         Element::Text(t) => {
             let fill_str = color_to_svg(t.color);
+            let stroke_color = t.stroke_color.map(color_to_svg).unwrap_or_else(|| "none".to_string());
+            let stroke_width = t.stroke_width;
             let anchor = match t.alignment {
                 TextAlign::Left => "start",
                 TextAlign::Center => "middle",
@@ -740,19 +742,56 @@ fn render_element_to_svg(elem: &Element, svg: &mut String, indent_level: usize) 
                 .map(|n| format!("id=\"{}\" ", xml_escape(n)))
                 .unwrap_or_else(|| format!("id=\"elem_{}\" ", t.id.0));
 
-            let _ = writeln!(
-                svg,
-                "{indent}<text {id_attr}x=\"{:.2}\" y=\"{:.2}\" font-family=\"{}\" font-size=\"{:.2}\" font-weight=\"{}\" fill=\"{}\" text-anchor=\"{}\" opacity=\"{:.3}\" {filter_attr}{blend_attr}>{}</text>",
-                t.position.x,
-                t.position.y + t.font_size,
-                xml_escape(&t.font_family),
-                t.font_size,
-                t.font_weight,
-                fill_str,
-                anchor,
-                t.opacity,
-                xml_escape(&t.text)
-            );
+            let stroke_attr = if stroke_width > 0.1 && stroke_color != "none" {
+                format!("stroke=\"{}\" stroke-width=\"{:.2}\" stroke-linejoin=\"round\" ", stroke_color, stroke_width)
+            } else {
+                String::new()
+            };
+
+            let spacing_attr = if t.letter_spacing != 0.0 {
+                format!("letter-spacing=\"{:.2}\" ", t.letter_spacing)
+            } else {
+                String::new()
+            };
+
+            let dec_attr = match (t.underline, t.strikethrough) {
+                (true, true) => "text-decoration=\"underline line-through\" ",
+                (true, false) => "text-decoration=\"underline\" ",
+                (false, true) => "text-decoration=\"line-through\" ",
+                (false, false) => "",
+            };
+
+            let formatted = xml_escape(&t.formatted_text());
+
+            if let Some(pid) = t.path_id {
+                let _ = writeln!(
+                    svg,
+                    "{indent}<text {id_attr}font-family=\"{}\" font-size=\"{:.2}\" font-weight=\"{}\" fill=\"{}\" {stroke_attr}{spacing_attr}{dec_attr}text-anchor=\"{}\" opacity=\"{:.3}\" {filter_attr}{blend_attr}><textPath href=\"#elem_{}\" startOffset=\"{:.1}%\">{}</textPath></text>",
+                    xml_escape(&t.font_family),
+                    t.font_size,
+                    t.font_weight,
+                    fill_str,
+                    anchor,
+                    t.opacity,
+                    pid.0,
+                    t.path_offset,
+                    formatted
+                );
+            } else {
+                let _ = writeln!(
+                    svg,
+                    "{indent}<text {id_attr}x=\"{:.2}\" y=\"{:.2}\" font-family=\"{}\" font-size=\"{:.2}\" font-weight=\"{}\" fill=\"{}\" {stroke_attr}{spacing_attr}{dec_attr}text-anchor=\"{}\" opacity=\"{:.3}\" {filter_attr}{blend_attr}>{}</text>",
+                    t.position.x,
+                    t.position.y + t.font_size,
+                    xml_escape(&t.font_family),
+                    t.font_size,
+                    t.font_weight,
+                    fill_str,
+                    anchor,
+                    t.opacity,
+                    formatted
+                );
+            }
         }
         Element::Image(i) => {
             let norm = i.rect.normalize();

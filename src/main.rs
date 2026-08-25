@@ -12,7 +12,10 @@ fn main() -> glib::ExitCode {
     glib::log_set_writer_func(|level, fields| {
         for field in fields {
             if let Some(msg) = field.value_str() {
-                if msg.contains("Theme directory") || msg.contains("vkAcquireNextImageKHR") {
+                if msg.contains("Theme directory")
+                    || msg.contains("vkAcquireNextImageKHR")
+                    || msg.contains("GtkRevealer")
+                {
                     return glib::LogWriterOutput::Handled;
                 }
             }

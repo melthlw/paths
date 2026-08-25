@@ -551,9 +551,6 @@ impl InterfaceScale {
 
     pub fn css(self) -> String {
         let p = self.percent() as f64 / 100.0;
-        if (p - 1.0).abs() < 0.01 {
-            return String::new();
-        }
         let font_size = (13.0 * p * 10.0).round() / 10.0;
         let btn_min_h = (32.0 * p).round() as i32;
         let entry_min_h = (30.0 * p).round() as i32;
@@ -561,12 +558,11 @@ impl InterfaceScale {
         let pad_h = (8.0 * p).round() as i32;
 
         format!(
-            "window, .background {{ font-size: {:.1}px; }} \
+            "window, .background, .sidebar {{ font-size: {:.1}px; }} \
              .toolbar {{ padding: {}px {}px; }} \
              entry.numeric, entry {{ min-height: {}px; }} \
-             button {{ min-height: {}px; }} \
-             .sidebar {{ font-size: {:.1}px; }}",
-            font_size, pad_v, pad_h, entry_min_h, btn_min_h, font_size
+             button {{ min-height: {}px; }}",
+            font_size, pad_v, pad_h, entry_min_h, btn_min_h
         )
     }
 }

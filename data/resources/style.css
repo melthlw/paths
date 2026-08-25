@@ -831,7 +831,7 @@
 .chip-cream { background: #fcf9f2; }
 .chip-paper-dark { background: #1e1e1e; }
 .chip-system-gradient { background: linear-gradient(135deg, #ffffff 50%, #242424 50%); }
-.chip-system-accent { background: linear-gradient(135deg, #3584e4 0%, #62a0ea 50%, #7856ff 100%); }
+.chip-system-accent { background: linear-gradient(135deg, #ffffff 50%, #242424 50%); }
 
 
 

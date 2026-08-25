@@ -1427,4 +1427,157 @@ impl CanvasWidget {
         state.notify_status();
         self.drawing_area.queue_draw();
     }
+
+    pub fn set_selected_kerning_offset(&self, offset: f32) {
+        let mut state = self.state.borrow_mut();
+        state.document.set_selected_kerning_offset(offset);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_selected_opentype_features(&self, features: crate::core::element::OpenTypeFeatures) {
+        let mut state = self.state.borrow_mut();
+        state.document.set_selected_opentype_features(features);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_selected_text_case(&self, text_case: crate::core::element::TextCase) {
+        let mut state = self.state.borrow_mut();
+        state.document.set_selected_text_case(text_case);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn attach_selected_text_to_path(&self) -> bool {
+        let mut state = self.state.borrow_mut();
+        let attached = state.document.attach_selected_text_to_path();
+        if attached {
+            state.notify_status();
+            drop(state);
+            self.drawing_area.queue_draw();
+        }
+        attached
+    }
+
+    pub fn detach_selected_text_from_path(&self) -> bool {
+        let mut state = self.state.borrow_mut();
+        let detached = state.document.detach_selected_text_from_path();
+        if detached {
+            state.notify_status();
+            drop(state);
+            self.drawing_area.queue_draw();
+        }
+        detached
+    }
+
+    pub fn set_selected_text_path_offset(&self, offset: f32) {
+        let mut state = self.state.borrow_mut();
+        state.document.set_selected_text_path_offset(offset);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_selected_text_path_inverted(&self, inverted: bool) {
+        let mut state = self.state.borrow_mut();
+        state.document.set_selected_text_path_inverted(inverted);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_selected_text_path_orientation(&self, orientation: bool) {
+        let mut state = self.state.borrow_mut();
+        state.document.set_selected_text_path_orientation(orientation);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_selected_text_path_repeat(&self, repeat: bool) {
+        let mut state = self.state.borrow_mut();
+        state.document.set_selected_text_path_repeat(repeat);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_selected_text_path_spacing(&self, spacing: f32) {
+        let mut state = self.state.borrow_mut();
+        state.document.set_selected_text_path_spacing(spacing);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_selected_text_underline(&self, underline: bool) {
+        let mut state = self.state.borrow_mut();
+        state.document.set_selected_text_underline(underline);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_selected_text_strikethrough(&self, strikethrough: bool) {
+        let mut state = self.state.borrow_mut();
+        state.document.set_selected_text_strikethrough(strikethrough);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_selected_text_baseline(&self, baseline: crate::core::element::TextBaseline) {
+        let mut state = self.state.borrow_mut();
+        state.document.set_selected_text_baseline(baseline);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn insert_symbol_to_selected_text(&self, symbol: &str) {
+        let mut state = self.state.borrow_mut();
+        state.document.insert_symbol_to_selected_text(symbol);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_selected_text_path_valign(&self, valign: crate::core::element::PathVerticalAlign) {
+        let mut state = self.state.borrow_mut();
+        state.document.set_selected_text_path_valign(valign);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_selected_text_path_glyph_orientation(&self, orientation: crate::core::element::PathGlyphOrientation) {
+        let mut state = self.state.borrow_mut();
+        state.document.set_selected_text_path_glyph_orientation(orientation);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn copy_selected_style(&self) -> bool {
+        let mut state = self.state.borrow_mut();
+        let sel_ids = state.document.selected_ids.clone();
+        if let Some(&first_id) = sel_ids.iter().next() {
+            if let Some(el) = state.document.find_element(first_id) {
+                let snapshot = el.extract_style_snapshot();
+                state.copied_style = Some(snapshot);
+                return true;
+            }
+        }
+        false
+    }
+
+    pub fn paste_style_to_selected(&self) -> bool {
+        let mut state = self.state.borrow_mut();
+        if let Some(style) = state.copied_style.clone() {
+            if state.document.selected_ids.is_empty() {
+                return false;
+            }
+            state.document.snapshot();
+            let ids = state.document.selected_ids.clone();
+            for id in ids {
+                if let Some(el) = state.document.find_element_mut(id) {
+                    el.apply_style_snapshot(&style);
+                }
+            }
+            state.notify_status();
+            self.drawing_area.queue_draw();
+            return true;
+        }
+        false
+    }
 }

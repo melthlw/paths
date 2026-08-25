@@ -2712,3 +2712,163 @@ msgstr "Editar pontos e cores do gradiente"
 msgid "Mesh Gradient Palette"
 msgstr "Paleta do Gradiente em Malha"
 
+msgid "Typography & Font"
+msgstr "Tipografia e Fonte"
+
+msgid "Typography"
+msgstr "Tipografia"
+
+msgid "Family"
+msgstr "Família"
+
+msgid "Font Weight"
+msgstr "Peso da Fonte"
+
+msgid "Line Height (Leading)"
+msgstr "Entrelinha (Leading)"
+
+msgid "Tracking / Letter Spacing"
+msgstr "Espaçamento de Letras (Tracking)"
+
+msgid "Align Left"
+msgstr "Alinhar à Esquerda"
+
+msgid "Align Right"
+msgstr "Alinhar à Direita"
+
+msgid "Justify"
+msgstr "Justificar"
+
+msgid "OpenType Features"
+msgstr "Recursos OpenType"
+
+msgid "Ligatures (liga, clig)"
+msgstr "Ligaturas (liga, clig)"
+
+msgid "Stylistic Alternates (salt)"
+msgstr "Alternativas Estilísticas (salt)"
+
+msgid "Fractions (frac)"
+msgstr "Frações (frac)"
+
+msgid "Tabular Numerals (tnum)"
+msgstr "Números Tabulares (tnum)"
+
+msgid "Auto Kerning (kern)"
+msgstr "Kerning Automático (kern)"
+
+msgid "Text Capitalization"
+msgstr "Capitalização do Texto"
+
+msgid "Normal (As Typed)"
+msgstr "Normal (Como Digitado)"
+
+msgid "UPPERCASE"
+msgstr "MAIÚSCULAS"
+
+msgid "lowercase"
+msgstr "minúsculas"
+
+msgid "Title Case"
+msgstr "Primeira Letra Maiúscula"
+
+msgid "SMALL CAPS"
+msgstr "VERSALETES"
+
+msgid "Text on Path"
+msgstr "Texto em Caminho"
+
+msgid "Attach to Path"
+msgstr "Anexar ao Caminho"
+
+msgid "Attach Text to Path"
+msgstr "Anexar Texto ao Caminho"
+
+msgid "Detach Text from Path"
+msgstr "Destacar Texto do Caminho"
+
+msgid "Attach selected Text element to selected Path element"
+msgstr "Anexar o elemento de texto selecionado ao elemento de caminho selecionado"
+
+msgid "Offset:"
+msgstr "Deslocamento:"
+
+msgid "Invert Path Side"
+msgstr "Inverter Lado do Caminho"
+
+msgid "Follow Path Tangent"
+msgstr "Seguir Tangente do Caminho"
+
+msgid "Repeat Along Path"
+msgstr "Repetir ao Longo do Caminho"
+
+msgid "Attach Text to Path / Detach"
+msgstr "Anexar / Destacar Texto do Caminho"
+
+msgid "Glyph & Symbol Catalog"
+msgstr "Catálogo de Glifos e Símbolos"
+
+msgid "Currency & Symbols"
+msgstr "Moedas e Símbolos"
+
+msgid "Math & Logic"
+msgstr "Matemática e Lógica"
+
+msgid "Arrows & Pointers"
+msgstr "Setas e Indicadores"
+
+msgid "Punctuation & Quotes"
+msgstr "Pontuação e Aspas"
+
+msgid "Ligatures & Special"
+msgstr "Ligaturas e Especiais"
+
+msgid "Shapes & Icons"
+msgstr "Formas e Ícones"
+
+msgid "Text Style & Baseline"
+msgstr "Estilo de Texto e Linha de Base"
+
+msgid "Underline"
+msgstr "Sublinhado"
+
+msgid "Strikethrough"
+msgstr "Tachado"
+
+msgid "Subscript"
+msgstr "Subscrito"
+
+msgid "Superscript"
+msgstr "Sobrescrito"
+
+msgid "V-Align:"
+msgstr "Alinhamento Vert.:"
+
+msgid "Ascender (Top)"
+msgstr "Ascendente (Topo)"
+
+msgid "Descender (Bottom)"
+msgstr "Descendente (Base)"
+
+msgid "Orient:"
+msgstr "Orientação:"
+
+msgid "Follow Curve (Tangent)"
+msgstr "Seguir Curva (Tangente)"
+
+msgid "Keep Upright (Vertical)"
+msgstr "Manter na Vertical"
+
+msgid "Perpendicular"
+msgstr "Perpendicular"
+
+msgid "Copy Style"
+msgstr "Copiar Estilo"
+
+msgid "Paste Style"
+msgstr "Colar Estilo"
+
+
+
+
+

@@ -1,3 +1,4 @@
+pub mod brush_store;
 pub mod color;
 pub mod document;
 pub mod element;
@@ -25,8 +26,8 @@ pub use document::{Document, TiledCloneParams, TransformOptions};
 pub use element::{
     ArcMode, BlendMode, BrushMode, BrushStroke, BrushStyle, CornerRadii, CornerStyle, Element,
     ElementId, FillLayer, FillStyle, Gradient, GradientStop, GradientType, ImageElement,
-    MeshGradient, PathElement, PathNode, PatternType, RectElement, ShapeOrigin, StrokeCap,
-    StrokeJoin, StrokeLayer, StrokeStyle, TextAlign, TextElement, dist_to_segment,
+    MarkerShape, MeshGradient, PathElement, PathNode, PatternType, RectElement, ShapeOrigin,
+    StrokeCap, StrokeJoin, StrokeLayer, StrokeStyle, TextAlign, TextElement, dist_to_segment,
     get_system_font_families,
 };
 pub use events::{KeyEvent, PointerButton, PointerEvent};

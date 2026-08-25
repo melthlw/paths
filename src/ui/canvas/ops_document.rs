@@ -822,6 +822,64 @@ impl CanvasWidget {
         }
     }
 
+    pub fn paste_from_clipboard(&self) {
+        if let Some(display) = gdk::Display::default() {
+            let clipboard = display.clipboard();
+            let canvas = self.clone();
+
+            clipboard.read_text_async(None::<&gio::Cancellable>, move |res| {
+                if let Ok(Some(text)) = res {
+                    let text_str = text.trim();
+
+                    // 1. Color Hash (#FF5733, #RGB, rgb(...))
+                    if let Some(col) = crate::core::Color::from_hex(text_str) {
+                        let mut state = canvas.state.borrow_mut();
+                        if !state.document.selected_ids.is_empty() {
+                            state.document.set_selected_fill_color(Some(col));
+                            state.notify_status();
+                            canvas.drawing_area.queue_draw();
+                            return;
+                        }
+                    }
+
+                    // 2. SVG Code (<svg ...>)
+                    if text_str.contains("<svg") && text_str.contains("</svg>") {
+                        if let Ok(svg_res) = crate::core::parse_svg(text_str) {
+                            if !svg_res.elements.is_empty() {
+                                let mut state = canvas.state.borrow_mut();
+                                state.document.snapshot();
+                                state.document.selected_ids.clear();
+                                for el in svg_res.elements {
+                                    let id = el.id();
+                                    state.document.add_element(el);
+                                    state.document.selected_ids.insert(id);
+                                }
+                                state.notify_status();
+                                canvas.drawing_area.queue_draw();
+                                return;
+                            }
+                        }
+                    }
+
+                    // 3. File path or URI
+                    if text_str.starts_with("file://") || text_str.starts_with('/') {
+                        let path_str = text_str.trim_start_matches("file://");
+                        let path = std::path::Path::new(path_str);
+                        if path.exists() {
+                            let _ = canvas.import_file(path_str);
+                            return;
+                        }
+                    }
+                }
+
+                // Fallback to internal document clipboard
+                canvas.paste(None);
+            });
+        } else {
+            self.paste(None);
+        }
+    }
+
     pub fn paste_in_place(&self) {
         self.paste(Some(Point::new(0.0, 0.0)));
     }
@@ -1065,5 +1123,48 @@ impl CanvasWidget {
     pub fn set_path_editor_config(&self, config: crate::core::PathEditorConfig) {
         self.state.borrow_mut().path_editor_config = config;
         self.drawing_area.queue_draw();
+    }
+
+    pub fn create_brush_preset_from_selected(&self, name: &str) -> Result<crate::core::brush_store::CustomBrushPreset, String> {
+        let state = self.state.borrow();
+        let sel = &state.document.selected_ids;
+        if sel.is_empty() {
+            return Err(crate::core::gettext("No element selected"));
+        }
+
+        let first_id = match sel.iter().next() {
+            Some(&id) => id,
+            None => return Err(crate::core::gettext("No element selected")),
+        };
+        let elem = state.document.find_element(first_id).ok_or_else(|| crate::core::gettext("Element not found"))?;
+        let path_elem = match elem {
+            crate::core::Element::Path(p) => p.clone(),
+            crate::core::Element::Rect(r) => r.to_path_element(),
+            crate::core::Element::Brush(b) => b.to_path_element(),
+            _ => return Err(crate::core::gettext("Selected element is not a vector path")),
+        };
+
+        let svg_path_d = crate::core::svg_export::path_element_to_svg_d(&path_elem);
+        if svg_path_d.trim().is_empty() {
+            return Err(crate::core::gettext("Selected path is empty"));
+        }
+
+        let (style, smoothing) = if let Some(feat) = state.plugin_manager.feature_by_id("brush") {
+            if let Some(b) = feat.as_brush_feature() {
+                (b.style, b.smoothing)
+            } else {
+                (crate::core::BrushStyle::Round, 0.5)
+            }
+        } else {
+            (crate::core::BrushStyle::Round, 0.5)
+        };
+
+        crate::core::brush_store::create_brush_from_clipboard_or_path(
+            name,
+            &svg_path_d,
+            style,
+            state.active_stroke_width,
+            smoothing,
+        )
     }
 }

@@ -13,8 +13,8 @@ pub fn create_floating_window(
     icon_res: Option<&'static str>,
     icon_name: &'static str,
     tab_widget: &gtk4::Widget,
-    tab_locations: &Rc<RefCell<[TabLocation; 6]>>,
-    active_section_tabs: &Rc<RefCell<[usize; 6]>>,
+    tab_locations: &Rc<RefCell<[TabLocation; 7]>>,
+    active_section_tabs: &Rc<RefCell<[usize; 7]>>,
     refresh_fn: Rc<dyn Fn()>,
     main_win_holder: &Rc<RefCell<Option<adw::ApplicationWindow>>>,
 ) -> adw::Window {

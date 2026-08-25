@@ -357,7 +357,7 @@ pub fn draw_element_node(
             }
         }
         other => {
-            other.render(canvas);
+            other.render_with_doc(canvas, Some(document));
         }
     }
 

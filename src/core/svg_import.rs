@@ -109,8 +109,57 @@ fn parse_svg_tag_elements(tag: &str) -> Vec<Element> {
         "polygon" => parse_polygon_tag(tag, true).into_iter().collect(),
         "polyline" => parse_polygon_tag(tag, false).into_iter().collect(),
         "use" => parse_use_tag(tag).into_iter().collect(),
+        "text" => parse_text_tag(tag).into_iter().collect(),
         _ => Vec::new(),
     }
+}
+
+fn parse_text_tag(tag: &str) -> Option<Element> {
+    let x = get_attribute(tag, "x")
+        .and_then(|s| s.parse::<f32>().ok())
+        .unwrap_or(0.0);
+    let y = get_attribute(tag, "y")
+        .and_then(|s| s.parse::<f32>().ok())
+        .unwrap_or(0.0);
+    let font_size = get_attribute(tag, "font-size")
+        .and_then(|s| s.trim_end_matches("px").trim_end_matches("pt").parse::<f32>().ok())
+        .unwrap_or(32.0);
+    let font_family = get_attribute(tag, "font-family").unwrap_or_else(|| "Cantarell".to_string());
+    let font_weight = get_attribute(tag, "font-weight")
+        .and_then(|s| s.parse::<u32>().ok())
+        .unwrap_or(400);
+
+    let (fill_col, stroke_col, stroke_w, opacity) = extract_style(tag);
+    let color = fill_col.unwrap_or(Color::BLACK);
+
+    let content_start = tag.find('>')? + 1;
+    let content_end = tag.rfind('<').unwrap_or(tag.len());
+    let raw_text = if content_start < content_end {
+        tag[content_start..content_end].trim().to_string()
+    } else {
+        String::new()
+    };
+
+    let mut text_elem = crate::core::element::TextElement::new(Point::new(x, y - font_size), raw_text, font_size, color);
+    text_elem.font_family = font_family;
+    text_elem.font_weight = font_weight;
+    text_elem.opacity = opacity;
+    text_elem.stroke_color = stroke_col;
+    text_elem.stroke_width = stroke_w;
+
+    if let Some(dec) = get_attribute(tag, "text-decoration") {
+        if dec.contains("underline") {
+            text_elem.underline = true;
+        }
+        if dec.contains("line-through") {
+            text_elem.strikethrough = true;
+        }
+    }
+
+    if let Some(id_str) = get_attribute(tag, "id") {
+        text_elem.name = Some(id_str);
+    }
+    Some(Element::Text(text_elem))
 }
 
 fn parse_path_tags(tag: &str) -> Vec<Element> {

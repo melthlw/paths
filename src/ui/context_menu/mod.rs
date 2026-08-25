@@ -95,6 +95,8 @@ impl ObjectContextMenu {
         root_box.append(&selection_menu.sep_edit);
 
         root_box.append(&selection_menu.convert_path_btn);
+        root_box.append(&selection_menu.attach_path_btn);
+        root_box.append(&selection_menu.detach_path_btn);
         root_box.append(&selection_menu.bring_front_btn);
         root_box.append(&selection_menu.bring_forward_btn);
         root_box.append(&selection_menu.send_backward_btn);
@@ -197,6 +199,8 @@ impl ObjectContextMenu {
             self.selection_menu.sep_edit.set_visible(false);
 
             self.selection_menu.convert_path_btn.set_visible(false);
+            self.selection_menu.attach_path_btn.set_visible(false);
+            self.selection_menu.detach_path_btn.set_visible(false);
             self.selection_menu.bring_front_btn.set_visible(false);
             self.selection_menu.bring_forward_btn.set_visible(false);
             self.selection_menu.send_backward_btn.set_visible(false);
@@ -259,6 +263,8 @@ impl ObjectContextMenu {
             self.selection_menu
                 .convert_path_btn
                 .set_visible(can_convert);
+            self.selection_menu.attach_path_btn.set_visible(has_sel);
+            self.selection_menu.detach_path_btn.set_visible(has_sel);
             self.selection_menu.bring_front_btn.set_visible(true);
             self.selection_menu.bring_forward_btn.set_visible(true);
             self.selection_menu.send_backward_btn.set_visible(true);

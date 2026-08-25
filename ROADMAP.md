@@ -171,9 +171,9 @@ Development roadmap structured by version milestones.
   - [x] Grouped **Vector Pen & Pencil Brush** (`pen-brush`) with Vector Pen as primary default.
   - [x] Grouped Shapes (`shapes`), Fill Tools (`fill-tools`), Zoom Tools (`zoom-tools`), and Booleans (`boolean`).
   - [x] Dynamic tool icon switching and flyout popover on long-press / right-click.
-- [ ] **Clipboard to Brush & Asset Presets**:
-  - [ ] Create custom brushes directly from clipboard path data (*Clipboard to Brush*).
-  - [ ] Built-in and user-imported brush presets folder (`~/.config/gnome-paths/brushes/`).
+- [x] **Clipboard to Brush & Asset Presets**:
+  - [x] Create custom brushes directly from clipboard path data (*Clipboard to Brush*).
+  - [x] Built-in and user-imported brush presets folder (`~/.config/paths/brushes/`).
 
 ### Zoom 1:1 Standardization
 - [x] **Zoom 1:1 Action & Official Badge**:
@@ -181,14 +181,14 @@ Development roadmap structured by version milestones.
   - [x] Standardized Adwaita `zoom-original-symbolic` badge icon with centered numeral `1`.
 
 ### Typography & Text
-- [ ] **Text on Path**:
-  - [ ] Draw or attach text dynamically along open or closed vector paths.
-  - [ ] Controls for path offset, glyph orientation, side inversion, and repeat along path.
-- [ ] **Advanced Typography Panel**:
-  - [ ] Full OpenType feature support (standard and context ligatures, stylistic alternates, fractions, and tabular numerals).
-  - [ ] Fine-grained controls for kerning, tracking/letter-spacing, leading, and text alignment.
-- [ ] **Text Stroke & Outline**:
-  - [ ] Independent stroke rendering for text elements with custom color, width, dashes, and join styles.
+- [x] **Text on Path**:
+  - [x] Draw or attach text dynamically along open or closed vector paths.
+  - [x] Controls for path offset, glyph orientation, side inversion, and repeat along path.
+- [x] **Advanced Typography Panel**:
+  - [x] Full OpenType feature support (standard and context ligatures, stylistic alternates, fractions, and tabular numerals).
+  - [x] Fine-grained controls for kerning, tracking/letter-spacing, leading, and text alignment.
+- [x] **Text Stroke & Outline**:
+  - [x] Independent stroke rendering for text elements with custom color, width, dashes, and join styles.
 
 ---
 

@@ -371,28 +371,67 @@ impl CanvasWidget {
 
         area.add_controller(key_controller);
 
-        // 5. Drag and Drop Target (Assets, Swatches, Patterns, Icons, Shapes from Libraries)
-        let drop_target = gtk4::DropTarget::new(glib::types::Type::STRING, gdk::DragAction::COPY);
+        // 5. Drag and Drop Target (Files, Images, Assets, Swatches, Patterns, Icons, Shapes)
+        let drop_target = gtk4::DropTarget::new(glib::types::Type::INVALID, gdk::DragAction::COPY);
+        drop_target.set_types(&[
+            gdk::FileList::static_type(),
+            gio::File::static_type(),
+            gdk::Texture::static_type(),
+            glib::types::Type::STRING,
+        ]);
+
         let state_drop = self.state.clone();
         let area_drop = self.drawing_area.clone();
         drop_target.connect_drop(move |_target, value, x, y| {
-            if let Ok(payload) = value.get::<String>() {
-                let screen_pt = Point::new(x as f32, y as f32);
-                let mut success = false;
+            let screen_pt = Point::new(x as f32, y as f32);
+            let mut success = false;
+
+            if let Ok(file_list) = value.get::<gdk::FileList>() {
                 if let Ok(mut state) = state_drop.try_borrow_mut() {
                     let world_pt = state.viewport.screen_to_world(screen_pt, state.widget_size);
-                    success = handle_asset_drop(&mut state, &payload, world_pt);
+                    for file in file_list.files() {
+                        if let Some(path) = file.path() {
+                            if handle_file_import(&mut state, &path, world_pt) {
+                                success = true;
+                            }
+                        }
+                    }
                     if success {
                         state.notify_status();
                     }
                 }
-                if success {
-                    area_drop.queue_draw();
+            } else if let Ok(file) = value.get::<gio::File>() {
+                if let Some(path) = file.path() {
+                    if let Ok(mut state) = state_drop.try_borrow_mut() {
+                        let world_pt = state.viewport.screen_to_world(screen_pt, state.widget_size);
+                        if handle_file_import(&mut state, &path, world_pt) {
+                            success = true;
+                            state.notify_status();
+                        }
+                    }
                 }
-                success
-            } else {
-                false
+            } else if let Ok(payload) = value.get::<String>() {
+                if let Ok(mut state) = state_drop.try_borrow_mut() {
+                    let world_pt = state.viewport.screen_to_world(screen_pt, state.widget_size);
+                    if payload.starts_with("file://") || payload.starts_with('/') {
+                        let path_str = payload.trim_start_matches("file://").trim();
+                        let path = std::path::PathBuf::from(path_str);
+                        if handle_file_import(&mut state, &path, world_pt) {
+                            success = true;
+                        }
+                    } else if handle_asset_drop(&mut state, &payload, world_pt) {
+                        success = true;
+                    }
+                    if success {
+                        state.notify_status();
+                    }
+                }
             }
+
+            if success {
+                area_drop.queue_draw();
+            }
+            success
         });
         area.add_controller(drop_target);
     }
@@ -710,6 +749,66 @@ pub fn handle_asset_drop(state: &mut super::state::CanvasState, payload: &str, w
     false
 }
 
+pub fn handle_file_import(state: &mut super::state::CanvasState, path: &std::path::Path, world_pt: Point) -> bool {
+    use crate::core::element::Element;
+    use crate::core::geometry::Rect;
+    use skia_safe as skia;
+
+    if !path.exists() {
+        return false;
+    }
+    let ext = path.extension().and_then(|s| s.to_str()).unwrap_or("").to_lowercase();
+    let file_name = path.file_name().and_then(|s| s.to_str()).map(|s| s.to_string());
+
+    if ext == "svg" {
+        if let Ok(content) = std::fs::read_to_string(path) {
+            if let Ok(svg_res) = crate::core::parse_svg(&content) {
+                if !svg_res.elements.is_empty() {
+                    state.document.snapshot();
+                    state.document.selected_ids.clear();
+
+                    let mut b_opt: Option<Rect> = None;
+                    for el in &svg_res.elements {
+                        let eb = el.bounds();
+                        b_opt = Some(match b_opt {
+                            Some(acc) => acc.union(eb),
+                            None => eb,
+                        });
+                    }
+                    let total_b = b_opt.unwrap_or(Rect::new(0.0, 0.0, 100.0, 100.0));
+                    let dx = world_pt.x - (total_b.x + total_b.width * 0.5);
+                    let dy = world_pt.y - (total_b.y + total_b.height * 0.5);
+
+                    for mut el in svg_res.elements {
+                        el.translate(dx, dy);
+                        let id = el.id();
+                        state.document.add_element(el);
+                        state.document.selected_ids.insert(id);
+                    }
+                    return true;
+                }
+            }
+        }
+    } else if matches!(ext.as_str(), "png" | "jpg" | "jpeg" | "webp" | "gif" | "bmp") {
+        if let Ok(bytes) = std::fs::read(path) {
+            if let Some(sk_img) = skia::Image::from_encoded(skia::Data::new_copy(&bytes)) {
+                let w = sk_img.width() as f32;
+                let h = sk_img.height() as f32;
+                let rect = Rect::new(world_pt.x - w * 0.5, world_pt.y - h * 0.5, w, h);
+                let img_elem = crate::core::element::ImageElement::new(rect, bytes, file_name);
+                let el = Element::Image(img_elem);
+                let id = el.id();
+                state.document.snapshot();
+                state.document.add_element(el);
+                state.document.selected_ids.clear();
+                state.document.selected_ids.insert(id);
+                return true;
+            }
+        }
+    }
+    false
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -751,5 +850,28 @@ mod tests {
         assert!(success_stroke_none);
         let el_no_stroke = state.document.find_element(rect_id).unwrap();
         assert_eq!(el_no_stroke.stroke_color(), None);
+    }
+
+    #[test]
+    fn test_element_style_copy_and_paste() {
+        let r1 = RectElement::new(Rect::new(0.0, 0.0, 50.0, 50.0), Some(Color::RED), Some(Color::BLUE));
+        let mut el1 = Element::Rect(r1);
+        el1.set_stroke_width(4.5);
+        el1.set_opacity(0.8);
+
+        let snapshot = el1.extract_style_snapshot();
+        assert_eq!(snapshot.fill_color, Some(Color::RED));
+        assert_eq!(snapshot.stroke_color, Some(Color::BLUE));
+        assert_eq!(snapshot.stroke_width, 4.5);
+        assert_eq!(snapshot.opacity, 0.8);
+
+        let mut r2 = RectElement::new(Rect::new(100.0, 100.0, 50.0, 50.0), Some(Color::BLACK), None);
+        let mut el2 = Element::Rect(r2);
+        el2.apply_style_snapshot(&snapshot);
+
+        assert_eq!(el2.fill_color(), Some(Color::RED));
+        assert_eq!(el2.stroke_color(), Some(Color::BLUE));
+        assert_eq!(el2.stroke_width(), 4.5);
+        assert_eq!(el2.opacity(), 0.8);
     }
 }

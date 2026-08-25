@@ -66,6 +66,7 @@ pub struct CanvasState {
     pub current_file_path: Option<std::path::PathBuf>,
     pub is_dirty: bool,
     pub has_centered_initial_page: bool,
+    pub copied_style: Option<crate::core::element::ElementStyleSnapshot>,
     pub on_file_state_changed: Option<Box<dyn Fn(Option<&std::path::Path>, bool)>>,
     pub on_file_dialog_request: Option<Box<dyn Fn(crate::core::ShortcutAction)>>,
 }
@@ -110,6 +111,7 @@ impl CanvasState {
             current_file_path: None,
             is_dirty: false,
             has_centered_initial_page: false,
+            copied_style: None,
             on_file_state_changed: None,
             on_file_dialog_request: None,
         }
