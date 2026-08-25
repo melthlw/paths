@@ -282,7 +282,10 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
                     mods.push(modifier);
                 }
             }
-            state.notify_status();
+            drop(state);
+            if let Ok(st) = canvas_widget.state.try_borrow() {
+                st.notify_status();
+            }
         } else {
             // Create a default Rectangle element on active page and select it
             let rect = Rect::new(200.0, 200.0, 160.0, 160.0);
@@ -295,7 +298,10 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
             state.document.elements.push(new_elem);
             state.document.selected_ids.clear();
             state.document.selected_ids.insert(new_id);
-            state.notify_status();
+            drop(state);
+            if let Ok(st) = canvas_widget.state.try_borrow() {
+                st.notify_status();
+            }
         }
     };
 
@@ -471,8 +477,10 @@ fn build_modifier_card(
                 }
             }
         }
-        state.notify_status();
         drop(state);
+        if let Ok(st) = canvas_up.state.try_borrow() {
+            st.notify_status();
+        }
         canvas_up.queue_draw();
         if let Some(ref update_fn) = on_up_update {
             update_fn();
@@ -491,8 +499,10 @@ fn build_modifier_card(
                 }
             }
         }
-        state.notify_status();
         drop(state);
+        if let Ok(st) = canvas_dn.state.try_borrow() {
+            st.notify_status();
+        }
         canvas_dn.queue_draw();
         if let Some(ref update_fn) = on_dn_update {
             update_fn();
@@ -567,8 +577,10 @@ fn build_modifier_card(
                         }
                     }
                 }
-                state.notify_status();
                 drop(state);
+                if let Ok(st) = canvas_m.state.try_borrow() {
+                    st.notify_status();
+                }
                 canvas_m.queue_draw();
                 if let Some(ref cb_fn) = on_ch_mode {
                     cb_fn();
@@ -632,8 +644,10 @@ fn build_modifier_card(
                                 }
                             }
                         }
-                        state.notify_status();
                         drop(state);
+                        if let Ok(st) = canvas_cb.state.try_borrow() {
+                            st.notify_status();
+                        }
                         canvas_cb.queue_draw();
                     };
 
@@ -712,8 +726,10 @@ fn build_modifier_card(
                                 }
                             }
                         }
-                        state.notify_status();
                         drop(state);
+                        if let Ok(st) = canvas_cb.state.try_borrow() {
+                            st.notify_status();
+                        }
                         canvas_cb.queue_draw();
                     };
 
@@ -780,8 +796,10 @@ fn build_modifier_card(
                                 }
                             }
                         }
-                        state.notify_status();
                         drop(state);
+                        if let Ok(st) = canvas_cb.state.try_borrow() {
+                            st.notify_status();
+                        }
                         canvas_cb.queue_draw();
                     };
 
@@ -850,8 +868,10 @@ fn build_modifier_card(
                         }
                     }
                 }
-                state.notify_status();
                 drop(state);
+                if let Ok(st) = canvas_cb.state.try_borrow() {
+                    st.notify_status();
+                }
                 canvas_cb.queue_draw();
             });
         }
@@ -902,8 +922,10 @@ fn build_modifier_card(
                         }
                     }
                 }
-                state.notify_status();
                 drop(state);
+                if let Ok(st) = canvas_cb.state.try_borrow() {
+                    st.notify_status();
+                }
                 canvas_cb.queue_draw();
             });
 
@@ -924,8 +946,10 @@ fn build_modifier_card(
                         }
                     }
                 }
-                state.notify_status();
                 drop(state);
+                if let Ok(st) = canvas_cb2.state.try_borrow() {
+                    st.notify_status();
+                }
                 canvas_cb2.queue_draw();
             });
         }
@@ -945,8 +969,10 @@ fn build_modifier_card(
                 }
             }
         }
-        state.notify_status();
         drop(state);
+        if let Ok(st) = canvas_sw.state.try_borrow() {
+            st.notify_status();
+        }
         canvas_sw.queue_draw();
     });
 
@@ -962,8 +988,10 @@ fn build_modifier_card(
                 }
             }
         }
-        state.notify_status();
         drop(state);
+        if let Ok(st) = canvas_del.state.try_borrow() {
+            st.notify_status();
+        }
         canvas_del.queue_draw();
         if let Some(ref update_fn) = on_del_update {
             update_fn();

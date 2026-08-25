@@ -71,7 +71,7 @@ impl Element {
     }
 
     pub fn bounds(&self) -> Rect {
-        match self {
+        let base_b = match self {
             Element::Rect(r) => r.bounds(),
             Element::Brush(b) => b.bounds(),
             Element::Path(p) => p.bounds(),
@@ -79,7 +79,127 @@ impl Element {
             Element::Group(g) => g.bounds(),
             Element::Image(i) => i.bounds(),
             Element::Clone(c) => c.bounds(),
+        };
+
+        self.evaluate_modifier_bounds(base_b)
+    }
+
+    pub fn evaluate_modifier_bounds(&self, base_b: Rect) -> Rect {
+        let mods = self.modifiers();
+        if mods.is_empty() {
+            return base_b;
         }
+
+        let mut boxes = vec![base_b];
+
+        for m in mods {
+            if !m.enabled() {
+                continue;
+            }
+            match m {
+                crate::core::modifier::Modifier::Array(arr) => {
+                    let mut next_boxes = Vec::new();
+                    for cur_b in &boxes {
+                        let center = cur_b.center();
+                        match &arr.mode {
+                            crate::core::modifier::ArrayMode::Linear {
+                                count,
+                                offset_x,
+                                offset_y,
+                                scale_step,
+                                rotate_step_deg: _,
+                            } => {
+                                for i in 0..*count {
+                                    let scale = scale_step.powi(i as i32);
+                                    let dx = offset_x * i as f32;
+                                    let dy = offset_y * i as f32;
+                                    let w = cur_b.width * scale;
+                                    let h = cur_b.height * scale;
+                                    let copy_r = Rect::new(
+                                        cur_b.x + dx,
+                                        cur_b.y + dy,
+                                        w,
+                                        h,
+                                    );
+                                    next_boxes.push(copy_r);
+                                }
+                            }
+                            crate::core::modifier::ArrayMode::Radial {
+                                count,
+                                radius,
+                                start_angle_deg,
+                                total_angle_deg,
+                                rotate_copies: _,
+                            } => {
+                                let step = if *count > 1 {
+                                    total_angle_deg / (*count as f32)
+                                } else {
+                                    0.0
+                                };
+                                for i in 0..*count {
+                                    let angle_deg = start_angle_deg + step * i as f32;
+                                    let rad = angle_deg.to_radians();
+                                    let cx = center.x + radius * rad.cos();
+                                    let cy = center.y + radius * rad.sin();
+                                    let copy_r = Rect::new(
+                                        cx - cur_b.width / 2.0,
+                                        cy - cur_b.height / 2.0,
+                                        cur_b.width,
+                                        cur_b.height,
+                                    );
+                                    next_boxes.push(copy_r);
+                                }
+                            }
+                            crate::core::modifier::ArrayMode::Grid {
+                                rows,
+                                cols,
+                                spacing_x,
+                                spacing_y,
+                            } => {
+                                for r in 0..*rows {
+                                    for c in 0..*cols {
+                                        let copy_r = Rect::new(
+                                            cur_b.x + spacing_x * c as f32,
+                                            cur_b.y + spacing_y * r as f32,
+                                            cur_b.width,
+                                            cur_b.height,
+                                        );
+                                        next_boxes.push(copy_r);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    boxes = next_boxes;
+                }
+                crate::core::modifier::Modifier::EnvelopeWarp(env) => {
+                    let mut next_boxes = Vec::new();
+                    for cur_b in &boxes {
+                        let norm = cur_b.normalize();
+                        let p1 = Point::new(norm.x + env.top_left_offset.x, norm.y + env.top_left_offset.y);
+                        let p2 = Point::new(norm.x + norm.width + env.top_right_offset.x, norm.y + env.top_right_offset.y);
+                        let p3 = Point::new(norm.x + norm.width + env.bottom_right_offset.x, norm.y + norm.height + env.bottom_right_offset.y);
+                        let p4 = Point::new(norm.x + env.bottom_left_offset.x, norm.y + norm.height + env.bottom_left_offset.y);
+
+                        let min_x = norm.x.min(p1.x).min(p2.x).min(p3.x).min(p4.x);
+                        let min_y = norm.y.min(p1.y).min(p2.y).min(p3.y).min(p4.y);
+                        let max_x = (norm.x + norm.width).max(p1.x).max(p2.x).max(p3.x).max(p4.x);
+                        let max_y = (norm.y + norm.height).max(p1.y).max(p2.y).max(p3.y).max(p4.y);
+
+                        next_boxes.push(Rect::new(min_x, min_y, max_x - min_x, max_y - min_y));
+                    }
+                    boxes = next_boxes;
+                }
+                _ => {}
+            }
+        }
+
+        let mut total_bounds = boxes[0];
+        for b in &boxes[1..] {
+            total_bounds = total_bounds.union(*b);
+        }
+
+        total_bounds
     }
 
     pub fn hit_test(&self, p: Point) -> bool {
@@ -525,99 +645,127 @@ impl Element {
     }
 
     pub fn render_with_doc(&self, canvas: &skia::Canvas, doc: Option<&crate::core::document::Document>) {
-        let active_array_mod = self.modifiers().iter().find_map(|m| {
-            if let crate::core::modifier::Modifier::Array(arr) = m {
-                if arr.enabled {
-                    return Some(arr);
-                }
-            }
-            None
-        });
-
-        if let Some(arr) = active_array_mod {
-            let bounds = self.bounds();
-            let center = bounds.center();
-
-            match &arr.mode {
-                crate::core::modifier::ArrayMode::Linear {
-                    count,
-                    offset_x,
-                    offset_y,
-                    scale_step,
-                    rotate_step_deg,
-                } => {
-                    for i in 0..*count {
-                        canvas.save();
-                        let dx = offset_x * i as f32;
-                        let dy = offset_y * i as f32;
-                        let scale = scale_step.powi(i as i32);
-                        let rot_deg = rotate_step_deg * i as f32;
-
-                        canvas.translate((center.x + dx, center.y + dy));
-                        if rot_deg.abs() > 0.001 {
-                            canvas.rotate(rot_deg, None);
-                        }
-                        if (scale - 1.0).abs() > 0.001 {
-                            canvas.scale((scale, scale));
-                        }
-                        canvas.translate((-center.x, -center.y));
-
-                        self.render_base_with_doc(canvas, doc);
-                        canvas.restore();
+        let enabled_array_mods: Vec<&crate::core::modifier::ArrayModifier> = self
+            .modifiers()
+            .iter()
+            .filter_map(|m| {
+                if let crate::core::modifier::Modifier::Array(arr) = m {
+                    if arr.enabled {
+                        return Some(arr);
                     }
                 }
-                crate::core::modifier::ArrayMode::Radial {
-                    count,
-                    radius,
-                    start_angle_deg,
-                    total_angle_deg,
-                    rotate_copies,
-                } => {
-                    let total_c = (*count).max(1) as f32;
-                    let angle_step = if *count > 1 {
-                        total_angle_deg / total_c
-                    } else {
-                        0.0
-                    };
+                None
+            })
+            .collect();
 
-                    for i in 0..*count {
-                        canvas.save();
-                        let angle_deg = start_angle_deg + angle_step * i as f32;
-                        let rad = angle_deg.to_radians();
-                        let dx = radius * rad.cos();
-                        let dy = radius * rad.sin();
-
-                        canvas.translate((center.x + dx, center.y + dy));
-                        if *rotate_copies {
-                            canvas.rotate(angle_deg, None);
-                        }
-                        canvas.translate((-center.x, -center.y));
-
-                        self.render_base_with_doc(canvas, doc);
-                        canvas.restore();
-                    }
-                }
-                crate::core::modifier::ArrayMode::Grid {
-                    rows,
-                    cols,
-                    spacing_x,
-                    spacing_y,
-                } => {
-                    for r in 0..*rows {
-                        for c in 0..*cols {
-                            canvas.save();
-                            let dx = spacing_x * c as f32;
-                            let dy = spacing_y * r as f32;
-
-                            canvas.translate((dx, dy));
-                            self.render_base_with_doc(canvas, doc);
-                            canvas.restore();
-                        }
-                    }
-                }
-            }
-        } else {
+        if enabled_array_mods.is_empty() {
             self.render_base_with_doc(canvas, doc);
+        } else {
+            self.render_array_step(0, &enabled_array_mods, canvas, doc);
+        }
+    }
+
+    fn render_array_step(
+        &self,
+        step_idx: usize,
+        arr_mods: &[&crate::core::modifier::ArrayModifier],
+        canvas: &skia::Canvas,
+        doc: Option<&crate::core::document::Document>,
+    ) {
+        if step_idx >= arr_mods.len() {
+            self.render_base_with_doc(canvas, doc);
+            return;
+        }
+
+        let arr = arr_mods[step_idx];
+        let bounds = match self {
+            Element::Rect(r) => r.bounds(),
+            Element::Brush(b) => b.bounds(),
+            Element::Path(p) => p.bounds(),
+            Element::Text(t) => t.bounds(),
+            Element::Group(g) => g.bounds(),
+            Element::Image(i) => i.bounds(),
+            Element::Clone(c) => c.bounds(),
+        };
+        let center = bounds.center();
+
+        match &arr.mode {
+            crate::core::modifier::ArrayMode::Linear {
+                count,
+                offset_x,
+                offset_y,
+                scale_step,
+                rotate_step_deg,
+            } => {
+                for i in 0..*count {
+                    canvas.save();
+                    let dx = offset_x * i as f32;
+                    let dy = offset_y * i as f32;
+                    let scale = scale_step.powi(i as i32);
+                    let rot_deg = rotate_step_deg * i as f32;
+
+                    canvas.translate((center.x + dx, center.y + dy));
+                    if rot_deg.abs() > 0.001 {
+                        canvas.rotate(rot_deg, None);
+                    }
+                    if (scale - 1.0).abs() > 0.001 {
+                        canvas.scale((scale, scale));
+                    }
+                    canvas.translate((-center.x, -center.y));
+
+                    self.render_array_step(step_idx + 1, arr_mods, canvas, doc);
+                    canvas.restore();
+                }
+            }
+            crate::core::modifier::ArrayMode::Radial {
+                count,
+                radius,
+                start_angle_deg,
+                total_angle_deg,
+                rotate_copies,
+            } => {
+                let total_c = (*count).max(1) as f32;
+                let angle_step = if *count > 1 {
+                    total_angle_deg / total_c
+                } else {
+                    0.0
+                };
+
+                for i in 0..*count {
+                    canvas.save();
+                    let angle_deg = start_angle_deg + angle_step * i as f32;
+                    let rad = angle_deg.to_radians();
+                    let dx = radius * rad.cos();
+                    let dy = radius * rad.sin();
+
+                    canvas.translate((center.x + dx, center.y + dy));
+                    if *rotate_copies {
+                        canvas.rotate(angle_deg, None);
+                    }
+                    canvas.translate((-center.x, -center.y));
+
+                    self.render_array_step(step_idx + 1, arr_mods, canvas, doc);
+                    canvas.restore();
+                }
+            }
+            crate::core::modifier::ArrayMode::Grid {
+                rows,
+                cols,
+                spacing_x,
+                spacing_y,
+            } => {
+                for r in 0..*rows {
+                    for c in 0..*cols {
+                        canvas.save();
+                        let dx = spacing_x * c as f32;
+                        let dy = spacing_y * r as f32;
+
+                        canvas.translate((dx, dy));
+                        self.render_array_step(step_idx + 1, arr_mods, canvas, doc);
+                        canvas.restore();
+                    }
+                }
+            }
         }
     }
 

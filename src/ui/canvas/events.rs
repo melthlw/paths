@@ -134,18 +134,20 @@ impl CanvasWidget {
                 });
 
                 let (redraw, cursor) = if let Ok(mut state) = state_drag.try_borrow_mut() {
-                    let res = state.pointer_down(
+                    state.pointer_down(
                         Point::new(x as f32, y as f32),
                         current_btn,
                         shift,
                         ctrl,
                         alt,
-                    );
-                    state.notify_status();
-                    res
+                    )
                 } else {
                     (false, None)
                 };
+
+                if let Ok(st) = state_drag.try_borrow() {
+                    st.notify_status();
+                }
 
                 if let Some(cursor_name) = cursor {
                     Self::apply_cursor(&area_drag, &cc_drag, cursor_name);
@@ -226,18 +228,20 @@ impl CanvasWidget {
                     });
 
                     let (redraw, cursor) = if let Ok(mut state) = state_end.try_borrow_mut() {
-                        let res = state.pointer_up(
+                        state.pointer_up(
                             Point::new(cur_x as f32, cur_y as f32),
                             current_btn,
                             shift,
                             ctrl,
                             alt,
-                        );
-                        state.notify_status();
-                        res
+                        )
                     } else {
                         (false, None)
                     };
+
+                    if let Ok(st) = state_end.try_borrow() {
+                        st.notify_status();
+                    }
 
                     if let Some(cursor_name) = cursor {
                         Self::apply_cursor(&area_end, &cc_end, cursor_name);
