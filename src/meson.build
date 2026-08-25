@@ -13,7 +13,6 @@ custom_target(
   build_by_default: true,
   build_always_stale: true,
   output: 'gnome-paths',
-  console: true,
   install: true,
   install_dir: get_option('bindir'),
   command: [
@@ -25,4 +24,10 @@ custom_target(
     rust_target,
     '@OUTPUT@'
   ]
+)
+
+test(
+  'cargo-test',
+  cargo,
+  args: ['test', '--manifest-path', meson.project_source_root() / 'Cargo.toml']
 )
