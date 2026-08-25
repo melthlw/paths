@@ -1208,6 +1208,35 @@ pub fn draw_modifier_canvas_overlays(
                     canvas.draw_circle(pt.to_skia(), ch.radius.min(bounds.width / 2.0), &chamf_paint);
                 }
             }
+            crate::core::modifier::Modifier::Extrude3D(ext) => {
+                if ext.enabled {
+                    let center = bounds.center();
+                    let rad = ext.angle_deg.to_radians();
+                    let end_pt = Point::new(
+                        center.x + ext.depth * rad.cos(),
+                        center.y + ext.depth * rad.sin(),
+                    );
+
+                    let mut line_paint = Paint::default();
+                    line_paint.set_color4f(Color4f::new(0.0, 0.85, 0.95, 0.9), None);
+                    line_paint.set_style(PaintStyle::Stroke);
+                    line_paint.set_stroke_width(2.0 / z);
+                    line_paint.set_anti_alias(true);
+
+                    let mut handle_fill = Paint::default();
+                    handle_fill.set_color4f(Color4f::new(0.0, 0.95, 1.0, 1.0), None);
+                    handle_fill.set_style(PaintStyle::Fill);
+                    handle_fill.set_anti_alias(true);
+
+                    canvas.draw_line(center.to_skia(), end_pt.to_skia(), &line_paint);
+                    canvas.draw_circle(end_pt.to_skia(), 6.0 / z, &handle_fill);
+                    canvas.draw_circle(end_pt.to_skia(), 6.0 / z, &line_paint);
+                }
+            }
+            crate::core::modifier::Modifier::Twist(_) => {}
+            crate::core::modifier::Modifier::OffsetPath(_) => {}
+            crate::core::modifier::Modifier::ZigZag(_) => {}
+            crate::core::modifier::Modifier::WaveDeform(_) => {}
         }
     }
 }

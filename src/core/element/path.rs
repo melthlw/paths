@@ -1074,6 +1074,21 @@ impl PathElement {
                             ch.style,
                         );
                     }
+                    crate::core::modifier::Modifier::Extrude3D(ext) => {
+                        path = crate::core::modifier::apply_extrude_3d_to_path(&path, ext.depth, ext.angle_deg);
+                    }
+                    crate::core::modifier::Modifier::Twist(tw) => {
+                        path = crate::core::modifier::apply_twist_to_path(&path, tw.angle_deg, tw.radius);
+                    }
+                    crate::core::modifier::Modifier::OffsetPath(off) => {
+                        path = crate::core::modifier::apply_offset_path_to_path(&path, off.offset, off.miter_limit);
+                    }
+                    crate::core::modifier::Modifier::ZigZag(zz) => {
+                        path = crate::core::modifier::apply_zigzag_to_path(&path, zz.ridges, zz.amplitude);
+                    }
+                    crate::core::modifier::Modifier::WaveDeform(wave) => {
+                        path = crate::core::modifier::apply_wave_deform_to_path(&path, wave.amplitude, wave.wavelength);
+                    }
                     crate::core::modifier::Modifier::EnvelopeWarp(env) => {
                         path = crate::core::modifier::apply_envelope_warp_to_path(
                             &path,

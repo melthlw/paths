@@ -1,0 +1,17 @@
+{
+  "id": "custom_3d_extrude_&_lighting",
+  "name": "Custom 3D Extrude & Lighting",
+  "description": "Saved user modifier preset",
+  "modifier": {
+    "Extrude3D": {
+      "enabled": true,
+      "depth": 8.767123,
+      "angle_deg": -147.12125,
+      "shading": true,
+      "shading_intensity": 0.6,
+      "custom_side_color": null,
+      "light_angle_deg": 135.0,
+      "mode": "Isometric"
+    }
+  }
+}

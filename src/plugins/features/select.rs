@@ -66,6 +66,7 @@ fn hit_corner_radius_handle(
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ModifierHandleTarget {
+    Extrude3DHandle,
     EnvelopeWarpTopLeft,
     EnvelopeWarpTopRight,
     EnvelopeWarpBottomRight,
@@ -87,6 +88,14 @@ fn hit_modifier_handle(
             continue;
         }
         match m {
+            Modifier::Extrude3D(ext) => {
+                let center = Point::new(bounds.x + bounds.width / 2.0, bounds.y + bounds.height / 2.0);
+                let rad = ext.angle_deg.to_radians();
+                let target = Point::new(center.x + ext.depth * rad.cos(), center.y + ext.depth * rad.sin());
+                if p.distance_to(target) <= hit_r {
+                    return Some((mod_idx, ModifierHandleTarget::Extrude3DHandle, Point::new(ext.depth, ext.angle_deg)));
+                }
+            }
             Modifier::EnvelopeWarp(env) => {
                 let p1 = Point::new(bounds.x + env.top_left_offset.x, bounds.y + env.top_left_offset.y);
                 let p2 = Point::new(bounds.x + bounds.width + env.top_right_offset.x, bounds.y + env.top_right_offset.y);
@@ -379,6 +388,12 @@ impl FeaturePlugin for SelectFeature {
                     if let Some(mods) = el.modifiers_mut() {
                         if let Some(m) = mods.get_mut(*mod_idx) {
                             match (m, target) {
+                                (Modifier::Extrude3D(ext), ModifierHandleTarget::Extrude3DHandle) => {
+                                    let dx = event.world_pos.x - initial_offset.x;
+                                    let dy = event.world_pos.y - initial_offset.y;
+                                    ext.depth = (dx * dx + dy * dy).sqrt().clamp(0.0, 500.0);
+                                    ext.angle_deg = dy.atan2(dx).to_degrees();
+                                }
                                 (Modifier::EnvelopeWarp(env), ModifierHandleTarget::EnvelopeWarpTopLeft) => {
                                     env.top_left_offset = Point::new(initial_offset.x + delta.x, initial_offset.y + delta.y);
                                 }

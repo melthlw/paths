@@ -479,6 +479,60 @@ impl TextElement {
         self.bounds().expand(6.0).contains(p)
     }
 
+    pub fn to_skia_path(&self) -> skia::Path {
+        let font = self.create_skia_font();
+        let lines = self.layout_lines();
+        let line_spacing = self.font_size * self.line_height.max(0.5);
+
+        let mut builder = skia::PathBuilder::new();
+        let mut has_glyphs = false;
+
+        let mut current_y = self.position.y;
+        for line in &lines {
+            let line_w = self.measure_text_line(&font, line);
+            let start_x = match self.alignment {
+                TextAlign::Left => self.position.x,
+                TextAlign::Center => {
+                    let box_w = self.box_width.unwrap_or(line_w);
+                    self.position.x + (box_w - line_w) * 0.5
+                }
+                TextAlign::Right => {
+                    let box_w = self.box_width.unwrap_or(line_w);
+                    self.position.x + box_w - line_w
+                }
+                TextAlign::Justify => self.position.x,
+            };
+
+            let count = font.count_text(line);
+            let mut glyphs = vec![skia::GlyphId::default(); count];
+            font.text_to_glyphs(line, &mut glyphs);
+            let mut widths = vec![0.0f32; count];
+            font.get_widths(&glyphs, &mut widths);
+
+            let mut pos = Vec::with_capacity(count);
+            let mut curr_x = start_x;
+            for w in &widths {
+                pos.push(Point::new(curr_x, current_y));
+                curr_x += w + self.letter_spacing;
+            }
+
+            for (g, p) in glyphs.iter().zip(pos.iter()) {
+                if let Some(glyph_path) = font.get_path(*g) {
+                    let transformed = glyph_path.with_offset((p.x, p.y));
+                    builder.add_path(&transformed, skia::path::AddPathMode::Append);
+                    has_glyphs = true;
+                }
+            }
+            current_y += line_spacing;
+        }
+
+        if has_glyphs {
+            builder.detach()
+        } else {
+            skia::Path::rect(self.bounds().to_skia(), None)
+        }
+    }
+
     pub fn translate(&mut self, dx: f32, dy: f32) {
         self.position.x += dx;
         self.position.y += dy;

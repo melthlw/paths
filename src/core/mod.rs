@@ -10,6 +10,7 @@ pub mod io;
 pub mod layer;
 pub mod libraries_store;
 pub mod modifier;
+pub mod modifier_store;
 pub mod page;
 pub mod path_editor_config;
 pub mod pattern_store;

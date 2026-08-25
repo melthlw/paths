@@ -574,12 +574,7 @@ impl Element {
                 }
                 builder.detach()
             }
-            Element::Text(t) => {
-                let r = t.bounds();
-                let mut builder = skia::PathBuilder::new();
-                builder.add_rect(r.to_skia(), None, None);
-                builder.detach()
-            }
+            Element::Text(t) => t.to_skia_path(),
             Element::Group(g) => {
                 if let Some(clip) = &g.clip_element {
                     clip.to_skia_path()
@@ -628,6 +623,131 @@ impl Element {
         }
     }
 
+    pub fn apply_modifier(&mut self, mod_idx: usize) {
+        let mods_len = self.modifiers().len();
+        if mod_idx >= mods_len {
+            return;
+        }
+
+        let m = self.modifiers_mut().unwrap().remove(mod_idx);
+        if !m.enabled() {
+            return;
+        }
+
+        match m {
+            crate::core::modifier::Modifier::Array(arr) => {
+                let mut children = Vec::new();
+                let base_bounds = self.bounds();
+                let center = base_bounds.center();
+
+                let mut generate_copy = |dx: f32, dy: f32, rot_deg: f32, scale: f32| {
+                    let mut child = self.clone();
+                    child.translate(dx, dy);
+                    if rot_deg.abs() > 0.001 || (scale - 1.0).abs() > 0.001 {
+                        child.scale(center, scale, scale);
+                    }
+                    children.push(child);
+                };
+
+                match &arr.mode {
+                    crate::core::modifier::ArrayMode::Linear {
+                        count,
+                        offset_x,
+                        offset_y,
+                        scale_step,
+                        rotate_step_deg,
+                    } => {
+                        for i in 0..*count {
+                            let dx = offset_x * i as f32;
+                            let dy = offset_y * i as f32;
+                            let scale = scale_step.powi(i as i32);
+                            let rot_deg = rotate_step_deg * i as f32;
+                            generate_copy(dx, dy, rot_deg, scale);
+                        }
+                    }
+                    crate::core::modifier::ArrayMode::Radial {
+                        count,
+                        radius,
+                        start_angle_deg,
+                        total_angle_deg,
+                        rotate_copies: _,
+                    } => {
+                        let step = if *count > 1 {
+                            total_angle_deg / (*count as f32)
+                        } else {
+                            0.0
+                        };
+                        for i in 0..*count {
+                            let angle_deg = start_angle_deg + step * i as f32;
+                            let rad = angle_deg.to_radians();
+                            let dx = radius * rad.cos();
+                            let dy = radius * rad.sin();
+                            generate_copy(dx, dy, angle_deg, 1.0);
+                        }
+                    }
+                    crate::core::modifier::ArrayMode::Grid {
+                        rows,
+                        cols,
+                        spacing_x,
+                        spacing_y,
+                    } => {
+                        for r in 0..*rows {
+                            for c in 0..*cols {
+                                let dx = spacing_x * c as f32;
+                                let dy = spacing_y * r as f32;
+                                generate_copy(dx, dy, 0.0, 1.0);
+                            }
+                        }
+                    }
+                }
+
+                if children.len() == 1 {
+                    *self = children.remove(0);
+                } else if !children.is_empty() {
+                    let mut grp = crate::core::element::group::GroupElement::new(children);
+                    grp.modifiers = self.modifiers().to_vec();
+                    *self = Element::Group(grp);
+                }
+            }
+            _ => {
+                let evaluated_skia = match self {
+                    Element::Path(p) => p.to_skia_path_evaluated(),
+                    Element::Rect(r) => r.to_path_element().to_skia_path_evaluated(),
+                    _ => self.to_skia_path(),
+                };
+
+                let fills = match self {
+                    Element::Path(p) => p.fills.clone(),
+                    Element::Rect(r) => r.fills.clone(),
+                    _ => Vec::new(),
+                };
+                let strokes = match self {
+                    Element::Path(p) => p.strokes.clone(),
+                    Element::Rect(r) => r.strokes.clone(),
+                    _ => Vec::new(),
+                };
+                let fill_c = self.fill_color();
+                let stroke_c = self.stroke_color();
+                let stroke_w = self.stroke_width();
+
+                let mut new_paths = crate::core::PathElement::from_skia_path(
+                    &evaluated_skia,
+                    fill_c,
+                    stroke_c,
+                    stroke_w,
+                );
+
+                if !new_paths.is_empty() {
+                    let mut new_path = new_paths.remove(0);
+                    new_path.fills = fills;
+                    new_path.strokes = strokes;
+                    new_path.modifiers = self.modifiers().to_vec();
+                    *self = Element::Path(new_path);
+                }
+            }
+        }
+    }
+
     pub fn render(&self, canvas: &skia::Canvas) {
         self.render_with_doc(canvas, None);
     }
@@ -645,39 +765,32 @@ impl Element {
     }
 
     pub fn render_with_doc(&self, canvas: &skia::Canvas, doc: Option<&crate::core::document::Document>) {
-        let enabled_array_mods: Vec<&crate::core::modifier::ArrayModifier> = self
+        let enabled_mods: Vec<&crate::core::modifier::Modifier> = self
             .modifiers()
             .iter()
-            .filter_map(|m| {
-                if let crate::core::modifier::Modifier::Array(arr) = m {
-                    if arr.enabled {
-                        return Some(arr);
-                    }
-                }
-                None
-            })
+            .filter(|m| m.enabled())
             .collect();
 
-        if enabled_array_mods.is_empty() {
+        if enabled_mods.is_empty() {
             self.render_base_with_doc(canvas, doc);
         } else {
-            self.render_array_step(0, &enabled_array_mods, canvas, doc);
+            self.render_modifier_stack_step(0, &enabled_mods, canvas, doc);
         }
     }
 
-    fn render_array_step(
+    fn render_modifier_stack_step(
         &self,
         step_idx: usize,
-        arr_mods: &[&crate::core::modifier::ArrayModifier],
+        mods: &[&crate::core::modifier::Modifier],
         canvas: &skia::Canvas,
         doc: Option<&crate::core::document::Document>,
     ) {
-        if step_idx >= arr_mods.len() {
+        if step_idx >= mods.len() {
             self.render_base_with_doc(canvas, doc);
             return;
         }
 
-        let arr = arr_mods[step_idx];
+        let m = mods[step_idx];
         let bounds = match self {
             Element::Rect(r) => r.bounds(),
             Element::Brush(b) => b.bounds(),
@@ -689,82 +802,106 @@ impl Element {
         };
         let center = bounds.center();
 
-        match &arr.mode {
-            crate::core::modifier::ArrayMode::Linear {
-                count,
-                offset_x,
-                offset_y,
-                scale_step,
-                rotate_step_deg,
-            } => {
-                for i in 0..*count {
-                    canvas.save();
-                    let dx = offset_x * i as f32;
-                    let dy = offset_y * i as f32;
-                    let scale = scale_step.powi(i as i32);
-                    let rot_deg = rotate_step_deg * i as f32;
+        match m {
+            crate::core::modifier::Modifier::Array(arr) => {
+                match &arr.mode {
+                    crate::core::modifier::ArrayMode::Linear {
+                        count,
+                        offset_x,
+                        offset_y,
+                        scale_step,
+                        rotate_step_deg,
+                    } => {
+                        for i in 0..*count {
+                            canvas.save();
+                            let dx = offset_x * i as f32;
+                            let dy = offset_y * i as f32;
+                            let scale = scale_step.powi(i as i32);
+                            let rot_deg = rotate_step_deg * i as f32;
 
-                    canvas.translate((center.x + dx, center.y + dy));
-                    if rot_deg.abs() > 0.001 {
-                        canvas.rotate(rot_deg, None);
-                    }
-                    if (scale - 1.0).abs() > 0.001 {
-                        canvas.scale((scale, scale));
-                    }
-                    canvas.translate((-center.x, -center.y));
+                            canvas.translate((center.x + dx, center.y + dy));
+                            if rot_deg.abs() > 0.001 {
+                                canvas.rotate(rot_deg, None);
+                            }
+                            if (scale - 1.0).abs() > 0.001 {
+                                canvas.scale((scale, scale));
+                            }
+                            canvas.translate((-center.x, -center.y));
 
-                    self.render_array_step(step_idx + 1, arr_mods, canvas, doc);
-                    canvas.restore();
+                            self.render_modifier_stack_step(step_idx + 1, mods, canvas, doc);
+                            canvas.restore();
+                        }
+                    }
+                    crate::core::modifier::ArrayMode::Radial {
+                        count,
+                        radius,
+                        start_angle_deg,
+                        total_angle_deg,
+                        rotate_copies,
+                    } => {
+                        let total_c = (*count).max(1) as f32;
+                        let angle_step = if *count > 1 {
+                            total_angle_deg / total_c
+                        } else {
+                            0.0
+                        };
+
+                        for i in 0..*count {
+                            canvas.save();
+                            let angle_deg = start_angle_deg + angle_step * i as f32;
+                            let rad = angle_deg.to_radians();
+                            let dx = radius * rad.cos();
+                            let dy = radius * rad.sin();
+
+                            canvas.translate((center.x + dx, center.y + dy));
+                            if *rotate_copies {
+                                canvas.rotate(angle_deg, None);
+                            }
+                            canvas.translate((-center.x, -center.y));
+
+                            self.render_modifier_stack_step(step_idx + 1, mods, canvas, doc);
+                            canvas.restore();
+                        }
+                    }
+                    crate::core::modifier::ArrayMode::Grid {
+                        rows,
+                        cols,
+                        spacing_x,
+                        spacing_y,
+                    } => {
+                        for r in 0..*rows {
+                            for c in 0..*cols {
+                                canvas.save();
+                                let dx = spacing_x * c as f32;
+                                let dy = spacing_y * r as f32;
+
+                                canvas.translate((dx, dy));
+                                self.render_modifier_stack_step(step_idx + 1, mods, canvas, doc);
+                                canvas.restore();
+                            }
+                        }
+                    }
                 }
             }
-            crate::core::modifier::ArrayMode::Radial {
-                count,
-                radius,
-                start_angle_deg,
-                total_angle_deg,
-                rotate_copies,
-            } => {
-                let total_c = (*count).max(1) as f32;
-                let angle_step = if *count > 1 {
-                    total_angle_deg / total_c
-                } else {
-                    0.0
-                };
+            crate::core::modifier::Modifier::Extrude3D(ext) => {
+                let fill_c = self.fill_color();
+                let stroke_c = self.stroke_color();
+                let stroke_w = self.stroke_width();
+                let path = self.to_skia_path();
 
-                for i in 0..*count {
-                    canvas.save();
-                    let angle_deg = start_angle_deg + angle_step * i as f32;
-                    let rad = angle_deg.to_radians();
-                    let dx = radius * rad.cos();
-                    let dy = radius * rad.sin();
-
-                    canvas.translate((center.x + dx, center.y + dy));
-                    if *rotate_copies {
-                        canvas.rotate(angle_deg, None);
-                    }
-                    canvas.translate((-center.x, -center.y));
-
-                    self.render_array_step(step_idx + 1, arr_mods, canvas, doc);
-                    canvas.restore();
-                }
+                crate::core::modifier::apply_extrude_3d_to_canvas(
+                    &path,
+                    fill_c,
+                    stroke_c,
+                    stroke_w,
+                    ext,
+                    canvas,
+                );
+                self.render_modifier_stack_step(step_idx + 1, mods, canvas, doc);
             }
-            crate::core::modifier::ArrayMode::Grid {
-                rows,
-                cols,
-                spacing_x,
-                spacing_y,
-            } => {
-                for r in 0..*rows {
-                    for c in 0..*cols {
-                        canvas.save();
-                        let dx = spacing_x * c as f32;
-                        let dy = spacing_y * r as f32;
-
-                        canvas.translate((dx, dy));
-                        self.render_array_step(step_idx + 1, arr_mods, canvas, doc);
-                        canvas.restore();
-                    }
-                }
+            _ => {
+                // Non-generative modifiers (Twist, Wave, Warp, Chamfer) - continue to next step
+                self.render_modifier_stack_step(step_idx + 1, mods, canvas, doc);
             }
         }
     }
@@ -1600,5 +1737,36 @@ mod tests {
         assert_eq!(mesh.nodes.len(), 9);
         assert_eq!(mesh.nodes[new_idx].color, green);
         assert_eq!(mesh.nodes[new_idx].point, Point::new(50.0, 50.0));
+    }
+
+    #[test]
+    fn test_element_apply_modifier_baking() {
+        use crate::core::modifier::{ArrayMode, ArrayModifier, Modifier};
+        let rect = Rect::new(0.0, 0.0, 100.0, 100.0);
+        let mut rect_elem = RectElement::new(rect, Some(Color::RED), None);
+        rect_elem.modifiers.push(Modifier::Array(ArrayModifier {
+            enabled: true,
+            mode: ArrayMode::Linear {
+                count: 3,
+                offset_x: 40.0,
+                offset_y: 0.0,
+                scale_step: 1.0,
+                rotate_step_deg: 0.0,
+            },
+        }));
+
+        let mut elem = Element::Rect(rect_elem);
+        assert_eq!(elem.modifiers().len(), 1);
+
+        elem.apply_modifier(0);
+
+        // After baking, modifier is removed and element is baked into a Group!
+        assert_eq!(elem.modifiers().len(), 0);
+        match elem {
+            Element::Group(g) => {
+                assert_eq!(g.children.len(), 3);
+            }
+            _ => panic!("Expected GroupElement after applying ArrayModifier"),
+        }
     }
 }
