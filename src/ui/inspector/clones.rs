@@ -749,7 +749,7 @@ fn build_tiled_clones_card(
 
     // 4A. Shift & Spacing Expander
     let shift_expander = adw::ExpanderRow::builder()
-        .title(crate::core::gettext("Shift & Spacing"))
+        .title(crate::core::gettext("Shift &amp; Spacing"))
         .subtitle(crate::core::gettext("Offset percentage per row / column"))
         .build();
     shift_expander.add_prefix(&gtk4::Image::from_icon_name("transform-symbolic"));
@@ -808,7 +808,7 @@ fn build_tiled_clones_card(
 
     // 4B. Scale & Progression Expander
     let scale_expander = adw::ExpanderRow::builder()
-        .title(crate::core::gettext("Scale & Progression"))
+        .title(crate::core::gettext("Scale &amp; Progression"))
         .subtitle(crate::core::gettext("Scale growth or reduction per step"))
         .build();
     scale_expander.add_prefix(&gtk4::Image::from_icon_name("transform-scale-stroke-symbolic"));
@@ -865,7 +865,7 @@ fn build_tiled_clones_card(
 
     // 4C. Rotation & Angle Expander
     let rot_expander = adw::ExpanderRow::builder()
-        .title(crate::core::gettext("Rotation & Angle"))
+        .title(crate::core::gettext("Rotation &amp; Angle"))
         .subtitle(crate::core::gettext("Angle increments per row / column"))
         .build();
     rot_expander.add_prefix(&gtk4::Image::from_icon_name("rotate-right-symbolic"));
@@ -922,7 +922,7 @@ fn build_tiled_clones_card(
 
     // 4D. Opacity & Radial Expander
     let op_expander = adw::ExpanderRow::builder()
-        .title(crate::core::gettext("Opacity & Radial"))
+        .title(crate::core::gettext("Opacity &amp; Radial"))
         .subtitle(crate::core::gettext("Fade gradients and ring distribution"))
         .build();
     op_expander.add_prefix(&gtk4::Image::from_icon_name("blend-mode-symbolic"));

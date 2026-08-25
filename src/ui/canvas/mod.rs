@@ -33,7 +33,11 @@ impl CanvasWidget {
 
         let state = Rc::new(RefCell::new(CanvasState::new()));
         let unit = Rc::new(std::cell::Cell::new(crate::core::Unit::Px));
-        let enabled_plugins = Rc::new(RefCell::new(std::collections::HashSet::new()));
+        let enabled_plugins = Rc::new(RefCell::new(
+            crate::core::AppSettings::enabled_plugins()
+                .into_iter()
+                .collect::<std::collections::HashSet<String>>(),
+        ));
         let cursor_cache = Rc::new(CursorCache::new());
 
         let widget = Self {

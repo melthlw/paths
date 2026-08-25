@@ -14,8 +14,8 @@ impl Default for PatternStudioPlugin {
             ui: ToolUiItem::new(
                 "pattern",
                 "Pattern",
-                "transform-move-pattern-symbolic",
-                Some("/io/github/lewis/GnomePaths/icons/transform-move-pattern-symbolic.svg"),
+                "tool-pattern-symbolic",
+                Some("/io/github/lewis/GnomePaths/icons/tool-pattern-symbolic.svg"),
                 "Pattern Tool (Shift+P)",
                 38,
             )

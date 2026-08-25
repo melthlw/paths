@@ -149,49 +149,128 @@ fn load_initial_config() -> AppConfig {
 
     // 2. If no settings.json yet, populate from GSettings if available
     if let Some(s) = settings() {
-        let w = s.int("window-width");
-        if w >= 400 {
-            config.window_width = w;
+        if let Some(schema) = s.settings_schema() {
+            if schema.has_key("window-width") {
+                let w = s.int("window-width");
+                if w >= 400 {
+                    config.window_width = w;
+                }
+            }
+            if schema.has_key("window-height") {
+                let h = s.int("window-height");
+                if h >= 300 {
+                    config.window_height = h;
+                }
+            }
+            if schema.has_key("is-maximized") {
+                config.is_maximized = s.boolean("is-maximized");
+            }
+            if schema.has_key("is-fullscreen") {
+                config.is_fullscreen = s.boolean("is-fullscreen");
+            }
+            if schema.has_key("show-layers-sidebar") {
+                config.show_layers_sidebar = s.boolean("show-layers-sidebar");
+            }
+            if schema.has_key("show-inspector-sidebar") {
+                config.show_inspector_sidebar = s.boolean("show-inspector-sidebar");
+            }
+            if schema.has_key("active-zoom") {
+                config.active_zoom = s.double("active-zoom").clamp(0.05, 40.0);
+            }
+            if schema.has_key("show-grid") {
+                config.show_grid = s.boolean("show-grid");
+            }
+            if schema.has_key("show-rulers") {
+                config.show_rulers = s.boolean("show-rulers");
+            }
+            if schema.has_key("show-guides") {
+                config.show_guides = s.boolean("show-guides");
+            }
+            if schema.has_key("snap-enabled") {
+                config.snap_enabled = s.boolean("snap-enabled");
+            }
+            if schema.has_key("snap-to-grid") {
+                config.snap_to_grid = s.boolean("snap-to-grid");
+            }
+            if schema.has_key("snap-to-objects") {
+                config.snap_to_objects = s.boolean("snap-to-objects");
+            }
+            if schema.has_key("snap-to-artboard") {
+                config.snap_to_artboard = s.boolean("snap-to-artboard");
+            }
+            if schema.has_key("snap-to-guides") {
+                config.snap_to_guides = s.boolean("snap-to-guides");
+            }
+            if schema.has_key("grid-style") {
+                config.grid_style = s.string("grid-style").to_string();
+            }
+            if schema.has_key("grid-cell-size") {
+                config.grid_cell_size = s.double("grid-cell-size").max(1.0);
+            }
+            if schema.has_key("grid-subdivisions") {
+                config.grid_subdivisions = s.int("grid-subdivisions").max(1);
+            }
+            if schema.has_key("workspace-dots") {
+                config.workspace_dots = s.boolean("workspace-dots");
+            }
+            if schema.has_key("page-shadow") {
+                config.page_shadow = s.boolean("page-shadow");
+            }
+            if schema.has_key("page-border") {
+                config.page_border = s.boolean("page-border");
+            }
+            if schema.has_key("canvas-bg-color") {
+                config.canvas_bg_color = s.string("canvas-bg-color").to_string();
+            }
+            if schema.has_key("page-bg-color") {
+                config.page_bg_color = s.string("page-bg-color").to_string();
+            }
+            if schema.has_key("hardware-acceleration") {
+                config.hardware_acceleration = s.boolean("hardware-acceleration");
+            }
+            if schema.has_key("high-precision-aa") {
+                config.high_precision_aa = s.boolean("high-precision-aa");
+            }
+            if schema.has_key("color-scheme") {
+                config.color_scheme = s.string("color-scheme").to_string();
+            }
+            if schema.has_key("visual-theme") {
+                config.visual_theme = s.string("visual-theme").to_string();
+            }
+            if schema.has_key("custom-accent-color") {
+                config.custom_accent_color = s.string("custom-accent-color").to_string();
+            }
+            if schema.has_key("interface-icon-color") {
+                config.interface_icon_color = s.string("interface-icon-color").to_string();
+            }
+            if schema.has_key("toolbar-icon-size") {
+                config.toolbar_icon_size = s.string("toolbar-icon-size").to_string();
+            }
+            if schema.has_key("interface-scale") {
+                config.interface_scale = s.string("interface-scale").to_string();
+            }
+            if schema.has_key("toolbar-position") {
+                config.toolbar_position = s.string("toolbar-position").to_string();
+            }
+            if schema.has_key("language") {
+                config.language = s.string("language").to_string();
+            }
+            if schema.has_key("unit") {
+                config.unit = s.string("unit").to_string();
+            }
+            if schema.has_key("node-size") {
+                config.node_size = s.double("node-size").max(4.0);
+            }
+            if schema.has_key("handle-size") {
+                config.handle_size = s.double("handle-size").max(3.0);
+            }
+            if schema.has_key("handle-display-mode") {
+                config.handle_display_mode = s.string("handle-display-mode").to_string();
+            }
+            if schema.has_key("shortcut-preset") {
+                config.shortcut_preset = s.string("shortcut-preset").to_string();
+            }
         }
-        let h = s.int("window-height");
-        if h >= 300 {
-            config.window_height = h;
-        }
-        config.is_maximized = s.boolean("is-maximized");
-        config.is_fullscreen = s.boolean("is-fullscreen");
-        config.show_layers_sidebar = s.boolean("show-layers-sidebar");
-        config.show_inspector_sidebar = s.boolean("show-inspector-sidebar");
-        config.active_zoom = s.double("active-zoom").clamp(0.05, 40.0);
-        config.show_grid = s.boolean("show-grid");
-        config.show_rulers = s.boolean("show-rulers");
-        config.show_guides = s.boolean("show-guides");
-        config.snap_enabled = s.boolean("snap-enabled");
-        config.snap_to_grid = s.boolean("snap-to-grid");
-        config.snap_to_objects = s.boolean("snap-to-objects");
-        config.snap_to_artboard = s.boolean("snap-to-artboard");
-        config.snap_to_guides = s.boolean("snap-to-guides");
-        config.grid_style = s.string("grid-style").to_string();
-        config.grid_cell_size = s.double("grid-cell-size").max(1.0);
-        config.grid_subdivisions = s.int("grid-subdivisions").max(1);
-        config.workspace_dots = s.boolean("workspace-dots");
-        config.page_shadow = s.boolean("page-shadow");
-        config.page_border = s.boolean("page-border");
-        config.canvas_bg_color = s.string("canvas-bg-color").to_string();
-        config.page_bg_color = s.string("page-bg-color").to_string();
-        config.hardware_acceleration = s.boolean("hardware-acceleration");
-        config.high_precision_aa = s.boolean("high-precision-aa");
-        config.color_scheme = s.string("color-scheme").to_string();
-        config.visual_theme = s.string("visual-theme").to_string();
-        config.custom_accent_color = s.string("custom-accent-color").to_string();
-        config.toolbar_icon_size = s.string("toolbar-icon-size").to_string();
-        config.interface_scale = s.string("interface-scale").to_string();
-        config.toolbar_position = s.string("toolbar-position").to_string();
-        config.language = s.string("language").to_string();
-        config.unit = s.string("unit").to_string();
-        config.node_size = s.double("node-size").max(4.0);
-        config.handle_size = s.double("handle-size").max(3.0);
-        config.handle_display_mode = s.string("handle-display-mode").to_string();
-        config.shortcut_preset = s.string("shortcut-preset").to_string();
     }
 
     save_config_internal(&config);

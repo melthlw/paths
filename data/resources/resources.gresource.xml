@@ -539,6 +539,9 @@
     <file>icons/tool-path-editor-symbolic.svg</file>
     <file alias="icons/hicolor/scalable/actions/tool-path-editor-symbolic.svg">icons/tool-path-editor-symbolic.svg</file>
     <file alias="icons/hicolor/symbolic/actions/tool-path-editor-symbolic.svg">icons/tool-path-editor-symbolic.svg</file>
+    <file>icons/tool-pattern-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-pattern-symbolic.svg">icons/tool-pattern-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-pattern-symbolic.svg">icons/tool-pattern-symbolic.svg</file>
     <file>icons/tool-brush-symbolic.svg</file>
     <file alias="icons/hicolor/scalable/actions/tool-brush-symbolic.svg">icons/tool-brush-symbolic.svg</file>
     <file alias="icons/hicolor/symbolic/actions/tool-brush-symbolic.svg">icons/tool-brush-symbolic.svg</file>

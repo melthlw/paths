@@ -148,6 +148,17 @@ pub enum PaletteBarPosition {
     Top,
 }
 
+impl From<PaletteBarPosition> for crate::plugins::manifest::BarPosition {
+    fn from(pos: PaletteBarPosition) -> Self {
+        match pos {
+            PaletteBarPosition::Left => crate::plugins::manifest::BarPosition::Left,
+            PaletteBarPosition::Right => crate::plugins::manifest::BarPosition::Right,
+            PaletteBarPosition::Bottom => crate::plugins::manifest::BarPosition::Bottom,
+            PaletteBarPosition::Top => crate::plugins::manifest::BarPosition::Top,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct ColorPaletteBar {
     container: gtk4::Box,
@@ -159,6 +170,7 @@ pub struct ColorPaletteBar {
     target_mode: Rc<Cell<PaletteTargetMode>>,
     current_preset: Rc<Cell<PalettePreset>>,
     position: Rc<Cell<PaletteBarPosition>>,
+    toolbar_position: Rc<Cell<crate::plugins::manifest::BarPosition>>,
     on_reposition: Rc<RefCell<Option<Box<dyn Fn(PaletteBarPosition)>>>>,
     canvas: CanvasWidget,
 }
@@ -174,6 +186,14 @@ impl ColorPaletteBar {
         let target_mode = Rc::new(Cell::new(PaletteTargetMode::Fill));
         let current_preset = Rc::new(Cell::new(initial_preset));
         let position = Rc::new(Cell::new(PaletteBarPosition::Left));
+        let initial_tb_pos_str = crate::core::AppSettings::toolbar_position();
+        let initial_tb_pos = match initial_tb_pos_str.as_str() {
+            "top" => crate::plugins::manifest::BarPosition::Top,
+            "left" => crate::plugins::manifest::BarPosition::Left,
+            "right" => crate::plugins::manifest::BarPosition::Right,
+            _ => crate::plugins::manifest::BarPosition::Bottom,
+        };
+        let toolbar_position = Rc::new(Cell::new(initial_tb_pos));
         let on_reposition: Rc<RefCell<Option<Box<dyn Fn(PaletteBarPosition)>>>> =
             Rc::new(RefCell::new(None));
 
@@ -183,7 +203,7 @@ impl ColorPaletteBar {
             .css_classes(["toolbar", "card", "color-palette-capsule"])
             .halign(gtk4::Align::Start)
             .valign(gtk4::Align::Center)
-            .margin_start(56)
+            .margin_start(24)
             .build();
 
         let swatches_box = gtk4::Box::builder()
@@ -213,6 +233,7 @@ impl ColorPaletteBar {
             target_mode,
             current_preset,
             position,
+            toolbar_position,
             on_reposition,
             canvas: canvas.clone(),
         };
@@ -528,6 +549,7 @@ impl ColorPaletteBar {
         container.append(&scrolled_win);
         container.append(&more_btn);
 
+        bar.update_layout();
         bar
     }
 
@@ -535,10 +557,47 @@ impl ColorPaletteBar {
         &self.container
     }
 
+    pub fn update_layout(&self) {
+        match self.position.get() {
+            PaletteBarPosition::Left | PaletteBarPosition::Right => {
+                self.container.set_orientation(gtk4::Orientation::Vertical);
+                self.swatches_box
+                    .set_orientation(gtk4::Orientation::Vertical);
+                self.scrolled_win
+                    .set_hscrollbar_policy(gtk4::PolicyType::Never);
+                self.scrolled_win
+                    .set_vscrollbar_policy(gtk4::PolicyType::Automatic);
+                self.scrolled_win.set_max_content_height(440);
+                self.scrolled_win.set_max_content_width(-1);
+            }
+            PaletteBarPosition::Bottom | PaletteBarPosition::Top => {
+                self.container
+                    .set_orientation(gtk4::Orientation::Horizontal);
+                self.swatches_box
+                    .set_orientation(gtk4::Orientation::Horizontal);
+                self.scrolled_win
+                    .set_hscrollbar_policy(gtk4::PolicyType::Automatic);
+                self.scrolled_win
+                    .set_vscrollbar_policy(gtk4::PolicyType::Never);
+                self.scrolled_win.set_max_content_width(520);
+                self.scrolled_win.set_max_content_height(-1);
+            }
+        }
+    }
+
+    pub fn update_margin_for_toolbar(&self, toolbar_pos: crate::plugins::manifest::BarPosition) {
+        self.toolbar_position.set(toolbar_pos);
+        self.update_layout();
+    }
+
+    pub fn set_on_reposition<F: Fn(PaletteBarPosition) + 'static>(&self, cb: F) {
+        *self.on_reposition.borrow_mut() = Some(Box::new(cb));
+    }
+
     pub fn set_position(&self, pos: PaletteBarPosition) {
         self.position.set(pos);
         match pos {
-            PaletteBarPosition::Left => {
+            PaletteBarPosition::Left | PaletteBarPosition::Right => {
                 self.container.set_orientation(gtk4::Orientation::Vertical);
                 self.swatches_box
                     .set_orientation(gtk4::Orientation::Vertical);
@@ -548,31 +607,8 @@ impl ColorPaletteBar {
                     .set_vscrollbar_policy(gtk4::PolicyType::Automatic);
                 self.scrolled_win.set_max_content_height(440);
                 self.scrolled_win.set_max_content_width(-1);
-                self.container.set_halign(gtk4::Align::Start);
-                self.container.set_valign(gtk4::Align::Center);
-                self.container.set_margin_start(56);
-                self.container.set_margin_end(0);
-                self.container.set_margin_top(0);
-                self.container.set_margin_bottom(0);
             }
-            PaletteBarPosition::Right => {
-                self.container.set_orientation(gtk4::Orientation::Vertical);
-                self.swatches_box
-                    .set_orientation(gtk4::Orientation::Vertical);
-                self.scrolled_win
-                    .set_hscrollbar_policy(gtk4::PolicyType::Never);
-                self.scrolled_win
-                    .set_vscrollbar_policy(gtk4::PolicyType::Automatic);
-                self.scrolled_win.set_max_content_height(440);
-                self.scrolled_win.set_max_content_width(-1);
-                self.container.set_halign(gtk4::Align::End);
-                self.container.set_valign(gtk4::Align::Center);
-                self.container.set_margin_end(16);
-                self.container.set_margin_start(0);
-                self.container.set_margin_top(0);
-                self.container.set_margin_bottom(0);
-            }
-            PaletteBarPosition::Bottom => {
+            PaletteBarPosition::Bottom | PaletteBarPosition::Top => {
                 self.container
                     .set_orientation(gtk4::Orientation::Horizontal);
                 self.swatches_box
@@ -583,30 +619,6 @@ impl ColorPaletteBar {
                     .set_vscrollbar_policy(gtk4::PolicyType::Never);
                 self.scrolled_win.set_max_content_width(520);
                 self.scrolled_win.set_max_content_height(-1);
-                self.container.set_halign(gtk4::Align::Center);
-                self.container.set_valign(gtk4::Align::End);
-                self.container.set_margin_bottom(24);
-                self.container.set_margin_top(0);
-                self.container.set_margin_start(0);
-                self.container.set_margin_end(0);
-            }
-            PaletteBarPosition::Top => {
-                self.container
-                    .set_orientation(gtk4::Orientation::Horizontal);
-                self.swatches_box
-                    .set_orientation(gtk4::Orientation::Horizontal);
-                self.scrolled_win
-                    .set_hscrollbar_policy(gtk4::PolicyType::Automatic);
-                self.scrolled_win
-                    .set_vscrollbar_policy(gtk4::PolicyType::Never);
-                self.scrolled_win.set_max_content_width(520);
-                self.scrolled_win.set_max_content_height(-1);
-                self.container.set_halign(gtk4::Align::Center);
-                self.container.set_valign(gtk4::Align::Start);
-                self.container.set_margin_top(48);
-                self.container.set_margin_bottom(0);
-                self.container.set_margin_start(0);
-                self.container.set_margin_end(0);
             }
         }
         if let Some(ref cb) = *self.on_reposition.borrow() {

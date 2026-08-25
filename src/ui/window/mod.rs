@@ -312,11 +312,27 @@ impl DesignWindow {
             .build();
         bottom_dock.append(color_bar_ref.widget());
 
+        let dock_manager = crate::ui::dock_manager::DockLayoutManager::new();
+
+        let initial_tb_pos_str = crate::core::AppSettings::toolbar_position();
+        let initial_tb_pos = match initial_tb_pos_str.as_str() {
+            "top" => crate::plugins::manifest::BarPosition::Top,
+            "left" => crate::plugins::manifest::BarPosition::Left,
+            "right" => crate::plugins::manifest::BarPosition::Right,
+            _ => crate::plugins::manifest::BarPosition::Bottom,
+        };
+
+        dock_manager.register("main_toolbar", &bottom_dock, initial_tb_pos, 0, 56, 24);
+        dock_manager.register("tool_options", tool_options.widget(), crate::plugins::manifest::BarPosition::Top, 1, 48, 32);
+        dock_manager.register("color_palette", palette_bar_ref.widget(), crate::plugins::manifest::BarPosition::Left, 2, 48, 24);
+
         let _toolbar = FloatingToolbar::new(
             canvas.clone(),
             bottom_dock.clone(),
             (*color_bar_ref).clone(),
+            (*palette_bar_ref).clone(),
             tool_options.clone(),
+            dock_manager.clone(),
         );
 
         let inspector = InspectorSidebar::new(canvas.clone(), main_win_holder.clone());
@@ -384,7 +400,7 @@ impl DesignWindow {
         zoom_box.append(&zoom_in_btn);
         zoom_box.append(&zoom_reset_btn);
 
-        // Center Overlay: Canvas at bottom + Tool Options + Bottom Dock + Lateral Palette Bar + Zoom HUD
+        // Center Overlay: Canvas at bottom + Tool Options + Bottom Dock + Zoom HUD + Colors Palette Bar (topmost)
         let overlay = gtk4::Overlay::builder()
             .hexpand(true)
             .vexpand(true)
@@ -392,8 +408,8 @@ impl DesignWindow {
             .build();
         overlay.add_overlay(tool_options.widget());
         overlay.add_overlay(&bottom_dock);
-        overlay.add_overlay(palette_bar_ref.widget());
         overlay.add_overlay(&zoom_box);
+        overlay.add_overlay(palette_bar_ref.widget());
 
         // Center Content: ToolbarView with top HeaderBar and Overlay content
         let center_toolbar = adw::ToolbarView::new();
@@ -447,6 +463,11 @@ impl DesignWindow {
             crate::core::AppSettings::set_show_inspector_sidebar(active);
         });
 
+        let dm_pal = dock_manager.clone();
+        palette_bar_ref.set_on_reposition(move |pos| {
+            dm_pal.update_position("color_palette", pos.into());
+        });
+
         // Wire status & selection updates
         let zoom_lbl_clone = zoom_label.clone();
         let tool_options_ref = Rc::new(tool_options);
@@ -455,6 +476,7 @@ impl DesignWindow {
         let layers_clone = layers_ref.clone();
         let color_bar_clone = color_bar_ref.clone();
         let palette_bar_clone = palette_bar_ref.clone();
+        let dock_manager_clone = dock_manager.clone();
         let grid_btn_clone = header_comps.grid_btn.clone();
         let ruler_btn_clone = header_comps.ruler_btn.clone();
         let snap_btn_clone = header_comps.snap_btn.clone();
@@ -536,6 +558,7 @@ impl DesignWindow {
                 color_bar_clone.update_state(selected_count, style);
                 let is_palette_enabled = canvas_unit_sync.is_plugin_enabled("color_palette_toolbar");
                 palette_bar_clone.widget().set_visible(is_palette_enabled);
+                dock_manager_clone.update_visibility("color_palette", is_palette_enabled);
                 if is_palette_enabled {
                     palette_bar_clone.update_state(selected_count, style, &doc_colors);
                     palette_bar_clone.widget().queue_draw();

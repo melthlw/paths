@@ -20,7 +20,9 @@ impl FloatingToolbar {
         canvas: CanvasWidget,
         dock_box: gtk4::Box,
         color_bar: super::color_bar::ColorControlBar,
+        palette_bar: super::palette_bar::ColorPaletteBar,
         options_bar: super::tool_options::ToolOptionsBar,
+        dock_manager: crate::ui::dock_manager::DockLayoutManager,
     ) -> Self {
         let container = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Horizontal)
@@ -136,11 +138,13 @@ impl FloatingToolbar {
         let apply_pos = {
             let dock_box_c = dock_box.clone();
             let color_bar_c = color_bar.clone();
+            let palette_bar_c = palette_bar.clone();
             let options_bar_c = options_bar.clone();
             let container_c = container.clone();
             let items_box_c = items_box.clone();
             let popovers_c = popovers.clone();
             let pos_c = position.clone();
+            let dock_manager_c = dock_manager.clone();
 
             Rc::new(move |pos: BarPosition| {
                 pos_c.set(pos);
@@ -151,6 +155,9 @@ impl FloatingToolbar {
                     BarPosition::Bottom => "bottom",
                 };
                 crate::core::AppSettings::set_toolbar_position(pos_str);
+
+                dock_manager_c.update_position("main_toolbar", pos);
+                palette_bar_c.update_margin_for_toolbar(pos);
 
                 let reorder_dock = |first: &gtk4::Box, second: &gtk4::Box| {
                     if first.parent().as_ref() == Some(dock_box_c.upcast_ref())
