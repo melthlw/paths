@@ -189,7 +189,7 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
     header_row.append(&add_mod_btn);
 
     let context_sub = gtk4::Label::builder()
-        .label(crate::core::gettext("Select an object or click + to add modifier"))
+        .label(crate::core::gettext("No object selected"))
         .css_classes(["caption", "dim-label"])
         .xalign(0.0)
         .margin_start(12)
@@ -213,21 +213,17 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
     let header_icon_c = header_icon.clone();
     let canvas_c = canvas.clone();
 
+    let update_fn_holder = Rc::new(std::cell::RefCell::new(None::<Rc<dyn Fn()>>));
+    let update_fn_holder_c = update_fn_holder.clone();
+
     let update_fn = Rc::new(move || {
         crate::ui::inspector::appearance::clear_box(&list_c);
 
         let sel_ids = canvas_c.selected_element_ids();
 
         if sel_ids.is_empty() {
-            ctx_sub_c.set_text(&crate::core::gettext("Select an object or click + to add modifier"));
+            ctx_sub_c.set_text(&crate::core::gettext("No object selected"));
             header_icon_c.set_icon_name(Some("view-grid-symbolic"));
-            let empty_lbl = gtk4::Label::builder()
-                .label(crate::core::gettext("Click + to add a modifier to canvas"))
-                .css_classes(["caption", "dim-label"])
-                .margin_top(8)
-                .margin_bottom(8)
-                .build();
-            list_c.append(&empty_lbl);
             return;
         }
 
@@ -250,25 +246,31 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
             let mods = elem.modifiers();
             if mods.is_empty() {
                 let empty_lbl = gtk4::Label::builder()
-                    .label(crate::core::gettext("No active modifiers on selection"))
+                    .label(crate::core::gettext("No active modifiers"))
                     .css_classes(["caption", "dim-label"])
                     .margin_top(4)
                     .margin_bottom(4)
                     .build();
                 list_c.append(&empty_lbl);
             } else {
+                let self_update = update_fn_holder_c.borrow().clone();
+                let total_mods = mods.len();
                 for (mod_idx, m) in mods.iter().enumerate() {
                     let card = build_modifier_card(
                         mod_idx,
+                        total_mods,
                         m,
                         first_id,
                         &canvas_c,
+                        self_update.clone(),
                     );
                     list_c.append(&card);
                 }
             }
         }
     });
+
+    *update_fn_holder.borrow_mut() = Some(update_fn.clone());
 
     // Helper to ensure target element exists (creates a shape if none selected)
     let ensure_target_element = |canvas_widget: &CanvasWidget, modifier: Modifier| {
@@ -280,6 +282,7 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
                     mods.push(modifier);
                 }
             }
+            state.notify_status();
         } else {
             // Create a default Rectangle element on active page and select it
             let rect = Rect::new(200.0, 200.0, 160.0, 160.0);
@@ -292,6 +295,7 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
             state.document.elements.push(new_elem);
             state.document.selected_ids.clear();
             state.document.selected_ids.insert(new_id);
+            state.notify_status();
         }
     };
 
@@ -380,9 +384,11 @@ fn create_menu_item_button(icon_name: &str, title: &str, subtitle: &str) -> gtk4
 
 fn build_modifier_card(
     mod_idx: usize,
+    total_mods: usize,
     modifier: &Modifier,
     elem_id: crate::core::ElementId,
     canvas: &CanvasWidget,
+    on_change: Option<Rc<dyn Fn()>>,
 ) -> gtk4::Box {
     let card = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Vertical)
@@ -392,11 +398,17 @@ fn build_modifier_card(
 
     let header = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Horizontal)
-        .spacing(8)
+        .spacing(6)
         .margin_start(10)
         .margin_end(8)
         .margin_top(8)
         .margin_bottom(8)
+        .build();
+
+    let badge_lbl = gtk4::Label::builder()
+        .label(&format!("#{}", mod_idx + 1))
+        .css_classes(["caption", "dim-label"])
+        .valign(gtk4::Align::Center)
         .build();
 
     let icon = gtk4::Image::from_icon_name(modifier.icon_name());
@@ -407,6 +419,23 @@ fn build_modifier_card(
         .css_classes(["heading"])
         .hexpand(true)
         .xalign(0.0)
+        .build();
+
+    // Reorder Buttons: Up and Down
+    let btn_up = gtk4::Button::builder()
+        .icon_name("go-up-symbolic")
+        .tooltip_text(crate::core::gettext("Move Up"))
+        .css_classes(["flat", "circular"])
+        .valign(gtk4::Align::Center)
+        .sensitive(mod_idx > 0)
+        .build();
+
+    let btn_dn = gtk4::Button::builder()
+        .icon_name("go-down-symbolic")
+        .tooltip_text(crate::core::gettext("Move Down"))
+        .css_classes(["flat", "circular"])
+        .valign(gtk4::Align::Center)
+        .sensitive(mod_idx + 1 < total_mods)
         .build();
 
     let switch = gtk4::Switch::builder()
@@ -421,11 +450,54 @@ fn build_modifier_card(
         .valign(gtk4::Align::Center)
         .build();
 
+    header.append(&badge_lbl);
     header.append(&icon);
     header.append(&name_lbl);
+    header.append(&btn_up);
+    header.append(&btn_dn);
     header.append(&switch);
     header.append(&del_btn);
     card.append(&header);
+
+    // Reorder Up Handler
+    let canvas_up = canvas.clone();
+    let on_up_update = on_change.clone();
+    btn_up.connect_clicked(move |_| {
+        let mut state = canvas_up.state.borrow_mut();
+        if let Some(elem) = state.document.find_element_mut(elem_id) {
+            if let Some(mods) = elem.modifiers_mut() {
+                if mod_idx > 0 && mod_idx < mods.len() {
+                    mods.swap(mod_idx, mod_idx - 1);
+                }
+            }
+        }
+        state.notify_status();
+        drop(state);
+        canvas_up.queue_draw();
+        if let Some(ref update_fn) = on_up_update {
+            update_fn();
+        }
+    });
+
+    // Reorder Down Handler
+    let canvas_dn = canvas.clone();
+    let on_dn_update = on_change.clone();
+    btn_dn.connect_clicked(move |_| {
+        let mut state = canvas_dn.state.borrow_mut();
+        if let Some(elem) = state.document.find_element_mut(elem_id) {
+            if let Some(mods) = elem.modifiers_mut() {
+                if mod_idx + 1 < mods.len() {
+                    mods.swap(mod_idx, mod_idx + 1);
+                }
+            }
+        }
+        state.notify_status();
+        drop(state);
+        canvas_dn.queue_draw();
+        if let Some(ref update_fn) = on_dn_update {
+            update_fn();
+        }
+    });
 
     // Body Controls
     let body = gtk4::Box::builder()
@@ -463,6 +535,7 @@ fn build_modifier_card(
 
             // Mode switcher callback
             let canvas_m = canvas.clone();
+            let on_ch_mode = on_change.clone();
             mode_combo.connect_selected_notify(move |cb| {
                 let sel = cb.selected();
                 let mut state = canvas_m.state.borrow_mut();
@@ -494,7 +567,12 @@ fn build_modifier_card(
                         }
                     }
                 }
+                state.notify_status();
+                drop(state);
                 canvas_m.queue_draw();
+                if let Some(ref cb_fn) = on_ch_mode {
+                    cb_fn();
+                }
             });
 
             match &arr.mode {
@@ -554,6 +632,8 @@ fn build_modifier_card(
                                 }
                             }
                         }
+                        state.notify_status();
+                        drop(state);
                         canvas_cb.queue_draw();
                     };
 
@@ -632,6 +712,8 @@ fn build_modifier_card(
                                 }
                             }
                         }
+                        state.notify_status();
+                        drop(state);
                         canvas_cb.queue_draw();
                     };
 
@@ -698,6 +780,8 @@ fn build_modifier_card(
                                 }
                             }
                         }
+                        state.notify_status();
+                        drop(state);
                         canvas_cb.queue_draw();
                     };
 
@@ -766,6 +850,8 @@ fn build_modifier_card(
                         }
                     }
                 }
+                state.notify_status();
+                drop(state);
                 canvas_cb.queue_draw();
             });
         }
@@ -816,6 +902,8 @@ fn build_modifier_card(
                         }
                     }
                 }
+                state.notify_status();
+                drop(state);
                 canvas_cb.queue_draw();
             });
 
@@ -836,6 +924,8 @@ fn build_modifier_card(
                         }
                     }
                 }
+                state.notify_status();
+                drop(state);
                 canvas_cb2.queue_draw();
             });
         }
@@ -855,11 +945,14 @@ fn build_modifier_card(
                 }
             }
         }
+        state.notify_status();
+        drop(state);
         canvas_sw.queue_draw();
     });
 
     // Delete modifier handler
     let canvas_del = canvas.clone();
+    let on_del_update = on_change;
     del_btn.connect_clicked(move |_| {
         let mut state = canvas_del.state.borrow_mut();
         if let Some(elem) = state.document.find_element_mut(elem_id) {
@@ -869,7 +962,12 @@ fn build_modifier_card(
                 }
             }
         }
+        state.notify_status();
+        drop(state);
         canvas_del.queue_draw();
+        if let Some(ref update_fn) = on_del_update {
+            update_fn();
+        }
     });
 
     card

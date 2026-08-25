@@ -1,5 +1,6 @@
 use skia_safe as skia;
 
+use crate::core::modifier::{ArrayMode, Modifier};
 use crate::core::{
     calculate_resize_scales, hit_transform_handle, Element, ElementId, Point, PointerButton,
     PointerEvent, Rect, TransformHandle, Viewport,
@@ -63,9 +64,83 @@ fn hit_corner_radius_handle(
     None
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ModifierHandleTarget {
+    EnvelopeWarpTopLeft,
+    EnvelopeWarpTopRight,
+    EnvelopeWarpBottomRight,
+    EnvelopeWarpBottomLeft,
+    ArrayLinearOffset,
+    ArrayRadialRadius,
+}
+
+fn hit_modifier_handle(
+    elem: &Element,
+    p: Point,
+    zoom: f32,
+) -> Option<(usize, ModifierHandleTarget, Point)> {
+    let bounds = elem.bounds().normalize();
+    let hit_r = (14.0 / zoom).max(10.0);
+
+    for (mod_idx, m) in elem.modifiers().iter().enumerate() {
+        if !m.enabled() {
+            continue;
+        }
+        match m {
+            Modifier::EnvelopeWarp(env) => {
+                let p1 = Point::new(bounds.x + env.top_left_offset.x, bounds.y + env.top_left_offset.y);
+                let p2 = Point::new(bounds.x + bounds.width + env.top_right_offset.x, bounds.y + env.top_right_offset.y);
+                let p3 = Point::new(bounds.x + bounds.width + env.bottom_right_offset.x, bounds.y + bounds.height + env.bottom_right_offset.y);
+                let p4 = Point::new(bounds.x + env.bottom_left_offset.x, bounds.y + bounds.height + env.bottom_left_offset.y);
+
+                if p.distance_to(p1) <= hit_r {
+                    return Some((mod_idx, ModifierHandleTarget::EnvelopeWarpTopLeft, env.top_left_offset));
+                }
+                if p.distance_to(p2) <= hit_r {
+                    return Some((mod_idx, ModifierHandleTarget::EnvelopeWarpTopRight, env.top_right_offset));
+                }
+                if p.distance_to(p3) <= hit_r {
+                    return Some((mod_idx, ModifierHandleTarget::EnvelopeWarpBottomRight, env.bottom_right_offset));
+                }
+                if p.distance_to(p4) <= hit_r {
+                    return Some((mod_idx, ModifierHandleTarget::EnvelopeWarpBottomLeft, env.bottom_left_offset));
+                }
+            }
+            Modifier::Array(arr) => {
+                match &arr.mode {
+                    ArrayMode::Linear { offset_x, offset_y, .. } => {
+                        let center = Point::new(bounds.x + bounds.width / 2.0, bounds.y + bounds.height / 2.0);
+                        let target = Point::new(center.x + offset_x, center.y + offset_y);
+                        if p.distance_to(target) <= hit_r {
+                            return Some((mod_idx, ModifierHandleTarget::ArrayLinearOffset, Point::new(*offset_x, *offset_y)));
+                        }
+                    }
+                    ArrayMode::Radial { radius, .. } => {
+                        let center = Point::new(bounds.x + bounds.width / 2.0, bounds.y + bounds.height / 2.0);
+                        let target = Point::new(center.x + radius, center.y);
+                        if p.distance_to(target) <= hit_r {
+                            return Some((mod_idx, ModifierHandleTarget::ArrayRadialRadius, Point::new(*radius, 0.0)));
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
 #[derive(Debug, Clone, PartialEq)]
 enum SelectState {
     Idle,
+    DraggingModifierHandle {
+        elem_id: ElementId,
+        mod_idx: usize,
+        target: ModifierHandleTarget,
+        start_world: Point,
+        initial_offset: Point,
+    },
     DraggingCornerRadius {
         handle: CornerRadiusHandle,
         rect: Rect,
@@ -142,6 +217,31 @@ impl FeaturePlugin for SelectFeature {
             return;
         }
 
+        // 0. Check if clicking on Modifier Handles FIRST for selected elements (Priority over transform resize handles!)
+        if !ctx.document.selected_ids.is_empty() {
+            let hit_mod = ctx.document.elements.iter().find_map(|e| {
+                if ctx.document.selected_ids.contains(&e.id()) {
+                    let res = hit_modifier_handle(e, event.world_pos, ctx.viewport.zoom)?;
+                    return Some((e.id(), res.0, res.1, res.2));
+                }
+                None
+            });
+
+            if let Some((elem_id, mod_idx, target, initial_offset)) = hit_mod {
+                ctx.document.snapshot();
+                self.state = SelectState::DraggingModifierHandle {
+                    elem_id,
+                    mod_idx,
+                    target,
+                    start_world: event.world_pos,
+                    initial_offset,
+                };
+                ctx.set_cursor("crosshair");
+                ctx.request_redraw();
+                return;
+            }
+        }
+
         // 1. Check if clicking on Corner Radius handles (for selected RectElement)
         if ctx.document.selected_ids.len() == 1 {
             let sel_id = *ctx.document.selected_ids.iter().next().unwrap();
@@ -190,11 +290,7 @@ impl FeaturePlugin for SelectFeature {
                     };
                     ctx.set_cursor("grabbing");
                 } else {
-                    let origin = if event.alt_pressed {
-                        bounds.center()
-                    } else {
-                        handle.opposite_anchor(bounds)
-                    };
+                    let origin = handle.opposite_anchor(bounds);
                     self.state = SelectState::Resizing {
                         handle,
                         start_world: event.world_pos,
@@ -209,7 +305,7 @@ impl FeaturePlugin for SelectFeature {
             }
         }
 
-        // 2. Element hit test
+        // 3. Element hit test
         let hit_id = ctx.document.hit_test(event.world_pos);
 
         match hit_id {
@@ -271,6 +367,49 @@ impl FeaturePlugin for SelectFeature {
 
     fn on_pointer_move(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
         match &mut self.state {
+            SelectState::DraggingModifierHandle {
+                elem_id,
+                mod_idx,
+                target,
+                start_world,
+                initial_offset,
+            } => {
+                let delta = event.world_pos - *start_world;
+                if let Some(el) = ctx.document.elements.iter_mut().find(|e| e.id() == *elem_id) {
+                    if let Some(mods) = el.modifiers_mut() {
+                        if let Some(m) = mods.get_mut(*mod_idx) {
+                            match (m, target) {
+                                (Modifier::EnvelopeWarp(env), ModifierHandleTarget::EnvelopeWarpTopLeft) => {
+                                    env.top_left_offset = Point::new(initial_offset.x + delta.x, initial_offset.y + delta.y);
+                                }
+                                (Modifier::EnvelopeWarp(env), ModifierHandleTarget::EnvelopeWarpTopRight) => {
+                                    env.top_right_offset = Point::new(initial_offset.x + delta.x, initial_offset.y + delta.y);
+                                }
+                                (Modifier::EnvelopeWarp(env), ModifierHandleTarget::EnvelopeWarpBottomRight) => {
+                                    env.bottom_right_offset = Point::new(initial_offset.x + delta.x, initial_offset.y + delta.y);
+                                }
+                                (Modifier::EnvelopeWarp(env), ModifierHandleTarget::EnvelopeWarpBottomLeft) => {
+                                    env.bottom_left_offset = Point::new(initial_offset.x + delta.x, initial_offset.y + delta.y);
+                                }
+                                (Modifier::Array(arr), ModifierHandleTarget::ArrayLinearOffset) => {
+                                    if let ArrayMode::Linear { ref mut offset_x, ref mut offset_y, .. } = arr.mode {
+                                        *offset_x = initial_offset.x + delta.x;
+                                        *offset_y = initial_offset.y + delta.y;
+                                    }
+                                }
+                                (Modifier::Array(arr), ModifierHandleTarget::ArrayRadialRadius) => {
+                                    if let ArrayMode::Radial { ref mut radius, .. } = arr.mode {
+                                        *radius = (initial_offset.x + delta.x).max(0.0);
+                                    }
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
+                }
+                ctx.set_cursor("crosshair");
+                ctx.request_redraw();
+            }
             SelectState::DraggingCornerRadius {
                 handle,
                 rect,
@@ -462,6 +601,17 @@ impl FeaturePlugin for SelectFeature {
                 ctx.request_redraw();
             }
             SelectState::Idle => {
+                if !ctx.document.selected_ids.is_empty() {
+                    let is_hit_mod = ctx.document.elements.iter().any(|e| {
+                        ctx.document.selected_ids.contains(&e.id())
+                            && hit_modifier_handle(e, event.world_pos, ctx.viewport.zoom).is_some()
+                    });
+                    if is_hit_mod {
+                        ctx.set_cursor("crosshair");
+                        return;
+                    }
+                }
+
                 if ctx.document.selected_ids.len() == 1 {
                     let sel_id = *ctx.document.selected_ids.iter().next().unwrap();
                     if let Some(Element::Rect(rect_el)) =

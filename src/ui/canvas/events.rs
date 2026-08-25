@@ -134,13 +134,15 @@ impl CanvasWidget {
                 });
 
                 let (redraw, cursor) = if let Ok(mut state) = state_drag.try_borrow_mut() {
-                    state.pointer_down(
+                    let res = state.pointer_down(
                         Point::new(x as f32, y as f32),
                         current_btn,
                         shift,
                         ctrl,
                         alt,
-                    )
+                    );
+                    state.notify_status();
+                    res
                 } else {
                     (false, None)
                 };
@@ -224,13 +226,15 @@ impl CanvasWidget {
                     });
 
                     let (redraw, cursor) = if let Ok(mut state) = state_end.try_borrow_mut() {
-                        state.pointer_up(
+                        let res = state.pointer_up(
                             Point::new(cur_x as f32, cur_y as f32),
                             current_btn,
                             shift,
                             ctrl,
                             alt,
-                        )
+                        );
+                        state.notify_status();
+                        res
                     } else {
                         (false, None)
                     };
