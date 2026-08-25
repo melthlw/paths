@@ -54,8 +54,8 @@
       <p>Controle cirúrgico de caminhos com nós cúspides (canto vivo), suaves e simétricos. Manipulação interativa de alças tangentes, inserção e remoção de nós, conversão de segmentos (reta/curva) e suavização contínua com de Casteljau.</p>
     </td>
     <td width="50%">
-      <h3>Customização de Interface e Espaço de Trabalho</h3>
-      <p>Barra de ferramentas HUD flutuante ou acoplada com reorganização de ferramentas, painéis laterais retráteis (Inspetor de Propriedades, Camadas e Bibliotecas) e integração nativa com tema claro e escuro do GNOME.</p>
+      <h3>Personalização de Interface e Espaço de Trabalho</h3>
+      <p>Layout flexível: gerenciador de layout dinâmico para barras flutuantes (<code>DockLayoutManager</code>) com empilhamento de margens automático nas bordas, ordenação personalizada de ferramentas, painéis laterais recolhíveis e integração aos temas claro/escuro do GNOME.</p>
     </td>
   </tr>
   <tr>
@@ -136,6 +136,10 @@ flatpak install flathub \
 
 # Compilar e instalar o pacote Flatpak
 flatpak-builder --user --install --force-clean build-dir io.gitlab.lewisHeart.GnomePaths.json
+
+# Gerar arquivo .flatpak único para release
+flatpak-builder --force-clean --repo=repo build-dir io.gitlab.lewisHeart.GnomePaths.json
+flatpak build-bundle repo io.gitlab.lewisHeart.GnomePaths.flatpak io.gitlab.lewisHeart.GnomePaths
 
 # Executar o aplicativo
 flatpak run io.gitlab.lewisHeart.GnomePaths

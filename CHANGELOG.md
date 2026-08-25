@@ -8,14 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.0] - 2026-08-25
 
 ### Added
+- **Dynamic Dock Layout Engine (`DockLayoutManager`)**:
+  - Multi-layered edge docking architecture (`Top`, `Bottom`, `Left`, `Right`) for floating HUD bars (Main Toolbar, Tool Options, Color Palette, and modular plugin bars).
+  - Sequential automatic margin calculation with generous 12px gap separation preventing bar overlap regardless of docking configuration.
+  - Live measurement of GTK widget dimensions (`height()`) respecting theme CSS paddings and borders.
+  - Real-time layout recalculation when any bar is moved, hidden, or dynamically activated.
+- **Application Namespace & ID Migration**:
+  - Full migration of application ID, GSchema, Desktop Entry, AppStream metainfo, Flatpak manifests, and GResource path to `io.gitlab.lewisHeart.GnomePaths`.
 - **Advanced Tiled Clones System (Clonagem em Ladrilhos Dinâmicos)**:
   - Parametric grid generation supporting 11 wallpaper symmetries and arrangements: P1 (Simple Translation), P2 (180° Half-Turn), PM (Horizontal Mirror), PMM (Double Mirror), PG (Glide Reflection), CM (Alternating Reflection), PMG (Reflection & Glide), PGG (Double Glide), P4 (90° Rotation), P6 (60° Hexagonal Symmetry), and Radial (Circular Ring Distribution).
   - Granular multi-dimensional transformation studio with row/column increments, percentage offsets, scale growth, angular progression, opacity fading, and pseudo-random jitter.
   - Interactive inspector UI in Libadwaita with ExpanderRows, SpinButtons, live tile counters, and one-click actions: Create Tiled Clones, Unlink All, Clear Clones, and Reset Defaults.
   - Full Undo/Redo history integration for all matrix and radial clone operations.
-- **Color Picker Drag & Gesture Stability**:
-  - In-place row updates preventing widget destruction and premature popover dismissal while dragging across HSV saturation/value square, hue bar, and opacity tuner.
-  - Popover lifecycle guards (`is_any_popover_visible`) across Appearance fills and strokes inspectors.
+- **Color Palette Toolbar & Plugin Auto-Restoration**:
+  - Integrated color palette toolbar plugin (`tool-pattern-symbolic.svg`) with custom swatch management.
+  - Automatic restoration of saved plugin enablement state on boot from `AppSettings::enabled_plugins()`.
+- **RefCell Borrow Safety & UI Stability**:
+  - Replaced direct `RefCell` borrows in Inspector Appearance updates with `try_borrow` and `try_borrow_mut` guards to prevent double-borrow panics during interactive updates.
+  - In-place row updates preventing widget destruction and premature popover dismissal while dragging HSV color pickers.
 - **GNOME 50 Platform Alignment**:
   - Upgraded Flatpak manifests and build configuration to GNOME 50 runtime and SDK (`org.gnome.Platform//50`, `org.gnome.Sdk//50`).
   - Offline prebuilt Skia binaries source integration for seamless Flatpak compilation.
@@ -24,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Redesigned Clones panel into an interactive studio with live linked instance tracking, jump-to-master navigation, and instant canvas selection.
+- Enforced lower position for the small color control box when docked vertically on Left/Right canvas edges.
 - Cleaned and deduplicated gettext translation catalogs (`po/en.po`, `po/pt_BR.po`, and `po/gnome-paths.pot`).
 
 ## [0.2.3] - 2026-08-24

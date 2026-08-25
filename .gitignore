@@ -13,6 +13,9 @@ subprojects/
 # Flatpak Builder
 .flatpak-builder/
 .flatpak/
+repo/
+gnome-paths/
+*.flatpak
 
 # Compiled GResources & Gettext Catalogs
 *.gresource

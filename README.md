@@ -55,7 +55,7 @@
     </td>
     <td width="50%">
       <h3>Interface Customization and Workspace</h3>
-      <p>Flexible layout: floating or docked HUD toolbars with custom tool ordering, collapsible sidebars (Property Inspector, Layers, and Libraries), and native GNOME dark and light theme integration.</p>
+      <p>Flexible layout: dynamic multi-layer docked HUD toolbars (<code>DockLayoutManager</code>) with automatic edge margin stacking, custom tool ordering, collapsible sidebars (Property Inspector, Layers, and Libraries), and native GNOME dark and light theme integration.</p>
     </td>
   </tr>
   <tr>
@@ -136,6 +136,10 @@ flatpak install flathub \
 
 # Build and install Flatpak package
 flatpak-builder --user --install --force-clean build-dir io.gitlab.lewisHeart.GnomePaths.json
+
+# Generate standalone .flatpak bundle for release
+flatpak-builder --force-clean --repo=repo build-dir io.gitlab.lewisHeart.GnomePaths.json
+flatpak build-bundle repo io.gitlab.lewisHeart.GnomePaths.flatpak io.gitlab.lewisHeart.GnomePaths
 
 # Run application
 flatpak run io.gitlab.lewisHeart.GnomePaths
