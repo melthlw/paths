@@ -957,11 +957,15 @@ impl InspectorSidebar {
 
                 if fills_changed {
                     *self.fills.borrow_mut() = sel_fills;
-                    self.rebuild_fill_rows();
+                    if !appearance::is_any_popover_visible(self.fill_list_box.upcast_ref()) {
+                        self.rebuild_fill_rows();
+                    }
                 }
                 if strokes_changed {
                     *self.strokes.borrow_mut() = sel_strokes;
-                    self.rebuild_stroke_rows();
+                    if !appearance::is_any_popover_visible(self.stroke_list_box.upcast_ref()) {
+                        self.rebuild_stroke_rows();
+                    }
                 }
             } else {
                 let was_not_empty =

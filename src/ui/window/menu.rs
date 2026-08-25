@@ -214,7 +214,7 @@ pub fn build_main_menu(
                 let about = adw::AboutDialog::builder()
                     .application_name("GNOME Paths")
                     .application_icon("io.github.lewis.GnomePaths")
-                    .version("0.1.0-alpha")
+                    .version("0.3.0-alpha")
                     .developer_name("Lewis")
                     .developers(["Lewis"])
                     .artists(["Lewis"])

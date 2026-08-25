@@ -598,6 +598,14 @@ impl CanvasWidget {
             .unwrap_or(0)
     }
 
+
+    pub fn first_selected_id(&self) -> Option<ElementId> {
+        self.state
+            .try_borrow()
+            .ok()
+            .and_then(|s| s.document.selected_ids.iter().next().copied())
+    }
+
     pub fn select_same_fill(&self) {
         let mut state = self.state.borrow_mut();
         state.document.select_same_fill();
@@ -854,6 +862,30 @@ impl CanvasWidget {
         state.document.clone_selected();
         state.notify_status();
         self.drawing_area.queue_draw();
+    }
+
+    pub fn create_tiled_clones_for_selection(
+        &self,
+        params: &crate::core::TiledCloneParams,
+    ) -> Vec<ElementId> {
+        let mut state = self.state.borrow_mut();
+        let target_id = state.document.selected_ids.iter().next().copied();
+        if let Some(tid) = target_id {
+            let created = state.document.create_tiled_clones(tid, params);
+            state.notify_status();
+            self.drawing_area.queue_draw();
+            created
+        } else {
+            Vec::new()
+        }
+    }
+
+    pub fn delete_clones_for_master(&self, master_id: ElementId) -> usize {
+        let mut state = self.state.borrow_mut();
+        let count = state.document.delete_clones_for_master(master_id);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+        count
     }
 
     pub fn select_original_element(&self) {

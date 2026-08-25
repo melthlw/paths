@@ -7,6 +7,7 @@ pub mod selection;
 pub mod text_style;
 pub mod transform;
 
+pub use clipboard::{TiledCloneParams, TiledCloneSymmetry};
 pub use transform::TransformOptions;
 
 use std::collections::HashSet;
@@ -880,5 +881,64 @@ pub mod tests {
         assert_eq!(remaining_unlinked.len(), 1);
         assert!(doc.get_clones_for_master(master1_id).is_empty());
         assert!(doc.get_all_clone_relationships().is_empty());
+    }
+
+    #[test]
+    fn test_tiled_clones_grid_and_radial_generation() {
+        let mut doc = Document::new();
+        let rect = Element::Rect(crate::core::element::RectElement::new(
+            Rect::new(0.0, 0.0, 50.0, 50.0),
+            None,
+            None,
+        ));
+        let master_id = rect.id();
+        doc.add_element(rect);
+
+        // 1. Create 3x3 Tiled Clones (9 total items -> 8 clone instances + 1 master)
+        let mut params = TiledCloneParams {
+            rows: 3,
+            cols: 3,
+            symmetry: TiledCloneSymmetry::P1,
+            shift_x_pct: 120.0,
+            shift_y_pct: 120.0,
+            scale_x_pct: 10.0,
+            scale_y_pct: 0.0,
+            rotate_per_col_deg: 15.0,
+            ..Default::default()
+        };
+
+        let created_clones = doc.create_tiled_clones(master_id, &params);
+        assert_eq!(created_clones.len(), 8);
+        assert_eq!(doc.get_clones_for_master(master_id).len(), 8);
+
+        // Verify clone properties (shift, scale, rotation)
+        let clones = doc.get_clones_for_master(master_id);
+        // Column 1 should have dx = 50 * 1.2 = 60.0
+        let c1 = clones.iter().find(|c| (c.offset.x - 60.0).abs() < 0.1 && c.offset.y.abs() < 0.1);
+        assert!(c1.is_some());
+        let c1_el = c1.unwrap();
+        assert!((c1_el.scale.x - 1.1).abs() < 0.01);
+        assert!((c1_el.rotation.to_degrees() - 15.0).abs() < 0.1);
+
+        // 2. Delete clones
+        let deleted = doc.delete_clones_for_master(master_id);
+        assert_eq!(deleted, 8);
+        assert_eq!(doc.get_clones_for_master(master_id).len(), 0);
+
+        // 3. Radial Clones (6 items -> 5 clones + 1 master)
+        params.rows = 2;
+        params.cols = 3;
+        params.symmetry = TiledCloneSymmetry::Radial;
+        params.radial_radius = 100.0;
+
+        let radial_clones = doc.create_tiled_clones(master_id, &params);
+        assert_eq!(radial_clones.len(), 5);
+        assert_eq!(doc.get_clones_for_master(master_id).len(), 5);
+
+        // 4. Undo and Redo
+        doc.undo();
+        assert_eq!(doc.get_clones_for_master(master_id).len(), 0);
+        doc.redo();
+        assert_eq!(doc.get_clones_for_master(master_id).len(), 5);
     }
 }

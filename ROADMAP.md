@@ -146,10 +146,10 @@ Development roadmap structured by version milestones.
   - [x] Color stop addition, deletion, opacity, and interpolation in Appearance Inspector.
 - [x] **Mesh Gradient Grid**:
   - [x] Interactive mesh gradient grids with patch deformation and per-vertex color assignment.
-- [ ] **On-Canvas Interactive Gradient Tool**:
-  - [ ] On-canvas interactive gizmo handles for linear, radial, and sweep gradients.
-- [ ] **Dedicated Mesh Dimensions Toolbar**:
-  - [ ] Dynamic row × column dimension spinbuttons and patch curvature handle editing.
+- [x] **On-Canvas Interactive Gradient Tool**:
+  - [x] On-canvas interactive gizmo handles for linear, radial, and sweep gradients.
+- [x] **Dedicated Mesh Dimensions Toolbar**:
+  - [x] Dynamic row × column dimension spinbuttons and patch curvature handle editing.
 
 ---
 

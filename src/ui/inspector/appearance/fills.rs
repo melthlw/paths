@@ -812,6 +812,13 @@ impl FillRow {
 
         {
             let pop_clean = popovers_to_cleanup.clone();
+            let r_cb = rebuild_cb.clone();
+            for p in pop_clean.borrow().iter() {
+                let r = r_cb.clone();
+                p.connect_closed(move |_| {
+                    r();
+                });
+            }
             container.connect_destroy(move |_| {
                 for p in pop_clean.borrow().iter() {
                     if p.parent().is_some() {

@@ -135,7 +135,7 @@ impl DesignApplication {
             .application_name("GNOME Paths")
             .application_icon("io.github.lewis.GnomePaths")
             .developer_name("Lewis")
-            .version("0.1.0")
+            .version("0.3.0")
             .copyright("© 2026 Lewis")
             .license_type(gtk4::License::Gpl30Only)
             .comments(&crate::core::gettext(

@@ -11,6 +11,22 @@ use std::rc::Rc;
 use crate::core::{FillLayer, StrokeLayer};
 use crate::ui::canvas::CanvasWidget;
 
+pub fn is_any_popover_visible(w: &gtk4::Widget) -> bool {
+    if let Some(pop) = w.downcast_ref::<gtk4::Popover>() {
+        if pop.is_visible() {
+            return true;
+        }
+    }
+    let mut child_opt = w.first_child();
+    while let Some(child) = child_opt {
+        if is_any_popover_visible(&child) {
+            return true;
+        }
+        child_opt = child.next_sibling();
+    }
+    false
+}
+
 pub fn unparent_all_popovers(w: &gtk4::Widget) {
     let mut child_opt = w.first_child();
     while let Some(child) = child_opt {
@@ -37,6 +53,9 @@ pub fn rebuild_fill_list(
     is_updating: &Rc<Cell<bool>>,
     fill_sep: &gtk4::Separator,
 ) {
+    if is_any_popover_visible(list_box.upcast_ref()) {
+        return;
+    }
     clear_box(list_box);
     let entries = fills.borrow();
     fill_sep.set_visible(!entries.is_empty());
@@ -88,6 +107,9 @@ pub fn rebuild_stroke_list(
     is_updating: &Rc<Cell<bool>>,
     stroke_sep: &gtk4::Separator,
 ) {
+    if is_any_popover_visible(list_box.upcast_ref()) {
+        return;
+    }
     clear_box(list_box);
     let entries = strokes.borrow();
     stroke_sep.set_visible(!entries.is_empty());

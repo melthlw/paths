@@ -21,7 +21,7 @@ pub mod svg_import;
 pub mod units;
 
 pub use color::Color;
-pub use document::{Document, TransformOptions};
+pub use document::{Document, TiledCloneParams, TransformOptions};
 pub use element::{
     ArcMode, BlendMode, BrushMode, BrushStroke, BrushStyle, CornerRadii, CornerStyle, Element,
     ElementId, FillLayer, FillStyle, Gradient, GradientStop, GradientType, ImageElement,

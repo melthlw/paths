@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-08-25
+
+### Added
+- **Advanced Tiled Clones System (Clonagem em Ladrilhos Dinâmicos)**:
+  - Parametric grid generation supporting 11 wallpaper symmetries and arrangements: P1 (Simple Translation), P2 (180° Half-Turn), PM (Horizontal Mirror), PMM (Double Mirror), PG (Glide Reflection), CM (Alternating Reflection), PMG (Reflection & Glide), PGG (Double Glide), P4 (90° Rotation), P6 (60° Hexagonal Symmetry), and Radial (Circular Ring Distribution).
+  - Granular multi-dimensional transformation studio with row/column increments, percentage offsets, scale growth, angular progression, opacity fading, and pseudo-random jitter.
+  - Interactive inspector UI in Libadwaita with ExpanderRows, SpinButtons, live tile counters, and one-click actions: Create Tiled Clones, Unlink All, Clear Clones, and Reset Defaults.
+  - Full Undo/Redo history integration for all matrix and radial clone operations.
+- **Color Picker Drag & Gesture Stability**:
+  - In-place row updates preventing widget destruction and premature popover dismissal while dragging across HSV saturation/value square, hue bar, and opacity tuner.
+  - Popover lifecycle guards (`is_any_popover_visible`) across Appearance fills and strokes inspectors.
+- **GNOME 50 Platform Alignment**:
+  - Upgraded Flatpak manifests and build configuration to GNOME 50 runtime and SDK (`org.gnome.Platform//50`, `org.gnome.Sdk//50`).
+  - Offline prebuilt Skia binaries source integration for seamless Flatpak compilation.
+- **Test Suite Expansion**:
+  - 77 automated unit tests covering tiled clone mathematics, geometric symmetries, radial dispersion, and undo/redo state integrity.
+
+### Changed
+- Redesigned Clones panel into an interactive studio with live linked instance tracking, jump-to-master navigation, and instant canvas selection.
+- Cleaned and deduplicated gettext translation catalogs (`po/en.po`, `po/pt_BR.po`, and `po/gnome-paths.pot`).
+
 ## [0.2.3] - 2026-08-24
 
 ### Added
