@@ -15,7 +15,9 @@ cache:
   image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-50
   before_script:
     - flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-    - flatpak install -y --noninteractive flathub org.freedesktop.Sdk.Extension.rust-stable//25.08
+    - flatpak install -y --noninteractive flathub
+        org.freedesktop.Sdk//25.08
+        org.freedesktop.Sdk.Extension.rust-stable//25.08
 
 flatpak-test:
   extends: .flatpak-setup
