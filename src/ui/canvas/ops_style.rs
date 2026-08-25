@@ -1,5 +1,5 @@
 use super::CanvasWidget;
-use crate::core::{Color, Element};
+use crate::core::{Color, Element, Point};
 use gtk4::prelude::*;
 
 impl CanvasWidget {
@@ -812,6 +812,195 @@ impl CanvasWidget {
                                 f0.secondary_color = color;
                             }
                         }
+                    }
+                    el.set_fills(fills);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn get_active_pattern_info(
+        &self,
+    ) -> Option<(
+        crate::core::element::PatternType,
+        Color,
+        Color,
+        f32,
+        f32,
+        Point,
+        Option<String>,
+    )> {
+        let state = self.state.try_borrow().ok()?;
+        let selected_ids = state.document.selected_ids.clone();
+        let first_id = selected_ids.iter().next()?;
+        let elem = state.document.elements.iter().find(|e| e.id() == *first_id)?;
+        let fills = elem.fills();
+        let fill = fills
+            .iter()
+            .find(|f| f.style == crate::core::FillStyle::Pattern && f.enabled)
+            .or_else(|| fills.iter().find(|f| f.style == crate::core::FillStyle::Pattern))?;
+        Some((
+            fill.pattern_type,
+            fill.color,
+            fill.secondary_color,
+            fill.pattern_scale,
+            fill.angle,
+            fill.pattern_offset,
+            fill.custom_pattern_path.clone(),
+        ))
+    }
+
+    pub fn set_pattern_type_and_custom_path(
+        &self,
+        pt: crate::core::element::PatternType,
+        custom_path: Option<String>,
+    ) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let mut fills = el.fills();
+                    if fills.is_empty() {
+                        fills.push(crate::core::FillLayer::default());
+                    }
+                    if let Some(f0) = fills.first_mut() {
+                        f0.style = crate::core::FillStyle::Pattern;
+                        f0.pattern_type = pt;
+                        f0.custom_pattern_path = custom_path.clone();
+                    }
+                    el.set_fills(fills);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_pattern_primary_color(&self, color: Color) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        f0.color = color;
+                    }
+                    el.set_fills(fills);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_pattern_secondary_color(&self, color: Color) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        f0.secondary_color = color;
+                    }
+                    el.set_fills(fills);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_pattern_scale(&self, scale: f32) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        f0.pattern_scale = scale.clamp(4.0, 2048.0);
+                    }
+                    el.set_fills(fills);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_pattern_angle(&self, angle: f32) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        f0.angle = angle;
+                    }
+                    el.set_fills(fills);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn set_pattern_offset(&self, offset: Point) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        f0.pattern_offset = offset;
+                    }
+                    el.set_fills(fills);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn reset_pattern_transform(&self) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        f0.pattern_scale = 24.0;
+                        f0.angle = 0.0;
+                        f0.pattern_offset = Point::ZERO;
+                    }
+                    el.set_fills(fills);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn swap_pattern_colors(&self) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        let c1 = f0.color;
+                        let c2 = f0.secondary_color;
+                        f0.color = c2;
+                        f0.secondary_color = c1;
                     }
                     el.set_fills(fills);
                 }

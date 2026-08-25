@@ -164,6 +164,53 @@ impl Element {
         }
     }
 
+    pub fn sample_color_at(&self, point: Point) -> Option<Color> {
+        match self {
+            Element::Rect(r) => {
+                if let Some(mesh) = &r.mesh_gradient {
+                    return Some(mesh.sample_at(point));
+                }
+                if let Some(grad) = &r.gradient {
+                    return Some(grad.sample_at(point));
+                }
+                if let Some(f0) = r.fills.first() {
+                    if f0.enabled {
+                        return Some(f0.sample_at(point, r.bounds()));
+                    }
+                }
+                r.fill_color
+            }
+            Element::Path(p) => {
+                if let Some(mesh) = &p.mesh_gradient {
+                    return Some(mesh.sample_at(point));
+                }
+                if let Some(grad) = &p.gradient {
+                    return Some(grad.sample_at(point));
+                }
+                if let Some(f0) = p.fills.first() {
+                    if f0.enabled {
+                        return Some(f0.sample_at(point, p.bounds()));
+                    }
+                }
+                p.fill_color
+            }
+            Element::Brush(b) => Some(b.color),
+            Element::Text(t) => Some(t.color),
+            Element::Group(g) => {
+                for c in g.children.iter().rev() {
+                    if c.hit_test(point) {
+                        if let Some(col) = c.sample_color_at(point) {
+                            return Some(col);
+                        }
+                    }
+                }
+                g.children.first().and_then(|c| c.sample_color_at(point))
+            }
+            Element::Clone(_) => None,
+            Element::Image(_) => None,
+        }
+    }
+
     pub fn stroke_color(&self) -> Option<Color> {
         match self {
             Element::Rect(r) => r.stroke_color,

@@ -208,6 +208,57 @@ impl FillLayer {
             ]
         }
     }
+
+    pub fn sample_at(&self, point: Point, bounds: Rect) -> Color {
+        let base_c = self.color;
+        match self.style {
+            FillStyle::Solid => base_c.with_alpha(base_c.a * self.opacity),
+            FillStyle::LinearGradient => {
+                let angle_rad = self.angle.to_radians();
+                let cx = bounds.x + bounds.width * 0.5;
+                let cy = bounds.y + bounds.height * 0.5;
+                let dx = angle_rad.cos() * (bounds.width * 0.5).max(1.0);
+                let dy = angle_rad.sin() * (bounds.height * 0.5).max(1.0);
+                let start = Point::new(cx - dx, cy - dy);
+                let end = Point::new(cx + dx, cy + dy);
+
+                let grad = Gradient {
+                    start,
+                    end,
+                    stops: self.effective_stops(),
+                    kind: GradientType::Linear,
+                };
+                let sampled = grad.sample_at(point);
+                sampled.with_alpha(sampled.a * self.opacity)
+            }
+            FillStyle::RadialGradient => {
+                let cx = bounds.x + bounds.width * 0.5;
+                let cy = bounds.y + bounds.height * 0.5;
+                let center = Point::new(cx, cy);
+                let radius = (bounds.width.max(bounds.height) * 0.5).max(1.0);
+                let end = Point::new(cx + radius, cy);
+
+                let grad = Gradient {
+                    start: center,
+                    end,
+                    stops: self.effective_stops(),
+                    kind: GradientType::Radial,
+                };
+                let sampled = grad.sample_at(point);
+                sampled.with_alpha(sampled.a * self.opacity)
+            }
+            FillStyle::Mesh => {
+                if let Some(m) = &self.mesh {
+                    m.sample_at(point)
+                } else {
+                    base_c.with_alpha(base_c.a * self.opacity)
+                }
+            }
+            FillStyle::Pattern => {
+                base_c.with_alpha(base_c.a * self.opacity)
+            }
+        }
+    }
 }
 
 pub fn create_pattern_shader(
@@ -625,6 +676,59 @@ impl Gradient {
         self.end.x = origin.x + (self.end.x - origin.x) * sx;
         self.end.y = origin.y + (self.end.y - origin.y) * sy;
     }
+
+    pub fn sample_at(&self, point: Point) -> Color {
+        if self.stops.is_empty() {
+            return Color::WHITE;
+        }
+        if self.stops.len() == 1 {
+            return self.stops[0].color;
+        }
+        let eff_stops = &self.stops;
+
+        let t = match self.kind {
+            GradientType::Linear => {
+                let v = self.end - self.start;
+                let len_sq = v.x * v.x + v.y * v.y;
+                if len_sq < 0.0001 {
+                    0.0
+                } else {
+                    let p = point - self.start;
+                    ((p.x * v.x + p.y * v.y) / len_sq).clamp(0.0, 1.0)
+                }
+            }
+            GradientType::Radial => {
+                let radius = self.start.distance_to(self.end).max(1.0);
+                let dist = point.distance_to(self.start);
+                (dist / radius).clamp(0.0, 1.0)
+            }
+        };
+
+        // Interpolate along stops
+        let mut left_stop = &eff_stops[0];
+        let mut right_stop = &eff_stops[eff_stops.len() - 1];
+
+        for s in eff_stops {
+            if s.offset <= t && s.offset >= left_stop.offset {
+                left_stop = s;
+            }
+            if s.offset >= t && s.offset <= right_stop.offset {
+                right_stop = s;
+            }
+        }
+
+        if (right_stop.offset - left_stop.offset).abs() < 0.0001 {
+            return left_stop.color;
+        }
+
+        let factor = ((t - left_stop.offset) / (right_stop.offset - left_stop.offset)).clamp(0.0, 1.0);
+        Color::new(
+            left_stop.color.r + factor * (right_stop.color.r - left_stop.color.r),
+            left_stop.color.g + factor * (right_stop.color.g - left_stop.color.g),
+            left_stop.color.b + factor * (right_stop.color.b - left_stop.color.b),
+            left_stop.color.a + factor * (right_stop.color.a - left_stop.color.a),
+        )
+    }
 }
 
 pub fn create_skia_gradient_shader(grad: &Gradient) -> Option<skia::Shader> {
@@ -977,6 +1081,104 @@ impl MeshGradient {
         }
         selected_idx
     }
+
+    pub fn sample_at(&self, point: Point) -> Color {
+        if self.nodes.is_empty() {
+            return Color::WHITE;
+        }
+        if self.nodes.len() == 1 || self.rows < 2 || self.cols < 2 {
+            return self.nodes[0].color;
+        }
+
+        // Check quadrilateral patches
+        for r in 0..(self.rows - 1) {
+            for c in 0..(self.cols - 1) {
+                let p00 = self.nodes[r * self.cols + c].point;
+                let p10 = self.nodes[r * self.cols + (c + 1)].point;
+                let p01 = self.nodes[(r + 1) * self.cols + c].point;
+                let p11 = self.nodes[(r + 1) * self.cols + (c + 1)].point;
+
+                let c00 = self.nodes[r * self.cols + c].color;
+                let c10 = self.nodes[r * self.cols + (c + 1)].color;
+                let c01 = self.nodes[(r + 1) * self.cols + c].color;
+                let c11 = self.nodes[(r + 1) * self.cols + (c + 1)].color;
+
+                // Triangle 1: (p00, p10, p11)
+                if let Some((u, v, w)) = point_in_triangle(point, p00, p10, p11) {
+                    return Color::new(
+                        u * c00.r + v * c10.r + w * c11.r,
+                        u * c00.g + v * c10.g + w * c11.g,
+                        u * c00.b + v * c10.b + w * c11.b,
+                        u * c00.a + v * c10.a + w * c11.a,
+                    );
+                }
+
+                // Triangle 2: (p00, p11, p01)
+                if let Some((u, v, w)) = point_in_triangle(point, p00, p11, p01) {
+                    return Color::new(
+                        u * c00.r + v * c11.r + w * c01.r,
+                        u * c00.g + v * c11.g + w * c01.g,
+                        u * c00.b + v * c11.b + w * c01.b,
+                        u * c00.a + v * c11.a + w * c01.a,
+                    );
+                }
+            }
+        }
+
+        // Outside all patches: use Inverse Distance Weighting from closest nodes
+        let mut total_weight = 0.0f32;
+        let mut accum_r = 0.0f32;
+        let mut accum_g = 0.0f32;
+        let mut accum_b = 0.0f32;
+        let mut accum_a = 0.0f32;
+
+        for node in &self.nodes {
+            let dist = point.distance_to(node.point);
+            if dist < 0.5 {
+                return node.color;
+            }
+            let weight = 1.0 / (dist * dist);
+            total_weight += weight;
+            accum_r += node.color.r * weight;
+            accum_g += node.color.g * weight;
+            accum_b += node.color.b * weight;
+            accum_a += node.color.a * weight;
+        }
+
+        if total_weight > 0.0 {
+            Color::new(
+                accum_r / total_weight,
+                accum_g / total_weight,
+                accum_b / total_weight,
+                accum_a / total_weight,
+            )
+        } else {
+            self.nodes[0].color
+        }
+    }
+}
+
+fn point_in_triangle(p: Point, a: Point, b: Point, c: Point) -> Option<(f32, f32, f32)> {
+    let v0 = b - a;
+    let v1 = c - a;
+    let v2 = p - a;
+    let d00 = v0.x * v0.x + v0.y * v0.y;
+    let d01 = v0.x * v1.x + v0.y * v1.y;
+    let d11 = v1.x * v1.x + v1.y * v1.y;
+    let d20 = v2.x * v0.x + v2.y * v0.y;
+    let d21 = v2.x * v1.x + v2.y * v1.y;
+    let denom = d00 * d11 - d01 * d01;
+    if denom.abs() < 0.00001 {
+        return None;
+    }
+    let v = (d11 * d20 - d01 * d21) / denom;
+    let w = (d00 * d21 - d01 * d20) / denom;
+    let u = 1.0 - v - w;
+    if u >= -0.01 && v >= -0.01 && w >= -0.01 {
+        Some((u.clamp(0.0, 1.0), v.clamp(0.0, 1.0), w.clamp(0.0, 1.0)))
+    } else {
+        None
+    }
 }
 
 pub fn render_mesh_gradient(canvas: &skia::Canvas, clip_path: &skia::Path, mesh: &MeshGradient) {
@@ -1215,6 +1417,30 @@ mod tests {
         grad.stops.sort_by(|a, b| a.offset.partial_cmp(&b.offset).unwrap());
         assert_eq!(grad.stops[0].color, Color::BLUE);
         assert_eq!(grad.stops[2].color, Color::RED);
+    }
+
+    #[test]
+    fn test_gradient_and_mesh_color_sampling() {
+        let grad = Gradient::new_linear(
+            Point::new(0.0, 0.0),
+            Point::new(100.0, 0.0),
+            Color::BLACK,
+            Color::WHITE,
+        );
+        let mid_c = grad.sample_at(Point::new(50.0, 0.0));
+        assert!((mid_c.r - 0.5).abs() < 0.05);
+        assert!((mid_c.g - 0.5).abs() < 0.05);
+        assert!((mid_c.b - 0.5).abs() < 0.05);
+
+        let mesh = MeshGradient::new_grid(
+            Rect::new(0.0, 0.0, 100.0, 100.0),
+            3,
+            3,
+            Color::BLACK,
+            Color::WHITE,
+        );
+        let sample_center = mesh.sample_at(Point::new(50.0, 50.0));
+        assert!(sample_center.r > 0.0 && sample_center.r < 1.0);
     }
 }
 

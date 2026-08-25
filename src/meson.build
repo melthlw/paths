@@ -1,40 +1,28 @@
 cargo = find_program('cargo', required: true)
 
-cargo_options = [
-  '--manifest-path', meson.project_source_root() / 'Cargo.toml',
-  '--target-dir', meson.project_build_root() / 'src',
-  '--ignore-rust-version',
-]
-
 if get_option('buildtype') == 'release'
-  cargo_options += ['--release']
+  cargo_options = ['--release']
   rust_target = 'release'
 else
+  cargo_options = []
   rust_target = 'debug'
 endif
 
-cargo_build = custom_target(
+custom_target(
   'cargo-build',
   build_by_default: true,
   build_always_stale: true,
   output: 'gnome-paths',
   console: true,
-  command: [
-    cargo, 'build',
-    cargo_options,
-  ]
-)
-
-custom_target(
-  'install-binary',
-  build_by_default: true,
-  input: cargo_build,
-  output: 'gnome-paths-installed',
-  command: [
-    'cp',
-    meson.project_build_root() / 'src' / rust_target / 'gnome-paths',
-    meson.project_build_root() / 'gnome-paths'
-  ],
   install: true,
-  install_dir: get_option('bindir')
+  install_dir: get_option('bindir'),
+  command: [
+    'sh', '-c',
+    'cargo build --manifest-path "$1" --target-dir "$2" --ignore-rust-version ' + ' '.join(cargo_options) + ' && cp "$2/$3/gnome-paths" "$4"',
+    '--',
+    meson.project_source_root() / 'Cargo.toml',
+    meson.project_build_root() / 'src',
+    rust_target,
+    '@OUTPUT@'
+  ]
 )

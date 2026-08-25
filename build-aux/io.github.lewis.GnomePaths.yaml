@@ -1,10 +1,9 @@
 app-id: io.github.lewis.GnomePaths
 runtime: org.gnome.Platform
-runtime-version: '47'
+runtime-version: '50'
 sdk: org.gnome.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.rust-stable
-  - org.freedesktop.Sdk.Extension.llvm19
 command: gnome-paths
 finish-args:
   - --share=ipc
@@ -16,11 +15,11 @@ finish-args:
   - --filesystem=xdg-download
   - --metadata=X-DConf=migrate-path=/io/github/lewis/GnomePaths/
 build-options:
-  append-path: /usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm19/bin
+  append-path: /usr/lib/sdk/rust-stable/bin
   env:
     CARGO_HOME: /run/build/gnome-paths/cargo
     RUST_BACKTRACE: '1'
-    LIBCLANG_PATH: /usr/lib/sdk/llvm19/lib
+    SKIA_BINARIES_URL: file:///run/build/gnome-paths/skia-binaries-a25a0fdb7d90429aa2d1-x86_64-unknown-linux-gnu-jpegd-jpege-pdf.tar.gz
 cleanup:
   - /include
   - /lib/pkgconfig
@@ -37,4 +36,8 @@ modules:
     sources:
       - type: dir
         path: ..
+      - type: file
+        url: https://github.com/rust-skia/skia-binaries/releases/download/0.99.0/skia-binaries-a25a0fdb7d90429aa2d1-x86_64-unknown-linux-gnu-jpegd-jpege-pdf.tar.gz
+        sha256: 5b776571b11194a9ed3a4c41824b7a4b35a83117aef99eb16a2ad3315db13b5d
+        dest-filename: skia-binaries-a25a0fdb7d90429aa2d1-x86_64-unknown-linux-gnu-jpegd-jpege-pdf.tar.gz
       - cargo-sources.json

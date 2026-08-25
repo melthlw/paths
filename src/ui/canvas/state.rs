@@ -678,6 +678,8 @@ impl CanvasState {
                             Some("mesh_gradient")
                         } else if r.gradient.is_some() || cur_tool == "gradient" || r.fills.first().map(|f| f.style == crate::core::FillStyle::LinearGradient || f.style == crate::core::FillStyle::RadialGradient).unwrap_or(false) {
                             Some("gradient")
+                        } else if cur_tool == "pattern" || r.fills.first().map(|f| f.style == crate::core::FillStyle::Pattern).unwrap_or(false) {
+                            Some("pattern")
                         } else {
                             Some("rectangle")
                         }
@@ -691,6 +693,8 @@ impl CanvasState {
                             Some("mesh_gradient")
                         } else if p.gradient.is_some() || cur_tool == "gradient" || p.fills.first().map(|f| f.style == crate::core::FillStyle::LinearGradient || f.style == crate::core::FillStyle::RadialGradient).unwrap_or(false) {
                             Some("gradient")
+                        } else if cur_tool == "pattern" || p.fills.first().map(|f| f.style == crate::core::FillStyle::Pattern).unwrap_or(false) {
+                            Some("pattern")
                         } else {
                             match &p.shape_origin {
                                 Some(crate::core::ShapeOrigin::Rectangle { .. }) => Some("rectangle"),

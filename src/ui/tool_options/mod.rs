@@ -2,6 +2,7 @@ pub mod brush;
 pub mod gradient;
 pub mod helpers;
 pub mod mesh;
+pub mod pattern;
 pub mod pen;
 pub mod pen_brush_text;
 pub mod select;
@@ -14,6 +15,7 @@ use std::rc::Rc;
 use self::brush::{build_brush_controls, BrushControls};
 use self::gradient::{build_gradient_controls, GradientControls};
 use self::mesh::{build_mesh_controls, MeshControls};
+use self::pattern::{build_pattern_controls, PatternControls};
 use self::pen::{build_pen_controls, PenControls};
 use self::pen_brush_text::build_pen_brush_text_controls;
 use self::select::build_select_controls;
@@ -97,6 +99,8 @@ pub struct ToolOptionsBar {
     mesh_controls: MeshControls,
     grad_box: gtk4::Box,
     grad_controls: GradientControls,
+    pattern_box: gtk4::Box,
+    pattern_controls: PatternControls,
     canvas: CanvasWidget,
     is_syncing: Rc<Cell<bool>>,
     is_top: Rc<Cell<bool>>,
@@ -227,6 +231,10 @@ impl ToolOptionsBar {
         let grad_controls = build_gradient_controls(&canvas, &is_syncing);
         let grad_box = grad_controls.grad_box.clone();
         left_capsule.append(&grad_box);
+
+        let pattern_controls = build_pattern_controls(&canvas, &is_syncing);
+        let pattern_box = pattern_controls.pattern_box.clone();
+        left_capsule.append(&pattern_box);
 
         container.append(&left_capsule);
         container.append(&text_capsule);
@@ -398,6 +406,8 @@ impl ToolOptionsBar {
             mesh_controls,
             grad_box,
             grad_controls,
+            pattern_box,
+            pattern_controls,
             canvas,
             is_syncing,
             is_top,
@@ -504,6 +514,7 @@ impl ToolOptionsBar {
             self.brush_box.set_visible(false);
             self.mesh_box.set_visible(false);
             self.grad_box.set_visible(false);
+            self.pattern_box.set_visible(false);
 
             self.is_syncing.set(true);
             match tool_id {
@@ -667,6 +678,7 @@ impl ToolOptionsBar {
             self.brush_box.set_visible(false);
             self.mesh_box.set_visible(false);
             self.grad_box.set_visible(false);
+            self.pattern_box.set_visible(false);
             self.path_editor_box.set_visible(true);
         } else if tool_id == "pen" || tool_id == "vector-pen" || tool_id == "vector_pen" {
             self.container.set_visible(true);
@@ -680,6 +692,7 @@ impl ToolOptionsBar {
             self.brush_box.set_visible(false);
             self.mesh_box.set_visible(false);
             self.grad_box.set_visible(false);
+            self.pattern_box.set_visible(false);
             self.pen_box.set_visible(true);
 
             if let Ok(state_b) = self.canvas.state().try_borrow() {
@@ -713,6 +726,7 @@ impl ToolOptionsBar {
             self.pen_box.set_visible(false);
             self.mesh_box.set_visible(false);
             self.grad_box.set_visible(false);
+            self.pattern_box.set_visible(false);
             self.brush_box.set_visible(true);
 
             if let Ok(state_b) = self.canvas.state().try_borrow() {
@@ -826,6 +840,57 @@ impl ToolOptionsBar {
                 )));
                 self.is_syncing.set(false);
             }
+        } else if tool_id == "pattern" {
+            self.container.set_visible(true);
+            self.text_capsule.set_visible(false);
+            self.page_capsule.set_visible(false);
+            self.left_capsule.set_visible(true);
+            self.right_capsule.set_visible(false);
+            self.general_box.set_visible(false);
+            self.shape_options_box.set_visible(false);
+            self.path_editor_box.set_visible(false);
+            self.pen_box.set_visible(false);
+            self.brush_box.set_visible(false);
+            self.mesh_box.set_visible(false);
+            self.grad_box.set_visible(false);
+            self.pattern_box.set_visible(true);
+
+            if let Some((pt, c1, c2, scale, angle, offset, custom_path)) = self.canvas.get_active_pattern_info() {
+                self.is_syncing.set(true);
+                self.pattern_controls.pattern_type_cell.set(pt);
+                *self.pattern_controls.custom_path_cell.borrow_mut() = custom_path.clone();
+                let display_name = match pt {
+                    crate::core::element::PatternType::Grid => crate::core::gettext("Technical Grid"),
+                    crate::core::element::PatternType::Dots => crate::core::gettext("Halftone Dots"),
+                    crate::core::element::PatternType::Stripes => crate::core::gettext("Diagonal Stripes"),
+                    crate::core::element::PatternType::Checkerboard => crate::core::gettext("Checkerboard"),
+                    crate::core::element::PatternType::Hexagon => crate::core::gettext("Honeycomb"),
+                    crate::core::element::PatternType::Crosshatch => crate::core::gettext("Crosshatch"),
+                    crate::core::element::PatternType::Brick => crate::core::gettext("Brick Wall"),
+                    crate::core::element::PatternType::Scales => crate::core::gettext("Seigaiha Scales"),
+                    crate::core::element::PatternType::Houndstooth => crate::core::gettext("Houndstooth"),
+                    crate::core::element::PatternType::Basketweave => crate::core::gettext("Basketweave"),
+                    crate::core::element::PatternType::Custom => {
+                        custom_path
+                            .as_ref()
+                            .and_then(|p| std::path::Path::new(p).file_stem().and_then(|s| s.to_str()))
+                            .map(|s| s.to_string())
+                            .unwrap_or_else(|| crate::core::gettext("Custom Pattern"))
+                    }
+                };
+                self.pattern_controls.pattern_type_lbl.set_label(&display_name);
+                self.pattern_controls.pattern_type_da.queue_draw();
+
+                self.pattern_controls.c1_cell.set(c1);
+                self.pattern_controls.c1_da.queue_draw();
+                self.pattern_controls.c2_cell.set(c2);
+                self.pattern_controls.c2_da.queue_draw();
+                self.pattern_controls.scale_spin.set_value(scale as f64);
+                self.pattern_controls.angle_spin.set_value(angle as f64);
+                self.pattern_controls.offset_x_spin.set_value(offset.x as f64);
+                self.pattern_controls.offset_y_spin.set_value(offset.y as f64);
+                self.is_syncing.set(false);
+            }
         } else if has_selection {
             self.container.set_visible(true);
             self.text_capsule.set_visible(false);
@@ -839,6 +904,7 @@ impl ToolOptionsBar {
             self.brush_box.set_visible(false);
             self.mesh_box.set_visible(false);
             self.grad_box.set_visible(false);
+            self.pattern_box.set_visible(false);
 
             self.layer_box.set_visible(selected_count > 0);
             self.transform_modes_box.set_visible(true);

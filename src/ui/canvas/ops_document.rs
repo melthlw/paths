@@ -355,7 +355,7 @@ impl CanvasWidget {
     }
 
     pub fn is_grid_visible(&self) -> bool {
-        self.state.borrow().grid_config.visible
+        self.state.try_borrow().map(|s| s.grid_config.visible).unwrap_or(false)
     }
 
     pub fn set_grid_style(&self, style: GridStyle) {
@@ -404,7 +404,7 @@ impl CanvasWidget {
     }
 
     pub fn is_snap_to_grid(&self) -> bool {
-        self.state.borrow().snap_config.snap_to_grid
+        self.state.try_borrow().map(|s| s.snap_config.snap_to_grid).unwrap_or(false)
     }
 
     pub fn set_snap_to_objects(&self, snap: bool) {
@@ -426,7 +426,7 @@ impl CanvasWidget {
     }
 
     pub fn is_snap_to_guides(&self) -> bool {
-        self.state.borrow().snap_config.snap_to_guides
+        self.state.try_borrow().map(|s| s.snap_config.snap_to_guides).unwrap_or(false)
     }
 
     pub fn ruler_config(&self) -> RulerConfig {
@@ -451,11 +451,11 @@ impl CanvasWidget {
     }
 
     pub fn is_guides_visible(&self) -> bool {
-        self.state.borrow().ruler_config.guides_visible
+        self.state.try_borrow().map(|s| s.ruler_config.guides_visible).unwrap_or(false)
     }
 
     pub fn has_user_guides(&self) -> bool {
-        !self.state.borrow().document.guides.is_empty()
+        self.state.try_borrow().map(|s| !s.document.guides.is_empty()).unwrap_or(false)
     }
 
     pub fn clear_user_guides(&self) {
@@ -922,70 +922,90 @@ impl CanvasWidget {
 
     // Render Options
     pub fn is_hardware_accelerated(&self) -> bool {
-        self.state.borrow().render_options.hardware_accelerated
+        self.state.try_borrow().map(|s| s.render_options.hardware_accelerated).unwrap_or(false)
     }
 
     pub fn set_hardware_accelerated(&self, enabled: bool) {
-        self.state.borrow_mut().render_options.hardware_accelerated = enabled;
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.render_options.hardware_accelerated = enabled;
+        }
         self.drawing_area.queue_draw();
     }
 
     pub fn is_high_precision_aa(&self) -> bool {
-        self.state.borrow().render_options.high_precision_aa
+        self.state.try_borrow().map(|s| s.render_options.high_precision_aa).unwrap_or(true)
     }
 
     pub fn set_high_precision_aa(&self, enabled: bool) {
-        self.state.borrow_mut().render_options.high_precision_aa = enabled;
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.render_options.high_precision_aa = enabled;
+        }
         self.drawing_area.queue_draw();
     }
 
     pub fn canvas_bg_color(&self) -> Option<Color> {
-        self.state.borrow().render_options.canvas_bg_color
+        self.state
+            .try_borrow()
+            .ok()
+            .and_then(|s| s.render_options.canvas_bg_color)
     }
 
     pub fn set_canvas_bg_color(&self, color: Option<Color>) {
-        self.state.borrow_mut().render_options.canvas_bg_color = color;
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.render_options.canvas_bg_color = color;
+        }
         self.drawing_area.queue_draw();
     }
 
     pub fn page_bg_color(&self) -> Option<Color> {
-        self.state.borrow().render_options.page_bg_color
+        self.state
+            .try_borrow()
+            .ok()
+            .and_then(|s| s.render_options.page_bg_color)
     }
 
     pub fn set_page_bg_color(&self, color: Option<Color>) {
-        self.state.borrow_mut().render_options.page_bg_color = color;
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.render_options.page_bg_color = color;
+        }
         self.drawing_area.queue_draw();
     }
 
     pub fn page_shadow(&self) -> bool {
-        self.state.borrow().render_options.page_shadow
+        self.state.try_borrow().map(|s| s.render_options.page_shadow).unwrap_or(true)
     }
 
     pub fn set_page_shadow(&self, enabled: bool) {
-        self.state.borrow_mut().render_options.page_shadow = enabled;
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.render_options.page_shadow = enabled;
+        }
         self.drawing_area.queue_draw();
     }
 
     pub fn page_border(&self) -> bool {
-        self.state.borrow().render_options.page_border
+        self.state.try_borrow().map(|s| s.render_options.page_border).unwrap_or(true)
     }
 
     pub fn set_page_border(&self, enabled: bool) {
-        self.state.borrow_mut().render_options.page_border = enabled;
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.render_options.page_border = enabled;
+        }
         self.drawing_area.queue_draw();
     }
 
     pub fn show_workspace_dots(&self) -> bool {
-        self.state.borrow().render_options.show_workspace_dots
+        self.state.try_borrow().map(|s| s.render_options.show_workspace_dots).unwrap_or(false)
     }
 
     pub fn set_show_workspace_dots(&self, enabled: bool) {
-        self.state.borrow_mut().render_options.show_workspace_dots = enabled;
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.render_options.show_workspace_dots = enabled;
+        }
         self.drawing_area.queue_draw();
     }
 
     pub fn path_editor_config(&self) -> crate::core::PathEditorConfig {
-        self.state.borrow().path_editor_config
+        self.state.try_borrow().map(|s| s.path_editor_config).unwrap_or_default()
     }
 
     pub fn set_path_editor_config(&self, config: crate::core::PathEditorConfig) {

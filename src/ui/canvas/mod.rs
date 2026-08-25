@@ -133,6 +133,8 @@ impl CanvasWidget {
     }
 
     pub fn notify_status(&self) {
-        self.state.borrow().notify_status();
+        if let Ok(state) = self.state.try_borrow() {
+            state.notify_status();
+        }
     }
 }

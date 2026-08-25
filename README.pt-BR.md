@@ -113,7 +113,7 @@ cd gnome-paths
 cargo run --release
 ```
 
-Para rodar todos os 68 testes unitários automatizados:
+Para rodar todos os 76 testes unitários automatizados:
 ```bash
 cargo test
 ```
@@ -122,18 +122,17 @@ cargo test
 
 1. Abra o **GNOME Builder**.
 2. Clone o repositório `https://gitlab.com/lewisHeart/gnome-paths.git`.
-3. Selecione o runtime Flatpak **GNOME 47**.
+3. Selecione o runtime Flatpak **GNOME 50**.
 4. Clique em **Executar**.
 
 ### 3. Flatpak Builder via Linha de Comando
 
 ```bash
-# Instalar SDK e extensões do GNOME 47
+# Instalar SDK e extensões do GNOME 50
 flatpak install flathub \
-  org.gnome.Platform//47 \
-  org.gnome.Sdk//47 \
-  org.freedesktop.Sdk.Extension.rust-stable//24.08 \
-  org.freedesktop.Sdk.Extension.llvm19//24.08
+  org.gnome.Platform//50 \
+  org.gnome.Sdk//50 \
+  org.freedesktop.Sdk.Extension.rust-stable//25.08
 
 # Compilar e instalar o pacote Flatpak
 flatpak-builder --user --install --force-clean build-dir io.github.lewis.GnomePaths.json

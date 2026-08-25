@@ -13,6 +13,8 @@ msgstr ""
 "Language-Team: English <gnome-i18n@gnome.org>\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 
 msgid "0° (Horizontal →)"
 msgstr "0° (Horizontal →)"
@@ -941,11 +943,19 @@ msgstr "Millimeters (mm)"
 msgid "Mirror and Layers"
 msgstr "Mirror and Layers"
 
-msgid "Modern vector design editor accelerated by Skia GPU, built with GTK4, Libadwaita and Rust"
-msgstr "Modern vector design editor accelerated by Skia GPU, built with GTK4, Libadwaita and Rust"
+msgid ""
+"Modern vector design editor accelerated by Skia GPU, built with GTK4, "
+"Libadwaita and Rust"
+msgstr ""
+"Modern vector design editor accelerated by Skia GPU, built with GTK4, "
+"Libadwaita and Rust"
 
-msgid "Modern vector design editor accelerated by Skia GPU, built with GTK4, Libadwaita and Rust."
-msgstr "Modern vector design editor accelerated by Skia GPU, built with GTK4, Libadwaita and Rust."
+msgid ""
+"Modern vector design editor accelerated by Skia GPU, built with GTK4, "
+"Libadwaita and Rust."
+msgstr ""
+"Modern vector design editor accelerated by Skia GPU, built with GTK4, "
+"Libadwaita and Rust."
 
 msgid "Move Layer Down"
 msgstr "Move Layer Down"
@@ -989,9 +999,11 @@ msgstr "New document created"
 msgid "New key captured successfully!"
 msgstr "New key captured successfully!"
 
-msgid "No existing groups.\n"
+msgid ""
+"No existing groups.\n"
 "Use the '+' button at the top to create a group."
-msgstr "No existing groups.\n"
+msgstr ""
+"No existing groups.\n"
 "Use the '+' button at the top to create a group."
 
 msgid "No external plugins installed"
@@ -1138,8 +1150,12 @@ msgstr "Preferences"
 msgid "Preserve alpha transparency"
 msgstr "Preserve alpha transparency"
 
-msgid "Press the new key or combination on your keyboard (e.g. <b>Ctrl</b>, <b>Shift</b>, <b>Alt</b> + Key):"
-msgstr "Press the new key or combination on your keyboard (e.g. <b>Ctrl</b>, <b>Shift</b>, <b>Alt</b> + Key):"
+msgid ""
+"Press the new key or combination on your keyboard (e.g. <b>Ctrl</b>, "
+"<b>Shift</b>, <b>Alt</b> + Key):"
+msgstr ""
+"Press the new key or combination on your keyboard (e.g. <b>Ctrl</b>, "
+"<b>Shift</b>, <b>Alt</b> + Key):"
 
 msgid "Pure Black (#000000)"
 msgstr "Pure Black (#000000)"
@@ -1396,9 +1412,6 @@ msgstr "Sides"
 msgid "Size of Bézier handle endpoints"
 msgstr "Size of Bézier handle endpoints"
 
-msgid "Size of Bézier handle endpoints"
-msgstr "Size of Bézier handle endpoints"
-
 msgid "Skia Graphics Pipeline"
 msgstr "Skia Graphics Pipeline"
 
@@ -1603,9 +1616,6 @@ msgstr "WebP (Compact Web)"
 msgid "When to show Bézier control arms and handles"
 msgstr "When to show Bézier control arms and handles"
 
-msgid "When to show Bézier control arms and handles"
-msgstr "When to show Bézier control arms and handles"
-
 msgid "Width"
 msgstr "Width"
 
@@ -1666,7 +1676,6 @@ msgstr "{} (Drag to reorder, split or float)"
 msgid "{} — Inspector"
 msgstr "{} — Inspector"
 
-
 msgid "Clone of {}"
 msgstr "Clone of {}"
 
@@ -1700,17 +1709,19 @@ msgstr "Restore All Panels"
 msgid "No Panels Open"
 msgstr "No Panels Open"
 
-msgid "Click '+' above to open panels like\nAppearance, Alignment, Transform or Export."
-msgstr "Click '+' above to open panels like\nAppearance, Alignment, Transform or Export."
+msgid ""
+"Click '+' above to open panels like\n"
+"Appearance, Alignment, Transform or Export."
+msgstr ""
+"Click '+' above to open panels like\n"
+"Appearance, Alignment, Transform or Export."
 
-msgid "Drag a floating tab here\nto dock it back."
-msgstr "Drag a floating tab here\nto dock it back."
-
-msgid "Dock into Top Bar"
-msgstr "Dock into Top Bar"
-
-msgid "Dock into New Section Below"
-msgstr "Dock into New Section Below"
+msgid ""
+"Drag a floating tab here\n"
+"to dock it back."
+msgstr ""
+"Drag a floating tab here\n"
+"to dock it back."
 
 msgid "Move to Section Above"
 msgstr "Move to Section Above"
@@ -1739,9 +1750,6 @@ msgstr "Insert Object"
 msgid "Guides & Grid"
 msgstr "Guides & Grid"
 
-msgid "Show Grid"
-msgstr "Show Grid"
-
 msgid "Snap to Grid"
 msgstr "Snap to Grid"
 
@@ -1759,9 +1767,6 @@ msgstr "Actual Size (100%)"
 
 msgid "Add New Page"
 msgstr "Add New Page"
-
-msgid "Circle / Ellipse"
-msgstr "Circle / Ellipse"
 
 msgid "Triangle / Polygon"
 msgstr "Triangle / Polygon"
@@ -1847,20 +1852,8 @@ msgstr "Choose the highlight color for selectors and active elements"
 msgid "Applies chromatic highlight to selectors, badges and focus elements"
 msgstr "Applies chromatic highlight to selectors, badges and focus elements"
 
-msgid "GNOME Blue (Default)"
-msgstr "GNOME Blue (Default)"
-
-msgid "Emerald Green"
-msgstr "Emerald Green"
-
-msgid "Ruby Red"
-msgstr "Ruby Red"
-
 msgid "Amber Gold"
 msgstr "Amber Gold"
-
-msgid "Slate"
-msgstr "Slate"
 
 msgid "Magenta Pink"
 msgstr "Magenta Pink"
@@ -1868,35 +1861,8 @@ msgstr "Magenta Pink"
 msgid "Customize workspace canvas background color and pattern"
 msgstr "Customize workspace canvas background color and pattern"
 
-msgid "Workspace Color"
-msgstr "Workspace Color"
-
-msgid "Background color behind pages and artboards"
-msgstr "Background color behind pages and artboards"
-
-msgid "Dark Studio (#242424)"
-msgstr "Dark Studio (#242424)"
-
-msgid "Neutral Charcoal (#383838)"
-msgstr "Neutral Charcoal (#383838)"
-
-msgid "Light Gray (#E8E8E8)"
-msgstr "Light Gray (#E8E8E8)"
-
-msgid "Pure Black (#000000)"
-msgstr "Pure Black (#000000)"
-
-msgid "Pure White (#FFFFFF)"
-msgstr "Pure White (#FFFFFF)"
-
 msgid "Visual styling for artboard paper color, drop shadow, and borders"
 msgstr "Visual styling for artboard paper color, drop shadow, and borders"
-
-msgid "Page Background Color"
-msgstr "Page Background Color"
-
-msgid "Default paper color for active document artboards"
-msgstr "Default paper color for active document artboards"
 
 msgid "White Paper"
 msgstr "White Paper"
@@ -1907,53 +1873,8 @@ msgstr "Warm Cream"
 msgid "Dark Paper"
 msgstr "Dark Paper"
 
-msgid "Page Drop Shadow"
-msgstr "Page Drop Shadow"
-
-msgid "Realistic elevation shadow around page boundaries"
-msgstr "Realistic elevation shadow around page boundaries"
-
-msgid "Page Outline"
-msgstr "Page Outline"
-
-msgid "Fine boundary outline highlighting page dimensions"
-msgstr "Fine boundary outline highlighting page dimensions"
-
 msgid "Visual configuration of precision grid and points"
 msgstr "Visual configuration of precision grid and points"
-
-msgid "Display precision grid across the canvas"
-msgstr "Display precision grid across the canvas"
-
-msgid "Grid Style"
-msgstr "Grid Style"
-
-msgid "Graphic pattern displayed for grid subdivisions"
-msgstr "Graphic pattern displayed for grid subdivisions"
-
-msgid "Grid Spacing (px)"
-msgstr "Grid Spacing (px)"
-
-msgid "Pixel distance between primary grid lines"
-msgstr "Pixel distance between primary grid lines"
-
-msgid "Grid Subdivisions"
-msgstr "Grid Subdivisions"
-
-msgid "Number of fine divisions in each cell"
-msgstr "Number of fine divisions in each cell"
-
-msgid "Grid Opacity"
-msgstr "Grid Opacity"
-
-msgid "Controls how visible the grid overlay appears"
-msgstr "Controls how visible the grid overlay appears"
-
-msgid "Grid Color"
-msgstr "Grid Color"
-
-msgid "Hue tint used for major and minor grid lines"
-msgstr "Hue tint used for major and minor grid lines"
 
 msgid "GNOME Blue"
 msgstr "GNOME Blue"
@@ -1970,59 +1891,26 @@ msgstr "Vibrant Magenta"
 msgid "High Contrast White"
 msgstr "High Contrast White"
 
-msgid "Units and Measurements"
-msgstr "Units and Measurements"
-
 msgid "Define coordinate system and default studio unit"
 msgstr "Define coordinate system and default studio unit"
-
-msgid "Default measurement unit"
-msgstr "Default measurement unit"
 
 msgid "Used in dimension inspector, rulers, and transformations"
 msgstr "Used in dimension inspector, rulers, and transformations"
 
-msgid "Magnetic Snapping and Guides"
-msgstr "Magnetic Snapping and Guides"
-
 msgid "Snapping rules and precision visual guides"
 msgstr "Snapping rules and precision visual guides"
-
-msgid "Snap to other objects"
-msgstr "Snap to other objects"
 
 msgid "Displays smart alignment guides between elements"
 msgstr "Displays smart alignment guides between elements"
 
-msgid "Snap to page"
-msgstr "Snap to page"
-
 msgid "Snaps objects to artboard margins and center"
 msgstr "Snaps objects to artboard margins and center"
-
-msgid "Show rulers and guides"
-msgstr "Show rulers and guides"
 
 msgid "Shows alignment guides and measurement rulers"
 msgstr "Shows alignment guides and measurement rulers"
 
-msgid "Node & Handle Appearance"
-msgstr "Node & Handle Appearance"
-
 msgid "Configure the visual sizing, shapes, and handles for vector editing"
 msgstr "Configure the visual sizing, shapes, and handles for vector editing"
-
-msgid "Anchor Node Size"
-msgstr "Anchor Node Size"
-
-msgid "Visual size of anchor points on canvas"
-msgstr "Visual size of anchor points on canvas"
-
-msgid "Handle Visibility"
-msgstr "Handle Visibility"
-
-msgid "When to show Bézier control arms and handles"
-msgstr "When to show Bézier control arms and handles"
 
 msgid "Selected Nodes"
 msgstr "Selected Nodes"
@@ -2030,59 +1918,26 @@ msgstr "Selected Nodes"
 msgid "Active Path"
 msgstr "Active Path"
 
-msgid "Always Visible"
-msgstr "Always Visible"
-
-msgid "Control Handle Size"
-msgstr "Control Handle Size"
-
-msgid "Size of Bézier handle endpoints"
-msgstr "Size of Bézier handle endpoints"
-
-msgid "Differentiate Node Shapes"
-msgstr "Differentiate Node Shapes"
-
-msgid "Show Squares for Corners, Diamonds for Smooth, and Circles for Symmetric/Auto"
-msgstr "Show Squares for Corners, Diamonds for Smooth, and Circles for Symmetric/Auto"
-
-msgid "Show Path Direction Arrows"
-msgstr "Show Path Direction Arrows"
+msgid ""
+"Show Squares for Corners, Diamonds for Smooth, and Circles for Symmetric/Auto"
+msgstr ""
+"Show Squares for Corners, Diamonds for Smooth, and Circles for Symmetric/Auto"
 
 msgid "Display tangent direction arrows along vector segments"
 msgstr "Display tangent direction arrows along vector segments"
 
-msgid "Highlight Hovered Segments"
-msgstr "Highlight Hovered Segments"
-
 msgid "Show dynamic add-point cross and segment highlight under cursor"
 msgstr "Show dynamic add-point cross and segment highlight under cursor"
-
-msgid "Interaction & Manipulation"
-msgstr "Interaction & Manipulation"
 
 msgid "Configure behavior and sensitivities for vector path editing"
 msgstr "Configure behavior and sensitivities for vector path editing"
 
-msgid "Direct Curve Dragging"
-msgstr "Direct Curve Dragging"
-
 msgid "Click and drag anywhere on a curve to reshape Bézier curvature directly"
-msgstr "Click and drag anywhere on a curve to reshape Bézier curvature directly"
-
-msgid "Click Grab Sensitivity"
-msgstr "Click Grab Sensitivity"
-
-msgid "Tolerance distance for selecting nodes and handles"
-msgstr "Tolerance distance for selecting nodes and handles"
-
-msgid "Handle Angle Snapping (Shift)"
-msgstr "Handle Angle Snapping (Shift)"
+msgstr ""
+"Click and drag anywhere on a curve to reshape Bézier curvature directly"
 
 msgid "Constrain handle rotation angle when holding Shift"
 msgstr "Constrain handle rotation angle when holding Shift"
-
-msgid "Default Type for New Nodes"
-msgstr "Default Type for New Nodes"
 
 msgid "Node type assigned when creating or inserting new anchor points"
 msgstr "Node type assigned when creating or inserting new anchor points"
@@ -2120,56 +1975,27 @@ msgstr "Hardware Acceleration"
 msgid "Render canvas using GPU"
 msgstr "Render canvas using GPU"
 
-msgid "Antialiasing"
-msgstr "Antialiasing"
-
 msgid "Smooth vector paths and curves"
 msgstr "Smooth vector paths and curves"
-
-msgid "Follows GNOME"
-msgstr "Follows GNOME"
-
-msgid "Bright interface"
-msgstr "Bright interface"
-
-msgid "Low brightness"
-msgstr "Low brightness"
-
-msgid "Select light, dark or automatic system synchronization"
-msgstr "Select light, dark or automatic system synchronization"
-
-msgid "Application Theme"
-msgstr "Application Theme"
 
 msgid "Choose interface color scheme and visual theme"
 msgstr "Choose interface color scheme and visual theme"
 
-msgid "Toolbar Customization"
-msgstr "Toolbar Customization"
-
 msgid "Manage on-screen tools, folders, and layout arrangement"
 msgstr "Manage on-screen tools, folders, and layout arrangement"
-
-msgid "Customize Tools and Groups"
-msgstr "Customize Tools and Groups"
 
 msgid "Add, remove, reorder tools, or organize them into folders"
 msgstr "Add, remove, reorder tools, or organize them into folders"
 
-msgid "Quick Repositioning Tip"
-msgstr "Quick Repositioning Tip"
-
-msgid "You can drag the toolbar handle on the canvas or right-click it to quickly dock it to the top, bottom, left, or right edges."
-msgstr "You can drag the toolbar handle on the canvas or right-click it to quickly dock it to the top, bottom, left, or right edges."
-
-msgid "Shortcut Scheme"
-msgstr "Shortcut Scheme"
+msgid ""
+"You can drag the toolbar handle on the canvas or right-click it to quickly "
+"dock it to the top, bottom, left, or right edges."
+msgstr ""
+"You can drag the toolbar handle on the canvas or right-click it to quickly "
+"dock it to the top, bottom, left, or right edges."
 
 msgid "Keyboard compatibility presets — click any shortcut to customize it"
 msgstr "Keyboard compatibility presets — click any shortcut to customize it"
-
-msgid "Keyboard scheme"
-msgstr "Keyboard scheme"
 
 msgid "Adapts shortcut keys to your preferred software"
 msgstr "Adapts shortcut keys to your preferred software"
@@ -2177,50 +2003,14 @@ msgstr "Adapts shortcut keys to your preferred software"
 msgid "Search shortcuts..."
 msgstr "Search shortcuts..."
 
-msgid "Creation and Selection Tools"
-msgstr "Creation and Selection Tools"
-
 msgid "Click row to customize shortcut"
 msgstr "Click row to customize shortcut"
-
-msgid "Editing, Organization and History"
-msgstr "Editing, Organization and History"
-
-msgid "View and Zoom"
-msgstr "View and Zoom"
-
-msgid "Restore Default"
-msgstr "Restore Default"
-
-msgid "Restore all shortcuts"
-msgstr "Restore all shortcuts"
 
 msgid "Reverts all keys to the default GNOME Paths scheme"
 msgstr "Reverts all keys to the default GNOME Paths scheme"
 
-msgid "Installed Plugins"
-msgstr "Installed Plugins"
-
 msgid "Manage external extensions added to the studio"
 msgstr "Manage external extensions added to the studio"
-
-msgid "No external plugins installed"
-msgstr "No external plugins installed"
-
-msgid "Add a new plugin to manage."
-msgstr "Add a new plugin to manage."
-
-msgid "Extension Management"
-msgstr "Extension Management"
-
-msgid "Install plugin"
-msgstr "Install plugin"
-
-msgid "Import plugins (.so)"
-msgstr "Import plugins (.so)"
-
-
-
 
 msgid "Add Active Color"
 msgstr "Add Active Color"
@@ -2276,8 +2066,12 @@ msgstr "Document Unit"
 msgid "Document Unit (px, mm, cm, m, in, pt, pc)"
 msgstr "Document Unit (px, mm, cm, m, in, pt, pc)"
 
-msgid "Draw shapes or text on canvas\nto create layers."
-msgstr "Draw shapes or text on canvas\nto create layers."
+msgid ""
+"Draw shapes or text on canvas\n"
+"to create layers."
+msgstr ""
+"Draw shapes or text on canvas\n"
+"to create layers."
 
 msgid "Drawing path"
 msgstr "Drawing path"
@@ -2320,9 +2114,6 @@ msgstr "Move gradients (in fill or stroke) along with the objects"
 
 msgid "Move patterns (in fill or stroke) along with the objects"
 msgstr "Move patterns (in fill or stroke) along with the objects"
-
-msgid "No existing groups.\nUse the '+' button at the top to create a group."
-msgstr "No existing groups.\nUse the '+' button at the top to create a group."
 
 msgid "Object to nodes and Bézier curves (Ctrl+Shift+C)"
 msgstr "Object to nodes and Bézier curves (Ctrl+Shift+C)"
@@ -2384,8 +2175,12 @@ msgstr "Vibrant Neon"
 msgid "When scaling objects, scale the stroke width in the same proportion"
 msgstr "When scaling objects, scale the stroke width in the same proportion"
 
-msgid "When scaling rectangles, scale the radii of rounded corners in the same proportion"
-msgstr "When scaling rectangles, scale the radii of rounded corners in the same proportion"
+msgid ""
+"When scaling rectangles, scale the radii of rounded corners in the same "
+"proportion"
+msgstr ""
+"When scaling rectangles, scale the radii of rounded corners in the same "
+"proportion"
 
 msgid "node"
 msgstr "node"
@@ -2408,8 +2203,12 @@ msgstr "Catppuccin (Mocha)"
 msgid "Cobalt (Builder)"
 msgstr "Cobalt (Builder)"
 
-msgid "Color schemes inspired by GNOME Builder, Text Editor, and modern developer aesthetics"
-msgstr "Color schemes inspired by GNOME Builder, Text Editor, and modern developer aesthetics"
+msgid ""
+"Color schemes inspired by GNOME Builder, Text Editor, and modern developer "
+"aesthetics"
+msgstr ""
+"Color schemes inspired by GNOME Builder, Text Editor, and modern developer "
+"aesthetics"
 
 msgid "Comfortable (110%)"
 msgstr "Comfortable (110%)"
@@ -2480,8 +2279,12 @@ msgstr "Large (125%)"
 msgid "Large (24px)"
 msgstr "Large (24px)"
 
-msgid "Lightweight, vector design tool built with GTK4, Libadwaita, Rust, and the Skia 2D engine."
-msgstr "Lightweight, vector design tool built with GTK4, Libadwaita, Rust, and the Skia 2D engine."
+msgid ""
+"Lightweight, vector design tool built with GTK4, Libadwaita, Rust, and the "
+"Skia 2D engine."
+msgstr ""
+"Lightweight, vector design tool built with GTK4, Libadwaita, Rust, and the "
+"Skia 2D engine."
 
 msgid "Medium (20px)"
 msgstr "Medium (20px)"
@@ -2654,9 +2457,6 @@ msgstr "Halftone Dots"
 msgid "Diagonal Stripes"
 msgstr "Diagonal Stripes"
 
-msgid "Checkerboard"
-msgstr "Checkerboard"
-
 msgid "Hexagonal Honeycomb"
 msgstr "Hexagonal Honeycomb"
 
@@ -2671,9 +2471,6 @@ msgstr "Search"
 
 msgid "Heart"
 msgstr "Heart"
-
-msgid "Star"
-msgstr "Star"
 
 msgid "Check"
 msgstr "Check"
@@ -2701,9 +2498,6 @@ msgstr "Pause"
 
 msgid "Camera"
 msgstr "Camera"
-
-msgid "Lock"
-msgstr "Lock"
 
 msgid "Globe"
 msgstr "Globe"
@@ -2834,9 +2628,6 @@ msgstr "Project Colors"
 msgid "Preset Palettes"
 msgstr "Preset Palettes"
 
-msgid "Document Colors"
-msgstr "Document Colors"
-
 msgid "Colors used on the canvas will appear here automatically."
 msgstr "Colors used on the canvas will appear here automatically."
 
@@ -2858,29 +2649,11 @@ msgstr "Click or drag to insert GNOME icon"
 msgid "Favorite"
 msgstr "Favorite"
 
-msgid "Check"
-msgstr "Check"
-
-msgid "Close"
-msgstr "Close"
-
-msgid "New Document"
-msgstr "New Document"
-
 msgid "Open"
 msgstr "Open"
 
-msgid "Save"
-msgstr "Save"
-
 msgid "Refresh"
 msgstr "Refresh"
-
-msgid "Play"
-msgstr "Play"
-
-msgid "Pause"
-msgstr "Pause"
 
 msgid "Palette"
 msgstr "Palette"
@@ -2900,15 +2673,5 @@ msgstr "Moon"
 msgid "Network"
 msgstr "Network"
 
-msgid "Lock"
-msgstr "Lock"
-
-msgid "Unlock"
-msgstr "Unlock"
-
 msgid "Info"
 msgstr "Info"
-
-
-
-

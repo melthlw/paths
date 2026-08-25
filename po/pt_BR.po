@@ -13,6 +13,8 @@ msgstr ""
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 
 msgid "0° (Horizontal →)"
 msgstr "0° (Horizontal →)"
@@ -941,11 +943,19 @@ msgstr "Milímetros (mm)"
 msgid "Mirror and Layers"
 msgstr "Espelhar e Camadas"
 
-msgid "Modern vector design editor accelerated by Skia GPU, built with GTK4, Libadwaita and Rust"
-msgstr "Editor moderno de design vetorial acelerado por Skia GPU, construído com GTK4, Libadwaita e Rust"
+msgid ""
+"Modern vector design editor accelerated by Skia GPU, built with GTK4, "
+"Libadwaita and Rust"
+msgstr ""
+"Editor moderno de design vetorial acelerado por Skia GPU, construído com "
+"GTK4, Libadwaita e Rust"
 
-msgid "Modern vector design editor accelerated by Skia GPU, built with GTK4, Libadwaita and Rust."
-msgstr "Editor moderno de design vetorial acelerado por Skia GPU, construído com GTK4, Libadwaita e Rust."
+msgid ""
+"Modern vector design editor accelerated by Skia GPU, built with GTK4, "
+"Libadwaita and Rust."
+msgstr ""
+"Editor moderno de design vetorial acelerado por Skia GPU, construído com "
+"GTK4, Libadwaita e Rust."
 
 msgid "Move Layer Down"
 msgstr "Mover Camada para Baixo"
@@ -989,9 +999,11 @@ msgstr "Novo documento criado"
 msgid "New key captured successfully!"
 msgstr "Nova tecla capturada com sucesso!"
 
-msgid "No existing groups.\n"
+msgid ""
+"No existing groups.\n"
 "Use the '+' button at the top to create a group."
-msgstr "Nenhum grupo existente.\n"
+msgstr ""
+"Nenhum grupo existente.\n"
 "Use o botão '+' no topo para criar um grupo."
 
 msgid "No external plugins installed"
@@ -1138,8 +1150,12 @@ msgstr "Preferências"
 msgid "Preserve alpha transparency"
 msgstr "Preservar transparência alfa"
 
-msgid "Press the new key or combination on your keyboard (e.g. <b>Ctrl</b>, <b>Shift</b>, <b>Alt</b> + Key):"
-msgstr "Pressione a nova tecla ou combinação no teclado (ex: <b>Ctrl</b>, <b>Shift</b>, <b>Alt</b> + Tecla):"
+msgid ""
+"Press the new key or combination on your keyboard (e.g. <b>Ctrl</b>, "
+"<b>Shift</b>, <b>Alt</b> + Key):"
+msgstr ""
+"Pressione a nova tecla ou combinação no teclado (ex: <b>Ctrl</b>, <b>Shift</"
+"b>, <b>Alt</b> + Tecla):"
 
 msgid "Pure Black (#000000)"
 msgstr "Preto Puro (#000000)"
@@ -1396,9 +1412,6 @@ msgstr "Lados"
 msgid "Size of Bézier handle endpoints"
 msgstr "Size of Bézier handle endpoints"
 
-msgid "Size of Bézier handle endpoints"
-msgstr "Tamanho dos pontos terminais das alças Bézier"
-
 msgid "Skia Graphics Pipeline"
 msgstr "Pipeline Gráfico Skia"
 
@@ -1603,9 +1616,6 @@ msgstr "WebP (Web Compacto)"
 msgid "When to show Bézier control arms and handles"
 msgstr "When to show Bézier control arms and handles"
 
-msgid "When to show Bézier control arms and handles"
-msgstr "Quando exibir braços de controle e alças Bézier"
-
 msgid "Width"
 msgstr "Espessura"
 
@@ -1666,7 +1676,6 @@ msgstr "{} (Arraste para reordenar, dividir ou flutuar)"
 msgid "{} — Inspector"
 msgstr "{} — Inspetor"
 
-
 msgid "Clone of {}"
 msgstr "Clone de {}"
 
@@ -1700,17 +1709,19 @@ msgstr "Restaurar Todos os Painéis"
 msgid "No Panels Open"
 msgstr "Nenhum Painel Aberto"
 
-msgid "Click '+' above to open panels like\nAppearance, Alignment, Transform or Export."
-msgstr "Clique em '+' acima para abrir painéis como\nAparência, Alinhamento, Transformar ou Exportar."
+msgid ""
+"Click '+' above to open panels like\n"
+"Appearance, Alignment, Transform or Export."
+msgstr ""
+"Clique em '+' acima para abrir painéis como\n"
+"Aparência, Alinhamento, Transformar ou Exportar."
 
-msgid "Drag a floating tab here\nto dock it back."
-msgstr "Arraste uma aba flutuante aqui\npara acoplá-la de volta."
-
-msgid "Dock into Top Bar"
-msgstr "Acoplar no Topo"
-
-msgid "Dock into New Section Below"
-msgstr "Acoplar em Nova Seção Abaixo"
+msgid ""
+"Drag a floating tab here\n"
+"to dock it back."
+msgstr ""
+"Arraste uma aba flutuante aqui\n"
+"para acoplá-la de volta."
 
 msgid "Move to Section Above"
 msgstr "Mover para a Seção Acima"
@@ -1725,7 +1736,9 @@ msgid "Move Tab Right"
 msgstr "Mover Aba para a Direita"
 
 msgid "Drag to sidebar or right click to dock/close"
-msgstr "Arraste para a barra lateral ou clique com o botão direito para acoplar/fechar"
+msgstr ""
+"Arraste para a barra lateral ou clique com o botão direito para acoplar/"
+"fechar"
 
 msgid "Paste Here"
 msgstr "Colar Aqui"
@@ -1738,9 +1751,6 @@ msgstr "Inserir Objeto"
 
 msgid "Guides & Grid"
 msgstr "Guias e Grade"
-
-msgid "Show Grid"
-msgstr "Mostrar Grade"
 
 msgid "Snap to Grid"
 msgstr "Alinhar à Grade"
@@ -1759,9 +1769,6 @@ msgstr "Tamanho Real (100%)"
 
 msgid "Add New Page"
 msgstr "Adicionar Nova Página"
-
-msgid "Circle / Ellipse"
-msgstr "Círculo / Elipse"
 
 msgid "Triangle / Polygon"
 msgstr "Triângulo / Polígono"
@@ -1847,20 +1854,8 @@ msgstr "Escolha a cor de destaque para seleções e elementos ativos"
 msgid "Applies chromatic highlight to selectors, badges and focus elements"
 msgstr "Aplica realce cromático a seletores, badges e foco"
 
-msgid "GNOME Blue (Default)"
-msgstr "Azul GNOME (Padrão)"
-
-msgid "Emerald Green"
-msgstr "Verde Esmeralda"
-
-msgid "Ruby Red"
-msgstr "Vermelho Rubi"
-
 msgid "Amber Gold"
 msgstr "Âmbar Dourado"
-
-msgid "Slate"
-msgstr "Ardósia"
 
 msgid "Magenta Pink"
 msgstr "Magenta / Rosa"
@@ -1868,35 +1863,11 @@ msgstr "Magenta / Rosa"
 msgid "Customize workspace canvas background color and pattern"
 msgstr "Personalize a cor de fundo e padrão da tela de trabalho"
 
-msgid "Workspace Color"
-msgstr "Cor da Área de Trabalho"
-
-msgid "Background color behind pages and artboards"
-msgstr "Cor de fundo atrás das páginas e pranchetas"
-
 msgid "Dark Studio (#242424)"
 msgstr "Estúdio Escuro (#242424)"
 
-msgid "Neutral Charcoal (#383838)"
-msgstr "Carvão Neutro (#383838)"
-
-msgid "Light Gray (#E8E8E8)"
-msgstr "Cinza Claro (#E8E8E8)"
-
-msgid "Pure Black (#000000)"
-msgstr "Preto Puro (#000000)"
-
-msgid "Pure White (#FFFFFF)"
-msgstr "Branco Puro (#FFFFFF)"
-
 msgid "Visual styling for artboard paper color, drop shadow, and borders"
 msgstr "Estilo visual para cor do papel, sombra e bordas da prancheta"
-
-msgid "Page Background Color"
-msgstr "Cor de Fundo da Página"
-
-msgid "Default paper color for active document artboards"
-msgstr "Cor padrão do papel para pranchetas do documento"
 
 msgid "White Paper"
 msgstr "Papel Branco"
@@ -1907,53 +1878,8 @@ msgstr "Creme Suave"
 msgid "Dark Paper"
 msgstr "Papel Escuro"
 
-msgid "Page Drop Shadow"
-msgstr "Sombra Projetada da Página"
-
-msgid "Realistic elevation shadow around page boundaries"
-msgstr "Sombra de elevação realista ao redor dos limites da página"
-
-msgid "Page Outline"
-msgstr "Contorno da Página"
-
-msgid "Fine boundary outline highlighting page dimensions"
-msgstr "Contorno fino destacando as dimensões da página"
-
 msgid "Visual configuration of precision grid and points"
 msgstr "Configuração visual da grade de precisão e pontos"
-
-msgid "Display precision grid across the canvas"
-msgstr "Exibe grade de precisão em toda a tela"
-
-msgid "Grid Style"
-msgstr "Estilo da Grade"
-
-msgid "Graphic pattern displayed for grid subdivisions"
-msgstr "Padrão gráfico exibido para subdivisões da grade"
-
-msgid "Grid Spacing (px)"
-msgstr "Espaçamento da Grade (px)"
-
-msgid "Pixel distance between primary grid lines"
-msgstr "Distância em pixels entre as linhas principais da grade"
-
-msgid "Grid Subdivisions"
-msgstr "Subdivisões da Grade"
-
-msgid "Number of fine divisions in each cell"
-msgstr "Número de divisões finas em cada célula"
-
-msgid "Grid Opacity"
-msgstr "Opacidade da Grade"
-
-msgid "Controls how visible the grid overlay appears"
-msgstr "Controla a visibilidade da sobreposição da grade"
-
-msgid "Grid Color"
-msgstr "Cor da Grade"
-
-msgid "Hue tint used for major and minor grid lines"
-msgstr "Matiz utilizado para linhas maiores e menores da grade"
 
 msgid "GNOME Blue"
 msgstr "Azul GNOME"
@@ -1970,59 +1896,26 @@ msgstr "Magenta Vibrante"
 msgid "High Contrast White"
 msgstr "Branco Alto Contraste"
 
-msgid "Units and Measurements"
-msgstr "Unidades e Medidas"
-
 msgid "Define coordinate system and default studio unit"
 msgstr "Define o sistema de coordenadas e unidade padrão do estúdio"
-
-msgid "Default measurement unit"
-msgstr "Unidade de medida padrão"
 
 msgid "Used in dimension inspector, rulers, and transformations"
 msgstr "Usada no inspetor de dimensões, réguas e transformações"
 
-msgid "Magnetic Snapping and Guides"
-msgstr "Alinhamento Magnético e Guias"
-
 msgid "Snapping rules and precision visual guides"
 msgstr "Regras de atração magnética e guias visuais de precisão"
-
-msgid "Snap to other objects"
-msgstr "Alinhar a outros objetos"
 
 msgid "Displays smart alignment guides between elements"
 msgstr "Exibe guias inteligentes de alinhamento entre elementos"
 
-msgid "Snap to page"
-msgstr "Alinhar à página"
-
 msgid "Snaps objects to artboard margins and center"
 msgstr "Atrai objetos para as margens e centro da prancheta"
-
-msgid "Show rulers and guides"
-msgstr "Mostrar réguas e guias"
 
 msgid "Shows alignment guides and measurement rulers"
 msgstr "Mostra guias de alinhamento e réguas de medição"
 
-msgid "Node & Handle Appearance"
-msgstr "Aparência de Nós e Alças"
-
 msgid "Configure the visual sizing, shapes, and handles for vector editing"
 msgstr "Configure o tamanho, formatos e alças visuais para edição vetorial"
-
-msgid "Anchor Node Size"
-msgstr "Tamanho do Nó Âncora"
-
-msgid "Visual size of anchor points on canvas"
-msgstr "Tamanho visual dos pontos âncora na tela"
-
-msgid "Handle Visibility"
-msgstr "Visibilidade das Alças"
-
-msgid "When to show Bézier control arms and handles"
-msgstr "Quando exibir os braços de controle Bézier e alças"
 
 msgid "Selected Nodes"
 msgstr "Nós Selecionados"
@@ -2030,59 +1923,26 @@ msgstr "Nós Selecionados"
 msgid "Active Path"
 msgstr "Caminho Ativo"
 
-msgid "Always Visible"
-msgstr "Sempre Visíveis"
-
-msgid "Control Handle Size"
-msgstr "Tamanho da Alça de Controle"
-
-msgid "Size of Bézier handle endpoints"
-msgstr "Tamanho dos pontos terminais das alças Bézier"
-
-msgid "Differentiate Node Shapes"
-msgstr "Diferenciar Formatos de Nós"
-
-msgid "Show Squares for Corners, Diamonds for Smooth, and Circles for Symmetric/Auto"
-msgstr "Quadrados para Vértices, Losangos para Suaves e Círculos para Simétricos/Auto"
-
-msgid "Show Path Direction Arrows"
-msgstr "Mostrar Setas de Direção do Caminho"
+msgid ""
+"Show Squares for Corners, Diamonds for Smooth, and Circles for Symmetric/Auto"
+msgstr ""
+"Quadrados para Vértices, Losangos para Suaves e Círculos para Simétricos/Auto"
 
 msgid "Display tangent direction arrows along vector segments"
 msgstr "Exibe setas de direção tangente ao longo dos segmentos vetoriais"
 
-msgid "Highlight Hovered Segments"
-msgstr "Realçar Segmento Sob o Cursor"
-
 msgid "Show dynamic add-point cross and segment highlight under cursor"
 msgstr "Exibe cruz de inserção de ponto e realce sob o cursor"
-
-msgid "Interaction & Manipulation"
-msgstr "Interação e Manipulação"
 
 msgid "Configure behavior and sensitivities for vector path editing"
 msgstr "Configure o comportamento e sensibilidade para edição de caminhos"
 
-msgid "Direct Curve Dragging"
-msgstr "Arraste Direto de Curvas"
-
 msgid "Click and drag anywhere on a curve to reshape Bézier curvature directly"
-msgstr "Clique e arraste em qualquer curva para remodelar a curvatura diretamente"
-
-msgid "Click Grab Sensitivity"
-msgstr "Sensibilidade do Clique e Seleção"
-
-msgid "Tolerance distance for selecting nodes and handles"
-msgstr "Distância de tolerância para selecionar nós e alças"
-
-msgid "Handle Angle Snapping (Shift)"
-msgstr "Atração de Ângulo das Alças (Shift)"
+msgstr ""
+"Clique e arraste em qualquer curva para remodelar a curvatura diretamente"
 
 msgid "Constrain handle rotation angle when holding Shift"
 msgstr "Restringe o ângulo de rotação das alças ao segurar Shift"
-
-msgid "Default Type for New Nodes"
-msgstr "Tipo Padrão para Novos Nós"
 
 msgid "Node type assigned when creating or inserting new anchor points"
 msgstr "Tipo atribuído ao criar ou inserir novos pontos âncora"
@@ -2120,56 +1980,29 @@ msgstr "Aceleração por Hardware"
 msgid "Render canvas using GPU"
 msgstr "Renderização acelerada por GPU"
 
-msgid "Antialiasing"
-msgstr "Antisserrilhado"
-
 msgid "Smooth vector paths and curves"
 msgstr "Suavização de curvas e caminhos vetoriais"
-
-msgid "Follows GNOME"
-msgstr "Segue o tema do GNOME"
-
-msgid "Bright interface"
-msgstr "Interface clara"
-
-msgid "Low brightness"
-msgstr "Baixa luminosidade"
-
-msgid "Select light, dark or automatic system synchronization"
-msgstr "Selecione tema claro, escuro ou sincronização automática"
-
-msgid "Application Theme"
-msgstr "Tema do Aplicativo"
 
 msgid "Choose interface color scheme and visual theme"
 msgstr "Escolha o esquema de cores e tema visual da interface"
 
-msgid "Toolbar Customization"
-msgstr "Personalização da Barra de Ferramentas"
-
 msgid "Manage on-screen tools, folders, and layout arrangement"
 msgstr "Gerencie ferramentas na tela, pastas e organização do layout"
-
-msgid "Customize Tools and Groups"
-msgstr "Personalizar Ferramentas e Grupos"
 
 msgid "Add, remove, reorder tools, or organize them into folders"
 msgstr "Adicione, remova, reordene ferramentas ou agrupe-as em pastas"
 
-msgid "Quick Repositioning Tip"
-msgstr "Dica de Reposicionamento Rápido"
-
-msgid "You can drag the toolbar handle on the canvas or right-click it to quickly dock it to the top, bottom, left, or right edges."
-msgstr "Você pode arrastar a alça da barra na tela ou clicar com o botão direito para fixá-la rapidamente no topo, base, esquerda ou direita."
-
-msgid "Shortcut Scheme"
-msgstr "Esquema de Atalhos"
+msgid ""
+"You can drag the toolbar handle on the canvas or right-click it to quickly "
+"dock it to the top, bottom, left, or right edges."
+msgstr ""
+"Você pode arrastar a alça da barra na tela ou clicar com o botão direito "
+"para fixá-la rapidamente no topo, base, esquerda ou direita."
 
 msgid "Keyboard compatibility presets — click any shortcut to customize it"
-msgstr "Predefinições de compatibilidade — clique em qualquer atalho para personalizar"
-
-msgid "Keyboard scheme"
-msgstr "Esquema de teclado"
+msgstr ""
+"Predefinições de compatibilidade — clique em qualquer atalho para "
+"personalizar"
 
 msgid "Adapts shortcut keys to your preferred software"
 msgstr "Adapta as teclas de atalho ao seu software de preferência"
@@ -2177,50 +2010,14 @@ msgstr "Adapta as teclas de atalho ao seu software de preferência"
 msgid "Search shortcuts..."
 msgstr "Buscar atalhos de teclado..."
 
-msgid "Creation and Selection Tools"
-msgstr "Ferramentas de Criação e Seleção"
-
 msgid "Click row to customize shortcut"
 msgstr "Clique na linha para personalizar o atalho"
-
-msgid "Editing, Organization and History"
-msgstr "Edição, Organização e Histórico"
-
-msgid "View and Zoom"
-msgstr "Visualização e Zoom"
-
-msgid "Restore Default"
-msgstr "Restaurar Padrão"
-
-msgid "Restore all shortcuts"
-msgstr "Restaurar todos os atalhos"
 
 msgid "Reverts all keys to the default GNOME Paths scheme"
 msgstr "Restaura todas as teclas para o esquema padrão do GNOME Paths"
 
-msgid "Installed Plugins"
-msgstr "Plugins Instalados"
-
 msgid "Manage external extensions added to the studio"
 msgstr "Gerencie extensões externas adicionadas ao estúdio"
-
-msgid "No external plugins installed"
-msgstr "Nenhum plugin externo instalado"
-
-msgid "Add a new plugin to manage."
-msgstr "Adicione um novo plugin para gerenciar."
-
-msgid "Extension Management"
-msgstr "Gerenciamento de Extensões"
-
-msgid "Install plugin"
-msgstr "Instalar plugin"
-
-msgid "Import plugins (.so)"
-msgstr "Importar plugins binários (.so)"
-
-
-
 
 msgid "Core Panels"
 msgstr "Painéis Principais"
@@ -2259,10 +2056,13 @@ msgid "{} — GNOME Paths"
 msgstr "{} — GNOME Paths"
 
 msgid "Customize the color of toolbar, tool options and inspector icons"
-msgstr "Personalize a cor dos ícones das barras de ferramentas, opções e inspetor"
+msgstr ""
+"Personalize a cor dos ícones das barras de ferramentas, opções e inspetor"
 
 msgid "Tint toolbars, HUDs and inspector icons with selected chromatic hue"
-msgstr "Tinja as barras de ferramentas, HUDs e ícones do inspetor com o tom cromático selecionado"
+msgstr ""
+"Tinja as barras de ferramentas, HUDs e ícones do inspetor com o tom "
+"cromático selecionado"
 
 msgid "Theme Default"
 msgstr "Padrão do Tema"
@@ -2276,8 +2076,12 @@ msgstr "Preto Puro"
 msgid "Vector graphics and illustration editor for the GNOME desktop."
 msgstr "Editor de gráficos vetoriais e ilustrações para o ambiente GNOME."
 
-msgid "Lightweight, vector design tool built with GTK4, Libadwaita, Rust, and the Skia 2D engine."
-msgstr "Ferramenta leve de design vetorial, construída com GTK4, Libadwaita, Rust e o motor gráfico Skia 2D."
+msgid ""
+"Lightweight, vector design tool built with GTK4, Libadwaita, Rust, and the "
+"Skia 2D engine."
+msgstr ""
+"Ferramenta leve de design vetorial, construída com GTK4, Libadwaita, Rust e "
+"o motor gráfico Skia 2D."
 
 msgid "Support Development"
 msgstr "Apoie o Desenvolvimento"
@@ -2285,8 +2089,12 @@ msgstr "Apoie o Desenvolvimento"
 msgid "Visual Themes and Palettes"
 msgstr "Temas Visuais e Paletas"
 
-msgid "Color schemes inspired by GNOME Builder, Text Editor, and modern developer aesthetics"
-msgstr "Esquemas de cores inspirados no GNOME Builder, Editor de Texto e estética de desenvolvimento moderna"
+msgid ""
+"Color schemes inspired by GNOME Builder, Text Editor, and modern developer "
+"aesthetics"
+msgstr ""
+"Esquemas de cores inspirados no GNOME Builder, Editor de Texto e estética de "
+"desenvolvimento moderna"
 
 msgid "Interface and Ergonomics"
 msgstr "Interface e Ergonomia"
@@ -2384,13 +2192,8 @@ msgstr "Catppuccin (Mocha)"
 msgid "Soothing warm pastel theme"
 msgstr "Paleta relaxante com tons pastéis quentes"
 
-msgid "System Default"
-msgstr "Padrão do Sistema"
-
 msgid "Teal"
 msgstr "Azul Petróleo / Verde-azulado"
-
-
 
 msgid "Add Active Color"
 msgstr "Adicionar Cor Ativa"
@@ -2446,8 +2249,12 @@ msgstr "Unidade do Documento"
 msgid "Document Unit (px, mm, cm, m, in, pt, pc)"
 msgstr "Unidade do Documento (px, mm, cm, m, in, pt, pc)"
 
-msgid "Draw shapes or text on canvas\nto create layers."
-msgstr "Desenhe formas ou texto na tela\npara criar camadas."
+msgid ""
+"Draw shapes or text on canvas\n"
+"to create layers."
+msgstr ""
+"Desenhe formas ou texto na tela\n"
+"para criar camadas."
 
 msgid "Drawing path"
 msgstr "Desenhando caminho"
@@ -2490,9 +2297,6 @@ msgstr "Mover gradientes (no preenchimento ou contorno) junto com os objetos"
 
 msgid "Move patterns (in fill or stroke) along with the objects"
 msgstr "Mover padrões (no preenchimento ou contorno) junto com os objetos"
-
-msgid "No existing groups.\nUse the '+' button at the top to create a group."
-msgstr "Nenhum grupo existente.\nUse o botão '+' no topo para criar um grupo."
 
 msgid "Object to nodes and Bézier curves (Ctrl+Shift+C)"
 msgstr "Objeto para nós e curvas Bézier (Ctrl+Shift+C)"
@@ -2552,10 +2356,16 @@ msgid "Vibrant Neon"
 msgstr "Neon Vibrante"
 
 msgid "When scaling objects, scale the stroke width in the same proportion"
-msgstr "Ao redimensionar objetos, dimensionar a largura do contorno na mesma proporção"
+msgstr ""
+"Ao redimensionar objetos, dimensionar a largura do contorno na mesma "
+"proporção"
 
-msgid "When scaling rectangles, scale the radii of rounded corners in the same proportion"
-msgstr "Ao redimensionar retângulos, dimensionar os raios dos cantos arredondados na mesma proporção"
+msgid ""
+"When scaling rectangles, scale the radii of rounded corners in the same "
+"proportion"
+msgstr ""
+"Ao redimensionar retângulos, dimensionar os raios dos cantos arredondados na "
+"mesma proporção"
 
 msgid "node"
 msgstr "nó"
@@ -2656,9 +2466,6 @@ msgstr "Pontilhado Halftone"
 msgid "Diagonal Stripes"
 msgstr "Listras Diagonais"
 
-msgid "Checkerboard"
-msgstr "Xadrez"
-
 msgid "Hexagonal Honeycomb"
 msgstr "Colmeia Hexagonal"
 
@@ -2673,9 +2480,6 @@ msgstr "Pesquisar"
 
 msgid "Heart"
 msgstr "Coração"
-
-msgid "Star"
-msgstr "Estrela"
 
 msgid "Check"
 msgstr "Verificação"
@@ -2703,9 +2507,6 @@ msgstr "Pausar"
 
 msgid "Camera"
 msgstr "Câmera"
-
-msgid "Lock"
-msgstr "Bloquear"
 
 msgid "Globe"
 msgstr "Globo"
@@ -2836,9 +2637,6 @@ msgstr "Cores do Projeto"
 msgid "Preset Palettes"
 msgstr "Paletas Predefinidas"
 
-msgid "Document Colors"
-msgstr "Cores do Documento"
-
 msgid "Colors used on the canvas will appear here automatically."
 msgstr "Cores usadas nos objetos na tela aparecem aqui automaticamente."
 
@@ -2863,29 +2661,11 @@ msgstr "Clique ou arraste para inserir o ícone do GNOME"
 msgid "Favorite"
 msgstr "Favorito"
 
-msgid "Check"
-msgstr "Confirmar"
-
-msgid "Close"
-msgstr "Fechar"
-
-msgid "New Document"
-msgstr "Novo Documento"
-
 msgid "Open"
 msgstr "Abrir"
 
-msgid "Save"
-msgstr "Salvar"
-
 msgid "Refresh"
 msgstr "Atualizar"
-
-msgid "Play"
-msgstr "Reproduzir"
-
-msgid "Pause"
-msgstr "Pausar"
 
 msgid "Palette"
 msgstr "Paleta"
@@ -2904,12 +2684,6 @@ msgstr "Lua"
 
 msgid "Network"
 msgstr "Rede"
-
-msgid "Lock"
-msgstr "Bloquear"
-
-msgid "Unlock"
-msgstr "Desbloquear"
 
 msgid "Info"
 msgstr "Informações"

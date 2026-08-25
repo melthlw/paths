@@ -13,6 +13,8 @@ msgstr ""
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 
 msgid "0° (Horizontal →)"
 msgstr ""
@@ -941,10 +943,14 @@ msgstr ""
 msgid "Mirror and Layers"
 msgstr ""
 
-msgid "Modern vector design editor accelerated by Skia GPU, built with GTK4, Libadwaita and Rust"
+msgid ""
+"Modern vector design editor accelerated by Skia GPU, built with GTK4, "
+"Libadwaita and Rust"
 msgstr ""
 
-msgid "Modern vector design editor accelerated by Skia GPU, built with GTK4, Libadwaita and Rust."
+msgid ""
+"Modern vector design editor accelerated by Skia GPU, built with GTK4, "
+"Libadwaita and Rust."
 msgstr ""
 
 msgid "Move Layer Down"
@@ -989,7 +995,8 @@ msgstr ""
 msgid "New key captured successfully!"
 msgstr ""
 
-msgid "No existing groups.\n"
+msgid ""
+"No existing groups.\n"
 "Use the '+' button at the top to create a group."
 msgstr ""
 
@@ -1137,7 +1144,9 @@ msgstr ""
 msgid "Preserve alpha transparency"
 msgstr ""
 
-msgid "Press the new key or combination on your keyboard (e.g. <b>Ctrl</b>, <b>Shift</b>, <b>Alt</b> + Key):"
+msgid ""
+"Press the new key or combination on your keyboard (e.g. <b>Ctrl</b>, "
+"<b>Shift</b>, <b>Alt</b> + Key):"
 msgstr ""
 
 msgid "Pure Black (#000000)"
@@ -1395,9 +1404,6 @@ msgstr ""
 msgid "Size of Bézier handle endpoints"
 msgstr ""
 
-msgid "Size of Bézier handle endpoints"
-msgstr ""
-
 msgid "Skia Graphics Pipeline"
 msgstr ""
 
@@ -1602,9 +1608,6 @@ msgstr ""
 msgid "When to show Bézier control arms and handles"
 msgstr ""
 
-msgid "When to show Bézier control arms and handles"
-msgstr ""
-
 msgid "Width"
 msgstr ""
 
@@ -1665,7 +1668,6 @@ msgstr ""
 msgid "{} — Inspector"
 msgstr ""
 
-
 msgid "Clone of {}"
 msgstr ""
 
@@ -1699,16 +1701,14 @@ msgstr ""
 msgid "No Panels Open"
 msgstr ""
 
-msgid "Click '+' above to open panels like\nAppearance, Alignment, Transform or Export."
+msgid ""
+"Click '+' above to open panels like\n"
+"Appearance, Alignment, Transform or Export."
 msgstr ""
 
-msgid "Drag a floating tab here\nto dock it back."
-msgstr ""
-
-msgid "Dock into Top Bar"
-msgstr ""
-
-msgid "Dock into New Section Below"
+msgid ""
+"Drag a floating tab here\n"
+"to dock it back."
 msgstr ""
 
 msgid "Move to Section Above"
@@ -1738,9 +1738,6 @@ msgstr ""
 msgid "Guides & Grid"
 msgstr ""
 
-msgid "Show Grid"
-msgstr ""
-
 msgid "Snap to Grid"
 msgstr ""
 
@@ -1757,9 +1754,6 @@ msgid "Actual Size (100%)"
 msgstr ""
 
 msgid "Add New Page"
-msgstr ""
-
-msgid "Circle / Ellipse"
 msgstr ""
 
 msgid "Triangle / Polygon"
@@ -1846,19 +1840,7 @@ msgstr ""
 msgid "Applies chromatic highlight to selectors, badges and focus elements"
 msgstr ""
 
-msgid "GNOME Blue (Default)"
-msgstr ""
-
-msgid "Emerald Green"
-msgstr ""
-
-msgid "Ruby Red"
-msgstr ""
-
 msgid "Amber Gold"
-msgstr ""
-
-msgid "Slate"
 msgstr ""
 
 msgid "Magenta Pink"
@@ -1867,34 +1849,7 @@ msgstr ""
 msgid "Customize workspace canvas background color and pattern"
 msgstr ""
 
-msgid "Workspace Color"
-msgstr ""
-
-msgid "Background color behind pages and artboards"
-msgstr ""
-
-msgid "Dark Studio (#242424)"
-msgstr ""
-
-msgid "Neutral Charcoal (#383838)"
-msgstr ""
-
-msgid "Light Gray (#E8E8E8)"
-msgstr ""
-
-msgid "Pure Black (#000000)"
-msgstr ""
-
-msgid "Pure White (#FFFFFF)"
-msgstr ""
-
 msgid "Visual styling for artboard paper color, drop shadow, and borders"
-msgstr ""
-
-msgid "Page Background Color"
-msgstr ""
-
-msgid "Default paper color for active document artboards"
 msgstr ""
 
 msgid "White Paper"
@@ -1906,52 +1861,7 @@ msgstr ""
 msgid "Dark Paper"
 msgstr ""
 
-msgid "Page Drop Shadow"
-msgstr ""
-
-msgid "Realistic elevation shadow around page boundaries"
-msgstr ""
-
-msgid "Page Outline"
-msgstr ""
-
-msgid "Fine boundary outline highlighting page dimensions"
-msgstr ""
-
 msgid "Visual configuration of precision grid and points"
-msgstr ""
-
-msgid "Display precision grid across the canvas"
-msgstr ""
-
-msgid "Grid Style"
-msgstr ""
-
-msgid "Graphic pattern displayed for grid subdivisions"
-msgstr ""
-
-msgid "Grid Spacing (px)"
-msgstr ""
-
-msgid "Pixel distance between primary grid lines"
-msgstr ""
-
-msgid "Grid Subdivisions"
-msgstr ""
-
-msgid "Number of fine divisions in each cell"
-msgstr ""
-
-msgid "Grid Opacity"
-msgstr ""
-
-msgid "Controls how visible the grid overlay appears"
-msgstr ""
-
-msgid "Grid Color"
-msgstr ""
-
-msgid "Hue tint used for major and minor grid lines"
 msgstr ""
 
 msgid "GNOME Blue"
@@ -1969,58 +1879,25 @@ msgstr ""
 msgid "High Contrast White"
 msgstr ""
 
-msgid "Units and Measurements"
-msgstr ""
-
 msgid "Define coordinate system and default studio unit"
-msgstr ""
-
-msgid "Default measurement unit"
 msgstr ""
 
 msgid "Used in dimension inspector, rulers, and transformations"
 msgstr ""
 
-msgid "Magnetic Snapping and Guides"
-msgstr ""
-
 msgid "Snapping rules and precision visual guides"
-msgstr ""
-
-msgid "Snap to other objects"
 msgstr ""
 
 msgid "Displays smart alignment guides between elements"
 msgstr ""
 
-msgid "Snap to page"
-msgstr ""
-
 msgid "Snaps objects to artboard margins and center"
-msgstr ""
-
-msgid "Show rulers and guides"
 msgstr ""
 
 msgid "Shows alignment guides and measurement rulers"
 msgstr ""
 
-msgid "Node & Handle Appearance"
-msgstr ""
-
 msgid "Configure the visual sizing, shapes, and handles for vector editing"
-msgstr ""
-
-msgid "Anchor Node Size"
-msgstr ""
-
-msgid "Visual size of anchor points on canvas"
-msgstr ""
-
-msgid "Handle Visibility"
-msgstr ""
-
-msgid "When to show Bézier control arms and handles"
 msgstr ""
 
 msgid "Selected Nodes"
@@ -2029,58 +1906,23 @@ msgstr ""
 msgid "Active Path"
 msgstr ""
 
-msgid "Always Visible"
-msgstr ""
-
-msgid "Control Handle Size"
-msgstr ""
-
-msgid "Size of Bézier handle endpoints"
-msgstr ""
-
-msgid "Differentiate Node Shapes"
-msgstr ""
-
-msgid "Show Squares for Corners, Diamonds for Smooth, and Circles for Symmetric/Auto"
-msgstr ""
-
-msgid "Show Path Direction Arrows"
+msgid ""
+"Show Squares for Corners, Diamonds for Smooth, and Circles for Symmetric/Auto"
 msgstr ""
 
 msgid "Display tangent direction arrows along vector segments"
 msgstr ""
 
-msgid "Highlight Hovered Segments"
-msgstr ""
-
 msgid "Show dynamic add-point cross and segment highlight under cursor"
-msgstr ""
-
-msgid "Interaction & Manipulation"
 msgstr ""
 
 msgid "Configure behavior and sensitivities for vector path editing"
 msgstr ""
 
-msgid "Direct Curve Dragging"
-msgstr ""
-
 msgid "Click and drag anywhere on a curve to reshape Bézier curvature directly"
 msgstr ""
 
-msgid "Click Grab Sensitivity"
-msgstr ""
-
-msgid "Tolerance distance for selecting nodes and handles"
-msgstr ""
-
-msgid "Handle Angle Snapping (Shift)"
-msgstr ""
-
 msgid "Constrain handle rotation angle when holding Shift"
-msgstr ""
-
-msgid "Default Type for New Nodes"
 msgstr ""
 
 msgid "Node type assigned when creating or inserting new anchor points"
@@ -2119,55 +1961,24 @@ msgstr ""
 msgid "Render canvas using GPU"
 msgstr ""
 
-msgid "Antialiasing"
-msgstr ""
-
 msgid "Smooth vector paths and curves"
-msgstr ""
-
-msgid "Follows GNOME"
-msgstr ""
-
-msgid "Bright interface"
-msgstr ""
-
-msgid "Low brightness"
-msgstr ""
-
-msgid "Select light, dark or automatic system synchronization"
-msgstr ""
-
-msgid "Application Theme"
 msgstr ""
 
 msgid "Choose interface color scheme and visual theme"
 msgstr ""
 
-msgid "Toolbar Customization"
-msgstr ""
-
 msgid "Manage on-screen tools, folders, and layout arrangement"
-msgstr ""
-
-msgid "Customize Tools and Groups"
 msgstr ""
 
 msgid "Add, remove, reorder tools, or organize them into folders"
 msgstr ""
 
-msgid "Quick Repositioning Tip"
-msgstr ""
-
-msgid "You can drag the toolbar handle on the canvas or right-click it to quickly dock it to the top, bottom, left, or right edges."
-msgstr ""
-
-msgid "Shortcut Scheme"
+msgid ""
+"You can drag the toolbar handle on the canvas or right-click it to quickly "
+"dock it to the top, bottom, left, or right edges."
 msgstr ""
 
 msgid "Keyboard compatibility presets — click any shortcut to customize it"
-msgstr ""
-
-msgid "Keyboard scheme"
 msgstr ""
 
 msgid "Adapts shortcut keys to your preferred software"
@@ -2176,47 +1987,11 @@ msgstr ""
 msgid "Search shortcuts..."
 msgstr ""
 
-msgid "Creation and Selection Tools"
-msgstr ""
-
 msgid "Click row to customize shortcut"
-msgstr ""
-
-msgid "Editing, Organization and History"
-msgstr ""
-
-msgid "View and Zoom"
-msgstr ""
-
-msgid "Restore Default"
-msgstr ""
-
-msgid "Restore all shortcuts"
 msgstr ""
 
 msgid "Reverts all keys to the default GNOME Paths scheme"
 msgstr ""
 
-msgid "Installed Plugins"
-msgstr ""
-
 msgid "Manage external extensions added to the studio"
 msgstr ""
-
-msgid "No external plugins installed"
-msgstr ""
-
-msgid "Add a new plugin to manage."
-msgstr ""
-
-msgid "Extension Management"
-msgstr ""
-
-msgid "Install plugin"
-msgstr ""
-
-msgid "Import plugins (.so)"
-msgstr ""
-
-
-

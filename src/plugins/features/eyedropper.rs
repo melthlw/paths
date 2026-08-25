@@ -26,8 +26,8 @@ impl EyedropperFeature {
         // Hit-test elements from top to bottom
         for elem in ctx.document.elements.iter().rev() {
             if elem.hit_test(point) {
-                if let Some(fill) = elem.fill_color() {
-                    return fill;
+                if let Some(color) = elem.sample_color_at(point) {
+                    return color;
                 }
                 if let Some(stroke) = elem.stroke_color() {
                     return stroke;
