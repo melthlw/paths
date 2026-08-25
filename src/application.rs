@@ -7,8 +7,8 @@ use libadwaita::prelude::*;
 
 use crate::ui::DesignWindow;
 
-pub const APP_ID: &str = "io.gitlab.lewisHeart.GnomePaths";
-pub const RESOURCE_PATH: &str = "/io/gitlab/lewisHeart/GnomePaths";
+pub const APP_ID: &str = "io.gitlab.lewisHeart.Paths";
+pub const RESOURCE_PATH: &str = "/io/gitlab/lewisHeart/Paths";
 
 pub struct DesignApplication {
     app: adw::Application,

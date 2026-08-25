@@ -15,11 +15,19 @@ pub fn save_document_to_file(doc: &Document, path: &Path) -> Result<(), String> 
 
 /// Loads a document from an SVG string (either a GNOME Paths project SVG or standard external SVG)
 pub fn load_document_from_svg(content: &str) -> Result<Document, String> {
-    // 1. Check for GNOME Paths lossless project metadata in <metadata>
-    if let Some(meta_start) = content.find("<gnomepaths:project") {
+    // 1. Check for Paths lossless project metadata in <metadata>
+    let meta_tag_start = content
+        .find("<paths:project")
+        .or_else(|| content.find("<gnomepaths:project"));
+    if let Some(meta_start) = meta_tag_start {
+        let close_tag = if content[meta_start..].starts_with("<paths:project") {
+            "</paths:project>"
+        } else {
+            "</gnomepaths:project>"
+        };
         if let Some(tag_end) = content[meta_start..].find('>') {
             let body_start = meta_start + tag_end + 1;
-            if let Some(body_end) = content[body_start..].find("</gnomepaths:project>") {
+            if let Some(body_end) = content[body_start..].find(close_tag) {
                 let mut json_str = &content[body_start..body_start + body_end];
                 // Strip CDATA wrapper if present
                 if let Some(cdata_start) = json_str.find("<![CDATA[") {

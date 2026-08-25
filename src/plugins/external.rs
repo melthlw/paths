@@ -29,10 +29,10 @@ impl ExternalPlugin {
     }
 }
 
-/// Returns the user plugins directory (~/.local/share/gnome-paths/plugins)
+/// Returns the user plugins directory (~/.local/share/paths/plugins)
 pub fn get_plugins_dir() -> PathBuf {
     if let Some(mut data_dir) = dirs::data_dir() {
-        data_dir.push("gnome-paths");
+        data_dir.push("paths");
         data_dir.push("plugins");
         data_dir
     } else {

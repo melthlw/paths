@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.gitlab.lewisHeart.GnomePaths</id>
+  <id>io.gitlab.lewisHeart.Paths</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
-  <name>GNOME Paths</name>
+  <name>Paths</name>
   <summary>Create and edit vector graphics and illustrations</summary>
   <description>
     <p>
-      GNOME Paths is a modern, high-performance vector design and illustration studio designed specifically for the GNOME desktop. Powered by the Skia 2D GPU rendering engine and written in Rust with GTK4 and Libadwaita, it delivers an intuitive and responsive creative environment.
+      Paths is a modern, high-performance vector design and illustration studio designed specifically for the GNOME desktop. Powered by the Skia 2D GPU rendering engine and written in Rust with GTK4 and Libadwaita, it delivers an intuitive and responsive creative environment.
     </p>
     <p>Key features include:</p>
     <ul>
@@ -21,10 +21,10 @@
       <li>Seamless dark and light theme integration following GNOME human interface guidelines</li>
     </ul>
   </description>
-  <launchable type="desktop-id">io.gitlab.lewisHeart.GnomePaths.desktop</launchable>
-  <url type="homepage">https://gitlab.com/lewisHeart/gnome-paths</url>
-  <url type="bugtracker">https://gitlab.com/lewisHeart/gnome-paths/-/issues</url>
-  <url type="vcs-browser">https://gitlab.com/lewisHeart/gnome-paths</url>
+  <launchable type="desktop-id">io.gitlab.lewisHeart.Paths.desktop</launchable>
+  <url type="homepage">https://gitlab.com/lewisHeart/paths</url>
+  <url type="bugtracker">https://gitlab.com/lewisHeart/paths/-/issues</url>
+  <url type="vcs-browser">https://gitlab.com/lewisHeart/paths</url>
   <developer id="io.gitlab.lewisheart">
     <name>Lewis</name>
   </developer>
@@ -40,7 +40,7 @@
   <releases>
     <release version="0.1.0" date="2026-08-22">
       <description>
-        <p>Initial release of GNOME Paths vector design studio featuring Skia GPU acceleration, Libadwaita modular UI, and comprehensive SVG workflows.</p>
+        <p>Initial release of Paths vector design studio featuring Skia GPU acceleration, Libadwaita modular UI, and comprehensive SVG workflows.</p>
       </description>
     </release>
   </releases>

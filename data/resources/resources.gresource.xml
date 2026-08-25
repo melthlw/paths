@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
-  <gresource prefix="/io/gitlab/lewisHeart/GnomePaths">
+  <gresource prefix="/io/gitlab/lewisHeart/Paths">
     <file preprocess="xml-stripblanks">ui/window.ui</file>
     <file preprocess="xml-stripblanks">ui/shortcuts.ui</file>
     <file>style.css</file>
@@ -271,10 +271,10 @@
     <file>icons/insert-object-symbolic.svg</file>
     <file alias="icons/hicolor/scalable/actions/insert-object-symbolic.svg">icons/insert-object-symbolic.svg</file>
     <file alias="icons/hicolor/symbolic/actions/insert-object-symbolic.svg">icons/insert-object-symbolic.svg</file>
-    <file>icons/io.gitlab.lewisHeart.GnomePaths-symbolic.svg</file>
-    <file alias="icons/hicolor/scalable/actions/io.gitlab.lewisHeart.GnomePaths-symbolic.svg">icons/io.gitlab.lewisHeart.GnomePaths-symbolic.svg</file>
-    <file alias="icons/hicolor/symbolic/actions/io.gitlab.lewisHeart.GnomePaths-symbolic.svg">icons/io.gitlab.lewisHeart.GnomePaths-symbolic.svg</file>
-    <file>icons/io.gitlab.lewisHeart.GnomePaths.svg</file>
+    <file>icons/io.gitlab.lewisHeart.Paths-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/io.gitlab.lewisHeart.Paths-symbolic.svg">icons/io.gitlab.lewisHeart.Paths-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/io.gitlab.lewisHeart.Paths-symbolic.svg">icons/io.gitlab.lewisHeart.Paths-symbolic.svg</file>
+    <file>icons/io.gitlab.lewisHeart.Paths.svg</file>
     <file>icons/isolate-panel-symbolic.svg</file>
     <file alias="icons/hicolor/scalable/actions/isolate-panel-symbolic.svg">icons/isolate-panel-symbolic.svg</file>
     <file alias="icons/hicolor/symbolic/actions/isolate-panel-symbolic.svg">icons/isolate-panel-symbolic.svg</file>

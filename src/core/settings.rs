@@ -3,7 +3,7 @@ use gtk4::prelude::*;
 use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 
-pub const APP_SCHEMA_ID: &str = "io.gitlab.lewisHeart.GnomePaths";
+pub const APP_SCHEMA_ID: &str = "io.gitlab.lewisHeart.Paths";
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct AppConfig {
@@ -132,7 +132,7 @@ thread_local! {
 
 pub fn config_file_path() -> PathBuf {
     glib::user_config_dir()
-        .join("gnome-paths")
+        .join("paths")
         .join("settings.json")
 }
 

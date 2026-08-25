@@ -1,8 +1,8 @@
 [Desktop Entry]
-Name=GNOME Paths
+Name=Paths
 Comment=Create and edit vector graphics and illustrations
-Exec=gnome-paths %F
-Icon=io.gitlab.lewisHeart.GnomePaths
+Exec=paths %F
+Icon=io.gitlab.lewisHeart.Paths
 Terminal=false
 Type=Application
 Categories=GNOME;GTK;Graphics;VectorGraphics;2DGraphics;
@@ -13,4 +13,4 @@ Actions=NewDocument;
 
 [Desktop Action NewDocument]
 Name=New Document
-Exec=gnome-paths
+Exec=paths

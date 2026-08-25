@@ -1,11 +1,11 @@
 [package]
-name = "gnome-paths"
+name = "paths"
 version = "0.3.0"
 edition = "2024"
 authors = ["Lewis"]
 description = "Vector graphics and illustration design studio for GNOME built with GTK4, Libadwaita, Skia and Rust"
 license = "GPL-3.0-or-later"
-repository = "https://gitlab.com/lewisHeart/gnome-paths"
+repository = "https://gitlab.com/lewisHeart/paths"
 
 [dependencies]
 gtk4 = { version = "0.11.4", features = ["v4_18"] }

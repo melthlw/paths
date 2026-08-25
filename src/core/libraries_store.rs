@@ -66,9 +66,9 @@ pub struct LibrariesData {
 
 pub fn get_libraries_dir() -> PathBuf {
     if let Some(cfg) = dirs::config_dir() {
-        cfg.join("gnome-paths").join("libraries")
+        cfg.join("paths").join("libraries")
     } else {
-        PathBuf::from(".config/gnome-paths/libraries")
+        PathBuf::from(".config/paths/libraries")
     }
 }
 

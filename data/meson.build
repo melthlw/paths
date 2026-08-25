@@ -1,6 +1,6 @@
 desktop_file = i18n.merge_file(
-  input: 'io.gitlab.lewisHeart.GnomePaths.desktop.in',
-  output: 'io.gitlab.lewisHeart.GnomePaths.desktop',
+  input: 'io.gitlab.lewisHeart.Paths.desktop.in',
+  output: 'io.gitlab.lewisHeart.Paths.desktop',
   type: 'desktop',
   po_dir: '../po',
   install: true,
@@ -13,8 +13,8 @@ if desktop_utils.found()
 endif
 
 appstream_file = i18n.merge_file(
-  input: 'io.gitlab.lewisHeart.GnomePaths.metainfo.xml.in',
-  output: 'io.gitlab.lewisHeart.GnomePaths.metainfo.xml',
+  input: 'io.gitlab.lewisHeart.Paths.metainfo.xml.in',
+  output: 'io.gitlab.lewisHeart.Paths.metainfo.xml',
   po_dir: '../po',
   install: true,
   install_dir: get_option('datadir') / 'metainfo'
@@ -25,7 +25,7 @@ if appstreamcli.found()
   test('Validate metainfo file', appstreamcli, args: ['validate', '--no-net', '--explain', appstream_file])
 endif
 
-install_data('io.gitlab.lewisHeart.GnomePaths.gschema.xml',
+install_data('io.gitlab.lewisHeart.Paths.gschema.xml',
   install_dir: get_option('datadir') / 'glib-2.0' / 'schemas'
 )
 
@@ -37,11 +37,11 @@ if compile_schemas.found()
 endif
 
 install_data(
-  'icons/hicolor/scalable/apps/io.gitlab.lewisHeart.GnomePaths.svg',
+  'icons/hicolor/scalable/apps/io.gitlab.lewisHeart.Paths.svg',
   install_dir: get_option('datadir') / 'icons' / 'hicolor' / 'scalable' / 'apps'
 )
 
 install_data(
-  'icons/hicolor/symbolic/apps/io.gitlab.lewisHeart.GnomePaths-symbolic.svg',
+  'icons/hicolor/symbolic/apps/io.gitlab.lewisHeart.Paths-symbolic.svg',
   install_dir: get_option('datadir') / 'icons' / 'hicolor' / 'symbolic' / 'apps'
 )

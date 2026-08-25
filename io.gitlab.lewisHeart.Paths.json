@@ -1,12 +1,12 @@
 {
-  "app-id": "io.gitlab.lewisHeart.GnomePaths",
+  "app-id": "io.gitlab.lewisHeart.Paths",
   "runtime": "org.gnome.Platform",
   "runtime-version": "50",
   "sdk": "org.gnome.Sdk",
   "sdk-extensions": [
     "org.freedesktop.Sdk.Extension.rust-stable"
   ],
-  "command": "gnome-paths",
+  "command": "paths",
   "finish-args": [
     "--share=ipc",
     "--socket=fallback-x11",
@@ -15,14 +15,14 @@
     "--filesystem=xdg-documents",
     "--filesystem=xdg-pictures",
     "--filesystem=xdg-download",
-    "--metadata=X-DConf=migrate-path=/io/gitlab/lewisHeart/GnomePaths/"
+    "--metadata=X-DConf=migrate-path=/io/gitlab/lewisHeart/Paths/"
   ],
   "build-options": {
     "append-path": "/usr/lib/sdk/rust-stable/bin",
     "env": {
-      "CARGO_HOME": "/run/build/gnome-paths/cargo",
+      "CARGO_HOME": "/run/build/paths/cargo",
       "RUST_BACKTRACE": "1",
-      "SKIA_BINARIES_URL": "file:///run/build/gnome-paths/skia-binaries-a25a0fdb7d90429aa2d1-x86_64-unknown-linux-gnu-jpegd-jpege-pdf.tar.gz"
+      "SKIA_BINARIES_URL": "file:///run/build/paths/skia-binaries-a25a0fdb7d90429aa2d1-x86_64-unknown-linux-gnu-jpegd-jpege-pdf.tar.gz"
     }
   },
   "cleanup": [
@@ -38,7 +38,7 @@
   ],
   "modules": [
     {
-      "name": "gnome-paths",
+      "name": "paths",
       "buildsystem": "meson",
       "run-tests": true,
       "sources": [

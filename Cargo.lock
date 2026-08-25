@@ -422,24 +422,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e4eba85ea1d0a966a983acd07deee566e67395d2d96b6fb39e62b5a833f1eb0b"
 
 [[package]]
-name = "gnome-paths"
-version = "0.3.0"
-dependencies = [
- "cairo-rs",
- "dirs",
- "gio",
- "glib",
- "glib-build-tools",
- "gtk4",
- "libadwaita",
- "libloading 0.9.0",
- "serde",
- "serde_json",
- "skia-safe",
- "toml",
-]
-
-[[package]]
 name = "gobject-sys"
 version = "0.22.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -736,6 +718,24 @@ dependencies = [
  "gobject-sys",
  "libc",
  "system-deps",
+]
+
+[[package]]
+name = "paths"
+version = "0.3.0"
+dependencies = [
+ "cairo-rs",
+ "dirs",
+ "gio",
+ "glib",
+ "glib-build-tools",
+ "gtk4",
+ "libadwaita",
+ "libloading 0.9.0",
+ "serde",
+ "serde_json",
+ "skia-safe",
+ "toml",
 ]
 
 [[package]]

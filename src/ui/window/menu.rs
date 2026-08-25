@@ -212,14 +212,14 @@ pub fn build_main_menu(
             pop_ab.popdown();
             if let Some(win) = win_holder.borrow().as_ref() {
                 let about = adw::AboutDialog::builder()
-                    .application_name("GNOME Paths")
-                    .application_icon("io.gitlab.lewisHeart.GnomePaths")
+                    .application_name("Paths")
+                    .application_icon("io.gitlab.lewisHeart.Paths")
                     .version("0.3.0-alpha")
                     .developer_name("Lewis")
                     .developers(["Lewis"])
                     .artists(["Lewis"])
-                    .issue_url("https://gitlab.com/lewisHeart/gnome-paths/-/issues")
-                    .website("https://gitlab.com/lewisHeart/gnome-paths")
+                    .issue_url("https://gitlab.com/lewisHeart/paths/-/issues")
+                    .website("https://gitlab.com/lewisHeart/paths")
                     .license_type(gtk4::License::Gpl30)
                     .comments(&crate::core::gettext("Modern vector design editor accelerated by Skia GPU, built with GTK4, Libadwaita and Rust."))
                     .build();

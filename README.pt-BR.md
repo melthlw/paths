@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="data/icons/hicolor/scalable/apps/io.gitlab.lewisHeart.GnomePaths.svg" alt="Logotipo do GNOME Paths" height="128">
+  <img src="data/icons/hicolor/scalable/apps/io.gitlab.lewisHeart.Paths.svg" alt="Logotipo do Paths" height="128">
 </p>
 
-<h1 align="center">GNOME Paths</h1>
+<h1 align="center">Paths</h1>
 
 <p align="center">
   <b>Estúdio moderno de ilustrações e computação gráfica vetorial para o GNOME.</b>
@@ -44,14 +44,14 @@
 
 <div align="center">
   <p><b>Área de Trabalho Principal e Ilustração Vetorial</b></p>
-  <img src="screenshots/main-window.png" alt="Área de Trabalho do GNOME Paths" style="max-width: 100%; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);" />
+  <img src="screenshots/main-window.png" alt="Área de Trabalho do Paths" style="max-width: 100%; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);" />
 </div>
 
 <br/>
 
 <div align="center">
   <p><b>Painel de Preferências e Configurações</b></p>
-  <img src="screenshots/preferences.png" alt="Preferências do GNOME Paths" style="max-width: 85%; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);" />
+  <img src="screenshots/preferences.png" alt="Preferências do Paths" style="max-width: 85%; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);" />
 </div>
 
 ---
@@ -72,7 +72,7 @@
   <tr>
     <td width="50%">
       <h3>Pranchetas Multipáginas</h3>
-      <p>Ambiente multipágina com suporte a múltiplas pranchetas independentes em um único documento. Controle de dimensões por prancheta, reordenação de páginas, navegação e exportação individual ou em lote.</p>
+      <p>Ambiente multipágina com suporte a múltiplas pranchetas independentes em um único documento. Controle de dimensões por pranchepa, reordenação de páginas, navegação e exportação individual ou em lote.</p>
     </td>
     <td width="50%">
       <h3>Clones Vinculados (Linked Clones)</h3>
@@ -93,15 +93,15 @@
 
 ---
 
-## Formatos Suportados de Exportação e Importação
+## Formatos de Exportação e Importação Suportados
 
-| Formato | Exportação | Importação | Características Principais |
+| Formato | Exportação | Importação | Principais Recursos |
 | :--- | :---: | :---: | :--- |
-| **SVG** | Sim | Sim | Preservação total de dados de projeto, curvas W3C padrão, gradientes e metadados |
-| **PNG** | Sim | Sim | Rasterização em alta resolução com canal alfa (transparência) e importação bitmap |
-| **JPG / JPEG** | Sim | Sim | Imagens rasterizadas compactadas para texturas, fundos e referências |
-| **WebP** | Sim | Sim | Formato moderno de alta fidelidade e baixo consumo de dados |
-| **PDF** | Sim | Não | Páginas vetoriais prontas para impressão e publicação |
+| **SVG** | Sim | Sim | Dados do projeto sem perdas, curvas vetoriais W3C padrão, gradientes e metadados |
+| **PNG** | Sim | Sim | Rasterização em alta resolução (High-DPI) com transparência alfa e importação de mapas de bits |
+| **JPG / JPEG** | Sim | Sim | Imagens rasterizadas compactadas para texturas, plano de fundo e referências |
+| **WebP** | Sim | Sim | Formato moderno e leve para gráficos web |
+| **PDF** | Sim | Não | Documentos de vetor prontos para impressão |
 
 ---
 
@@ -118,13 +118,13 @@ Pacotes de desenvolvimento necessários:
 ### 1. Cargo (Desenvolvimento Local)
 
 ```bash
-git clone https://gitlab.com/lewisHeart/gnome-paths.git
-cd gnome-paths
+git clone https://gitlab.com/lewisHeart/paths.git
+cd paths
 
 cargo run --release
 ```
 
-Para rodar todos os 76 testes unitários automatizados:
+Para rodar a suíte de testes unitários automatizados:
 ```bash
 cargo test
 ```
@@ -132,7 +132,7 @@ cargo test
 ### 2. GNOME Builder (Flatpak)
 
 1. Abra o **GNOME Builder**.
-2. Clone o repositório `https://gitlab.com/lewisHeart/gnome-paths.git`.
+2. Clone o repositório `https://gitlab.com/lewisHeart/paths.git`.
 3. Selecione o runtime Flatpak **GNOME 50**.
 4. Clique em **Executar**.
 
@@ -146,14 +146,14 @@ flatpak install flathub \
   org.freedesktop.Sdk.Extension.rust-stable//25.08
 
 # Compilar e instalar o pacote Flatpak
-flatpak-builder --user --install --force-clean build-dir io.gitlab.lewisHeart.GnomePaths.json
+flatpak-builder --user --install --force-clean build-dir io.gitlab.lewisHeart.Paths.json
 
 # Gerar arquivo .flatpak único para release
-flatpak-builder --force-clean --repo=repo build-dir io.gitlab.lewisHeart.GnomePaths.json
-flatpak build-bundle repo io.gitlab.lewisHeart.GnomePaths.flatpak io.gitlab.lewisHeart.GnomePaths
+flatpak-builder --force-clean --repo=repo build-dir io.gitlab.lewisHeart.Paths.json
+flatpak build-bundle repo io.gitlab.lewisHeart.Paths.flatpak io.gitlab.lewisHeart.Paths
 
 # Executar o aplicativo
-flatpak run io.gitlab.lewisHeart.GnomePaths
+flatpak run io.gitlab.lewisHeart.Paths
 ```
 
 ### 4. Meson e Ninja
@@ -161,14 +161,14 @@ flatpak run io.gitlab.lewisHeart.GnomePaths
 ```bash
 meson setup build
 ninja -C build
-./build/gnome-paths
+./build/paths
 ```
 
 ---
 
 ## Sobre o Projeto e Visão
 
-O **GNOME Paths** nasceu da paixão por gráficos vetoriais, profundamente inspirado na versatilidade e no poder do **Inkscape**, com o objetivo de oferecer uma experiência moderna, rápida, fluida e com integração nativa ao ambiente GNOME.
+O **Paths** nasceu da paixão por gráficos vetoriais, profundamente inspirado na versatilidade e no poder do **Inkscape**, com o objetivo de oferecer uma experiência moderna, rápida, fluida e com integração nativa ao ambiente GNOME.
 
 ### Desenvolvimento e Transparência
 Este projeto é ativamente desenvolvido com o auxílio de **inteligência artificial em pair-programming**, sendo cuidadosamente estruturado, planejado e mantido com olhar e arquitetura humana.
@@ -186,13 +186,13 @@ Prezamos pela transparência e colaboração aberta. Caso você prefira o fluxo 
 ## Contribuição e Comunidade
 
 - **Histórico de Alterações**: Consulte o **[CHANGELOG.md](CHANGELOG.md)** para detalhes das versões e notas de lançamento.
-- **Relatórios de Bugs e Sugestões**: Abra uma issue no [Rastreador de Issues do GitLab](https://gitlab.com/lewisHeart/gnome-paths/-/issues).
-- **Traduções**: Ajude a traduzir o GNOME Paths para outros idiomas! Veja **[TRANSLATING.md](TRANSLATING.md)**.
+- **Relatórios de Bugs e Sugestões**: Abra uma issue no [Rastreador de Issues do GitLab](https://gitlab.com/lewisHeart/paths/-/issues).
+- **Traduções**: Ajude a traduzir o Paths para outros idiomas! Veja **[TRANSLATING.md](TRANSLATING.md)**.
 - **Plugins**: Veja o modelo de plugin em [`examples/plugin-template`](examples/plugin-template/).
-- **Apoie o Projeto**: Se o GNOME Paths for útil para você, considere apoiar o desenvolvimento no [Ko-fi](https://ko-fi.com/lauel).
+- **Apoie o Projeto**: Se o Paths for útil para você, considere apoiar o desenvolvimento no [Ko-fi](https://ko-fi.com/lauel).
 
 ---
 
 ## Licença
 
-O GNOME Paths é um software livre de código aberto sob a licença **[GNU General Public License v3.0 ou posterior (GPL-3.0-or-later)](LICENSE)**.
+O Paths é um software livre de código aberto sob a licença **[GNU General Public License v3.0 ou posterior (GPL-3.0-or-later)](LICENSE)**.

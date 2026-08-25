@@ -119,7 +119,7 @@ pub fn export_document_to_svg(doc: &Document) -> String {
         svg,
         r#"<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     xmlns:gnomepaths="https://gitlab.com/lewisHeart/gnome-paths"
+     xmlns:paths="https://gitlab.com/lewisHeart/paths"
      width="{:.2}" height="{:.2}" viewBox="{:.2} {:.2} {:.2} {:.2}" version="1.1">"#,
         width, height, view_box_x, view_box_y, width, height
     );
@@ -127,10 +127,10 @@ pub fn export_document_to_svg(doc: &Document) -> String {
     // 1. Lossless Project Metadata
     let project_data = DocumentProjectData::from_document(doc);
     if let Ok(json_str) = serde_json::to_string(&project_data) {
-        let _ = writeln!(svg, "  <metadata id=\"gnome-paths-metadata\">");
+        let _ = writeln!(svg, "  <metadata id=\"paths-metadata\">");
         let _ = writeln!(
             svg,
-            "    <gnomepaths:project version=\"1.0\"><![CDATA[{}]]></gnomepaths:project>",
+            "    <paths:project version=\"1.0\"><![CDATA[{}]]></paths:project>",
             json_str
         );
         let _ = writeln!(svg, "  </metadata>");

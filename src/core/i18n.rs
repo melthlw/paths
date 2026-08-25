@@ -210,7 +210,7 @@ impl I18nManager {
     }
 
     fn config_path() -> Option<std::path::PathBuf> {
-        dirs::config_dir().map(|p| p.join("gnome-paths").join("language.toml"))
+        dirs::config_dir().map(|p| p.join("paths").join("language.toml"))
     }
 
     fn load_preference() -> Language {

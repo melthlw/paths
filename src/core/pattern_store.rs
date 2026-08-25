@@ -15,9 +15,9 @@ pub struct CustomPatternDef {
 
 pub fn get_user_patterns_dir() -> PathBuf {
     if let Some(cfg) = dirs::config_dir() {
-        cfg.join("gnome-paths").join("libraries").join("patterns")
+        cfg.join("paths").join("libraries").join("patterns")
     } else {
-        PathBuf::from(".config/gnome-paths/libraries/patterns")
+        PathBuf::from(".config/paths/libraries/patterns")
     }
 }
 
@@ -29,9 +29,9 @@ pub fn ensure_user_patterns_dir() -> PathBuf {
     let dir = get_user_patterns_dir();
     let _ = std::fs::create_dir_all(&dir);
 
-    // Auto-migrate files from legacy ~/.config/gnome-paths/patterns/ if it exists
+    // Auto-migrate files from legacy ~/.config/paths/patterns/ if it exists
     if let Some(cfg) = dirs::config_dir() {
-        let legacy_dir = cfg.join("gnome-paths").join("patterns");
+        let legacy_dir = cfg.join("paths").join("patterns");
         if legacy_dir.is_dir() && legacy_dir != dir {
             if let Ok(entries) = std::fs::read_dir(&legacy_dir) {
                 for entry in entries.flatten() {

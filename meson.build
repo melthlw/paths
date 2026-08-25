@@ -1,5 +1,5 @@
 project(
-  'gnome-paths',
+  'paths',
   'rust',
   version: '0.3.0',
   license: 'GPL-3.0-or-later',
@@ -13,7 +13,7 @@ project(
 i18n = import('i18n')
 gnome = import('gnome')
 
-base_id = 'io.gitlab.lewisHeart.GnomePaths'
+base_id = 'io.gitlab.lewisHeart.Paths'
 
 prefix = get_option('prefix')
 bindir = prefix / get_option('bindir')

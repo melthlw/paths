@@ -27,7 +27,7 @@ flatpak-test:
     - >
       flatpak-builder --force-clean --disable-rofiles-fuse
       --build-only build-dir
-      io.gitlab.lewisHeart.GnomePaths.json
+      io.gitlab.lewisHeart.Paths.json
     
 flatpak-bundle:
   extends: .flatpak-setup
@@ -36,15 +36,15 @@ flatpak-bundle:
     - >
       flatpak-builder --force-clean --disable-rofiles-fuse
       --repo=repo build-dir
-      io.gitlab.lewisHeart.GnomePaths.json
+      io.gitlab.lewisHeart.Paths.json
     - >
       flatpak build-bundle repo
-      io.gitlab.lewisHeart.GnomePaths.flatpak
-      io.gitlab.lewisHeart.GnomePaths
+      io.gitlab.lewisHeart.Paths.flatpak
+      io.gitlab.lewisHeart.Paths
   artifacts:
-    name: "io.gitlab.lewisHeart.GnomePaths-$CI_COMMIT_REF_NAME"
+    name: "io.gitlab.lewisHeart.Paths-$CI_COMMIT_REF_NAME"
     paths:
-      - io.gitlab.lewisHeart.GnomePaths.flatpak
+      - io.gitlab.lewisHeart.Paths.flatpak
     expire_in: 30 days
   rules:
     - if: $CI_COMMIT_TAG

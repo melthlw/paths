@@ -1,1 +1,1 @@
-i18n.gettext('gnome-paths', preset: 'glib')
+i18n.gettext('paths', preset: 'glib')
