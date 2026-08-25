@@ -963,4 +963,32 @@ pub mod tests {
         assert!(doc_colors.contains(&Some(green)));
         assert!(doc_colors.contains(&Some(blue)));
     }
+
+    #[test]
+    fn test_set_selected_stroke_color_preserves_fill() {
+        let mut doc = Document::default();
+        let red = Color::new(1.0, 0.0, 0.0, 1.0);
+        let green = Color::new(0.0, 1.0, 0.0, 1.0);
+        let blue = Color::new(0.0, 0.0, 1.0, 1.0);
+
+        let rect = RectElement::new(Rect::new(0.0, 0.0, 100.0, 100.0), Some(red), Some(green));
+        let rect_id = rect.id;
+        doc.add_element(Element::Rect(rect));
+        doc.selected_ids.insert(rect_id);
+
+        // Modify only the stroke color to blue
+        doc.set_selected_stroke_color(Some(blue));
+
+        let el = doc.find_element(rect_id).unwrap();
+        // Fill MUST remain red, stroke MUST be blue
+        assert_eq!(el.fill_color(), Some(red));
+        assert_eq!(el.stroke_color(), Some(blue));
+
+        // Modify only the fill color to green
+        doc.set_selected_fill_color(Some(green));
+        let el2 = doc.find_element(rect_id).unwrap();
+        assert_eq!(el2.fill_color(), Some(green));
+        assert_eq!(el2.stroke_color(), Some(blue));
+    }
 }
+

@@ -353,10 +353,9 @@ impl ColorPaletteBar {
             .halign(gtk4::Align::Fill)
             .build();
 
-        let color_popover = ColorPickerPopover::new(
+        let color_popover = ColorPickerPopover::standalone(
             canvas.clone(),
             bar.active_color.get().unwrap_or(Color::BLACK),
-            0,
         );
         color_popover.attach_to(&picker_btn);
 
@@ -882,7 +881,7 @@ impl ColorPaletteBar {
 
             let initial_col = self.active_color.get().unwrap_or(Color::BLACK);
 
-            let color_popover = ColorPickerPopover::new(self.canvas.clone(), initial_col, 0);
+            let color_popover = ColorPickerPopover::standalone(self.canvas.clone(), initial_col);
             color_popover.attach_to(&add_btn);
 
             let chosen_color = Rc::new(Cell::new(initial_col));

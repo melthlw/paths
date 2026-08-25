@@ -97,6 +97,113 @@ pub fn create_swatch_button(
     (btn, area, col_cell)
 }
 
+pub fn create_gradient_ramp_button(
+    stops: &[crate::core::GradientStop],
+    is_radial: bool,
+) -> (gtk4::Button, gtk4::DrawingArea) {
+    let stops_vec = stops.to_vec();
+    let area = gtk4::DrawingArea::builder()
+        .content_height(18)
+        .hexpand(true)
+        .valign(gtk4::Align::Center)
+        .build();
+
+    let stops_draw = stops_vec;
+    area.set_draw_func(move |_area, cr, width, height| {
+        let w = width as f64;
+        let h = height as f64;
+        let pad_x = 2.0;
+        let pad_y = 2.0;
+        let sw = (w - pad_x * 2.0).max(1.0);
+        let sh = (h - pad_y * 2.0).max(1.0);
+        let radius = 4.5;
+
+        // Clip rounded rectangle for the ramp
+        cr.save().unwrap();
+        draw_rounded_rect(cr, pad_x, pad_y, sw, sh, radius);
+        cr.clip();
+
+        // 1. Checkerboard
+        let cs = 4.0;
+        let cols = (sw / cs).ceil() as usize;
+        let rows = (sh / cs).ceil() as usize;
+        for r in 0..rows {
+            for col in 0..cols {
+                if (r + col) % 2 == 0 {
+                    cr.set_source_rgb(0.85, 0.85, 0.85);
+                } else {
+                    cr.set_source_rgb(0.65, 0.65, 0.65);
+                }
+                cr.rectangle(pad_x + col as f64 * cs, pad_y + r as f64 * cs, cs, cs);
+                let _ = cr.fill();
+            }
+        }
+
+        // 2. Multi-stop gradient
+        if is_radial {
+            let cx = pad_x + sw * 0.5;
+            let cy = pad_y + sh * 0.5;
+            let r_max = (sw.max(sh)) * 0.5;
+            let pat = cairo::RadialGradient::new(cx, cy, 0.0, cx, cy, r_max);
+            for s in &stops_draw {
+                pat.add_color_stop_rgba(
+                    s.offset.clamp(0.0, 1.0) as f64,
+                    s.color.r as f64,
+                    s.color.g as f64,
+                    s.color.b as f64,
+                    s.color.a as f64,
+                );
+            }
+            cr.set_source(&pat).unwrap();
+        } else {
+            let pat = cairo::LinearGradient::new(pad_x, 0.0, pad_x + sw, 0.0);
+            for s in &stops_draw {
+                pat.add_color_stop_rgba(
+                    s.offset.clamp(0.0, 1.0) as f64,
+                    s.color.r as f64,
+                    s.color.g as f64,
+                    s.color.b as f64,
+                    s.color.a as f64,
+                );
+            }
+            cr.set_source(&pat).unwrap();
+        }
+        let _ = cr.paint();
+        cr.restore().unwrap();
+
+        // 3. Crisp border
+        draw_rounded_rect(cr, pad_x + 0.5, pad_y + 0.5, sw - 1.0, sh - 1.0, radius);
+        cr.set_source_rgba(0.0, 0.0, 0.0, 0.25);
+        cr.set_line_width(1.0);
+        let _ = cr.stroke();
+    });
+
+    let btn_box = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Horizontal)
+        .spacing(6)
+        .hexpand(true)
+        .valign(gtk4::Align::Center)
+        .build();
+
+    btn_box.append(&area);
+
+    let count_lbl = gtk4::Label::builder()
+        .label(format!("{} {}", stops.len(), crate::core::gettext("stops")))
+        .css_classes(["caption", "dim-label"])
+        .valign(gtk4::Align::Center)
+        .build();
+    btn_box.append(&count_lbl);
+
+    let btn = gtk4::Button::builder()
+        .child(&btn_box)
+        .css_classes(["pill-btn", "color-swatch-btn"])
+        .valign(gtk4::Align::Center)
+        .hexpand(true)
+        .build();
+
+    (btn, area)
+}
+
 #[derive(Clone)]
 pub struct PillSlider {
     pub container: gtk4::DrawingArea,

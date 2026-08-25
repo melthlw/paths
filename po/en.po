@@ -2690,3 +2690,13 @@ msgstr "Fill (Click to choose, drag onto object)"
 
 msgid "Stroke (Click to choose, drag onto object)"
 msgstr "Stroke (Click to choose, drag onto object)"
+
+msgid "stops"
+msgstr "stops"
+
+msgid "Edit Gradient Stops & Colors"
+msgstr "Edit Gradient Stops & Colors"
+
+msgid "Mesh Gradient Palette"
+msgstr "Mesh Gradient Palette"
+

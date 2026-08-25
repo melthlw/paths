@@ -153,7 +153,13 @@ impl ColorControlBar {
 
         let fill_picker_open = fill_picker.clone();
         let canvas_fill_open = canvas.clone();
+        let current_fill_open = current_fill.clone();
         fill_btn.connect_clicked(move |_| {
+            if let Some(rgba) = current_fill_open.get() {
+                if rgba.alpha() > 0.01 {
+                    fill_picker_open.set_color(Color::new(rgba.red(), rgba.green(), rgba.blue(), rgba.alpha()));
+                }
+            }
             let active_tool = canvas_fill_open
                 .state()
                 .try_borrow()
@@ -250,7 +256,7 @@ impl ColorControlBar {
         });
         stroke_btn.add_controller(drag_stroke);
 
-        let stroke_picker = ColorPickerPopover::new(canvas.clone(), Color::BLACK, 0);
+        let stroke_picker = ColorPickerPopover::for_stroke(canvas.clone(), Color::BLACK);
         stroke_picker.attach_to(&stroke_btn);
 
         let current_stroke_inner = current_stroke.clone();
@@ -263,7 +269,13 @@ impl ColorControlBar {
         });
 
         let stroke_picker_open = stroke_picker.clone();
+        let current_stroke_open = current_stroke.clone();
         stroke_btn.connect_clicked(move |_| {
+            if let Some(rgba) = current_stroke_open.get() {
+                if rgba.alpha() > 0.01 {
+                    stroke_picker_open.set_color(Color::new(rgba.red(), rgba.green(), rgba.blue(), rgba.alpha()));
+                }
+            }
             stroke_picker_open.popup();
         });
 

@@ -2,7 +2,7 @@ use gtk4::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
-use super::super::swatch::create_swatch_button;
+use super::super::swatch::{create_gradient_ramp_button, create_swatch_button};
 use crate::core::{Color, FillLayer, FillStyle, PatternType};
 use crate::ui::canvas::CanvasWidget;
 use crate::ui::color_picker::ColorPickerPopover;
@@ -194,64 +194,150 @@ impl FillRow {
             pop_open.popup();
         });
 
-        let (color_btn1, swatch1_area, col1_cell) = create_swatch_button(entry.color);
-        let mode1_idx = match entry.style {
-            FillStyle::Solid => 0,
-            FillStyle::LinearGradient | FillStyle::RadialGradient => 1,
-            FillStyle::Mesh => 2,
-            FillStyle::Pattern => 3,
-        };
-        let picker1 = ColorPickerPopover::with_mode_switcher(canvas.clone(), entry.color, mode1_idx, false);
-        popovers_to_cleanup
-            .borrow_mut()
-            .push(picker1.popover().clone());
-        picker1.attach_to(&color_btn1);
-        let p1_open = picker1.clone();
-        color_btn1.connect_clicked(move |_| {
-            p1_open.popup();
-        });
+        // Style-specific widgets on Line 1 & Line 2
+        match entry.style {
+            FillStyle::Solid => {
+                let (color_btn1, swatch1_area, col1_cell) = create_swatch_button(entry.color);
+                let picker1 = ColorPickerPopover::with_mode_switcher(canvas.clone(), entry.color, 0, false);
+                popovers_to_cleanup.borrow_mut().push(picker1.popover().clone());
+                picker1.attach_to(&color_btn1);
+                let p1_open = picker1.clone();
+                color_btn1.connect_clicked(move |_| {
+                    p1_open.popup();
+                });
 
-        let hex_entry1 = gtk4::Entry::builder()
-            .text(entry.color.to_hex())
-            .width_chars(8)
-            .max_width_chars(9)
-            .css_classes(["numeric", "pill-entry"])
-            .valign(gtk4::Align::Center)
-            .hexpand(true)
-            .build();
+                let hex_entry1 = gtk4::Entry::builder()
+                    .text(entry.color.to_hex())
+                    .width_chars(8)
+                    .max_width_chars(9)
+                    .css_classes(["numeric", "pill-entry"])
+                    .valign(gtk4::Align::Center)
+                    .hexpand(true)
+                    .build();
 
-        let (
-            _color_btn2_opt,
-            hex_entry2_opt,
-            col2_cell_opt,
-            swatch2_area_opt,
-            picker2_opt,
-            pat_btn_opt,
-            pat_tool_btn_opt,
-            mesh_btn_opt,
-            angle_btn_opt,
-        ) = if entry.style != FillStyle::Solid {
-            let (color_btn2, swatch2_area, col2_cell) = create_swatch_button(entry.secondary_color);
-            let picker2 = ColorPickerPopover::with_mode_switcher(canvas.clone(), entry.secondary_color, mode1_idx, false);
-            popovers_to_cleanup
-                .borrow_mut()
-                .push(picker2.popover().clone());
-            picker2.attach_to(&color_btn2);
-            let p2_open = picker2.clone();
-            color_btn2.connect_clicked(move |_| {
-                p2_open.popup();
-            });
+                line1.append(&color_btn1);
+                line1.append(&hex_entry1);
 
-            let hex_entry2 = gtk4::Entry::builder()
-                .text(entry.secondary_color.to_hex())
-                .width_chars(8)
-                .max_width_chars(9)
-                .css_classes(["numeric", "pill-entry"])
-                .valign(gtk4::Align::Center)
-                .hexpand(true)
-                .build();
+                // Wire Color 1
+                {
+                    let list = list_ref.clone();
+                    let canvas = canvas.clone();
+                    let u = is_updating.clone();
+                    let hex = hex_entry1.clone();
+                    let col1_c = col1_cell.clone();
+                    let swatch1_a = swatch1_area.clone();
+                    picker1.on_color_changed(move |col| {
+                        col1_c.set(col);
+                        swatch1_a.queue_draw();
+                        u.set(true);
+                        hex.set_text(&col.to_hex());
+                        let mut l = list.borrow_mut();
+                        if let Some(e) = l.get_mut(idx) {
+                            e.color = col;
+                        }
+                        let cloned = l.clone();
+                        drop(l);
+                        canvas.set_selected_fills(cloned);
+                        u.set(false);
+                    });
+                }
+                {
+                    let list = list_ref.clone();
+                    let canvas = canvas.clone();
+                    let u = is_updating.clone();
+                    let pick1 = picker1.clone();
+                    let col1_c = col1_cell.clone();
+                    let swatch1_a = swatch1_area.clone();
+                    hex_entry1.connect_activate(move |entry| {
+                        if u.get() {
+                            return;
+                        }
+                        let text = entry.text();
+                        let hex_str = text.trim();
+                        if let Some(col) = Color::from_hex(hex_str) {
+                            u.set(true);
+                            pick1.set_color(col);
+                            col1_c.set(col);
+                            swatch1_a.queue_draw();
+                            let mut l = list.borrow_mut();
+                            if let Some(e) = l.get_mut(idx) {
+                                e.color = col;
+                            }
+                            let cloned = l.clone();
+                            drop(l);
+                            canvas.set_selected_fills(cloned);
+                            u.set(false);
+                        }
+                    });
+                }
+            }
+            FillStyle::LinearGradient | FillStyle::RadialGradient => {
+                let is_radial = entry.style == FillStyle::RadialGradient;
+                if !is_radial {
+                    let angle_btn = gtk4::Button::builder()
+                        .label(format!("{}°", entry.angle.round() as i32))
+                        .css_classes(["pill-btn", "numeric"])
+                        .valign(gtk4::Align::Center)
+                        .tooltip_text(crate::core::gettext("Angle"))
+                        .build();
 
-            let (pat_btn_opt, pat_tool_btn_opt) = if entry.style == FillStyle::Pattern {
+                    let angle_popover = gtk4::Popover::builder().has_arrow(true).build();
+                    popovers_to_cleanup.borrow_mut().push(angle_popover.clone());
+                    let angle_menu = gtk4::Box::builder()
+                        .orientation(gtk4::Orientation::Vertical)
+                        .spacing(4)
+                        .margin_top(6)
+                        .margin_bottom(6)
+                        .margin_start(6)
+                        .margin_end(6)
+                        .width_request(140)
+                        .build();
+
+                    let angle_presets = [
+                        (0.0f32, crate::core::gettext("0° (Horizontal →)")),
+                        (45.0f32, crate::core::gettext("45° (Diagonal ↘)")),
+                        (90.0f32, crate::core::gettext("90° (Vertical ↓)")),
+                        (135.0f32, crate::core::gettext("135° (Diagonal ↙)")),
+                        (180.0f32, crate::core::gettext("180° (Horizontal ←)")),
+                        (270.0f32, crate::core::gettext("270° (Vertical ↑)")),
+                    ];
+
+                    for (ang, ang_lbl) in angle_presets {
+                        let p_btn = gtk4::Button::builder()
+                            .label(ang_lbl)
+                            .css_classes(["flat"])
+                            .halign(gtk4::Align::Fill)
+                            .build();
+
+                        let list = list_ref.clone();
+                        let canvas_a = canvas.clone();
+                        let ap_c = angle_popover.clone();
+                        let rebuild = rebuild_cb.clone();
+                        p_btn.connect_clicked(move |_| {
+                            let mut l = list.borrow_mut();
+                            if let Some(e) = l.get_mut(idx) {
+                                e.angle = ang;
+                            }
+                            let cloned = l.clone();
+                            drop(l);
+                            canvas_a.set_selected_fills(cloned);
+                            ap_c.popdown();
+                            rebuild();
+                        });
+                        angle_menu.append(&p_btn);
+                    }
+
+                    angle_popover.set_child(Some(&angle_menu));
+                    angle_popover.set_parent(&angle_btn);
+
+                    let ap_open = angle_popover.clone();
+                    angle_btn.connect_clicked(move |_| {
+                        ap_open.popup();
+                    });
+                    line1.append(&angle_btn);
+                }
+            }
+            FillStyle::Pattern => {
                 let cur_label = if let Some(ref cp) = entry.custom_pattern_path {
                     std::path::Path::new(cp)
                         .file_stem()
@@ -430,7 +516,6 @@ impl FillRow {
                     pp_c2.popdown();
                 });
                 action_box.append(&edit_gizmo_btn);
-
                 pat_menu.append(&action_box);
 
                 scrolled_window.set_child(Some(&pat_menu));
@@ -453,128 +538,85 @@ impl FillRow {
                     canvas_pt.set_active_tool("pattern");
                 });
 
-                (Some(pat_btn), Some(pat_tool_btn))
-            } else {
-                (None, None)
-            };
+                let angle_btn = gtk4::Button::builder()
+                    .label(format!("{}°", entry.angle.round() as i32))
+                    .css_classes(["pill-btn", "numeric"])
+                    .valign(gtk4::Align::Center)
+                    .tooltip_text(crate::core::gettext("Angle"))
+                    .build();
 
-            let mesh_btn_opt = if entry.style == FillStyle::Mesh {
+                let angle_popover = gtk4::Popover::builder().has_arrow(true).build();
+                popovers_to_cleanup.borrow_mut().push(angle_popover.clone());
+                let angle_menu = gtk4::Box::builder()
+                    .orientation(gtk4::Orientation::Vertical)
+                    .spacing(4)
+                    .margin_top(6)
+                    .margin_bottom(6)
+                    .margin_start(6)
+                    .margin_end(6)
+                    .width_request(140)
+                    .build();
+
+                let angle_presets = [
+                    (0.0f32, crate::core::gettext("0° (Horizontal →)")),
+                    (45.0f32, crate::core::gettext("45° (Diagonal ↘)")),
+                    (90.0f32, crate::core::gettext("90° (Vertical ↓)")),
+                    (135.0f32, crate::core::gettext("135° (Diagonal ↙)")),
+                    (180.0f32, crate::core::gettext("180° (Horizontal ←)")),
+                    (270.0f32, crate::core::gettext("270° (Vertical ↑)")),
+                ];
+
+                for (ang, ang_lbl) in angle_presets {
+                    let p_btn = gtk4::Button::builder()
+                        .label(ang_lbl)
+                        .css_classes(["flat"])
+                        .halign(gtk4::Align::Fill)
+                        .build();
+
+                    let list = list_ref.clone();
+                    let canvas_a = canvas.clone();
+                    let ap_c = angle_popover.clone();
+                    let rebuild = rebuild_cb.clone();
+                    p_btn.connect_clicked(move |_| {
+                        let mut l = list.borrow_mut();
+                        if let Some(e) = l.get_mut(idx) {
+                            e.angle = ang;
+                        }
+                        let cloned = l.clone();
+                        drop(l);
+                        canvas_a.set_selected_fills(cloned);
+                        ap_c.popdown();
+                        rebuild();
+                    });
+                    angle_menu.append(&p_btn);
+                }
+
+                angle_popover.set_child(Some(&angle_menu));
+                angle_popover.set_parent(&angle_btn);
+
+                let ap_open = angle_popover.clone();
+                angle_btn.connect_clicked(move |_| {
+                    ap_open.popup();
+                });
+
+                line1.append(&pat_btn);
+                line1.append(&pat_tool_btn);
+                line1.append(&angle_btn);
+            }
+            FillStyle::Mesh => {
                 let mesh_tool_btn = gtk4::Button::builder()
                     .label(crate::core::gettext("Mesh Tool"))
                     .icon_name("action-unavailable-symbolic")
                     .css_classes(["pill-btn"])
                     .valign(gtk4::Align::Center)
-                    .tooltip_text(crate::core::gettext(
-                        "Edit Mesh Nodes on Canvas (Mesh Tool)",
-                    ))
+                    .tooltip_text(crate::core::gettext("Edit Mesh Nodes on Canvas (Mesh Tool)"))
                     .build();
 
                 let canvas_m = canvas.clone();
                 mesh_tool_btn.connect_clicked(move |_| {
                     canvas_m.set_active_tool("mesh_gradient");
                 });
-                Some(mesh_tool_btn)
-            } else {
-                None
-            };
-
-            let angle_btn =
-                if entry.style == FillStyle::LinearGradient || entry.style == FillStyle::Pattern {
-                    let abtn = gtk4::Button::builder()
-                        .label(format!("{}°", entry.angle.round() as i32))
-                        .css_classes(["pill-btn", "numeric"])
-                        .valign(gtk4::Align::Center)
-                        .tooltip_text(crate::core::gettext("Angle"))
-                        .build();
-
-                    let angle_popover = gtk4::Popover::builder().has_arrow(true).build();
-                    popovers_to_cleanup.borrow_mut().push(angle_popover.clone());
-                    let angle_menu = gtk4::Box::builder()
-                        .orientation(gtk4::Orientation::Vertical)
-                        .spacing(4)
-                        .margin_top(6)
-                        .margin_bottom(6)
-                        .margin_start(6)
-                        .margin_end(6)
-                        .width_request(140)
-                        .build();
-
-                    let angle_presets = [
-                        (0.0f32, crate::core::gettext("0° (Horizontal →)")),
-                        (45.0f32, crate::core::gettext("45° (Diagonal ↘)")),
-                        (90.0f32, crate::core::gettext("90° (Vertical ↓)")),
-                        (135.0f32, crate::core::gettext("135° (Diagonal ↙)")),
-                        (180.0f32, crate::core::gettext("180° (Horizontal ←)")),
-                        (270.0f32, crate::core::gettext("270° (Vertical ↑)")),
-                    ];
-
-                    for (ang, ang_lbl) in angle_presets {
-                        let p_btn = gtk4::Button::builder()
-                            .label(ang_lbl)
-                            .css_classes(["flat"])
-                            .halign(gtk4::Align::Fill)
-                            .build();
-
-                        let list = list_ref.clone();
-                        let canvas_a = canvas.clone();
-                        let ap_c = angle_popover.clone();
-                        let rebuild = rebuild_cb.clone();
-                        p_btn.connect_clicked(move |_| {
-                            let mut l = list.borrow_mut();
-                            if let Some(e) = l.get_mut(idx) {
-                                e.angle = ang;
-                            }
-                            let cloned = l.clone();
-                            drop(l);
-                            canvas_a.set_selected_fills(cloned);
-                            ap_c.popdown();
-                            rebuild();
-                        });
-                        angle_menu.append(&p_btn);
-                    }
-
-                    angle_popover.set_child(Some(&angle_menu));
-                    angle_popover.set_parent(&abtn);
-
-                    let ap_open = angle_popover.clone();
-                    abtn.connect_clicked(move |_| {
-                        ap_open.popup();
-                    });
-                    Some(abtn)
-                } else {
-                    None
-                };
-
-            (
-                Some(color_btn2),
-                Some(hex_entry2),
-                Some(col2_cell),
-                Some(swatch2_area),
-                Some(picker2),
-                pat_btn_opt,
-                pat_tool_btn_opt,
-                mesh_btn_opt,
-                angle_btn,
-            )
-        } else {
-            (None, None, None, None, None, None, None, None, None)
-        };
-
-        if entry.style == FillStyle::Solid {
-            line1.append(&color_btn1);
-            line1.append(&hex_entry1);
-        } else {
-            if let Some(ref pbtn) = pat_btn_opt {
-                line1.append(pbtn);
-            }
-            if let Some(ref pt_btn) = pat_tool_btn_opt {
-                line1.append(pt_btn);
-            }
-            if let Some(ref mbtn) = mesh_btn_opt {
-                line1.append(mbtn);
-            }
-            if let Some(ref abtn) = angle_btn_opt {
-                line1.append(abtn);
+                line1.append(&mesh_tool_btn);
             }
         }
 
@@ -649,124 +691,145 @@ impl FillRow {
 
         container.append(&line1);
 
-        // Line 2: Colors and hex codes for multi-control fill styles (gradients, patterns, mesh)
-        if entry.style != FillStyle::Solid {
-            let line2 = gtk4::Box::builder()
-                .orientation(gtk4::Orientation::Horizontal)
-                .spacing(6)
-                .valign(gtk4::Align::Center)
-                .build();
+        // Line 2 for multi-control fill styles (gradients, patterns, mesh)
+        match entry.style {
+            FillStyle::LinearGradient | FillStyle::RadialGradient => {
+                let is_radial = entry.style == FillStyle::RadialGradient;
+                let line2 = gtk4::Box::builder()
+                    .orientation(gtk4::Orientation::Horizontal)
+                    .spacing(6)
+                    .valign(gtk4::Align::Center)
+                    .hexpand(true)
+                    .build();
 
-            line2.append(&color_btn1);
-            line2.append(&hex_entry1);
+                let (grad_btn, _grad_da) = create_gradient_ramp_button(&entry.effective_stops(), is_radial);
+                let grad_picker = ColorPickerPopover::with_mode_switcher(canvas.clone(), entry.color, 1, false);
+                popovers_to_cleanup.borrow_mut().push(grad_picker.popover().clone());
+                grad_picker.attach_to(&grad_btn);
 
-            if let Some(color_btn2) = _color_btn2_opt {
-                line2.append(&color_btn2);
-            }
-            if let Some(hex2) = &hex_entry2_opt {
-                line2.append(hex2);
-            }
-
-            container.append(&line2);
-        }
-
-        // Wire controls for Color 1
-        {
-            let list = list_ref.clone();
-            let canvas = canvas.clone();
-            let u = is_updating.clone();
-            let hex = hex_entry1.clone();
-            let col1_c = col1_cell.clone();
-            let swatch1_a = swatch1_area.clone();
-            picker1.on_color_changed(move |col| {
-                col1_c.set(col);
-                swatch1_a.queue_draw();
-                u.set(true);
-                hex.set_text(&col.to_hex());
-                let mut l = list.borrow_mut();
-                if let Some(e) = l.get_mut(idx) {
-                    e.color = col;
-                }
-                let cloned = l.clone();
-                drop(l);
-                canvas.set_selected_fills(cloned);
-                u.set(false);
-            });
-        }
-        {
-            let list = list_ref.clone();
-            let canvas = canvas.clone();
-            let u = is_updating.clone();
-            let pick1 = picker1.clone();
-            let col1_c = col1_cell.clone();
-            let swatch1_a = swatch1_area.clone();
-            hex_entry1.connect_activate(move |entry| {
-                if u.get() {
-                    return;
-                }
-                let text = entry.text();
-                let hex_str = text.trim();
-                if let Some(col) = Color::from_hex(hex_str) {
-                    u.set(true);
-                    pick1.set_color(col);
-                    col1_c.set(col);
-                    swatch1_a.queue_draw();
-                    let mut l = list.borrow_mut();
-                    if let Some(e) = l.get_mut(idx) {
-                        e.color = col;
-                    }
-                    let cloned = l.clone();
-                    drop(l);
-                    canvas.set_selected_fills(cloned);
-                    u.set(false);
-                }
-            });
-        }
-
-        // Wire controls for Color 2 (if present)
-        if let (Some(hex2), Some(col2_c), Some(swatch2_a), Some(picker2)) =
-            (hex_entry2_opt, col2_cell_opt, swatch2_area_opt, picker2_opt)
-        {
-            {
-                let list = list_ref.clone();
-                let canvas = canvas.clone();
-                let u = is_updating.clone();
-                let hex = hex2.clone();
-                let col2_cell_c = col2_c.clone();
-                let swatch2_area_c = swatch2_a.clone();
-                picker2.on_color_changed(move |col| {
-                    col2_cell_c.set(col);
-                    swatch2_area_c.queue_draw();
-                    u.set(true);
-                    hex.set_text(&col.to_hex());
-                    let mut l = list.borrow_mut();
-                    if let Some(e) = l.get_mut(idx) {
-                        e.secondary_color = col;
-                    }
-                    let cloned = l.clone();
-                    drop(l);
-                    canvas.set_selected_fills(cloned);
-                    u.set(false);
+                let gp_open = grad_picker.clone();
+                grad_btn.connect_clicked(move |_| {
+                    gp_open.popup();
                 });
+
+                line2.append(&grad_btn);
+                container.append(&line2);
             }
-            {
-                let list = list_ref.clone();
-                let canvas = canvas.clone();
-                let u = is_updating.clone();
-                let pick2 = picker2.clone();
-                let col2_cell_c = col2_c.clone();
-                let swatch2_area_c = swatch2_a.clone();
-                hex2.connect_activate(move |entry| {
-                    if u.get() {
-                        return;
-                    }
-                    let text = entry.text();
-                    let hex_str = text.trim();
-                    if let Some(col) = Color::from_hex(hex_str) {
+            FillStyle::Pattern => {
+                let (color_btn1, swatch1_area, col1_cell) = create_swatch_button(entry.color);
+                let picker1 = ColorPickerPopover::with_mode_switcher(canvas.clone(), entry.color, 0, false);
+                popovers_to_cleanup.borrow_mut().push(picker1.popover().clone());
+                picker1.attach_to(&color_btn1);
+                let p1_open = picker1.clone();
+                color_btn1.connect_clicked(move |_| {
+                    p1_open.popup();
+                });
+
+                let hex_entry1 = gtk4::Entry::builder()
+                    .text(entry.color.to_hex())
+                    .width_chars(8)
+                    .max_width_chars(9)
+                    .css_classes(["numeric", "pill-entry"])
+                    .valign(gtk4::Align::Center)
+                    .hexpand(true)
+                    .build();
+
+                let (color_btn2, swatch2_area, col2_cell) = create_swatch_button(entry.secondary_color);
+                let picker2 = ColorPickerPopover::with_mode_switcher(canvas.clone(), entry.secondary_color, 0, false);
+                popovers_to_cleanup.borrow_mut().push(picker2.popover().clone());
+                picker2.attach_to(&color_btn2);
+                let p2_open = picker2.clone();
+                color_btn2.connect_clicked(move |_| {
+                    p2_open.popup();
+                });
+
+                let hex_entry2 = gtk4::Entry::builder()
+                    .text(entry.secondary_color.to_hex())
+                    .width_chars(8)
+                    .max_width_chars(9)
+                    .css_classes(["numeric", "pill-entry"])
+                    .valign(gtk4::Align::Center)
+                    .hexpand(true)
+                    .build();
+
+                let line2 = gtk4::Box::builder()
+                    .orientation(gtk4::Orientation::Horizontal)
+                    .spacing(6)
+                    .valign(gtk4::Align::Center)
+                    .build();
+
+                line2.append(&color_btn1);
+                line2.append(&hex_entry1);
+                line2.append(&color_btn2);
+                line2.append(&hex_entry2);
+                container.append(&line2);
+
+                // Wire controls for Pattern Color 1
+                {
+                    let list = list_ref.clone();
+                    let canvas = canvas.clone();
+                    let u = is_updating.clone();
+                    let hex = hex_entry1.clone();
+                    let col1_c = col1_cell.clone();
+                    let swatch1_a = swatch1_area.clone();
+                    picker1.on_color_changed(move |col| {
+                        col1_c.set(col);
+                        swatch1_a.queue_draw();
                         u.set(true);
-                        pick2.set_color(col);
+                        hex.set_text(&col.to_hex());
+                        let mut l = list.borrow_mut();
+                        if let Some(e) = l.get_mut(idx) {
+                            e.color = col;
+                        }
+                        let cloned = l.clone();
+                        drop(l);
+                        canvas.set_selected_fills(cloned);
+                        u.set(false);
+                    });
+                }
+                {
+                    let list = list_ref.clone();
+                    let canvas = canvas.clone();
+                    let u = is_updating.clone();
+                    let pick1 = picker1.clone();
+                    let col1_c = col1_cell.clone();
+                    let swatch1_a = swatch1_area.clone();
+                    hex_entry1.connect_activate(move |entry| {
+                        if u.get() {
+                            return;
+                        }
+                        let text = entry.text();
+                        let hex_str = text.trim();
+                        if let Some(col) = Color::from_hex(hex_str) {
+                            u.set(true);
+                            pick1.set_color(col);
+                            col1_c.set(col);
+                            swatch1_a.queue_draw();
+                            let mut l = list.borrow_mut();
+                            if let Some(e) = l.get_mut(idx) {
+                                e.color = col;
+                            }
+                            let cloned = l.clone();
+                            drop(l);
+                            canvas.set_selected_fills(cloned);
+                            u.set(false);
+                        }
+                    });
+                }
+
+                // Wire controls for Pattern Color 2
+                {
+                    let list = list_ref.clone();
+                    let canvas = canvas.clone();
+                    let u = is_updating.clone();
+                    let hex = hex_entry2.clone();
+                    let col2_cell_c = col2_cell.clone();
+                    let swatch2_area_c = swatch2_area.clone();
+                    picker2.on_color_changed(move |col| {
                         col2_cell_c.set(col);
                         swatch2_area_c.queue_draw();
+                        u.set(true);
+                        hex.set_text(&col.to_hex());
                         let mut l = list.borrow_mut();
                         if let Some(e) = l.get_mut(idx) {
                             e.secondary_color = col;
@@ -775,9 +838,66 @@ impl FillRow {
                         drop(l);
                         canvas.set_selected_fills(cloned);
                         u.set(false);
-                    }
-                });
+                    });
+                }
+                {
+                    let list = list_ref.clone();
+                    let canvas = canvas.clone();
+                    let u = is_updating.clone();
+                    let pick2 = picker2.clone();
+                    let col2_cell_c = col2_cell.clone();
+                    let swatch2_area_c = swatch2_area.clone();
+                    hex_entry2.connect_activate(move |entry| {
+                        if u.get() {
+                            return;
+                        }
+                        let text = entry.text();
+                        let hex_str = text.trim();
+                        if let Some(col) = Color::from_hex(hex_str) {
+                            u.set(true);
+                            pick2.set_color(col);
+                            col2_cell_c.set(col);
+                            swatch2_area_c.queue_draw();
+                            let mut l = list.borrow_mut();
+                            if let Some(e) = l.get_mut(idx) {
+                                e.secondary_color = col;
+                            }
+                            let cloned = l.clone();
+                            drop(l);
+                            canvas.set_selected_fills(cloned);
+                            u.set(false);
+                        }
+                    });
+                }
             }
+            FillStyle::Mesh => {
+                let line2 = gtk4::Box::builder()
+                    .orientation(gtk4::Orientation::Horizontal)
+                    .spacing(6)
+                    .valign(gtk4::Align::Center)
+                    .hexpand(true)
+                    .build();
+
+                let mesh_btn = gtk4::Button::builder()
+                    .label(crate::core::gettext("Mesh Gradient Palette"))
+                    .css_classes(["pill-btn"])
+                    .hexpand(true)
+                    .valign(gtk4::Align::Center)
+                    .build();
+
+                let mesh_picker = ColorPickerPopover::with_mode_switcher(canvas.clone(), entry.color, 2, false);
+                popovers_to_cleanup.borrow_mut().push(mesh_picker.popover().clone());
+                mesh_picker.attach_to(&mesh_btn);
+
+                let mp_open = mesh_picker.clone();
+                mesh_btn.connect_clicked(move |_| {
+                    mp_open.popup();
+                });
+
+                line2.append(&mesh_btn);
+                container.append(&line2);
+            }
+            FillStyle::Solid => {}
         }
 
         // Wire opacity control

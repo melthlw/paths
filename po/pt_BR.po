@@ -2702,3 +2702,13 @@ msgstr "Preenchimento (Clique para escolher, arraste para o objeto)"
 
 msgid "Stroke (Click to choose, drag onto object)"
 msgstr "Contorno (Clique para escolher, arraste para o objeto)"
+
+msgid "stops"
+msgstr "pontos"
+
+msgid "Edit Gradient Stops & Colors"
+msgstr "Editar pontos e cores do gradiente"
+
+msgid "Mesh Gradient Palette"
+msgstr "Paleta do Gradiente em Malha"
+

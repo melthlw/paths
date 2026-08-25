@@ -759,10 +759,11 @@ fn build_swatches_page(
     custom_group.add(&custom_card);
     project_box.append(&custom_group);
 
-    sub_stack.add_titled(
+    sub_stack.add_titled_with_icon(
         &project_box,
         Some("project"),
         &crate::core::gettext("Project Colors"),
+        "color-picker-symbolic",
     );
 
     {
@@ -819,10 +820,11 @@ fn build_swatches_page(
         presets_box.append(&group);
     }
 
-    sub_stack.add_titled(
+    sub_stack.add_titled_with_icon(
         &presets_box,
         Some("presets"),
         &crate::core::gettext("Preset Palettes"),
+        "view-grid-symbolic",
     );
 
     page.append(&sub_stack);

@@ -46,7 +46,7 @@ impl StrokeRow {
         line1.append(&drag_handle);
 
         let (color_btn, swatch_area, col_cell) = create_swatch_button(entry.color);
-        let picker = ColorPickerPopover::with_mode_switcher(canvas.clone(), entry.color, 0, false);
+        let picker = ColorPickerPopover::for_stroke(canvas.clone(), entry.color);
         popovers_to_cleanup
             .borrow_mut()
             .push(picker.popover().clone());

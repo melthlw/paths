@@ -6,6 +6,14 @@ use std::rc::Rc;
 use super::canvas::CanvasWidget;
 use crate::core::{Color, GradientStop};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum ColorPickerTarget {
+    #[default]
+    Fill,
+    Stroke,
+    Standalone,
+}
+
 #[derive(Clone)]
 pub struct ColorPickerPopover {
     popover: gtk4::Popover,
@@ -38,6 +46,7 @@ pub struct ColorPickerPopover {
     pat_c2_da: gtk4::DrawingArea,
 
     canvas: CanvasWidget,
+    target: ColorPickerTarget,
 }
 
 fn draw_rounded_rect(cr: &cairo::Context, x: f64, y: f64, width: f64, height: f64, radius: f64) {
@@ -117,7 +126,7 @@ fn interpolate_stops(stops: &[GradientStop], t: f32) -> Color {
 
 impl ColorPickerPopover {
     pub fn new(canvas: CanvasWidget, initial_color: Color, initial_mode: usize) -> Self {
-        Self::with_mode_switcher(canvas, initial_color, initial_mode, true)
+        Self::with_target(canvas, initial_color, initial_mode, true, ColorPickerTarget::Fill)
     }
 
     pub fn with_mode_switcher(
@@ -126,13 +135,31 @@ impl ColorPickerPopover {
         initial_mode: usize,
         show_mode_switcher: bool,
     ) -> Self {
-        let initial_mesh_info = canvas.get_active_mesh_info();
+        Self::with_target(canvas, initial_color, initial_mode, show_mode_switcher, ColorPickerTarget::Fill)
+    }
+
+    pub fn for_stroke(canvas: CanvasWidget, initial_color: Color) -> Self {
+        Self::with_target(canvas, initial_color, 0, false, ColorPickerTarget::Stroke)
+    }
+
+    pub fn standalone(canvas: CanvasWidget, initial_color: Color) -> Self {
+        Self::with_target(canvas, initial_color, 0, false, ColorPickerTarget::Standalone)
+    }
+
+    pub fn with_target(
+        canvas: CanvasWidget,
+        initial_color: Color,
+        initial_mode: usize,
+        show_mode_switcher: bool,
+        target: ColorPickerTarget,
+    ) -> Self {
+        let initial_mesh_info = if target == ColorPickerTarget::Fill { canvas.get_active_mesh_info() } else { None };
         let init_mesh_node = initial_mesh_info.as_ref().map(|(n, _, _, _, _)| *n).unwrap_or(0);
-        let initial_grad_info = canvas.get_active_gradient_info();
+        let initial_grad_info = if target == ColorPickerTarget::Fill { canvas.get_active_gradient_info() } else { None };
         let init_grad_stop = initial_grad_info.as_ref().map(|(s, _, _, _, _)| *s).unwrap_or(0);
-        let actual_init_color = if initial_mode == 2 {
+        let actual_init_color = if initial_mode == 2 && target == ColorPickerTarget::Fill {
             initial_mesh_info.as_ref().map(|(_, _, _, c, _)| *c).unwrap_or(initial_color)
-        } else if initial_mode == 1 {
+        } else if initial_mode == 1 && target == ColorPickerTarget::Fill {
             initial_grad_info.as_ref().map(|(_, _, _, _, c)| *c).unwrap_or(initial_color)
         } else {
             initial_color
@@ -257,12 +284,16 @@ impl ColorPickerPopover {
             .valign(gtk4::Align::Center)
             .build();
 
-        let initial_title = match initial_mode {
-            0 => crate::core::gettext("Flat Color"),
-            1 => crate::core::gettext("Gradient"),
-            2 => crate::core::gettext("Mesh Gradient"),
-            3 => crate::core::gettext("Patterns"),
-            _ => crate::core::gettext("Flat Color"),
+        let initial_title = match target {
+            ColorPickerTarget::Stroke => crate::core::gettext("Stroke Color"),
+            ColorPickerTarget::Fill => match initial_mode {
+                0 => crate::core::gettext("Flat Color"),
+                1 => crate::core::gettext("Gradient"),
+                2 => crate::core::gettext("Mesh Gradient"),
+                3 => crate::core::gettext("Patterns"),
+                _ => crate::core::gettext("Flat Color"),
+            },
+            ColorPickerTarget::Standalone => crate::core::gettext("Flat Color"),
         };
 
         let title_lbl = gtk4::Label::builder()
@@ -1462,8 +1493,12 @@ impl ColorPickerPopover {
             let paintable = gtk4::WidgetPaintable::new(Some(&da));
             drag_swatch.set_icon(Some(&paintable), 10, 10);
             let hex_val = col.to_hex();
+            let tg = target;
             drag_swatch.connect_prepare(move |_, _, _| {
-                let payload = format!("gnome-paths:fill:{}", hex_val);
+                let payload = match tg {
+                    ColorPickerTarget::Stroke => format!("gnome-paths:stroke:{}", hex_val),
+                    _ => format!("gnome-paths:fill:{}", hex_val),
+                };
                 Some(gdk::ContentProvider::for_value(&payload.to_value()))
             });
             btn.add_controller(drag_swatch);
@@ -1485,65 +1520,69 @@ impl ColorPickerPopover {
 
             btn.connect_clicked(move |_| {
                 ltc(col);
-                let mode = cur_m.get();
+                if tg == ColorPickerTarget::Stroke {
+                    cv_s.set_stroke_color(Some(col));
+                } else if tg == ColorPickerTarget::Fill {
+                    let mode = cur_m.get();
 
-                let fills_opt = cv_s.get_selected_fills_and_strokes();
-                let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
-                if fills.is_empty() {
-                    fills.push(crate::core::FillLayer::default());
-                }
-
-                if let Some(f0) = fills.first_mut() {
-                    match mode {
-                        0 => {
-                            f0.style = crate::core::FillStyle::Solid;
-                            f0.mesh = None;
-                            f0.stops.clear();
-                            f0.custom_pattern_path = None;
-                            f0.color = col;
-                            cv_s.set_fill_color(col);
-                        }
-                        1 => {
-                            let stop_idx = cv_s.get_active_gradient_info().map(|(s, _, _, _, _)| s).unwrap_or_else(|| act_g.get());
-                            act_g.set(stop_idx);
-                            {
-                                let mut stops = g_stops.borrow_mut();
-                                if stop_idx < stops.len() {
-                                    stops[stop_idx].color = col;
-                                }
-                            }
-                            let stops_clone = g_stops.borrow().clone();
-                            f0.stops = stops_clone.clone();
-                            if let Some(s0) = stops_clone.first() {
-                                f0.color = s0.color;
-                            }
-                            if let Some(send) = stops_clone.last() {
-                                f0.secondary_color = send.color;
-                            }
-                            g_track_c.queue_draw();
-                            rbp_c();
-                        }
-                        2 => {
-                            let node_idx = cv_s.get_active_mesh_node().unwrap_or_else(|| act_mesh_n.get());
-                            act_mesh_n.set(node_idx);
-                            cv_s.set_mesh_node_color(node_idx, col);
-                        }
-                        3 => {
-                            if act_p.get() == 0 {
-                                f0.color = col;
-                                pc1_c.set(col);
-                            } else {
-                                f0.secondary_color = col;
-                                pc2_c.set(col);
-                            }
-                            pc1_da_c.queue_draw();
-                            pc2_da_c.queue_draw();
-                        }
-                        _ => {}
+                    let fills_opt = cv_s.get_selected_fills_and_strokes();
+                    let mut fills = fills_opt.map(|(f, _)| f).unwrap_or_default();
+                    if fills.is_empty() {
+                        fills.push(crate::core::FillLayer::default());
                     }
-                }
-                if mode != 2 {
-                    cv_s.set_selected_fills(fills);
+
+                    if let Some(f0) = fills.first_mut() {
+                        match mode {
+                            0 => {
+                                f0.style = crate::core::FillStyle::Solid;
+                                f0.mesh = None;
+                                f0.stops.clear();
+                                f0.custom_pattern_path = None;
+                                f0.color = col;
+                                cv_s.set_fill_color(col);
+                            }
+                            1 => {
+                                let stop_idx = cv_s.get_active_gradient_info().map(|(s, _, _, _, _)| s).unwrap_or_else(|| act_g.get());
+                                act_g.set(stop_idx);
+                                {
+                                    let mut stops = g_stops.borrow_mut();
+                                    if stop_idx < stops.len() {
+                                        stops[stop_idx].color = col;
+                                    }
+                                }
+                                let stops_clone = g_stops.borrow().clone();
+                                f0.stops = stops_clone.clone();
+                                if let Some(s0) = stops_clone.first() {
+                                    f0.color = s0.color;
+                                }
+                                if let Some(send) = stops_clone.last() {
+                                    f0.secondary_color = send.color;
+                                }
+                                g_track_c.queue_draw();
+                                rbp_c();
+                            }
+                            2 => {
+                                let node_idx = cv_s.get_active_mesh_node().unwrap_or_else(|| act_mesh_n.get());
+                                act_mesh_n.set(node_idx);
+                                cv_s.set_mesh_node_color(node_idx, col);
+                            }
+                            3 => {
+                                if act_p.get() == 0 {
+                                    f0.color = col;
+                                    pc1_c.set(col);
+                                } else {
+                                    f0.secondary_color = col;
+                                    pc2_c.set(col);
+                                }
+                                pc1_da_c.queue_draw();
+                                pc2_da_c.queue_draw();
+                            }
+                            _ => {}
+                        }
+                    }
+                    if mode != 2 {
+                        cv_s.set_selected_fills(fills);
+                    }
                 }
 
                 if let Some(cb) = on_ch.borrow().as_ref() {
@@ -1686,7 +1725,8 @@ impl ColorPickerPopover {
             });
         }
 
-        if show_mode_switcher {
+        let effective_show_mode = show_mode_switcher && target == ColorPickerTarget::Fill;
+        if effective_show_mode {
             root_box.append(&top_modes_box);
         }
 
@@ -1721,6 +1761,7 @@ impl ColorPickerPopover {
             pat_c1_da,
             pat_c2_da,
             canvas,
+            target,
         };
 
         instance.wire_events(rebuild_stop_pills, active_pat_stop);
@@ -1743,7 +1784,15 @@ impl ColorPickerPopover {
         let g_track_da = self.grad_track_da.clone();
         let rbp_fn = rebuild_stop_pills;
 
+        let tg = self.target;
         let apply_current_color = move |new_col: Color| {
+            if tg == ColorPickerTarget::Stroke {
+                cv.set_stroke_color(Some(new_col));
+                return;
+            } else if tg == ColorPickerTarget::Standalone {
+                return;
+            }
+
             let mode = cur_mode.get();
 
             let fills_opt = cv.get_selected_fills_and_strokes();
