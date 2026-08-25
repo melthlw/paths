@@ -1,43 +1,33 @@
 stages:
-  - check
   - test
   - flatpak
 
 variables:
-  CARGO_HOME: "$CI_PROJECT_DIR/.cargo"
   RUST_BACKTRACE: "1"
 
 cache:
   key: "${CI_COMMIT_REF_SLUG}"
   paths:
-    - .cargo/registry/index/
-    - .cargo/registry/cache/
-    - .cargo/git/db/
-    - target/
+    - .flatpak-builder/cache
+    - .flatpak-builder/downloads
 
-.rust-deps:
-  image: rust:latest
+.flatpak-setup:
+  image: ghcr.io/flathub-infra/flatpak-builder:latest
   before_script:
-    - apt-get update -qq
-    - apt-get install -y -qq build-essential pkg-config libgtk-4-dev libadwaita-1-dev libclang-dev clang libssl-dev git
+    - flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    - flatpak install --user -y flathub org.gnome.Platform//50 org.gnome.Sdk//50 org.freedesktop.Sdk.Extension.rust-stable//25.08
 
-cargo-check:
-  extends: .rust-deps
-  stage: check
-  script:
-    - cargo check --verbose
-
-cargo-test:
-  extends: .rust-deps
+flatpak-test:
+  extends: .flatpak-setup
   stage: test
   script:
-    - cargo test --verbose
+    - flatpak-builder --force-clean --build-only build-dir io.gitlab.lewisHeart.GnomePaths.json
+    - flatpak-builder --run build-dir io.gitlab.lewisHeart.GnomePaths.json cargo test
 
-flatpak-build:
+flatpak-bundle:
+  extends: .flatpak-setup
   stage: flatpak
-  image: ghcr.io/flathub-infra/flatpak-builder:latest
   script:
-    - flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
     - flatpak-builder --force-clean --repo=repo build-dir io.gitlab.lewisHeart.GnomePaths.json
     - flatpak build-bundle repo io.gitlab.lewisHeart.GnomePaths.flatpak io.gitlab.lewisHeart.GnomePaths
   artifacts:
