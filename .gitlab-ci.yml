@@ -29,8 +29,7 @@ flatpak-test:
       --build-only build-dir
       io.gitlab.lewisHeart.GnomePaths.json
     - >
-      flatpak-builder --disable-rofiles-fuse
-      --run build-dir
+      flatpak-builder --run build-dir
       io.gitlab.lewisHeart.GnomePaths.json
       cargo test
 

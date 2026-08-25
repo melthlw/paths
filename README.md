@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="README.pt-BR.md">Versao em Portugues</a> • 
+  <a href="README.pt-BR.md">Versão em Português</a> • 
   <a href="README.md">English Version</a>
 </p>
 
