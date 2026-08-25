@@ -659,7 +659,7 @@ impl InspectorSidebar {
                     (
                         crate::core::gettext("Modifiers"),
                         None,
-                        "builder-symbolic",
+                        "view-grid-symbolic",
                     ),
                     (
                         crate::core::gettext("Alignment"),

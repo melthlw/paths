@@ -587,6 +587,13 @@ impl FeaturePlugin for SelectFeature {
             canvas.draw_rect(r.to_skia(), &stroke_paint);
         }
 
+        // Render Interactive Canvas Overlays for Modifiers on Selected Elements
+        for sel_id in &ctx.document.selected_ids {
+            if let Some(elem) = ctx.document.elements.iter().find(|e| e.id() == *sel_id) {
+                crate::core::renderer::draw_modifier_canvas_overlays(canvas, elem, viewport.zoom);
+            }
+        }
+
         // Render Corner Radius Handles if a single RectElement is selected
         if ctx.document.selected_ids.len() == 1 {
             let sel_id = *ctx.document.selected_ids.iter().next().unwrap();

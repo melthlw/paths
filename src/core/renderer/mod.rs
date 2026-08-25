@@ -3,7 +3,8 @@ pub mod export;
 
 pub use draw::{
     draw_alignment_grid, draw_corner_origin_drag, draw_element_node, draw_infinite_dot_grid,
-    draw_pages, draw_rulers, draw_selection_highlight, draw_snap_guides, draw_user_guides,
+    draw_modifier_canvas_overlays, draw_pages, draw_rulers, draw_selection_highlight,
+    draw_snap_guides, draw_user_guides,
 };
 
 pub use export::{

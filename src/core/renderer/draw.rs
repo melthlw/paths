@@ -1104,3 +1104,110 @@ pub fn draw_rulers(
     );
     canvas.draw_circle(skia::Point::new(ch_center, ch_center), 2.5, &icon_paint);
 }
+
+pub fn draw_modifier_canvas_overlays(
+    canvas: &skia::Canvas,
+    element: &Element,
+    zoom: f32,
+) {
+    let z = zoom.max(0.001);
+    let bounds = element.bounds().normalize();
+    let mods = element.modifiers();
+
+    for m in mods {
+        if !m.enabled() {
+            continue;
+        }
+        match m {
+            crate::core::modifier::Modifier::EnvelopeWarp(env) => {
+                let p1 = Point::new(bounds.x + env.top_left_offset.x, bounds.y + env.top_left_offset.y);
+                let p2 = Point::new(bounds.x + bounds.width + env.top_right_offset.x, bounds.y + env.top_right_offset.y);
+                let p3 = Point::new(bounds.x + bounds.width + env.bottom_right_offset.x, bounds.y + bounds.height + env.bottom_right_offset.y);
+                let p4 = Point::new(bounds.x + env.bottom_left_offset.x, bounds.y + bounds.height + env.bottom_left_offset.y);
+
+                let mut mesh_paint = Paint::default();
+                mesh_paint.set_color4f(Color4f::new(1.0, 0.55, 0.0, 0.85), None);
+                mesh_paint.set_style(PaintStyle::Stroke);
+                mesh_paint.set_stroke_width(1.5 / z);
+                mesh_paint.set_anti_alias(true);
+
+                canvas.draw_line(p1.to_skia(), p2.to_skia(), &mesh_paint);
+                canvas.draw_line(p2.to_skia(), p3.to_skia(), &mesh_paint);
+                canvas.draw_line(p3.to_skia(), p4.to_skia(), &mesh_paint);
+                canvas.draw_line(p4.to_skia(), p1.to_skia(), &mesh_paint);
+
+                // Draw 4 corner diamond handles
+                let handle_sz = 8.0 / z;
+                let pts = [p1, p2, p3, p4];
+                let mut h_fill = Paint::default();
+                h_fill.set_color4f(Color4f::new(1.0, 0.6, 0.1, 1.0), None);
+                h_fill.set_anti_alias(true);
+
+                let mut h_stroke = Paint::default();
+                h_stroke.set_color4f(Color4f::new(1.0, 1.0, 1.0, 1.0), None);
+                h_stroke.set_style(PaintStyle::Stroke);
+                h_stroke.set_stroke_width(1.2 / z);
+                h_stroke.set_anti_alias(true);
+
+                for pt in pts {
+                    let mut path = skia::PathBuilder::new();
+                    path.move_to(skia::Point::new(pt.x, pt.y - handle_sz));
+                    path.line_to(skia::Point::new(pt.x + handle_sz, pt.y));
+                    path.line_to(skia::Point::new(pt.x, pt.y + handle_sz));
+                    path.line_to(skia::Point::new(pt.x - handle_sz, pt.y));
+                    path.close();
+                    let p = path.detach();
+                    canvas.draw_path(&p, &h_fill);
+                    canvas.draw_path(&p, &h_stroke);
+                }
+            }
+            crate::core::modifier::Modifier::Array(arr) => {
+                let mut arr_paint = Paint::default();
+                arr_paint.set_color4f(Color4f::new(0.6, 0.2, 0.9, 0.75), None);
+                arr_paint.set_style(PaintStyle::Stroke);
+                arr_paint.set_stroke_width(1.2 / z);
+                arr_paint.set_anti_alias(true);
+
+                match &arr.mode {
+                    crate::core::modifier::ArrayMode::Linear { offset_x, offset_y, .. } => {
+                        let center = Point::new(bounds.x + bounds.width / 2.0, bounds.y + bounds.height / 2.0);
+                        let target = Point::new(center.x + offset_x, center.y + offset_y);
+                        canvas.draw_line(center.to_skia(), target.to_skia(), &arr_paint);
+
+                        let mut h_fill = Paint::default();
+                        h_fill.set_color4f(Color4f::new(0.65, 0.25, 0.95, 1.0), None);
+                        h_fill.set_anti_alias(true);
+                        canvas.draw_circle(target.to_skia(), 5.0 / z, &h_fill);
+                    }
+                    crate::core::modifier::ArrayMode::Radial { radius, .. } => {
+                        let center = Point::new(bounds.x + bounds.width / 2.0, bounds.y + bounds.height / 2.0);
+                        canvas.draw_circle(center.to_skia(), *radius, &arr_paint);
+                    }
+                    crate::core::modifier::ArrayMode::Grid { rows, cols, spacing_x, spacing_y } => {
+                        let total_w = *cols as f32 * spacing_x;
+                        let total_h = *rows as f32 * spacing_y;
+                        let grid_rect = skia::Rect::from_xywh(bounds.x, bounds.y, total_w, total_h);
+                        canvas.draw_rect(grid_rect, &arr_paint);
+                    }
+                }
+            }
+            crate::core::modifier::Modifier::ChamferRounding(ch) => {
+                let mut chamf_paint = Paint::default();
+                chamf_paint.set_color4f(Color4f::new(0.0, 0.85, 0.7, 0.8), None);
+                chamf_paint.set_style(PaintStyle::Stroke);
+                chamf_paint.set_stroke_width(1.2 / z);
+                chamf_paint.set_anti_alias(true);
+
+                let corners = [
+                    Point::new(bounds.x, bounds.y),
+                    Point::new(bounds.x + bounds.width, bounds.y),
+                    Point::new(bounds.x + bounds.width, bounds.y + bounds.height),
+                    Point::new(bounds.x, bounds.y + bounds.height),
+                ];
+                for pt in corners {
+                    canvas.draw_circle(pt.to_skia(), ch.radius.min(bounds.width / 2.0), &chamf_paint);
+                }
+            }
+        }
+    }
+}

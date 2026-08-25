@@ -1,6 +1,8 @@
 use gtk4::prelude::*;
 use std::rc::Rc;
 
+use crate::core::element::CornerStyle;
+use crate::core::geometry::Rect;
 use crate::core::modifier::{
     ArrayMode, ArrayModifier, ChamferRoundingModifier, EnvelopeWarpModifier, Modifier,
 };
@@ -21,57 +23,43 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
         .margin_bottom(12)
         .build();
 
-    // 1. Selection Context Header Card
+    // 1. Sleek GNOME Adwaita Header Card
     let header_card = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(10)
+        .orientation(gtk4::Orientation::Vertical)
+        .spacing(2)
         .margin_bottom(4)
         .css_classes(["card"])
         .build();
-    let header_card_inner = gtk4::Box::builder()
+
+    let header_row = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Horizontal)
-        .spacing(10)
+        .spacing(8)
         .margin_start(12)
-        .margin_end(12)
-        .margin_top(10)
-        .margin_bottom(10)
-        .hexpand(true)
+        .margin_end(10)
+        .margin_top(8)
+        .margin_bottom(4)
         .build();
 
-    let context_icon = gtk4::Image::from_icon_name("builder-symbolic");
-    context_icon.set_pixel_size(20);
-    context_icon.set_opacity(0.8);
+    let header_icon = gtk4::Image::from_icon_name("view-grid-symbolic");
+    header_icon.set_pixel_size(16);
 
-    let context_label_box = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Vertical)
-        .spacing(2)
+    let header_title = gtk4::Label::builder()
+        .label(crate::core::gettext("Modifiers"))
+        .css_classes(["heading"])
         .hexpand(true)
-        .build();
-
-    let context_title = gtk4::Label::builder()
-        .label(crate::core::gettext("Modifiers Stack"))
-        .css_classes(["title-4"])
         .xalign(0.0)
         .build();
 
-    let context_sub = gtk4::Label::builder()
-        .label(crate::core::gettext("No selection"))
-        .css_classes(["caption", "dim-label"])
-        .xalign(0.0)
-        .build();
-
-    context_label_box.append(&context_title);
-    context_label_box.append(&context_sub);
-
-    // + Add Modifier Menu Button
+    // + Add Modifier Menu Button (ALWAYS ACTIVE & ENABLED)
     let add_mod_btn = gtk4::MenuButton::builder()
         .icon_name("list-add-symbolic")
         .tooltip_text(crate::core::gettext("Add Modifier"))
-        .css_classes(["flat", "circular"])
+        .css_classes(["flat"])
         .valign(gtk4::Align::Center)
+        .sensitive(true)
         .build();
 
-    // Add Modifier Popover
+    // Extensible Searchable Modifier Catalog Gallery Popover
     let popover = gtk4::Popover::builder()
         .position(gtk4::PositionType::Bottom)
         .has_arrow(true)
@@ -81,51 +69,136 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
 
     let pop_box = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Vertical)
-        .spacing(4)
-        .margin_start(6)
-        .margin_end(6)
-        .margin_top(6)
-        .margin_bottom(6)
-        .width_request(200)
+        .spacing(6)
+        .margin_start(8)
+        .margin_end(8)
+        .margin_top(8)
+        .margin_bottom(8)
+        .width_request(280)
         .build();
 
-    let pop_title = gtk4::Label::builder()
-        .label(crate::core::gettext("Add Parametric Modifier"))
-        .css_classes(["caption", "dim-label"])
-        .xalign(0.0)
-        .margin_start(6)
+    // Search bar for filtering modifiers
+    let search_entry = gtk4::SearchEntry::builder()
+        .placeholder_text(crate::core::gettext("Search Modifiers..."))
         .margin_bottom(4)
         .build();
-    pop_box.append(&pop_title);
+    pop_box.append(&search_entry);
 
-    let btn_add_array = gtk4::Button::builder()
-        .label(crate::core::gettext("⚡ Array Modifier"))
-        .css_classes(["flat"])
-        .halign(gtk4::Align::Fill)
+    let scrolled = gtk4::ScrolledWindow::builder()
+        .hscrollbar_policy(gtk4::PolicyType::Never)
+        .vscrollbar_policy(gtk4::PolicyType::Automatic)
+        .max_content_height(340)
+        .propagate_natural_height(true)
         .build();
-    pop_box.append(&btn_add_array);
 
-    let btn_add_env = gtk4::Button::builder()
-        .label(crate::core::gettext("🌊 Envelope Warp"))
-        .css_classes(["flat"])
-        .halign(gtk4::Align::Fill)
+    let catalog_box = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Vertical)
+        .spacing(8)
+        .margin_end(4)
         .build();
-    pop_box.append(&btn_add_env);
 
-    let btn_add_chamfer = gtk4::Button::builder()
-        .label(crate::core::gettext("📐 Dynamic Chamfer"))
-        .css_classes(["flat"])
-        .halign(gtk4::Align::Fill)
+    // ── CATEGORY 1: GENERATE & DUPLICATE ──
+    let cat_dup_title = gtk4::Label::builder()
+        .label(crate::core::gettext("GENERATE & DUPLICATE"))
+        .css_classes(["caption", "dim-label"])
+        .xalign(0.0)
+        .margin_start(4)
         .build();
-    pop_box.append(&btn_add_chamfer);
+    let cat_dup_box = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Vertical)
+        .spacing(2)
+        .build();
+
+    let btn_add_array = create_menu_item_button(
+        "view-grid-symbolic",
+        &crate::core::gettext("Array Modifier"),
+        &crate::core::gettext("Linear, Radial & Grid Duplication"),
+    );
+    cat_dup_box.append(&btn_add_array);
+
+    // ── CATEGORY 2: DEFORM & WARP ──
+    let cat_deform_title = gtk4::Label::builder()
+        .label(crate::core::gettext("DEFORM & WARP"))
+        .css_classes(["caption", "dim-label"])
+        .xalign(0.0)
+        .margin_start(4)
+        .margin_top(4)
+        .build();
+    let cat_deform_box = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Vertical)
+        .spacing(2)
+        .build();
+
+    let btn_add_env = create_menu_item_button(
+        "transform-symbolic",
+        &crate::core::gettext("Envelope Warp"),
+        &crate::core::gettext("4-Point Mesh Distortion"),
+    );
+    cat_deform_box.append(&btn_add_env);
+
+    // ── CATEGORY 3: PATH & CORNERS ──
+    let cat_path_title = gtk4::Label::builder()
+        .label(crate::core::gettext("PATH & CORNERS"))
+        .css_classes(["caption", "dim-label"])
+        .xalign(0.0)
+        .margin_start(4)
+        .margin_top(4)
+        .build();
+    let cat_path_box = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Vertical)
+        .spacing(2)
+        .build();
+
+    let btn_add_chamfer = create_menu_item_button(
+        "tool-node-symbolic",
+        &crate::core::gettext("Dynamic Chamfer"),
+        &crate::core::gettext("Corner Rounding & Bevels"),
+    );
+    cat_path_box.append(&btn_add_chamfer);
+
+    catalog_box.append(&cat_dup_title);
+    catalog_box.append(&cat_dup_box);
+    catalog_box.append(&cat_deform_title);
+    catalog_box.append(&cat_deform_box);
+    catalog_box.append(&cat_path_title);
+    catalog_box.append(&cat_path_box);
+
+    scrolled.set_child(Some(&catalog_box));
+    pop_box.append(&scrolled);
 
     popover.set_child(Some(&pop_box));
     add_mod_btn.set_popover(Some(&popover));
 
-    header_card_inner.append(&context_icon);
-    header_card_inner.append(&context_label_box);
-    header_card_inner.append(&add_mod_btn);
-    header_card.append(&header_card_inner);
+    // Search filter callback
+    let b_array_c = btn_add_array.clone();
+    let b_env_c = btn_add_env.clone();
+    let b_chamf_c = btn_add_chamfer.clone();
+    search_entry.connect_search_changed(move |se| {
+        let q = se.text().to_lowercase();
+        let match_array = q.is_empty() || "array modifier linear radial grid duplication".contains(&q);
+        let match_env = q.is_empty() || "envelope warp distortion mesh 4-point".contains(&q);
+        let match_chamf = q.is_empty() || "dynamic chamfer corner rounding bevels".contains(&q);
+
+        b_array_c.set_visible(match_array);
+        b_env_c.set_visible(match_env);
+        b_chamf_c.set_visible(match_chamf);
+    });
+
+    header_row.append(&header_icon);
+    header_row.append(&header_title);
+    header_row.append(&add_mod_btn);
+
+    let context_sub = gtk4::Label::builder()
+        .label(crate::core::gettext("Select an object or click + to add modifier"))
+        .css_classes(["caption", "dim-label"])
+        .xalign(0.0)
+        .margin_start(12)
+        .margin_end(12)
+        .margin_bottom(8)
+        .build();
+
+    header_card.append(&header_row);
+    header_card.append(&context_sub);
     container.append(&header_card);
 
     // Modifiers List Container
@@ -137,7 +210,7 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
 
     let list_c = list_container.clone();
     let ctx_sub_c = context_sub.clone();
-    let ctx_icon_c = context_icon.clone();
+    let header_icon_c = header_icon.clone();
     let canvas_c = canvas.clone();
 
     let update_fn = Rc::new(move || {
@@ -146,8 +219,15 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
         let sel_ids = canvas_c.selected_element_ids();
 
         if sel_ids.is_empty() {
-            ctx_sub_c.set_text(&crate::core::gettext("Select an object to add modifiers"));
-            ctx_icon_c.set_icon_name(Some("dialog-information-symbolic"));
+            ctx_sub_c.set_text(&crate::core::gettext("Select an object or click + to add modifier"));
+            header_icon_c.set_icon_name(Some("view-grid-symbolic"));
+            let empty_lbl = gtk4::Label::builder()
+                .label(crate::core::gettext("Click + to add a modifier to canvas"))
+                .css_classes(["caption", "dim-label"])
+                .margin_top(8)
+                .margin_bottom(8)
+                .build();
+            list_c.append(&empty_lbl);
             return;
         }
 
@@ -167,21 +247,13 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
             };
             ctx_sub_c.set_text(&elem_type_str);
 
-            let icon_name = match elem {
-                crate::core::Element::Image(_) => "image-x-generic-symbolic",
-                crate::core::Element::Text(_) => "tool-text-symbolic",
-                crate::core::Element::Group(_) => "folder-symbolic",
-                _ => "builder-symbolic",
-            };
-            ctx_icon_c.set_icon_name(Some(icon_name));
-
             let mods = elem.modifiers();
             if mods.is_empty() {
                 let empty_lbl = gtk4::Label::builder()
-                    .label(crate::core::gettext("No active modifiers. Click + to add one."))
+                    .label(crate::core::gettext("No active modifiers on selection"))
                     .css_classes(["caption", "dim-label"])
-                    .margin_top(12)
-                    .margin_bottom(12)
+                    .margin_top(4)
+                    .margin_bottom(4)
                     .build();
                 list_c.append(&empty_lbl);
             } else {
@@ -198,21 +270,38 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
         }
     });
 
+    // Helper to ensure target element exists (creates a shape if none selected)
+    let ensure_target_element = |canvas_widget: &CanvasWidget, modifier: Modifier| {
+        let sel_ids = canvas_widget.selected_element_ids();
+        if !sel_ids.is_empty() {
+            let mut state = canvas_widget.state.borrow_mut();
+            if let Some(elem) = state.document.find_element_mut(sel_ids[0]) {
+                if let Some(mods) = elem.modifiers_mut() {
+                    mods.push(modifier);
+                }
+            }
+        } else {
+            // Create a default Rectangle element on active page and select it
+            let rect = Rect::new(200.0, 200.0, 160.0, 160.0);
+            let mut new_rect = crate::core::RectElement::new(rect, Some(crate::core::Color::new(0.2, 0.5, 0.9, 1.0)), None);
+            new_rect.modifiers.push(modifier);
+            let new_elem = crate::core::Element::Rect(new_rect);
+            let new_id = new_elem.id();
+
+            let mut state = canvas_widget.state.borrow_mut();
+            state.document.elements.push(new_elem);
+            state.document.selected_ids.clear();
+            state.document.selected_ids.insert(new_id);
+        }
+    };
+
     // Wire Popover Actions
     let update_ref1 = update_fn.clone();
     let canvas_a = canvas.clone();
     let pop_a = popover.clone();
     btn_add_array.connect_clicked(move |_| {
         pop_a.popdown();
-        let sel_ids = canvas_a.selected_element_ids();
-        if !sel_ids.is_empty() {
-            let mut state = canvas_a.state.borrow_mut();
-            if let Some(elem) = state.document.find_element_mut(sel_ids[0]) {
-                if let Some(mods) = elem.modifiers_mut() {
-                    mods.push(Modifier::Array(ArrayModifier::default()));
-                }
-            }
-        }
+        ensure_target_element(&canvas_a, Modifier::Array(ArrayModifier::default()));
         canvas_a.queue_draw();
         update_ref1();
     });
@@ -222,15 +311,7 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
     let pop_e = popover.clone();
     btn_add_env.connect_clicked(move |_| {
         pop_e.popdown();
-        let sel_ids = canvas_e.selected_element_ids();
-        if !sel_ids.is_empty() {
-            let mut state = canvas_e.state.borrow_mut();
-            if let Some(elem) = state.document.find_element_mut(sel_ids[0]) {
-                if let Some(mods) = elem.modifiers_mut() {
-                    mods.push(Modifier::EnvelopeWarp(EnvelopeWarpModifier::default()));
-                }
-            }
-        }
+        ensure_target_element(&canvas_e, Modifier::EnvelopeWarp(EnvelopeWarpModifier::default()));
         canvas_e.queue_draw();
         update_ref2();
     });
@@ -240,15 +321,7 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
     let pop_c_chamf = popover.clone();
     btn_add_chamfer.connect_clicked(move |_| {
         pop_c_chamf.popdown();
-        let sel_ids = canvas_c_chamf.selected_element_ids();
-        if !sel_ids.is_empty() {
-            let mut state = canvas_c_chamf.state.borrow_mut();
-            if let Some(elem) = state.document.find_element_mut(sel_ids[0]) {
-                if let Some(mods) = elem.modifiers_mut() {
-                    mods.push(Modifier::ChamferRounding(ChamferRoundingModifier::default()));
-                }
-            }
-        }
+        ensure_target_element(&canvas_c_chamf, Modifier::ChamferRounding(ChamferRoundingModifier::default()));
         canvas_c_chamf.queue_draw();
         update_ref3();
     });
@@ -257,6 +330,52 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
         container,
         update_fn,
     }
+}
+
+fn create_menu_item_button(icon_name: &str, title: &str, subtitle: &str) -> gtk4::Button {
+    let btn = gtk4::Button::builder()
+        .css_classes(["flat"])
+        .halign(gtk4::Align::Fill)
+        .build();
+
+    let box_item = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Horizontal)
+        .spacing(12)
+        .margin_start(8)
+        .margin_end(8)
+        .margin_top(6)
+        .margin_bottom(6)
+        .build();
+
+    let img = gtk4::Image::from_icon_name(icon_name);
+    img.set_pixel_size(18);
+
+    let lbl_box = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Vertical)
+        .spacing(2)
+        .valign(gtk4::Align::Center)
+        .build();
+
+    let title_lbl = gtk4::Label::builder()
+        .label(title)
+        .css_classes(["body"])
+        .xalign(0.0)
+        .build();
+
+    let sub_lbl = gtk4::Label::builder()
+        .label(subtitle)
+        .css_classes(["caption", "dim-label"])
+        .xalign(0.0)
+        .build();
+
+    lbl_box.append(&title_lbl);
+    lbl_box.append(&sub_lbl);
+
+    box_item.append(&img);
+    box_item.append(&lbl_box);
+
+    btn.set_child(Some(&box_item));
+    btn
 }
 
 fn build_modifier_card(
@@ -275,7 +394,7 @@ fn build_modifier_card(
         .orientation(gtk4::Orientation::Horizontal)
         .spacing(8)
         .margin_start(10)
-        .margin_end(10)
+        .margin_end(8)
         .margin_top(8)
         .margin_bottom(8)
         .build();
@@ -321,7 +440,7 @@ fn build_modifier_card(
         Modifier::Array(arr) => {
             let mode_box = gtk4::Box::builder()
                 .orientation(gtk4::Orientation::Horizontal)
-                .spacing(6)
+                .spacing(8)
                 .build();
             let mode_lbl = gtk4::Label::builder()
                 .label(crate::core::gettext("Mode"))
@@ -342,6 +461,42 @@ fn build_modifier_card(
             mode_box.append(&mode_combo);
             body.append(&mode_box);
 
+            // Mode switcher callback
+            let canvas_m = canvas.clone();
+            mode_combo.connect_selected_notify(move |cb| {
+                let sel = cb.selected();
+                let mut state = canvas_m.state.borrow_mut();
+                if let Some(elem) = state.document.find_element_mut(elem_id) {
+                    if let Some(mods) = elem.modifiers_mut() {
+                        if let Some(Modifier::Array(a)) = mods.get_mut(mod_idx) {
+                            a.mode = match sel {
+                                1 => ArrayMode::Radial {
+                                    count: 6,
+                                    radius: 80.0,
+                                    start_angle_deg: 0.0,
+                                    total_angle_deg: 360.0,
+                                    rotate_copies: true,
+                                },
+                                2 => ArrayMode::Grid {
+                                    rows: 3,
+                                    cols: 3,
+                                    spacing_x: 50.0,
+                                    spacing_y: 50.0,
+                                },
+                                _ => ArrayMode::Linear {
+                                    count: 4,
+                                    offset_x: 40.0,
+                                    offset_y: 0.0,
+                                    scale_step: 1.0,
+                                    rotate_step_deg: 0.0,
+                                },
+                            };
+                        }
+                    }
+                }
+                canvas_m.queue_draw();
+            });
+
             match &arr.mode {
                 ArrayMode::Linear {
                     count,
@@ -352,12 +507,18 @@ fn build_modifier_card(
                 } => {
                     let grid = gtk4::Grid::builder().column_spacing(8).row_spacing(6).build();
 
-                    grid.attach(&gtk4::Label::new(Some(&crate::core::gettext("Count"))), 0, 0, 1, 1);
+                    let lbl_count = gtk4::Label::new(Some(&crate::core::gettext("Count")));
+                    lbl_count.set_css_classes(&["caption", "dim-label"]);
+                    grid.attach(&lbl_count, 0, 0, 1, 1);
+
                     let spin_count = gtk4::SpinButton::with_range(1.0, 100.0, 1.0);
                     spin_count.set_value(*count as f64);
                     grid.attach(&spin_count, 1, 0, 1, 1);
 
-                    grid.attach(&gtk4::Label::new(Some(&crate::core::gettext("DX / DY"))), 0, 1, 1, 1);
+                    let lbl_dx = gtk4::Label::new(Some(&crate::core::gettext("Offset X/Y")));
+                    lbl_dx.set_css_classes(&["caption", "dim-label"]);
+                    grid.attach(&lbl_dx, 0, 1, 1, 1);
+
                     let dx_dy_box = gtk4::Box::builder().spacing(4).build();
                     let spin_dx = gtk4::SpinButton::with_range(-2000.0, 2000.0, 5.0);
                     spin_dx.set_value(*offset_x as f64);
@@ -367,7 +528,10 @@ fn build_modifier_card(
                     dx_dy_box.append(&spin_dy);
                     grid.attach(&dx_dy_box, 1, 1, 1, 1);
 
-                    grid.attach(&gtk4::Label::new(Some(&crate::core::gettext("Rotate (°)"))), 0, 2, 1, 1);
+                    let lbl_rot = gtk4::Label::new(Some(&crate::core::gettext("Rotate (°)")));
+                    lbl_rot.set_css_classes(&["caption", "dim-label"]);
+                    grid.attach(&lbl_rot, 0, 2, 1, 1);
+
                     let spin_rot = gtk4::SpinButton::with_range(-360.0, 360.0, 5.0);
                     spin_rot.set_value(*rotate_step_deg as f64);
                     grid.attach(&spin_rot, 1, 2, 1, 1);
@@ -434,13 +598,19 @@ fn build_modifier_card(
                 } => {
                     let grid = gtk4::Grid::builder().column_spacing(8).row_spacing(6).build();
 
-                    grid.attach(&gtk4::Label::new(Some(&crate::core::gettext("Count"))), 0, 0, 1, 1);
+                    let lbl_count = gtk4::Label::new(Some(&crate::core::gettext("Count")));
+                    lbl_count.set_css_classes(&["caption", "dim-label"]);
+                    grid.attach(&lbl_count, 0, 0, 1, 1);
+
                     let spin_count = gtk4::SpinButton::with_range(1.0, 100.0, 1.0);
                     spin_count.set_value(*count as f64);
                     grid.attach(&spin_count, 1, 0, 1, 1);
 
-                    grid.attach(&gtk4::Label::new(Some(&crate::core::gettext("Radius"))), 0, 1, 1, 1);
-                    let spin_rad = gtk4::SpinButton::with_range(0.0, 2000.0, 10.0);
+                    let lbl_rad = gtk4::Label::new(Some(&crate::core::gettext("Radius")));
+                    lbl_rad.set_css_classes(&["caption", "dim-label"]);
+                    grid.attach(&lbl_rad, 0, 1, 1, 1);
+
+                    let spin_rad = gtk4::SpinButton::with_range(0.0, 2000.0, 5.0);
                     spin_rad.set_value(*radius as f64);
                     grid.attach(&spin_rad, 1, 1, 1, 1);
 
@@ -485,7 +655,10 @@ fn build_modifier_card(
                 } => {
                     let grid = gtk4::Grid::builder().column_spacing(8).row_spacing(6).build();
 
-                    grid.attach(&gtk4::Label::new(Some(&crate::core::gettext("Rows / Cols"))), 0, 0, 1, 1);
+                    let lbl_rc = gtk4::Label::new(Some(&crate::core::gettext("Rows / Cols")));
+                    lbl_rc.set_css_classes(&["caption", "dim-label"]);
+                    grid.attach(&lbl_rc, 0, 0, 1, 1);
+
                     let rc_box = gtk4::Box::builder().spacing(4).build();
                     let spin_r = gtk4::SpinButton::with_range(1.0, 50.0, 1.0);
                     spin_r.set_value(*rows as f64);
@@ -495,7 +668,10 @@ fn build_modifier_card(
                     rc_box.append(&spin_c);
                     grid.attach(&rc_box, 1, 0, 1, 1);
 
-                    grid.attach(&gtk4::Label::new(Some(&crate::core::gettext("Spacing X/Y"))), 0, 1, 1, 1);
+                    let lbl_sp = gtk4::Label::new(Some(&crate::core::gettext("Spacing X/Y")));
+                    lbl_sp.set_css_classes(&["caption", "dim-label"]);
+                    grid.attach(&lbl_sp, 0, 1, 1, 1);
+
                     let sp_box = gtk4::Box::builder().spacing(4).build();
                     let spin_sx = gtk4::SpinButton::with_range(0.0, 1000.0, 5.0);
                     spin_sx.set_value(*spacing_x as f64);
@@ -525,12 +701,36 @@ fn build_modifier_card(
                         canvas_cb.queue_draw();
                     };
 
-                    let u_g = update_g.clone();
-                    let s_c = spin_c.clone();
-                    let s_sx = spin_sx.clone();
-                    let s_sy = spin_sy.clone();
+                    let u_g1 = update_g.clone();
+                    let s_c1 = spin_c.clone();
+                    let s_sx1 = spin_sx.clone();
+                    let s_sy1 = spin_sy.clone();
                     spin_r.connect_value_changed(move |s| {
-                        u_g(s.value() as u32, s_c.value() as u32, s_sx.value() as f32, s_sy.value() as f32);
+                        u_g1(s.value() as u32, s_c1.value() as u32, s_sx1.value() as f32, s_sy1.value() as f32);
+                    });
+
+                    let u_g2 = update_g.clone();
+                    let s_r2 = spin_r.clone();
+                    let s_sx2 = spin_sx.clone();
+                    let s_sy2 = spin_sy.clone();
+                    spin_c.connect_value_changed(move |s| {
+                        u_g2(s_r2.value() as u32, s.value() as u32, s_sx2.value() as f32, s_sy2.value() as f32);
+                    });
+
+                    let u_g3 = update_g.clone();
+                    let s_r3 = spin_r.clone();
+                    let s_c3 = spin_c.clone();
+                    let s_sy3 = spin_sy.clone();
+                    spin_sx.connect_value_changed(move |s| {
+                        u_g3(s_r3.value() as u32, s_c3.value() as u32, s.value() as f32, s_sy3.value() as f32);
+                    });
+
+                    let u_g4 = update_g.clone();
+                    let s_r4 = spin_r.clone();
+                    let s_c4 = spin_c.clone();
+                    let s_sx4 = spin_sx.clone();
+                    spin_sy.connect_value_changed(move |s| {
+                        u_g4(s_r4.value() as u32, s_c4.value() as u32, s_sx4.value() as f32, s.value() as f32);
                     });
                 }
             }
@@ -538,12 +738,18 @@ fn build_modifier_card(
         Modifier::EnvelopeWarp(env) => {
             let grid = gtk4::Grid::builder().column_spacing(8).row_spacing(6).build();
 
-            grid.attach(&gtk4::Label::new(Some(&crate::core::gettext("Top-Left Offset"))), 0, 0, 1, 1);
+            let lbl_tl = gtk4::Label::new(Some(&crate::core::gettext("Top-Left Offset")));
+            lbl_tl.set_css_classes(&["caption", "dim-label"]);
+            grid.attach(&lbl_tl, 0, 0, 1, 1);
+
             let spin_tl_x = gtk4::SpinButton::with_range(-500.0, 500.0, 2.0);
             spin_tl_x.set_value(env.top_left_offset.x as f64);
             grid.attach(&spin_tl_x, 1, 0, 1, 1);
 
-            grid.attach(&gtk4::Label::new(Some(&crate::core::gettext("Top-Right Offset"))), 0, 1, 1, 1);
+            let lbl_tr = gtk4::Label::new(Some(&crate::core::gettext("Top-Right Offset")));
+            lbl_tr.set_css_classes(&["caption", "dim-label"]);
+            grid.attach(&lbl_tr, 0, 1, 1, 1);
+
             let spin_tr_x = gtk4::SpinButton::with_range(-500.0, 500.0, 2.0);
             spin_tr_x.set_value(env.top_right_offset.x as f64);
             grid.attach(&spin_tr_x, 1, 1, 1, 1);
@@ -566,24 +772,71 @@ fn build_modifier_card(
         Modifier::ChamferRounding(ch) => {
             let grid = gtk4::Grid::builder().column_spacing(8).row_spacing(6).build();
 
-            grid.attach(&gtk4::Label::new(Some(&crate::core::gettext("Radius"))), 0, 0, 1, 1);
+            let lbl_style = gtk4::Label::new(Some(&crate::core::gettext("Corner Style")));
+            lbl_style.set_css_classes(&["caption", "dim-label"]);
+            grid.attach(&lbl_style, 0, 0, 1, 1);
+
+            let combo_style = gtk4::DropDown::from_strings(&[
+                &crate::core::gettext("Round"),
+                &crate::core::gettext("Chamfer"),
+                &crate::core::gettext("Concave"),
+            ]);
+            let active_style_idx = match ch.style {
+                CornerStyle::Round => 0,
+                CornerStyle::Chamfer => 1,
+                CornerStyle::Concave => 2,
+            };
+            combo_style.set_selected(active_style_idx);
+            grid.attach(&combo_style, 1, 0, 1, 1);
+
+            let lbl_r = gtk4::Label::new(Some(&crate::core::gettext("Radius (px)")));
+            lbl_r.set_css_classes(&["caption", "dim-label"]);
+            grid.attach(&lbl_r, 0, 1, 1, 1);
+
             let spin_r = gtk4::SpinButton::with_range(0.0, 200.0, 1.0);
             spin_r.set_value(ch.radius as f64);
-            grid.attach(&spin_r, 1, 0, 1, 1);
+            grid.attach(&spin_r, 1, 1, 1, 1);
 
             body.append(&grid);
 
             let canvas_cb = canvas.clone();
-            spin_r.connect_value_changed(move |s| {
+            let spin_r_c = spin_r.clone();
+            combo_style.connect_selected_notify(move |cb| {
+                let sel_style = match cb.selected() {
+                    1 => CornerStyle::Chamfer,
+                    2 => CornerStyle::Concave,
+                    _ => CornerStyle::Round,
+                };
                 let mut state = canvas_cb.state.borrow_mut();
                 if let Some(elem) = state.document.find_element_mut(elem_id) {
                     if let Some(mods) = elem.modifiers_mut() {
                         if let Some(Modifier::ChamferRounding(c)) = mods.get_mut(mod_idx) {
-                            c.radius = s.value() as f32;
+                            c.style = sel_style;
+                            c.radius = spin_r_c.value() as f32;
                         }
                     }
                 }
                 canvas_cb.queue_draw();
+            });
+
+            let canvas_cb2 = canvas.clone();
+            let combo_style_c = combo_style.clone();
+            spin_r.connect_value_changed(move |s| {
+                let sel_style = match combo_style_c.selected() {
+                    1 => CornerStyle::Chamfer,
+                    2 => CornerStyle::Concave,
+                    _ => CornerStyle::Round,
+                };
+                let mut state = canvas_cb2.state.borrow_mut();
+                if let Some(elem) = state.document.find_element_mut(elem_id) {
+                    if let Some(mods) = elem.modifiers_mut() {
+                        if let Some(Modifier::ChamferRounding(c)) = mods.get_mut(mod_idx) {
+                            c.radius = s.value() as f32;
+                            c.style = sel_style;
+                        }
+                    }
+                }
+                canvas_cb2.queue_draw();
             });
         }
     }

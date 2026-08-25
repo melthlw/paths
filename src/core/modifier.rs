@@ -137,12 +137,17 @@ impl Modifier {
 pub fn apply_chamfer_rounding_to_path(
     path: &skia::Path,
     radius: f32,
-    _style: CornerStyle,
+    style: CornerStyle,
 ) -> skia::Path {
     if radius <= 0.1 {
         return path.clone();
     }
-    if let Some(pe) = skia::PathEffect::corner_path(radius) {
+    let effective_r = match style {
+        CornerStyle::Round => radius,
+        CornerStyle::Chamfer => radius * 0.7,
+        CornerStyle::Concave => radius * 0.85,
+    };
+    if let Some(pe) = skia::PathEffect::corner_path(effective_r) {
         if let Some((mut builder, _)) = pe.filter_path(path, &skia::StrokeRec::new_fill(), &skia::Rect::default()) {
             return builder.detach();
         }
