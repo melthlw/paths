@@ -29,5 +29,6 @@ custom_target(
 test(
   'cargo-test',
   cargo,
-  args: ['test', '--manifest-path', meson.project_source_root() / 'Cargo.toml']
+  args: ['test', '--manifest-path', meson.project_source_root() / 'Cargo.toml'],
+  timeout: 0,
 )

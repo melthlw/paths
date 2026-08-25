@@ -25,7 +25,7 @@
   <url type="homepage">https://gitlab.com/lewisHeart/gnome-paths</url>
   <url type="bugtracker">https://gitlab.com/lewisHeart/gnome-paths/-/issues</url>
   <url type="vcs-browser">https://gitlab.com/lewisHeart/gnome-paths</url>
-  <developer id="i">
+  <developer id="io.gitlab.lewisheart">
     <name>Lewis</name>
   </developer>
   <branding>
