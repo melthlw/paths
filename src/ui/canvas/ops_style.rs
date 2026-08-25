@@ -1421,6 +1421,14 @@ impl CanvasWidget {
         self.drawing_area.queue_draw();
     }
 
+    pub fn get_selected_text_element(&self) -> Option<crate::core::element::TextElement> {
+        if let Ok(state) = self.state.try_borrow() {
+            state.document.get_selected_text_element().cloned()
+        } else {
+            None
+        }
+    }
+
     pub fn set_selected_text_box_width(&self, width: Option<f32>) {
         let mut state = self.state.borrow_mut();
         state.document.set_selected_text_box_width(width);
@@ -1579,5 +1587,41 @@ impl CanvasWidget {
             return true;
         }
         false
+    }
+
+    pub fn can_attach_text_to_path(&self) -> bool {
+        if let Ok(state) = self.state.try_borrow() {
+            let elems: Vec<&crate::core::Element> = state
+                .document
+                .selected_ids
+                .iter()
+                .filter_map(|id| state.document.find_element(*id))
+                .collect();
+            let has_text = elems.iter().any(|e| matches!(e, crate::core::Element::Text(_)));
+            let has_path = elems.iter().any(|e| !matches!(e, crate::core::Element::Text(_)));
+            has_text && has_path
+        } else {
+            false
+        }
+    }
+
+    pub fn can_detach_text_from_path(&self) -> bool {
+        if let Ok(state) = self.state.try_borrow() {
+            let elems: Vec<&crate::core::Element> = state
+                .document
+                .selected_ids
+                .iter()
+                .filter_map(|id| state.document.find_element(*id))
+                .collect();
+            elems.iter().any(|e| {
+                if let crate::core::Element::Text(t) = e {
+                    t.path_id.is_some()
+                } else {
+                    false
+                }
+            })
+        } else {
+            false
+        }
     }
 }

@@ -253,8 +253,35 @@ pub fn build_typography_section(canvas: &CanvasWidget) -> gtk4::Box {
     ls_box.append(&ls_lbl);
     ls_box.append(&ls_spin);
 
+    // Kerning Offset
+    let ko_box = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Horizontal)
+        .spacing(4)
+        .hexpand(true)
+        .build();
+    let ko_lbl = gtk4::Label::builder()
+        .label("K")
+        .tooltip_text(crate::core::gettext("Kerning Offset"))
+        .css_classes(["dim-label", "caption"])
+        .build();
+    let ko_spin = gtk4::SpinButton::with_range(-100.0, 100.0, 0.5);
+    ko_spin.set_digits(1);
+    ko_spin.set_value(0.0);
+    ko_spin.set_hexpand(true);
+    let canvas_ko = canvas.clone();
+    let sync_ko = is_syncing.clone();
+    ko_spin.connect_value_changed(move |spin| {
+        if sync_ko.get() {
+            return;
+        }
+        canvas_ko.set_selected_kerning_offset(spin.value() as f32);
+    });
+    ko_box.append(&ko_lbl);
+    ko_box.append(&ko_spin);
+
     spacing_row.append(&lh_box);
     spacing_row.append(&ls_box);
+    spacing_row.append(&ko_box);
     font_content.append(&spacing_row);
 
     // Alignment Buttons
@@ -708,8 +735,27 @@ pub fn build_typography_section(canvas: &CanvasWidget) -> gtk4::Box {
         }
         canvas_po.set_selected_text_path_offset(spin.value() as f32);
     });
+    let ps_lbl = gtk4::Label::builder()
+        .label(crate::core::gettext("Spacing:"))
+        .css_classes(["dim-label", "caption"])
+        .build();
+    let ps_spin = gtk4::SpinButton::with_range(0.0, 500.0, 1.0);
+    ps_spin.set_digits(1);
+    ps_spin.set_value(0.0);
+    ps_spin.set_hexpand(true);
+    let canvas_ps = canvas.clone();
+    let sync_ps = is_syncing.clone();
+    ps_spin.connect_value_changed(move |spin| {
+        if sync_ps.get() {
+            return;
+        }
+        canvas_ps.set_selected_text_path_spacing(spin.value() as f32);
+    });
+
     po_row.append(&po_lbl);
     po_row.append(&po_spin);
+    po_row.append(&ps_lbl);
+    po_row.append(&ps_spin);
     path_content.append(&po_row);
 
     // Vertical Alignment & Glyph Orientation Dropdowns
@@ -833,7 +879,11 @@ pub fn build_typography_section(canvas: &CanvasWidget) -> gtk4::Box {
     let valign_dd_c = valign_dd.clone();
     let ori_dd_c = ori_dd.clone();
 
+    let ps_spin_c = ps_spin.clone();
+    let ps_lbl_c = ps_lbl.clone();
+
     path_card.add_tick_callback(move |_, _| {
+        let selected_text = canvas_sens.get_selected_text_element();
         let state_rc = canvas_sens.state();
         let state = state_rc.borrow();
         let sel_ids = &state.document.selected_ids;
@@ -842,9 +892,9 @@ pub fn build_typography_section(canvas: &CanvasWidget) -> gtk4::Box {
             .filter_map(|id| state.document.find_element(*id))
             .collect();
 
-        let has_text = elems.iter().any(|e| matches!(e, crate::core::Element::Text(_)));
+        let has_text = selected_text.is_some() || elems.iter().any(|e| matches!(e, crate::core::Element::Text(_)));
         let has_path = elems.iter().any(|e| !matches!(e, crate::core::Element::Text(_)));
-        let is_attached = elems.iter().any(|e| {
+        let is_attached = selected_text.map_or(false, |t| t.path_id.is_some()) || elems.iter().any(|e| {
             if let crate::core::Element::Text(t) = e {
                 t.path_id.is_some()
             } else {
@@ -865,6 +915,8 @@ pub fn build_typography_section(canvas: &CanvasWidget) -> gtk4::Box {
         if po_spin_c.is_sensitive() != can_edit_path {
             po_spin_c.set_sensitive(can_edit_path);
             po_lbl_c.set_sensitive(can_edit_path);
+            ps_spin_c.set_sensitive(can_edit_path);
+            ps_lbl_c.set_sensitive(can_edit_path);
             valign_dd_c.set_sensitive(can_edit_path);
             ori_dd_c.set_sensitive(can_edit_path);
             sw_inv_c.set_sensitive(can_edit_path);

@@ -84,6 +84,8 @@ impl ObjectContextMenu {
         root_box.append(&selection_menu.copy_btn);
         root_box.append(&selection_menu.cut_btn);
         root_box.append(&selection_menu.paste_btn);
+        root_box.append(&selection_menu.copy_style_btn);
+        root_box.append(&selection_menu.paste_style_btn);
         root_box.append(&selection_menu.sep_clip);
 
         root_box.append(&selection_menu.duplicate_btn);
@@ -188,6 +190,8 @@ impl ObjectContextMenu {
             self.selection_menu.copy_btn.set_visible(false);
             self.selection_menu.cut_btn.set_visible(false);
             self.selection_menu.paste_btn.set_visible(false);
+            self.selection_menu.copy_style_btn.set_visible(false);
+            self.selection_menu.paste_style_btn.set_visible(false);
             self.selection_menu.sep_clip.set_visible(false);
 
             self.selection_menu.duplicate_btn.set_visible(false);
@@ -242,6 +246,8 @@ impl ObjectContextMenu {
             self.selection_menu.copy_btn.set_visible(true);
             self.selection_menu.cut_btn.set_visible(true);
             self.selection_menu.paste_btn.set_visible(has_clip);
+            self.selection_menu.copy_style_btn.set_visible(true);
+            self.selection_menu.paste_style_btn.set_visible(true);
             self.selection_menu.sep_clip.set_visible(true);
 
             let has_clones = self.canvas.has_clones_selected();
@@ -263,8 +269,10 @@ impl ObjectContextMenu {
             self.selection_menu
                 .convert_path_btn
                 .set_visible(can_convert);
-            self.selection_menu.attach_path_btn.set_visible(has_sel);
-            self.selection_menu.detach_path_btn.set_visible(has_sel);
+            let can_attach = self.canvas.can_attach_text_to_path();
+            let can_detach = self.canvas.can_detach_text_from_path();
+            self.selection_menu.attach_path_btn.set_visible(can_attach);
+            self.selection_menu.detach_path_btn.set_visible(can_detach);
             self.selection_menu.bring_front_btn.set_visible(true);
             self.selection_menu.bring_forward_btn.set_visible(true);
             self.selection_menu.send_backward_btn.set_visible(true);

@@ -827,53 +827,116 @@ impl CanvasWidget {
             let clipboard = display.clipboard();
             let canvas = self.clone();
 
-            clipboard.read_text_async(None::<&gio::Cancellable>, move |res| {
-                if let Ok(Some(text)) = res {
-                    let text_str = text.trim();
+            // 1. Try reading Texture Image from System Clipboard (Browser, Screenshot, GIMP, Files, etc.)
+            clipboard.clone().read_texture_async(None::<&gio::Cancellable>, move |res| {
+                if let Ok(Some(texture)) = res {
+                    let bytes = texture.save_to_png_bytes().to_vec();
+                    let iw = texture.width() as f32;
+                    let ih = texture.height() as f32;
+                    let max_dim = 800.0f32;
+                    let scale = if iw > max_dim || ih > max_dim {
+                        (max_dim / iw).min(max_dim / ih)
+                    } else {
+                        1.0
+                    };
+                    let w = (iw * scale).max(10.0);
+                    let h = (ih * scale).max(10.0);
 
-                    // 1. Color Hash (#FF5733, #RGB, rgb(...))
-                    if let Some(col) = crate::core::Color::from_hex(text_str) {
-                        let mut state = canvas.state.borrow_mut();
-                        if !state.document.selected_ids.is_empty() {
-                            state.document.set_selected_fill_color(Some(col));
-                            state.notify_status();
-                            canvas.drawing_area.queue_draw();
-                            return;
-                        }
-                    }
+                    let mut state = canvas.state.borrow_mut();
+                    let center = state.viewport.screen_to_world(
+                        Point::new(state.widget_size.0 / 2.0, state.widget_size.1 / 2.0),
+                        state.widget_size,
+                    );
+                    let rect = crate::core::Rect::new(center.x - w / 2.0, center.y - h / 2.0, w, h);
+                    let img_elem = crate::core::element::ImageElement::new(
+                        rect,
+                        bytes,
+                        Some(crate::core::gettext("Pasted Image")),
+                    );
+                    let el = crate::core::Element::Image(img_elem);
+                    let id = el.id();
+                    state.document.snapshot();
+                    state.document.add_element(el);
+                    state.document.selected_ids.clear();
+                    state.document.selected_ids.insert(id);
+                    state.notify_status();
+                    drop(state);
+                    canvas.drawing_area.queue_draw();
+                    return;
+                }
 
-                    // 2. SVG Code (<svg ...>)
-                    if text_str.contains("<svg") && text_str.contains("</svg>") {
-                        if let Ok(svg_res) = crate::core::parse_svg(text_str) {
-                            if !svg_res.elements.is_empty() {
-                                let mut state = canvas.state.borrow_mut();
-                                state.document.snapshot();
-                                state.document.selected_ids.clear();
-                                for el in svg_res.elements {
-                                    let id = el.id();
-                                    state.document.add_element(el);
-                                    state.document.selected_ids.insert(id);
-                                }
+                // 2. If not a texture, try reading Text / SVG Code / Color Hash / File Path
+                let canvas_text = canvas.clone();
+                let clipboard_text = gdk::Display::default()
+                    .map(|d| d.clipboard())
+                    .unwrap_or(clipboard);
+
+                clipboard_text.read_text_async(None::<&gio::Cancellable>, move |res_text| {
+                    if let Ok(Some(text)) = res_text {
+                        let text_str = text.trim();
+
+                        // 2a. Color Hash (#FF5733, #RGB, rgb(...))
+                        if let Some(col) = crate::core::Color::from_hex(text_str) {
+                            let mut state = canvas_text.state.borrow_mut();
+                            if !state.document.selected_ids.is_empty() {
+                                state.document.set_selected_fill_color(Some(col));
                                 state.notify_status();
-                                canvas.drawing_area.queue_draw();
+                                canvas_text.drawing_area.queue_draw();
+                                return;
+                            }
+                        }
+
+                        // 2b. SVG Code (<svg ...>)
+                        if text_str.contains("<svg") && text_str.contains("</svg>") {
+                            if let Ok(svg_res) = crate::core::parse_svg(text_str) {
+                                if !svg_res.elements.is_empty() {
+                                    let mut state = canvas_text.state.borrow_mut();
+                                    state.document.snapshot();
+                                    state.document.selected_ids.clear();
+
+                                    let mut b_opt: Option<crate::core::Rect> = None;
+                                    for el in &svg_res.elements {
+                                        let eb = el.bounds();
+                                        b_opt = Some(match b_opt {
+                                            Some(acc) => acc.union(eb),
+                                            None => eb,
+                                        });
+                                    }
+                                    let total_b = b_opt.unwrap_or(crate::core::Rect::new(0.0, 0.0, 100.0, 100.0));
+                                    let center = state.viewport.screen_to_world(
+                                        Point::new(state.widget_size.0 / 2.0, state.widget_size.1 / 2.0),
+                                        state.widget_size,
+                                    );
+                                    let dx = center.x - (total_b.x + total_b.width * 0.5);
+                                    let dy = center.y - (total_b.y + total_b.height * 0.5);
+
+                                    for mut el in svg_res.elements {
+                                        el.translate(dx, dy);
+                                        let id = el.id();
+                                        state.document.add_element(el);
+                                        state.document.selected_ids.insert(id);
+                                    }
+                                    state.notify_status();
+                                    canvas_text.drawing_area.queue_draw();
+                                    return;
+                                }
+                            }
+                        }
+
+                        // 2c. File path or URI
+                        if text_str.starts_with("file://") || text_str.starts_with('/') {
+                            let path_str = text_str.trim_start_matches("file://");
+                            let path = std::path::Path::new(path_str);
+                            if path.exists() {
+                                let _ = canvas_text.import_file(path_str);
                                 return;
                             }
                         }
                     }
 
-                    // 3. File path or URI
-                    if text_str.starts_with("file://") || text_str.starts_with('/') {
-                        let path_str = text_str.trim_start_matches("file://");
-                        let path = std::path::Path::new(path_str);
-                        if path.exists() {
-                            let _ = canvas.import_file(path_str);
-                            return;
-                        }
-                    }
-                }
-
-                // Fallback to internal document clipboard
-                canvas.paste(None);
+                    // 3. Fallback to internal document clipboard
+                    canvas_text.paste(None);
+                });
             });
         } else {
             self.paste(None);

@@ -322,12 +322,29 @@ impl CanvasWidget {
         let area_key = self.drawing_area.clone();
         let cc_key = cursor_cache.clone();
 
+        let canvas_key = self.clone();
         key_controller.connect_key_pressed(glib::clone!(
             #[weak]
             area_key,
             #[upgrade_or]
             glib::Propagation::Proceed,
             move |_controller, keyval, _keycode, state_flags| {
+                let is_ctrl = state_flags.contains(gdk::ModifierType::CONTROL_MASK);
+                let is_alt = state_flags.contains(gdk::ModifierType::ALT_MASK);
+
+                if is_ctrl && is_alt && (keyval == gdk::Key::c || keyval == gdk::Key::C) {
+                    canvas_key.copy_selected_style();
+                    return glib::Propagation::Stop;
+                }
+                if is_ctrl && is_alt && (keyval == gdk::Key::v || keyval == gdk::Key::V) {
+                    canvas_key.paste_style_to_selected();
+                    return glib::Propagation::Stop;
+                }
+                if is_ctrl && !is_alt && (keyval == gdk::Key::v || keyval == gdk::Key::V) {
+                    canvas_key.paste_from_clipboard();
+                    return glib::Propagation::Stop;
+                }
+
                 let mut state = state_key.borrow_mut();
 
                 if keyval == gdk::Key::space && !state.plugin_manager.is_editing() {
@@ -339,8 +356,8 @@ impl CanvasWidget {
                 let key_event = crate::core::KeyEvent {
                     key: keyval,
                     shift_pressed: state_flags.contains(gdk::ModifierType::SHIFT_MASK),
-                    ctrl_pressed: state_flags.contains(gdk::ModifierType::CONTROL_MASK),
-                    alt_pressed: state_flags.contains(gdk::ModifierType::ALT_MASK),
+                    ctrl_pressed: is_ctrl,
+                    alt_pressed: is_alt,
                 };
 
                 let (handled, redraw) = state.on_key_pressed(&key_event);
@@ -865,7 +882,7 @@ mod tests {
         assert_eq!(snapshot.stroke_width, 4.5);
         assert_eq!(snapshot.opacity, 0.8);
 
-        let mut r2 = RectElement::new(Rect::new(100.0, 100.0, 50.0, 50.0), Some(Color::BLACK), None);
+        let r2 = RectElement::new(Rect::new(100.0, 100.0, 50.0, 50.0), Some(Color::BLACK), None);
         let mut el2 = Element::Rect(r2);
         el2.apply_style_snapshot(&snapshot);
 
