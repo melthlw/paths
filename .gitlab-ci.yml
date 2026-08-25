@@ -23,14 +23,14 @@ flatpak-test:
   extends: .flatpak-setup
   stage: test
   script:
-    - flatpak-builder --force-clean --disable-rofiles-fuse --build-only build-dir io.gitlab.lewisHeart.GnomePaths.json
-    - flatpak-builder --disable-rofiles-fuse --run build-dir io.gitlab.lewisHeart.GnomePaths.json cargo test
+    - flatpak-builder --force-clean --build-only build-dir io.gitlab.lewisHeart.GnomePaths.json
+    - flatpak-builder --run build-dir io.gitlab.lewisHeart.GnomePaths.json cargo test
 
 flatpak-bundle:
   extends: .flatpak-setup
   stage: flatpak
   script:
-    - flatpak-builder --force-clean --disable-rofiles-fuse --repo=repo build-dir io.gitlab.lewisHeart.GnomePaths.json
+    - flatpak-builder --force-clean --repo=repo build-dir io.gitlab.lewisHeart.GnomePaths.json
     - flatpak build-bundle repo io.gitlab.lewisHeart.GnomePaths.flatpak io.gitlab.lewisHeart.GnomePaths
   artifacts:
     name: "io.gitlab.lewisHeart.GnomePaths-$CI_COMMIT_REF_NAME"
