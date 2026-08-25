@@ -3,7 +3,7 @@ pub mod items;
 
 pub use customizer::{show_customize_toolbar_dialog, show_customize_toolbar_dialog_standalone};
 
-pub use items::{generate_default_items, rebuild_toolbar_items};
+pub use items::{generate_default_items, rebuild_toolbar_items, restore_toolbar_items};
 
 use gtk4::prelude::*;
 use std::cell::{Cell, RefCell};
@@ -54,7 +54,12 @@ impl FloatingToolbar {
 
         let state_rc = canvas.state();
         let default_groups = state_rc.borrow().plugin_manager.toolbar_groups();
-        let items_model = Rc::new(RefCell::new(generate_default_items(&default_groups)));
+        let initial_items = if let Some(saved_json) = crate::core::AppSettings::toolbar_customization() {
+            restore_toolbar_items(&saved_json, &default_groups)
+        } else {
+            generate_default_items(&default_groups)
+        };
+        let items_model = Rc::new(RefCell::new(initial_items));
 
         rebuild_toolbar_items(
             &items_box,

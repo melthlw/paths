@@ -58,6 +58,100 @@ pub fn get_tool_meta(
     }
 }
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct SerializedSubTool {
+    pub id: String,
+    pub visible: bool,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct SerializedToolItem {
+    pub id: String,
+    pub name: String,
+    pub visible: bool,
+    pub sub_tools: Vec<SerializedSubTool>,
+}
+
+pub fn serialize_toolbar_items(items: &[ToolItem]) -> String {
+    let serialized: Vec<SerializedToolItem> = items
+        .iter()
+        .map(|it| SerializedToolItem {
+            id: it.id.to_string(),
+            name: it.name.clone(),
+            visible: it.visible,
+            sub_tools: it
+                .sub_tools
+                .iter()
+                .map(|st| SerializedSubTool {
+                    id: st.id.to_string(),
+                    visible: st.visible,
+                })
+                .collect(),
+        })
+        .collect();
+    serde_json::to_string(&serialized).unwrap_or_default()
+}
+
+pub fn restore_toolbar_items(json_str: &str, groups: &[ToolbarGroup]) -> Vec<ToolItem> {
+    if let Ok(serialized) = serde_json::from_str::<Vec<SerializedToolItem>>(json_str) {
+        if !serialized.is_empty() {
+            let mut all_tools: HashMap<&str, (Option<&'static str>, &'static str, &'static str)> =
+                HashMap::new();
+            for g in groups {
+                for t in &g.tools {
+                    all_tools.insert(t.tool_id, (t.icon_resource, t.icon_name, t.tooltip));
+                }
+            }
+
+            let mut items = Vec::new();
+            for sit in serialized {
+                if let Some(&(ic_res, ic_name, tt)) = all_tools.get(sit.id.as_str()) {
+                    let (p_name, p_sc) = get_tool_meta(leak_str(&sit.id), tt);
+
+                    let mut sub_items = Vec::new();
+                    for sst in sit.sub_tools {
+                        if let Some(&(s_ic_res, s_ic_name, s_tt)) = all_tools.get(sst.id.as_str()) {
+                            let (s_name, s_sc) = get_tool_meta(leak_str(&sst.id), s_tt);
+                            sub_items.push(SubToolItem {
+                                id: leak_str(&sst.id),
+                                name: s_name,
+                                shortcut: s_sc.map(|s| s.to_string()),
+                                icon_resource: s_ic_res,
+                                icon_name: s_ic_name,
+                                tooltip: s_tt,
+                                visible: sst.visible,
+                            });
+                        }
+                    }
+
+                    items.push(ToolItem {
+                        id: leak_str(&sit.id),
+                        name: if sit.name.trim().is_empty() {
+                            p_name
+                        } else {
+                            sit.name
+                        },
+                        shortcut: p_sc.map(|s| s.to_string()),
+                        icon_resource: ic_res,
+                        icon_name: ic_name,
+                        tooltip: tt,
+                        visible: sit.visible,
+                        sub_tools: sub_items,
+                    });
+                }
+            }
+            if !items.is_empty() {
+                return items;
+            }
+        }
+    }
+    generate_default_items(groups)
+}
+
+fn leak_str(s: &str) -> &'static str {
+    Box::leak(s.to_string().into_boxed_str())
+}
+
 pub fn generate_default_items(groups: &[ToolbarGroup]) -> Vec<ToolItem> {
     let mut items = Vec::new();
     for group in groups {

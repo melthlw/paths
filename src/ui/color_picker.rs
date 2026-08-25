@@ -1542,7 +1542,7 @@ impl ColorPickerPopover {
                                 cv_s.set_fill_color(col);
                             }
                             1 => {
-                                let stop_idx = cv_s.get_active_gradient_info().map(|(s, _, _, _, _)| s).unwrap_or_else(|| act_g.get());
+                                let stop_idx = act_g.get().min(g_stops.borrow().len().saturating_sub(1));
                                 act_g.set(stop_idx);
                                 {
                                     let mut stops = g_stops.borrow_mut();
@@ -1812,7 +1812,7 @@ impl ColorPickerPopover {
                         cv.set_fill_color(new_col);
                     }
                     1 => {
-                        let stop_idx = cv.get_active_gradient_info().map(|(s, _, _, _, _)| s).unwrap_or_else(|| act_grad_stop.get());
+                        let stop_idx = act_grad_stop.get().min(g_stops.borrow().len().saturating_sub(1));
                         act_grad_stop.set(stop_idx);
                         {
                             let mut stops = g_stops.borrow_mut();

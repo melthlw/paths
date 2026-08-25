@@ -67,6 +67,10 @@ impl DesignApplication {
             let scale = crate::ui::theme::InterfaceScale::from_id(&scale_str);
             crate::ui::theme::set_interface_scale(scale);
 
+            // Apply persisted interface icon color
+            let icon_color = crate::core::AppSettings::interface_icon_color();
+            crate::ui::icons::set_interface_icon_color(&icon_color);
+
             Self::load_css();
             Self::setup_actions(app);
         });

@@ -12,6 +12,7 @@ pub fn current_interface_icon_color() -> String {
 }
 
 pub fn set_interface_icon_color(color_hex: &str) {
+    crate::core::AppSettings::set_interface_icon_color(color_hex);
     ICON_COLOR.with(|c| {
         *c.borrow_mut() = if color_hex == "default" {
             None

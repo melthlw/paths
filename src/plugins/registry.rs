@@ -31,10 +31,16 @@ pub struct PluginRegistry {
 
 impl Default for PluginRegistry {
     fn default() -> Self {
+        let saved_enabled = crate::core::AppSettings::enabled_plugins();
+        let mut enabled_set = std::collections::HashSet::new();
+        for id in saved_enabled {
+            enabled_set.insert(id);
+        }
+
         let mut registry = Self {
             modules: Vec::new(),
             _external_handles: Vec::new(),
-            enabled_plugins: std::collections::HashSet::new(),
+            enabled_plugins: enabled_set,
             active_id: "select",
         };
 
@@ -98,7 +104,7 @@ impl PluginRegistry {
     }
 
     pub fn is_plugin_enabled(&self, id: &str) -> bool {
-        self.enabled_plugins.contains(id)
+        crate::core::AppSettings::is_plugin_enabled(id)
     }
 
     pub fn set_plugin_enabled(&mut self, id: &str, enabled: bool) {
@@ -107,6 +113,7 @@ impl PluginRegistry {
         } else {
             self.enabled_plugins.remove(id);
         }
+        crate::core::AppSettings::set_plugin_enabled(id, enabled);
     }
 
     pub fn active_id(&self) -> &'static str {

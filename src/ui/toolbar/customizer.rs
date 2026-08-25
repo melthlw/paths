@@ -182,6 +182,10 @@ pub fn show_customize_toolbar_dialog(
                 position.get(),
             );
 
+            // Persist customized layout
+            let json = super::items::serialize_toolbar_items(&items_model.borrow());
+            crate::core::AppSettings::set_toolbar_customization(Some(json));
+
             // 2. Clear dialog UI
             while let Some(child) = list_container.first_child() {
                 list_container.remove(&child);

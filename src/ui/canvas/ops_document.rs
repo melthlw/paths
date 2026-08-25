@@ -402,12 +402,14 @@ impl CanvasWidget {
     pub fn set_snap_enabled(&self, enabled: bool) {
         let mut state = self.state.borrow_mut();
         state.snap_config.enabled = enabled;
+        crate::core::AppSettings::set_snap_enabled(enabled);
         self.drawing_area.queue_draw();
     }
 
     pub fn set_snap_to_grid(&self, snap: bool) {
         let mut state = self.state.borrow_mut();
         state.snap_config.snap_to_grid = snap;
+        crate::core::AppSettings::set_snap_to_grid(snap);
         self.drawing_area.queue_draw();
     }
 
@@ -418,18 +420,21 @@ impl CanvasWidget {
     pub fn set_snap_to_objects(&self, snap: bool) {
         let mut state = self.state.borrow_mut();
         state.snap_config.snap_to_objects = snap;
+        crate::core::AppSettings::set_snap_to_objects(snap);
         self.drawing_area.queue_draw();
     }
 
     pub fn set_snap_to_artboard(&self, snap: bool) {
         let mut state = self.state.borrow_mut();
         state.snap_config.snap_to_artboard = snap;
+        crate::core::AppSettings::set_snap_to_artboard(snap);
         self.drawing_area.queue_draw();
     }
 
     pub fn set_snap_to_guides(&self, snap: bool) {
         let mut state = self.state.borrow_mut();
         state.snap_config.snap_to_guides = snap;
+        crate::core::AppSettings::set_snap_to_guides(snap);
         self.drawing_area.queue_draw();
     }
 

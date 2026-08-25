@@ -464,16 +464,47 @@ impl InspectorSidebar {
         let libraries_body = build_libraries_section(&canvas);
 
         // Setup Dynamic Multi-Section Tab Bar & Split System
-        let tab_locations = Rc::new(RefCell::new([
+        let saved_loc_strings = crate::core::AppSettings::inspector_tab_locations();
+        let mut initial_locs = [
             TabLocation::Docked(0), // 0: Appearance
             TabLocation::Docked(0), // 1: Alignment
             TabLocation::Closed,    // 2: Transform
             TabLocation::Closed,    // 3: Clones
             TabLocation::Closed,    // 4: Export
-            TabLocation::Closed,    // 5: Libraries (Closed by default)
-        ]));
-        let tab_order = Rc::new(RefCell::new(vec![0usize, 1usize, 2usize, 3usize, 4usize, 5usize]));
-        let active_section_tabs = Rc::new(RefCell::new([0usize, 1usize, 2usize, 3usize, 4usize, 5usize]));
+            TabLocation::Closed,    // 5: Libraries
+        ];
+        if saved_loc_strings.len() >= 6 {
+            for (i, s) in saved_loc_strings.iter().enumerate().take(6) {
+                if s == "closed" {
+                    initial_locs[i] = TabLocation::Closed;
+                } else if s == "floating" {
+                    initial_locs[i] = TabLocation::Floating;
+                } else if let Some(sec_str) = s.strip_prefix("docked:") {
+                    if let Ok(sec) = sec_str.parse::<usize>() {
+                        initial_locs[i] = TabLocation::Docked(sec);
+                    }
+                }
+            }
+        }
+
+        let saved_active = crate::core::AppSettings::inspector_active_tabs();
+        let mut initial_active = [0usize, 1usize, 2usize, 3usize, 4usize, 5usize];
+        if saved_active.len() >= 6 {
+            for (i, &t) in saved_active.iter().enumerate().take(6) {
+                initial_active[i] = t;
+            }
+        }
+
+        let saved_order = crate::core::AppSettings::inspector_tab_order();
+        let initial_order = if saved_order.len() == 6 {
+            saved_order
+        } else {
+            vec![0usize, 1usize, 2usize, 3usize, 4usize, 5usize]
+        };
+
+        let tab_locations = Rc::new(RefCell::new(initial_locs));
+        let tab_order = Rc::new(RefCell::new(initial_order));
+        let active_section_tabs = Rc::new(RefCell::new(initial_active));
         let floating_wins: Rc<RefCell<[Option<adw::Window>; 6]>> =
             Rc::new(RefCell::new([None, None, None, None, None, None]));
 
@@ -683,6 +714,21 @@ impl InspectorSidebar {
                         }
                     }
                 }
+
+                // 6. Persist current inspector tab layout
+                let loc_strings: Vec<String> = locs
+                    .iter()
+                    .map(|l| match l {
+                        TabLocation::Closed => "closed".to_string(),
+                        TabLocation::Floating => "floating".to_string(),
+                        TabLocation::Docked(s) => format!("docked:{}", s),
+                    })
+                    .collect();
+                crate::core::AppSettings::set_inspector_tab_locations(loc_strings);
+                crate::core::AppSettings::set_inspector_active_tabs(
+                    active_section_tabs.borrow().to_vec(),
+                );
+                crate::core::AppSettings::set_inspector_tab_order(tab_order.borrow().clone());
             })
         };
 

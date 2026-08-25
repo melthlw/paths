@@ -127,7 +127,10 @@ impl FillRow {
             let pop_c = style_popover.clone();
             let rebuild = rebuild_cb.clone();
             item_btn.connect_clicked(move |_| {
-                let mut l = list.borrow_mut();
+                let Ok(mut l) = list.try_borrow_mut() else {
+                    pop_c.popdown();
+                    return;
+                };
                 if let Some(e) = l.get_mut(idx) {
                     e.style = st;
                     match st {
