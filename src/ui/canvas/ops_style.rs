@@ -31,8 +31,42 @@ impl CanvasWidget {
         if !state.document.selected_ids.is_empty() {
             state.document.snapshot();
             let selected_ids = state.document.selected_ids.clone();
+            let is_mesh_tool = state.plugin_manager.active_id() == "mesh_gradient";
+            let active_mesh_node = if is_mesh_tool {
+                state.plugin_manager.active_feature().and_then(|f| f.get_active_mesh_node())
+            } else {
+                None
+            };
+
             for el in &mut state.document.elements {
                 if selected_ids.contains(&el.id()) {
+                    if let Some(node_idx) = active_mesh_node {
+                        let mesh_mut = match el {
+                            crate::core::Element::Rect(r) => &mut r.mesh_gradient,
+                            crate::core::Element::Path(p) => &mut p.mesh_gradient,
+                            _ => &mut None,
+                        };
+                        let mut updated = false;
+                        if let Some(m) = mesh_mut {
+                            if node_idx < m.nodes.len() {
+                                m.nodes[node_idx].color = color;
+                                updated = true;
+                            }
+                        }
+                        let mut fills = el.fills();
+                        if let Some(f0) = fills.first_mut() {
+                            if let Some(m) = &mut f0.mesh {
+                                if node_idx < m.nodes.len() {
+                                    m.nodes[node_idx].color = color;
+                                    updated = true;
+                                }
+                            }
+                        }
+                        if updated {
+                            el.set_fills(fills);
+                            continue;
+                        }
+                    }
                     el.set_fill_color(Some(color));
                 }
             }
@@ -133,55 +167,6 @@ impl CanvasWidget {
         self.drawing_area.queue_draw();
     }
 
-    pub fn apply_selected_mesh_theme(&self, c1: Color, c2: Color) {
-        if let Ok(mut state) = self.state.try_borrow_mut() {
-            state.document.snapshot();
-            let selected_ids = state.document.selected_ids.clone();
-            for el in &mut state.document.elements {
-                if selected_ids.contains(&el.id()) {
-                    let mut updated_mesh = None;
-                    let mesh_mut = match el {
-                        crate::core::Element::Rect(r) => &mut r.mesh_gradient,
-                        crate::core::Element::Path(p) => &mut p.mesh_gradient,
-                        _ => &mut None,
-                    };
-                    if let Some(m) = mesh_mut {
-                        m.apply_theme(c1, c2);
-                        updated_mesh = Some(m.clone());
-                    }
-                    let mut fills = el.fills();
-                    if let Some(f0) = fills.first_mut() {
-                        if let Some(um) = updated_mesh.clone() {
-                            f0.mesh = Some(um);
-                        } else if let Some(m) = &mut f0.mesh {
-                            m.apply_theme(c1, c2);
-                            updated_mesh = Some(m.clone());
-                        }
-                    }
-                    if updated_mesh.is_none() {
-                        let bounds = el.bounds();
-                        let new_m = crate::core::MeshGradient::new_grid(bounds, 3, 3, c1, c2);
-                        match el {
-                            crate::core::Element::Rect(r) => r.mesh_gradient = Some(new_m.clone()),
-                            crate::core::Element::Path(p) => p.mesh_gradient = Some(new_m.clone()),
-                            _ => {}
-                        }
-                        if fills.is_empty() {
-                            fills.push(crate::core::FillLayer::default());
-                        }
-                        if let Some(f0) = fills.first_mut() {
-                            f0.style = crate::core::FillStyle::Mesh;
-                            f0.mesh = Some(new_m);
-                        }
-                    }
-                    el.set_fills(fills);
-                }
-            }
-            state.notify_status();
-        }
-        self.drawing_area.queue_draw();
-    }
-
     pub fn set_mesh_node_color(&self, idx: usize, color: Color) {
         if let Ok(mut state) = self.state.try_borrow_mut() {
             state.document.snapshot();
@@ -221,6 +206,311 @@ impl CanvasWidget {
                         }
                     }
                 }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn get_active_mesh_node(&self) -> Option<usize> {
+        self.state
+            .try_borrow()
+            .ok()
+            .and_then(|s| s.plugin_manager.active_feature().and_then(|f| f.get_active_mesh_node()))
+    }
+
+    pub fn get_active_mesh_info(&self) -> Option<(usize, usize, usize, Color, bool)> {
+        let state = self.state.try_borrow().ok()?;
+        let selected_id = state.document.selected_ids.iter().next()?;
+        let el = state.document.elements.iter().find(|e| e.id() == *selected_id)?;
+        let mesh = match el {
+            crate::core::Element::Rect(r) => r.mesh_gradient.as_ref()?,
+            crate::core::Element::Path(p) => p.mesh_gradient.as_ref()?,
+            _ => return None,
+        };
+        let active_node = state
+            .plugin_manager
+            .active_feature()
+            .and_then(|f| f.get_active_mesh_node())
+            .unwrap_or(0)
+            .min(mesh.nodes.len().saturating_sub(1));
+        let col = mesh.nodes.get(active_node).map(|n| n.color).unwrap_or(Color::BLACK);
+        Some((active_node, mesh.rows, mesh.cols, col, mesh.smooth_curves))
+    }
+
+    pub fn reset_selected_mesh_to_bounds(&self) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let bounds = el.bounds();
+                    let mesh_mut = match el {
+                        crate::core::Element::Rect(r) => &mut r.mesh_gradient,
+                        crate::core::Element::Path(p) => &mut p.mesh_gradient,
+                        _ => &mut None,
+                    };
+                    let mut updated_mesh = None;
+                    if let Some(m) = mesh_mut {
+                        m.reset_to_bounds(bounds);
+                        updated_mesh = Some(m.clone());
+                    }
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        if let Some(um) = updated_mesh.clone() {
+                            f0.mesh = Some(um);
+                        } else if let Some(m) = &mut f0.mesh {
+                            m.reset_to_bounds(bounds);
+                            updated_mesh = Some(m.clone());
+                        }
+                    }
+                    el.set_fills(fills);
+                    if let Some(um) = updated_mesh {
+                        match el {
+                            crate::core::Element::Rect(r) => r.mesh_gradient = Some(um),
+                            crate::core::Element::Path(p) => p.mesh_gradient = Some(um),
+                            _ => {}
+                        }
+                    }
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn split_selected_mesh_row(&self) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            let active_node = state
+                .plugin_manager
+                .active_feature()
+                .and_then(|f| f.get_active_mesh_node());
+            let mut new_sel = None;
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let mesh_mut = match el {
+                        crate::core::Element::Rect(r) => &mut r.mesh_gradient,
+                        crate::core::Element::Path(p) => &mut p.mesh_gradient,
+                        _ => &mut None,
+                    };
+                    let mut updated_mesh = None;
+                    if let Some(m) = mesh_mut {
+                        let r_idx = active_node.map(|idx| idx / m.cols);
+                        let next_node = m.split_row(r_idx);
+                        new_sel = Some(next_node);
+                        updated_mesh = Some(m.clone());
+                    }
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        if let Some(um) = updated_mesh.clone() {
+                            f0.mesh = Some(um);
+                        } else if let Some(m) = &mut f0.mesh {
+                            let r_idx = active_node.map(|idx| idx / m.cols);
+                            let next_node = m.split_row(r_idx);
+                            new_sel = Some(next_node);
+                            updated_mesh = Some(m.clone());
+                        }
+                    }
+                    el.set_fills(fills);
+                    if let Some(um) = updated_mesh {
+                        match el {
+                            crate::core::Element::Rect(r) => r.mesh_gradient = Some(um),
+                            crate::core::Element::Path(p) => p.mesh_gradient = Some(um),
+                            _ => {}
+                        }
+                    }
+                }
+            }
+            if let Some(idx) = new_sel {
+                if let Some(feat) = state.plugin_manager.active_feature_mut() {
+                    feat.set_active_mesh_node(idx);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn split_selected_mesh_col(&self) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            let active_node = state
+                .plugin_manager
+                .active_feature()
+                .and_then(|f| f.get_active_mesh_node());
+            let mut new_sel = None;
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let mesh_mut = match el {
+                        crate::core::Element::Rect(r) => &mut r.mesh_gradient,
+                        crate::core::Element::Path(p) => &mut p.mesh_gradient,
+                        _ => &mut None,
+                    };
+                    let mut updated_mesh = None;
+                    if let Some(m) = mesh_mut {
+                        let c_idx = active_node.map(|idx| idx % m.cols);
+                        let next_node = m.split_col(c_idx);
+                        new_sel = Some(next_node);
+                        updated_mesh = Some(m.clone());
+                    }
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        if let Some(um) = updated_mesh.clone() {
+                            f0.mesh = Some(um);
+                        } else if let Some(m) = &mut f0.mesh {
+                            let c_idx = active_node.map(|idx| idx % m.cols);
+                            let next_node = m.split_col(c_idx);
+                            new_sel = Some(next_node);
+                            updated_mesh = Some(m.clone());
+                        }
+                    }
+                    el.set_fills(fills);
+                    if let Some(um) = updated_mesh {
+                        match el {
+                            crate::core::Element::Rect(r) => r.mesh_gradient = Some(um),
+                            crate::core::Element::Path(p) => p.mesh_gradient = Some(um),
+                            _ => {}
+                        }
+                    }
+                }
+            }
+            if let Some(idx) = new_sel {
+                if let Some(feat) = state.plugin_manager.active_feature_mut() {
+                    feat.set_active_mesh_node(idx);
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn toggle_selected_mesh_smooth_curves(&self) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let mesh_mut = match el {
+                        crate::core::Element::Rect(r) => &mut r.mesh_gradient,
+                        crate::core::Element::Path(p) => &mut p.mesh_gradient,
+                        _ => &mut None,
+                    };
+                    let mut updated_mesh = None;
+                    if let Some(m) = mesh_mut {
+                        m.smooth_curves = !m.smooth_curves;
+                        updated_mesh = Some(m.clone());
+                    }
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        if let Some(um) = updated_mesh.clone() {
+                            f0.mesh = Some(um);
+                        } else if let Some(m) = &mut f0.mesh {
+                            m.smooth_curves = !m.smooth_curves;
+                            updated_mesh = Some(m.clone());
+                        }
+                    }
+                    el.set_fills(fills);
+                    if let Some(um) = updated_mesh {
+                        match el {
+                            crate::core::Element::Rect(r) => r.mesh_gradient = Some(um),
+                            crate::core::Element::Path(p) => p.mesh_gradient = Some(um),
+                            _ => {}
+                        }
+                    }
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn smooth_selected_mesh_spacing(&self) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let mesh_mut = match el {
+                        crate::core::Element::Rect(r) => &mut r.mesh_gradient,
+                        crate::core::Element::Path(p) => &mut p.mesh_gradient,
+                        _ => &mut None,
+                    };
+                    let mut updated_mesh = None;
+                    if let Some(m) = mesh_mut {
+                        m.smooth_grid_spacing();
+                        updated_mesh = Some(m.clone());
+                    }
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        if let Some(um) = updated_mesh.clone() {
+                            f0.mesh = Some(um);
+                        } else if let Some(m) = &mut f0.mesh {
+                            m.smooth_grid_spacing();
+                            updated_mesh = Some(m.clone());
+                        }
+                    }
+                    el.set_fills(fills);
+                    if let Some(um) = updated_mesh {
+                        match el {
+                            crate::core::Element::Rect(r) => r.mesh_gradient = Some(um),
+                            crate::core::Element::Path(p) => p.mesh_gradient = Some(um),
+                            _ => {}
+                        }
+                    }
+                }
+            }
+            state.notify_status();
+        }
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn delete_selected_mesh_node(&self) {
+        if let Ok(mut state) = self.state.try_borrow_mut() {
+            state.document.snapshot();
+            let selected_ids = state.document.selected_ids.clone();
+            let active_node = state
+                .plugin_manager
+                .active_feature()
+                .and_then(|f| f.get_active_mesh_node())
+                .unwrap_or(0);
+            for el in &mut state.document.elements {
+                if selected_ids.contains(&el.id()) {
+                    let mesh_mut = match el {
+                        crate::core::Element::Rect(r) => &mut r.mesh_gradient,
+                        crate::core::Element::Path(p) => &mut p.mesh_gradient,
+                        _ => &mut None,
+                    };
+                    let mut updated_mesh = None;
+                    if let Some(m) = mesh_mut {
+                        if m.delete_node(active_node) {
+                            updated_mesh = Some(m.clone());
+                        }
+                    }
+                    let mut fills = el.fills();
+                    if let Some(f0) = fills.first_mut() {
+                        if let Some(um) = updated_mesh.clone() {
+                            f0.mesh = Some(um);
+                        } else if let Some(m) = &mut f0.mesh {
+                            if m.delete_node(active_node) {
+                                updated_mesh = Some(m.clone());
+                            }
+                        }
+                    }
+                    el.set_fills(fills);
+                    if let Some(um) = updated_mesh {
+                        match el {
+                            crate::core::Element::Rect(r) => r.mesh_gradient = Some(um),
+                            crate::core::Element::Path(p) => p.mesh_gradient = Some(um),
+                            _ => {}
+                        }
+                    }
+                }
+            }
+            if let Some(feat) = state.plugin_manager.active_feature_mut() {
+                feat.set_active_mesh_node(0);
             }
             state.notify_status();
         }

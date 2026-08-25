@@ -132,6 +132,14 @@ pub trait FeaturePlugin: 'static + Send + Sync {
 
     /// Select all nodes in active path
     fn select_all_nodes(&mut self, _ctx: &mut PluginContext) {}
+
+    /// Get active selected mesh node index
+    fn get_active_mesh_node(&self) -> Option<usize> {
+        None
+    }
+
+    /// Set active selected mesh node index
+    fn set_active_mesh_node(&mut self, _idx: usize) {}
 }
 
 pub struct PluginRenderContext<'a> {

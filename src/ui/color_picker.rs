@@ -125,15 +125,22 @@ impl ColorPickerPopover {
         initial_mode: usize,
         show_mode_switcher: bool,
     ) -> Self {
-        let (h, s, v) = initial_color.to_hsv();
-        let color = Rc::new(Cell::new(initial_color));
+        let initial_mesh_info = canvas.get_active_mesh_info();
+        let init_mesh_node = initial_mesh_info.map(|(n, _, _, _, _)| n).unwrap_or(0);
+        let actual_init_color = if initial_mode == 2 {
+            initial_mesh_info.map(|(_, _, _, c, _)| c).unwrap_or(initial_color)
+        } else {
+            initial_color
+        };
+        let (h, s, v) = actual_init_color.to_hsv();
+        let color = Rc::new(Cell::new(actual_init_color));
         let hue = Rc::new(Cell::new(h));
         let sat = Rc::new(Cell::new(s));
         let val = Rc::new(Cell::new(v));
-        let alpha = Rc::new(Cell::new(initial_color.a));
+        let alpha = Rc::new(Cell::new(actual_init_color.a));
         let current_mode = Rc::new(Cell::new(initial_mode));
         let active_grad_stop = Rc::new(Cell::new(0usize));
-        let active_mesh_node = Rc::new(Cell::new(0usize));
+        let active_mesh_node = Rc::new(Cell::new(init_mesh_node));
         let is_updating = Rc::new(Cell::new(false));
         let on_change: Rc<RefCell<Option<Box<dyn Fn(Color)>>>> = Rc::new(RefCell::new(None));
         let on_mode_change: Rc<RefCell<Option<Box<dyn Fn(usize)>>>> = Rc::new(RefCell::new(None));
@@ -176,7 +183,7 @@ impl ColorPickerPopover {
             .margin_end(4)
             .margin_top(4)
             .margin_bottom(4)
-            .width_request(290)
+            .width_request(248)
             .build();
 
         // ── 1. Top Mode Switcher (Floating Tab Capsule) ──
@@ -207,12 +214,12 @@ impl ColorPickerPopover {
                     .build();
                 let b_content = gtk4::Box::builder()
                     .orientation(gtk4::Orientation::Horizontal)
-                    .spacing(4)
+                    .spacing(3)
                     .halign(gtk4::Align::Center)
                     .valign(gtk4::Align::Center)
                     .build();
                 let img = gtk4::Image::from_icon_name(*icon);
-                img.set_pixel_size(12);
+                img.set_pixel_size(11);
                 let label = gtk4::Label::builder().label(lbl).build();
                 b_content.append(&img);
                 b_content.append(&label);
@@ -264,25 +271,27 @@ impl ColorPickerPopover {
 
         // Pre-create DrawingAreas and Entry (Compact Dimensions)
         let hue_area = gtk4::DrawingArea::builder()
-            .content_width(24)
-            .content_height(110)
+            .content_width(16)
+            .content_height(115)
             .valign(gtk4::Align::Fill)
             .build();
 
         let sv_area = gtk4::DrawingArea::builder()
-            .content_width(220)
-            .content_height(110)
-            .hexpand(true)
+            .content_width(196)
+            .content_height(115)
+            .hexpand(false)
+            .halign(gtk4::Align::Center)
             .valign(gtk4::Align::Fill)
             .build();
 
         let alpha_area = gtk4::DrawingArea::builder()
-            .content_width(250)
-            .content_height(24)
+            .content_width(218)
+            .content_height(18)
             .margin_top(2)
             .margin_bottom(2)
             .valign(gtk4::Align::Center)
-            .hexpand(true)
+            .hexpand(false)
+            .halign(gtk4::Align::Center)
             .build();
 
         let hex_entry = gtk4::Entry::builder()
@@ -1013,47 +1022,6 @@ impl ColorPickerPopover {
             .visible(initial_mode == 2)
             .build();
 
-        let hint_lbl = gtk4::Label::builder()
-            .label(&crate::core::gettext("Click any point or edge on canvas to select, drag, or add new mesh points."))
-            .wrap(true)
-            .css_classes(["caption"])
-            .halign(gtk4::Align::Center)
-            .margin_start(4)
-            .margin_end(4)
-            .margin_top(2)
-            .margin_bottom(2)
-            .build();
-        mesh_panel.append(&hint_lbl);
-
-        // Theme Presets
-        let themes_box = gtk4::Box::builder()
-            .orientation(gtk4::Orientation::Horizontal)
-            .spacing(2)
-            .halign(gtk4::Align::Fill)
-            .build();
-
-        for (p_name, c1, c2) in [
-            ("Sunset", Color::from_hex("#ff5e3a").unwrap(), Color::from_hex("#ff2a6d").unwrap()),
-            ("Aurora", Color::from_hex("#00f2fe").unwrap(), Color::from_hex("#4facfe").unwrap()),
-            ("Ocean", Color::from_hex("#009efd").unwrap(), Color::from_hex("#2af598").unwrap()),
-            ("Neon", Color::from_hex("#f857a6").unwrap(), Color::from_hex("#ff5858").unwrap()),
-        ] {
-            let p_btn = gtk4::Button::builder()
-                .label(&crate::core::gettext(p_name))
-                .css_classes(["flat", "pill-btn"])
-                .hexpand(true)
-                .build();
-            let cv_th = canvas.clone();
-            let ltc = load_tuner_color.clone();
-            p_btn.connect_clicked(move |_| {
-                cv_th.apply_selected_mesh_theme(c1, c2);
-                cv_th.set_active_tool("mesh_gradient");
-                ltc(c1);
-            });
-            themes_box.append(&p_btn);
-        }
-        mesh_panel.append(&themes_box);
-
         card.append(&mesh_panel);
 
         // ── 4. PATTERN PANEL ──
@@ -1287,12 +1255,14 @@ impl ColorPickerPopover {
         let divider_tuner = gtk4::Box::builder()
             .css_classes(["color-picker-divider"])
             .hexpand(true)
+            .visible(initial_mode == 1 || initial_mode == 3)
             .build();
         card.append(&divider_tuner);
 
         let body_row = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Horizontal)
             .spacing(6)
+            .halign(gtk4::Align::Center)
             .margin_top(2)
             .margin_bottom(2)
             .build();
@@ -1613,7 +1583,8 @@ impl ColorPickerPopover {
                             rbp_c();
                         }
                         2 => {
-                            let node_idx = act_mesh_n.get();
+                            let node_idx = cv_s.get_active_mesh_node().unwrap_or_else(|| act_mesh_n.get());
+                            act_mesh_n.set(node_idx);
                             cv_s.set_mesh_node_color(node_idx, col);
                         }
                         3 => {
@@ -1657,6 +1628,8 @@ impl ColorPickerPopover {
         let g_track_mode = grad_track_da.clone();
         let g_stops_mode = grad_stops_ref.clone();
 
+        let div_tun_clone = divider_tuner.clone();
+
         for (i, btn) in mode_buttons.iter().enumerate() {
             let on_mode = on_mode_clone.clone();
             let all_btns = mode_btns_clone.clone();
@@ -1665,6 +1638,7 @@ impl ColorPickerPopover {
             let grad_p_c = gradient_panel.clone();
             let mesh_p_c = mesh_panel.clone();
             let pat_p_c = pattern_panel.clone();
+            let div_tun_c = div_tun_clone.clone();
             let cur_m = current_mode.clone();
             let cv = canvas_mode.clone();
             let ltc = load_tuner_color.clone();
@@ -1686,6 +1660,7 @@ impl ColorPickerPopover {
                 grad_p_c.set_visible(i == 1);
                 mesh_p_c.set_visible(i == 2);
                 pat_p_c.set_visible(i == 3);
+                div_tun_c.set_visible(i == 1 || i == 3);
 
                 match i {
                     0 => {
@@ -1866,7 +1841,8 @@ impl ColorPickerPopover {
                         rbp_fn();
                     }
                     2 => {
-                        let node_idx = act_mesh_n.get();
+                        let node_idx = cv.get_active_mesh_node().unwrap_or_else(|| act_mesh_n.get());
+                        act_mesh_n.set(node_idx);
                         cv.set_mesh_node_color(node_idx, new_col);
                     }
                     3 => {

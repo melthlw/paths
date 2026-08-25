@@ -1,5 +1,6 @@
 pub mod brush;
 pub mod helpers;
+pub mod mesh;
 pub mod pen;
 pub mod pen_brush_text;
 pub mod select;
@@ -10,6 +11,7 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 use self::brush::{build_brush_controls, BrushControls};
+use self::mesh::{build_mesh_controls, MeshControls};
 use self::pen::{build_pen_controls, PenControls};
 use self::pen_brush_text::build_pen_brush_text_controls;
 use self::select::build_select_controls;
@@ -89,6 +91,8 @@ pub struct ToolOptionsBar {
     h_entry: gtk4::Entry,
     unit_dd: gtk4::DropDown,
     path_editor_box: gtk4::Box,
+    mesh_box: gtk4::Box,
+    mesh_controls: MeshControls,
     canvas: CanvasWidget,
     is_syncing: Rc<Cell<bool>>,
     is_top: Rc<Cell<bool>>,
@@ -211,6 +215,10 @@ impl ToolOptionsBar {
         let brush_controls = build_brush_controls(&canvas, &is_syncing);
         let brush_box = brush_controls.brush_box.clone();
         left_capsule.append(&brush_box);
+
+        let mesh_controls = build_mesh_controls(&canvas, &is_syncing);
+        let mesh_box = mesh_controls.mesh_box.clone();
+        left_capsule.append(&mesh_box);
 
         container.append(&left_capsule);
         container.append(&text_capsule);
@@ -378,6 +386,8 @@ impl ToolOptionsBar {
             pen_controls,
             brush_box,
             brush_controls,
+            mesh_box,
+            mesh_controls,
             canvas,
             is_syncing,
             is_top,
@@ -482,6 +492,7 @@ impl ToolOptionsBar {
             self.spiral_box.set_visible(false);
             self.pen_box.set_visible(false);
             self.brush_box.set_visible(false);
+            self.mesh_box.set_visible(false);
 
             self.is_syncing.set(true);
             match tool_id {
@@ -643,6 +654,7 @@ impl ToolOptionsBar {
             self.shape_options_box.set_visible(false);
             self.pen_box.set_visible(false);
             self.brush_box.set_visible(false);
+            self.mesh_box.set_visible(false);
             self.path_editor_box.set_visible(true);
         } else if tool_id == "pen" || tool_id == "vector-pen" || tool_id == "vector_pen" {
             self.container.set_visible(true);
@@ -654,6 +666,7 @@ impl ToolOptionsBar {
             self.shape_options_box.set_visible(false);
             self.path_editor_box.set_visible(false);
             self.brush_box.set_visible(false);
+            self.mesh_box.set_visible(false);
             self.pen_box.set_visible(true);
 
             if let Ok(state_b) = self.canvas.state().try_borrow() {
@@ -685,6 +698,7 @@ impl ToolOptionsBar {
             self.shape_options_box.set_visible(false);
             self.path_editor_box.set_visible(false);
             self.pen_box.set_visible(false);
+            self.mesh_box.set_visible(false);
             self.brush_box.set_visible(true);
 
             if let Ok(state_b) = self.canvas.state().try_borrow() {
@@ -736,6 +750,33 @@ impl ToolOptionsBar {
                     }
                 }
             }
+        } else if tool_id == "mesh_gradient" || tool_id == "mesh" {
+            self.container.set_visible(true);
+            self.text_capsule.set_visible(false);
+            self.page_capsule.set_visible(false);
+            self.left_capsule.set_visible(true);
+            self.right_capsule.set_visible(false);
+            self.general_box.set_visible(false);
+            self.shape_options_box.set_visible(false);
+            self.path_editor_box.set_visible(false);
+            self.pen_box.set_visible(false);
+            self.brush_box.set_visible(false);
+            self.mesh_box.set_visible(true);
+
+            if let Some((node_idx, rows, cols, color, smooth_curves)) = self.canvas.get_active_mesh_info() {
+                self.is_syncing.set(true);
+                self.mesh_controls.btn_smooth_curves.set_active(smooth_curves);
+                self.mesh_controls.btn_delete_node.set_sensitive(rows > 2 || cols > 2);
+                self.mesh_controls.node_color_cell.set(color);
+                self.mesh_controls.color_da.queue_draw();
+                self.mesh_controls.color_btn.set_tooltip_text(Some(&format!(
+                    "{} (#{} - Node {})",
+                    crate::core::gettext("Selected Mesh Node Color"),
+                    color.to_hex_rgba(),
+                    node_idx + 1
+                )));
+                self.is_syncing.set(false);
+            }
         } else if has_selection {
             self.container.set_visible(true);
             self.text_capsule.set_visible(false);
@@ -747,6 +788,7 @@ impl ToolOptionsBar {
             self.path_editor_box.set_visible(false);
             self.pen_box.set_visible(false);
             self.brush_box.set_visible(false);
+            self.mesh_box.set_visible(false);
 
             self.layer_box.set_visible(selected_count > 0);
             self.transform_modes_box.set_visible(true);

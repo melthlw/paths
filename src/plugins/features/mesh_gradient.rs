@@ -30,29 +30,91 @@ impl MeshGradientFeature {
         }
     }
 
-    fn find_target(&mut self, ctx: &mut PluginContext, point: Point) -> Option<ElementId> {
+    fn find_target_and_node(
+        &mut self,
+        ctx: &mut PluginContext,
+        point: Point,
+    ) -> (Option<ElementId>, Option<usize>) {
+        let hit_radius = 16.0 / ctx.viewport.zoom;
+
+        // 1. First priority: Check if clicking on ANY node of the currently selected element
         if let Some(&first) = ctx.document.selected_ids.iter().next() {
             if let Some(elem) = ctx.document.elements.iter().find(|e| e.id() == first) {
-                if elem.hit_test(point) {
-                    return Some(first);
+                let mesh_opt = match elem {
+                    Element::Rect(r) => &r.mesh_gradient,
+                    Element::Path(p) => &p.mesh_gradient,
+                    _ => &None,
+                };
+                if let Some(mesh) = mesh_opt {
+                    for (i, node) in mesh.nodes.iter().enumerate() {
+                        if node.point.distance_to(point) <= hit_radius {
+                            return (Some(first), Some(i));
+                        }
+                    }
                 }
             }
         }
 
+        // 2. Second priority: Check if clicking on ANY node of other elements
+        for elem in ctx.document.elements.iter().rev() {
+            let mesh_opt = match elem {
+                Element::Rect(r) => &r.mesh_gradient,
+                Element::Path(p) => &p.mesh_gradient,
+                _ => &None,
+            };
+            if let Some(mesh) = mesh_opt {
+                for (i, node) in mesh.nodes.iter().enumerate() {
+                    if node.point.distance_to(point) <= hit_radius {
+                        let id = elem.id();
+                        ctx.document.select(id, false);
+                        return (Some(id), Some(i));
+                    }
+                }
+            }
+        }
+
+        // 3. Third priority: Check if clicking inside currently selected element
+        if let Some(&first) = ctx.document.selected_ids.iter().next() {
+            if let Some(elem) = ctx.document.elements.iter().find(|e| e.id() == first) {
+                if elem.hit_test(point) {
+                    return (Some(first), None);
+                }
+            }
+        }
+
+        // 4. Fourth priority: General element hit test
         for elem in ctx.document.elements.iter().rev() {
             if elem.hit_test(point) {
                 let id = elem.id();
                 ctx.document.select(id, false);
-                return Some(id);
+                return (Some(id), None);
             }
         }
-        None
+
+        // 5. Fallback: Keep currently selected target if available
+        if let Some(&first) = ctx.document.selected_ids.iter().next() {
+            return (Some(first), None);
+        }
+
+        (None, None)
     }
 }
 
 impl FeaturePlugin for MeshGradientFeature {
     fn on_activate(&mut self, ctx: &mut PluginContext) {
         ctx.set_cursor("tool:node");
+        if let Some(&first) = ctx.document.selected_ids.iter().next() {
+            self.target_id = Some(first);
+            self.selected_node_idx = Some(0);
+        }
+    }
+
+    fn get_active_mesh_node(&self) -> Option<usize> {
+        self.selected_node_idx
+    }
+
+    fn set_active_mesh_node(&mut self, idx: usize) {
+        self.selected_node_idx = Some(idx);
     }
 
     fn on_pointer_down(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
@@ -62,14 +124,15 @@ impl FeaturePlugin for MeshGradientFeature {
 
         let now = std::time::Instant::now();
         let is_double_click = if let (Some(last_t), Some(last_p)) = (self.last_click_time, self.last_click_pos) {
-            now.duration_since(last_t).as_millis() < 350 && last_p.distance_to(event.world_pos) < (10.0 / ctx.viewport.zoom)
+            now.duration_since(last_t).as_millis() < 350 && last_p.distance_to(event.world_pos) < (14.0 / ctx.viewport.zoom)
         } else {
             false
         };
         self.last_click_time = Some(now);
         self.last_click_pos = Some(event.world_pos);
 
-        let target_id = match self.find_target(ctx, event.world_pos) {
+        let (target_id_opt, hit_node_idx) = self.find_target_and_node(ctx, event.world_pos);
+        let target_id = match target_id_opt {
             Some(id) => id,
             None => {
                 self.target_id = None;
@@ -128,8 +191,28 @@ impl FeaturePlugin for MeshGradientFeature {
                 }
             }
             self.selected_node_idx = Some(0);
+        } else if let Some(node_idx) = hit_node_idx {
+            // Direct node hit (even if dragged outside shape)
+            self.selected_node_idx = Some(node_idx);
+            self.is_dragging = true;
+
+            for el in &ctx.document.elements {
+                if el.id() == target_id {
+                    let mesh_opt = match el {
+                        Element::Rect(r) => &r.mesh_gradient,
+                        Element::Path(p) => &p.mesh_gradient,
+                        _ => &None,
+                    };
+                    if let Some(mesh) = mesh_opt {
+                        if node_idx < mesh.nodes.len() {
+                            ctx.active_fill_color = mesh.nodes[node_idx].color;
+                        }
+                    }
+                    break;
+                }
+            }
         } else if is_double_click || event.alt_pressed {
-            // Double click or Alt-click: Subdivide mesh at click position
+            // Double click or Alt-click on mesh area: Subdivide mesh at click position
             ctx.document.snapshot();
             let mut new_node_idx = None;
             for el in &mut ctx.document.elements {
@@ -159,7 +242,7 @@ impl FeaturePlugin for MeshGradientFeature {
             self.selected_node_idx = new_node_idx;
             self.is_dragging = true;
         } else {
-            // Single click: Select closest node and enable dragging / coloring
+            // Single click inside mesh: Select closest node and enable dragging
             let mut closest_idx = 0;
             let mut min_dist = f32::MAX;
             for el in &ctx.document.elements {
@@ -187,36 +270,6 @@ impl FeaturePlugin for MeshGradientFeature {
 
             self.selected_node_idx = Some(closest_idx);
             self.is_dragging = true;
-
-            // If Shift is pressed, apply active fill color to this node!
-            if event.shift_pressed {
-                ctx.document.snapshot();
-                for el in &mut ctx.document.elements {
-                    if el.id() == target_id {
-                        let mesh_mut = match el {
-                            Element::Rect(r) => &mut r.mesh_gradient,
-                            Element::Path(p) => &mut p.mesh_gradient,
-                            _ => &mut None,
-                        };
-                        let mut updated_mesh = None;
-                        if let Some(mesh) = mesh_mut {
-                            if closest_idx < mesh.nodes.len() {
-                                mesh.nodes[closest_idx].color = ctx.active_fill_color;
-                                updated_mesh = Some(mesh.clone());
-                            }
-                        }
-                        if let Some(um) = updated_mesh {
-                            let mut fills = el.fills();
-                            if let Some(f0) = fills.first_mut() {
-                                f0.style = crate::core::FillStyle::Mesh;
-                                f0.mesh = Some(um);
-                            }
-                            el.set_fills(fills);
-                        }
-                        break;
-                    }
-                }
-            }
         }
 
         ctx.request_redraw();
@@ -280,7 +333,13 @@ impl FeaturePlugin for MeshGradientFeature {
     ) {
         let id = match self.target_id {
             Some(i) => i,
-            None => return,
+            None => {
+                if let Some(&first) = _ctx.document.selected_ids.iter().next() {
+                    first
+                } else {
+                    return;
+                }
+            }
         };
 
         let doc = &_ctx.document;
@@ -305,8 +364,8 @@ impl FeaturePlugin for MeshGradientFeature {
 
         // 1. Draw Mesh Grid Connecting Lines
         let mut line_paint = skia::Paint::default();
-        line_paint.set_color4f(skia::Color4f::new(0.2, 0.6, 1.0, 0.6), None);
-        line_paint.set_stroke_width(1.0 / zoom);
+        line_paint.set_color4f(skia::Color4f::new(0.2, 0.6, 1.0, 0.65), None);
+        line_paint.set_stroke_width(1.2 / zoom);
         line_paint.set_style(skia::PaintStyle::Stroke);
         line_paint.set_anti_alias(true);
 
@@ -329,10 +388,19 @@ impl FeaturePlugin for MeshGradientFeature {
             }
         }
 
-        // 2. Draw Mesh Nodes
+        // 2. Draw Mesh Nodes with Clear Highlights & Colors
         for (i, node) in mesh.nodes.iter().enumerate() {
             let is_sel = self.selected_node_idx == Some(i);
-            let radius = if is_sel { 6.0 / zoom } else { 4.5 / zoom };
+            let radius = if is_sel { 7.5 / zoom } else { 5.0 / zoom };
+
+            if is_sel {
+                // Outer glow halo for selected node
+                let mut halo = skia::Paint::default();
+                halo.set_color4f(skia::Color4f::new(0.15, 0.55, 1.0, 0.4), None);
+                halo.set_style(skia::PaintStyle::Fill);
+                halo.set_anti_alias(true);
+                canvas.draw_circle(node.point.to_skia(), radius + 3.5 / zoom, &halo);
+            }
 
             let mut node_paint = skia::Paint::default();
             node_paint.set_color4f(node.color.to_skia(), None);
@@ -342,11 +410,11 @@ impl FeaturePlugin for MeshGradientFeature {
 
             let mut border = skia::Paint::default();
             if is_sel {
-                border.set_color4f(skia::Color4f::new(1.0, 0.8, 0.2, 1.0), None);
-                border.set_stroke_width(2.0 / zoom);
+                border.set_color4f(skia::Color4f::new(1.0, 1.0, 1.0, 1.0), None);
+                border.set_stroke_width(2.5 / zoom);
             } else {
-                border.set_color4f(skia::Color4f::new(0.1, 0.1, 0.15, 0.9), None);
-                border.set_stroke_width(1.2 / zoom);
+                border.set_color4f(skia::Color4f::new(0.05, 0.05, 0.1, 0.85), None);
+                border.set_stroke_width(1.5 / zoom);
             }
             border.set_style(skia::PaintStyle::Stroke);
             border.set_anti_alias(true);

@@ -665,6 +665,7 @@ impl CanvasState {
         }
 
         if let Some(hit_id) = self.document.hit_test(world_pos) {
+            let cur_tool = self.plugin_manager.active_id();
             let target_tool: Option<&'static str> = self
                 .document
                 .elements
@@ -672,19 +673,31 @@ impl CanvasState {
                 .find(|el| el.id() == hit_id)
                 .and_then(|el| match el {
                     Element::Text(_) => Some("text"),
-                    Element::Rect(_) => Some("rectangle"),
+                    Element::Rect(r) => {
+                        if r.mesh_gradient.is_some() || cur_tool == "mesh_gradient" {
+                            Some("mesh_gradient")
+                        } else {
+                            Some("rectangle")
+                        }
+                    }
                     Element::Brush(_) => Some("brush"),
                     Element::Group(_) => Some("select"),
                     Element::Image(_) => Some("select"),
                     Element::Clone(_) => Some("select"),
-                    Element::Path(p) => match &p.shape_origin {
-                        Some(crate::core::ShapeOrigin::Rectangle { .. }) => Some("rectangle"),
-                        Some(crate::core::ShapeOrigin::Circle { .. }) => Some("circle"),
-                        Some(crate::core::ShapeOrigin::Star { .. }) => Some("star"),
-                        Some(crate::core::ShapeOrigin::Triangle { .. }) => Some("triangle"),
-                        Some(crate::core::ShapeOrigin::Spiral { .. }) => Some("spiral"),
-                        None => Some("path_editor"),
-                    },
+                    Element::Path(p) => {
+                        if p.mesh_gradient.is_some() || cur_tool == "mesh_gradient" {
+                            Some("mesh_gradient")
+                        } else {
+                            match &p.shape_origin {
+                                Some(crate::core::ShapeOrigin::Rectangle { .. }) => Some("rectangle"),
+                                Some(crate::core::ShapeOrigin::Circle { .. }) => Some("circle"),
+                                Some(crate::core::ShapeOrigin::Star { .. }) => Some("star"),
+                                Some(crate::core::ShapeOrigin::Triangle { .. }) => Some("triangle"),
+                                Some(crate::core::ShapeOrigin::Spiral { .. }) => Some("spiral"),
+                                None => Some("path_editor"),
+                            }
+                        }
+                    }
                 });
 
             if let Some(tool) = target_tool {

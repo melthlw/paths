@@ -674,6 +674,8 @@ pub struct MeshGradient {
     pub rows: usize,
     pub cols: usize,
     pub nodes: Vec<MeshNode>,
+    #[serde(default)]
+    pub smooth_curves: bool,
 }
 
 impl MeshGradient {
@@ -710,7 +712,12 @@ impl MeshGradient {
                 nodes.push(MeshNode::new(Point::new(px, py), c));
             }
         }
-        Self { rows, cols, nodes }
+        Self {
+            rows,
+            cols,
+            nodes,
+            smooth_curves: true,
+        }
     }
 
     pub fn translate(&mut self, dx: f32, dy: f32) {
@@ -726,23 +733,154 @@ impl MeshGradient {
         }
     }
 
-    pub fn apply_theme(&mut self, c1: Color, c2: Color) {
+    pub fn reset_to_bounds(&mut self, bounds: Rect) {
         if self.rows < 2 || self.cols < 2 || self.nodes.len() != self.rows * self.cols {
             return;
         }
-        for r in 0..self.rows {
-            let v = r as f32 / (self.rows - 1) as f32;
-            for c in 0..self.cols {
-                let u = c as f32 / (self.cols - 1) as f32;
-                let t = (u + v) / 2.0;
-                let col = Color::new(
-                    c1.r + t * (c2.r - c1.r),
-                    c1.g + t * (c2.g - c1.g),
-                    c1.b + t * (c2.b - c1.b),
-                    c1.a + t * (c2.a - c1.a),
-                );
-                self.nodes[r * self.cols + c].color = col;
+        let r = bounds.normalize();
+        for row in 0..self.rows {
+            let v = row as f32 / (self.rows - 1) as f32;
+            for col in 0..self.cols {
+                let u = col as f32 / (self.cols - 1) as f32;
+                let px = r.x + u * r.width;
+                let py = r.y + v * r.height;
+                self.nodes[row * self.cols + col].point = Point::new(px, py);
             }
+        }
+    }
+
+    pub fn split_row(&mut self, row_idx: Option<usize>) -> usize {
+        if self.rows < 2 || self.cols < 2 {
+            return 0;
+        }
+        let target_r = row_idx.unwrap_or(self.rows / 2).clamp(0, self.rows - 2);
+        let mut final_nodes = Vec::with_capacity((self.rows + 1) * self.cols);
+
+        for r in 0..self.rows {
+            for c in 0..self.cols {
+                final_nodes.push(self.nodes[r * self.cols + c].clone());
+            }
+            if r == target_r {
+                for c in 0..self.cols {
+                    let top_node = &self.nodes[r * self.cols + c];
+                    let bot_node = &self.nodes[(r + 1) * self.cols + c];
+                    let mid_p = Point::new(
+                        (top_node.point.x + bot_node.point.x) * 0.5,
+                        (top_node.point.y + bot_node.point.y) * 0.5,
+                    );
+                    let mid_c = Color::new(
+                        (top_node.color.r + bot_node.color.r) * 0.5,
+                        (top_node.color.g + bot_node.color.g) * 0.5,
+                        (top_node.color.b + bot_node.color.b) * 0.5,
+                        (top_node.color.a + bot_node.color.a) * 0.5,
+                    );
+                    final_nodes.push(MeshNode::new(mid_p, mid_c));
+                }
+            }
+        }
+        self.rows += 1;
+        self.nodes = final_nodes;
+        (target_r + 1) * self.cols
+    }
+
+    pub fn split_col(&mut self, col_idx: Option<usize>) -> usize {
+        if self.rows < 2 || self.cols < 2 {
+            return 0;
+        }
+        let target_c = col_idx.unwrap_or(self.cols / 2).clamp(0, self.cols - 2);
+        let mut final_nodes = Vec::with_capacity(self.rows * (self.cols + 1));
+
+        for r in 0..self.rows {
+            for c in 0..self.cols {
+                final_nodes.push(self.nodes[r * self.cols + c].clone());
+                if c == target_c {
+                    let left_node = &self.nodes[r * self.cols + c];
+                    let right_node = &self.nodes[r * self.cols + (c + 1)];
+                    let mid_p = Point::new(
+                        (left_node.point.x + right_node.point.x) * 0.5,
+                        (left_node.point.y + right_node.point.y) * 0.5,
+                    );
+                    let mid_c = Color::new(
+                        (left_node.color.r + right_node.color.r) * 0.5,
+                        (left_node.color.g + right_node.color.g) * 0.5,
+                        (left_node.color.b + right_node.color.b) * 0.5,
+                        (left_node.color.a + right_node.color.a) * 0.5,
+                    );
+                    final_nodes.push(MeshNode::new(mid_p, mid_c));
+                }
+            }
+        }
+        self.cols += 1;
+        self.nodes = final_nodes;
+        target_c + 1
+    }
+
+    pub fn delete_node(&mut self, node_idx: usize) -> bool {
+        if node_idx >= self.nodes.len() || self.rows < 2 || self.cols < 2 {
+            return false;
+        }
+        if self.rows <= 2 && self.cols <= 2 {
+            return false;
+        }
+
+        let r = node_idx / self.cols;
+        let c = node_idx % self.cols;
+
+        if self.cols > 2 && (self.rows <= 2 || self.cols >= self.rows) {
+            // Delete column `c`
+            let mut new_nodes = Vec::with_capacity(self.rows * (self.cols - 1));
+            for row in 0..self.rows {
+                for col in 0..self.cols {
+                    if col != c {
+                        new_nodes.push(self.nodes[row * self.cols + col].clone());
+                    }
+                }
+            }
+            self.cols -= 1;
+            self.nodes = new_nodes;
+            true
+        } else if self.rows > 2 {
+            // Delete row `r`
+            let mut new_nodes = Vec::with_capacity((self.rows - 1) * self.cols);
+            for row in 0..self.rows {
+                if row != r {
+                    for col in 0..self.cols {
+                        new_nodes.push(self.nodes[row * self.cols + col].clone());
+                    }
+                }
+            }
+            self.rows -= 1;
+            self.nodes = new_nodes;
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn smooth_grid_spacing(&mut self) {
+        if self.rows <= 2 || self.cols <= 2 || self.nodes.len() != self.rows * self.cols {
+            return;
+        }
+
+        // Perform Laplacian relaxation on internal grid nodes for even distribution
+        let mut new_pts = self.nodes.iter().map(|n| n.point).collect::<Vec<_>>();
+        for _ in 0..4 {
+            for r in 1..(self.rows - 1) {
+                for c in 1..(self.cols - 1) {
+                    let top = new_pts[(r - 1) * self.cols + c];
+                    let bot = new_pts[(r + 1) * self.cols + c];
+                    let left = new_pts[r * self.cols + (c - 1)];
+                    let right = new_pts[r * self.cols + (c + 1)];
+
+                    new_pts[r * self.cols + c] = Point::new(
+                        (top.x + bot.x + left.x + right.x) * 0.25,
+                        (top.y + bot.y + left.y + right.y) * 0.25,
+                    );
+                }
+            }
+        }
+        for (i, p) in new_pts.into_iter().enumerate() {
+            self.nodes[i].point = p;
         }
     }
 
@@ -852,32 +990,113 @@ pub fn render_mesh_gradient(canvas: &skia::Canvas, clip_path: &skia::Path, mesh:
     let mut colors = Vec::new();
     let mut indices: Vec<u16> = Vec::new();
 
-    for n in &mesh.nodes {
-        positions.push(n.point.to_skia());
-        let c = n.color;
-        let c_u8 = skia::Color::from_argb(
-            (c.a * 255.0).round() as u8,
-            (c.r * 255.0).round() as u8,
-            (c.g * 255.0).round() as u8,
-            (c.b * 255.0).round() as u8,
-        );
-        colors.push(c_u8);
-    }
+    if mesh.smooth_curves {
+        // High-fidelity smooth sub-patches (3x3 quads per patch = 18 triangles per patch)
+        let sub = 3usize;
+        let mut vert_idx = 0u16;
 
-    for r in 0..(mesh.rows - 1) {
-        for c in 0..(mesh.cols - 1) {
-            let top_left = (r * mesh.cols + c) as u16;
-            let top_right = (r * mesh.cols + c + 1) as u16;
-            let bot_left = ((r + 1) * mesh.cols + c) as u16;
-            let bot_right = ((r + 1) * mesh.cols + c + 1) as u16;
+        for r in 0..(mesh.rows - 1) {
+            for c in 0..(mesh.cols - 1) {
+                let p00 = mesh.nodes[r * mesh.cols + c].point;
+                let p10 = mesh.nodes[r * mesh.cols + (c + 1)].point;
+                let p01 = mesh.nodes[(r + 1) * mesh.cols + c].point;
+                let p11 = mesh.nodes[(r + 1) * mesh.cols + (c + 1)].point;
 
-            indices.push(top_left);
-            indices.push(top_right);
-            indices.push(bot_left);
+                let c00 = mesh.nodes[r * mesh.cols + c].color;
+                let c10 = mesh.nodes[r * mesh.cols + (c + 1)].color;
+                let c01 = mesh.nodes[(r + 1) * mesh.cols + c].color;
+                let c11 = mesh.nodes[(r + 1) * mesh.cols + (c + 1)].color;
 
-            indices.push(top_right);
-            indices.push(bot_right);
-            indices.push(bot_left);
+                let base_idx = vert_idx;
+                for sr in 0..=sub {
+                    let v = sr as f32 / sub as f32;
+                    for sc in 0..=sub {
+                        let u = sc as f32 / sub as f32;
+                        // Bilinear/Coons interpolation
+                        let px = (1.0 - u) * (1.0 - v) * p00.x
+                            + u * (1.0 - v) * p10.x
+                            + (1.0 - u) * v * p01.x
+                            + u * v * p11.x;
+                        let py = (1.0 - u) * (1.0 - v) * p00.y
+                            + u * (1.0 - v) * p10.y
+                            + (1.0 - u) * v * p01.y
+                            + u * v * p11.y;
+
+                        let cr = (1.0 - u) * (1.0 - v) * c00.r
+                            + u * (1.0 - v) * c10.r
+                            + (1.0 - u) * v * c01.r
+                            + u * v * c11.r;
+                        let cg = (1.0 - u) * (1.0 - v) * c00.g
+                            + u * (1.0 - v) * c10.g
+                            + (1.0 - u) * v * c01.g
+                            + u * v * c11.g;
+                        let cb = (1.0 - u) * (1.0 - v) * c00.b
+                            + u * (1.0 - v) * c10.b
+                            + (1.0 - u) * v * c01.b
+                            + u * v * c11.b;
+                        let ca = (1.0 - u) * (1.0 - v) * c00.a
+                            + u * (1.0 - v) * c10.a
+                            + (1.0 - u) * v * c01.a
+                            + u * v * c11.a;
+
+                        positions.push(Point::new(px, py).to_skia());
+                        colors.push(skia::Color::from_argb(
+                            (ca * 255.0).round() as u8,
+                            (cr * 255.0).round() as u8,
+                            (cg * 255.0).round() as u8,
+                            (cb * 255.0).round() as u8,
+                        ));
+                        vert_idx += 1;
+                    }
+                }
+
+                let stride = (sub + 1) as u16;
+                for sr in 0..sub as u16 {
+                    for sc in 0..sub as u16 {
+                        let tl = base_idx + sr * stride + sc;
+                        let tr = tl + 1;
+                        let bl = tl + stride;
+                        let br = bl + 1;
+
+                        indices.push(tl);
+                        indices.push(tr);
+                        indices.push(bl);
+
+                        indices.push(tr);
+                        indices.push(br);
+                        indices.push(bl);
+                    }
+                }
+            }
+        }
+    } else {
+        for n in &mesh.nodes {
+            positions.push(n.point.to_skia());
+            let c = n.color;
+            let c_u8 = skia::Color::from_argb(
+                (c.a * 255.0).round() as u8,
+                (c.r * 255.0).round() as u8,
+                (c.g * 255.0).round() as u8,
+                (c.b * 255.0).round() as u8,
+            );
+            colors.push(c_u8);
+        }
+
+        for r in 0..(mesh.rows - 1) {
+            for c in 0..(mesh.cols - 1) {
+                let top_left = (r * mesh.cols + c) as u16;
+                let top_right = (r * mesh.cols + c + 1) as u16;
+                let bot_left = ((r + 1) * mesh.cols + c) as u16;
+                let bot_right = ((r + 1) * mesh.cols + c + 1) as u16;
+
+                indices.push(top_left);
+                indices.push(top_right);
+                indices.push(bot_left);
+
+                indices.push(top_right);
+                indices.push(bot_right);
+                indices.push(bot_left);
+            }
         }
     }
 
@@ -927,6 +1146,48 @@ mod tests {
         // Pixel at (5,5) near top-left should be reddish, NOT black (0,0,0,255)
         println!("Rendered pixel at (5,5): RGBA({}, {}, {}, {})", pixel[0], pixel[1], pixel[2], pixel[3]);
         assert!(pixel[0] > 100, "Red channel should be > 100, got {}", pixel[0]);
+    }
+
+    #[test]
+    fn test_mesh_gradient_manipulation_methods() {
+        let mut mesh = MeshGradient::new_grid(
+            Rect::new(0.0, 0.0, 100.0, 100.0),
+            3,
+            3,
+            Color::RED,
+            Color::BLUE,
+        );
+        assert_eq!(mesh.rows, 3);
+        assert_eq!(mesh.cols, 3);
+        assert_eq!(mesh.nodes.len(), 9);
+
+        // Test Split Row
+        mesh.split_row(Some(1));
+        assert_eq!(mesh.rows, 4);
+        assert_eq!(mesh.cols, 3);
+        assert_eq!(mesh.nodes.len(), 12);
+
+        // Test Split Col
+        mesh.split_col(Some(1));
+        assert_eq!(mesh.rows, 4);
+        assert_eq!(mesh.cols, 4);
+        assert_eq!(mesh.nodes.len(), 16);
+
+        // Move a node and test reset_to_bounds
+        mesh.nodes[5].point = Point::new(999.0, 999.0);
+        mesh.reset_to_bounds(Rect::new(0.0, 0.0, 100.0, 100.0));
+        assert!(mesh.nodes[5].point.x < 100.0);
+        assert!(mesh.nodes[5].point.y < 100.0);
+
+        // Test Smooth Grid Spacing
+        mesh.smooth_grid_spacing();
+        assert_eq!(mesh.nodes.len(), 16);
+
+        // Test Delete Node
+        let deleted = mesh.delete_node(5);
+        assert!(deleted);
+        assert_eq!(mesh.cols, 3);
+        assert_eq!(mesh.nodes.len(), 12);
     }
 }
 
