@@ -146,6 +146,8 @@ pub struct PathElement {
     pub opacity: f32,
     pub blend_mode: BlendMode,
     pub blur: f32,
+    #[serde(default)]
+    pub modifiers: Vec<crate::core::modifier::Modifier>,
 }
 
 impl PathElement {
@@ -184,6 +186,7 @@ impl PathElement {
             opacity: 1.0,
             blend_mode: BlendMode::default(),
             blur: 0.0,
+            modifiers: Vec::new(),
         }
     }
 
@@ -1057,8 +1060,40 @@ impl PathElement {
         }
     }
 
+    pub fn to_skia_path_evaluated(&self) -> skia::Path {
+        let mut path = self.to_skia_path();
+        let bounds = self.bounds();
+
+        for m in &self.modifiers {
+            if m.enabled() {
+                match m {
+                    crate::core::modifier::Modifier::ChamferRounding(ch) => {
+                        path = crate::core::modifier::apply_chamfer_rounding_to_path(
+                            &path,
+                            ch.radius,
+                            ch.style,
+                        );
+                    }
+                    crate::core::modifier::Modifier::EnvelopeWarp(env) => {
+                        path = crate::core::modifier::apply_envelope_warp_to_path(
+                            &path,
+                            bounds,
+                            env.top_left_offset,
+                            env.top_right_offset,
+                            env.bottom_right_offset,
+                            env.bottom_left_offset,
+                        );
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        path
+    }
+
     pub fn render(&self, canvas: &skia::Canvas) {
-        let path = self.to_skia_path();
+        let path = self.to_skia_path_evaluated();
 
         // 1. Fills
         if !self.fills.is_empty() {

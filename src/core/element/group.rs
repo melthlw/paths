@@ -15,6 +15,8 @@ pub struct GroupElement {
     pub blur: f32,
     pub children: Vec<Element>,
     pub clip_element: Option<Box<Element>>,
+    #[serde(default)]
+    pub modifiers: Vec<crate::core::modifier::Modifier>,
 }
 
 impl GroupElement {
@@ -29,6 +31,7 @@ impl GroupElement {
             blur: 0.0,
             children,
             clip_element: None,
+            modifiers: Vec::new(),
         }
     }
 
@@ -155,6 +158,8 @@ pub struct ImageElement {
     pub locked: bool,
     pub blend_mode: BlendMode,
     pub blur: f32,
+    #[serde(default)]
+    pub modifiers: Vec<crate::core::modifier::Modifier>,
 }
 
 impl ImageElement {
@@ -169,6 +174,7 @@ impl ImageElement {
             locked: false,
             blend_mode: BlendMode::Normal,
             blur: 0.0,
+            modifiers: Vec::new(),
         }
     }
 

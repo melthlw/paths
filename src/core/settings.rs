@@ -78,14 +78,16 @@ impl Default for AppConfig {
             show_inspector_sidebar: true,
             inspector_tab_locations: vec![
                 "docked:0".to_string(), // Appearance
-                "docked:0".to_string(), // Alignment
+                "docked:0".to_string(), // Modifiers
+                "closed".to_string(),   // Alignment
                 "closed".to_string(),   // Transform
+                "closed".to_string(),   // Typography
                 "closed".to_string(),   // Clones
                 "closed".to_string(),   // Export
                 "closed".to_string(),   // Libraries
             ],
-            inspector_active_tabs: vec![0, 1, 2, 3, 4, 5],
-            inspector_tab_order: vec![0, 1, 2, 3, 4, 5],
+            inspector_active_tabs: vec![0, 1, 2, 3, 4, 5, 6, 7],
+            inspector_tab_order: vec![0, 1, 2, 3, 4, 5, 6, 7],
             active_zoom: 1.0,
             show_grid: false,
             show_rulers: true,

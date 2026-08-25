@@ -484,11 +484,35 @@ impl Element {
         }
     }
 
+    pub fn modifiers(&self) -> &[crate::core::modifier::Modifier] {
+        match self {
+            Element::Rect(r) => &r.modifiers,
+            Element::Brush(b) => &b.modifiers,
+            Element::Path(p) => &p.modifiers,
+            Element::Text(t) => &t.modifiers,
+            Element::Group(g) => &g.modifiers,
+            Element::Image(i) => &i.modifiers,
+            Element::Clone(_) => &[],
+        }
+    }
+
+    pub fn modifiers_mut(&mut self) -> Option<&mut Vec<crate::core::modifier::Modifier>> {
+        match self {
+            Element::Rect(r) => Some(&mut r.modifiers),
+            Element::Brush(b) => Some(&mut b.modifiers),
+            Element::Path(p) => Some(&mut p.modifiers),
+            Element::Text(t) => Some(&mut t.modifiers),
+            Element::Group(g) => Some(&mut g.modifiers),
+            Element::Image(i) => Some(&mut i.modifiers),
+            Element::Clone(_) => None,
+        }
+    }
+
     pub fn render(&self, canvas: &skia::Canvas) {
         self.render_with_doc(canvas, None);
     }
 
-    pub fn render_with_doc(&self, canvas: &skia::Canvas, doc: Option<&crate::core::document::Document>) {
+    pub fn render_base_with_doc(&self, canvas: &skia::Canvas, doc: Option<&crate::core::document::Document>) {
         match self {
             Element::Rect(r) => r.render(canvas),
             Element::Brush(b) => b.render(canvas),
@@ -497,6 +521,103 @@ impl Element {
             Element::Group(g) => g.render(canvas),
             Element::Image(i) => i.render(canvas),
             Element::Clone(c) => c.render(canvas),
+        }
+    }
+
+    pub fn render_with_doc(&self, canvas: &skia::Canvas, doc: Option<&crate::core::document::Document>) {
+        let active_array_mod = self.modifiers().iter().find_map(|m| {
+            if let crate::core::modifier::Modifier::Array(arr) = m {
+                if arr.enabled {
+                    return Some(arr);
+                }
+            }
+            None
+        });
+
+        if let Some(arr) = active_array_mod {
+            let bounds = self.bounds();
+            let center = bounds.center();
+
+            match &arr.mode {
+                crate::core::modifier::ArrayMode::Linear {
+                    count,
+                    offset_x,
+                    offset_y,
+                    scale_step,
+                    rotate_step_deg,
+                } => {
+                    for i in 0..*count {
+                        canvas.save();
+                        let dx = offset_x * i as f32;
+                        let dy = offset_y * i as f32;
+                        let scale = scale_step.powi(i as i32);
+                        let rot_deg = rotate_step_deg * i as f32;
+
+                        canvas.translate((center.x + dx, center.y + dy));
+                        if rot_deg.abs() > 0.001 {
+                            canvas.rotate(rot_deg, None);
+                        }
+                        if (scale - 1.0).abs() > 0.001 {
+                            canvas.scale((scale, scale));
+                        }
+                        canvas.translate((-center.x, -center.y));
+
+                        self.render_base_with_doc(canvas, doc);
+                        canvas.restore();
+                    }
+                }
+                crate::core::modifier::ArrayMode::Radial {
+                    count,
+                    radius,
+                    start_angle_deg,
+                    total_angle_deg,
+                    rotate_copies,
+                } => {
+                    let total_c = (*count).max(1) as f32;
+                    let angle_step = if *count > 1 {
+                        total_angle_deg / total_c
+                    } else {
+                        0.0
+                    };
+
+                    for i in 0..*count {
+                        canvas.save();
+                        let angle_deg = start_angle_deg + angle_step * i as f32;
+                        let rad = angle_deg.to_radians();
+                        let dx = radius * rad.cos();
+                        let dy = radius * rad.sin();
+
+                        canvas.translate((center.x + dx, center.y + dy));
+                        if *rotate_copies {
+                            canvas.rotate(angle_deg, None);
+                        }
+                        canvas.translate((-center.x, -center.y));
+
+                        self.render_base_with_doc(canvas, doc);
+                        canvas.restore();
+                    }
+                }
+                crate::core::modifier::ArrayMode::Grid {
+                    rows,
+                    cols,
+                    spacing_x,
+                    spacing_y,
+                } => {
+                    for r in 0..*rows {
+                        for c in 0..*cols {
+                            canvas.save();
+                            let dx = spacing_x * c as f32;
+                            let dy = spacing_y * r as f32;
+
+                            canvas.translate((dx, dy));
+                            self.render_base_with_doc(canvas, doc);
+                            canvas.restore();
+                        }
+                    }
+                }
+            }
+        } else {
+            self.render_base_with_doc(canvas, doc);
         }
     }
 

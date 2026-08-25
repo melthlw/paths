@@ -9,11 +9,11 @@ use super::TabLocation;
 use crate::ui::canvas::CanvasWidget;
 
 pub fn render_dock_sections(
-    tab_info: &[(String, Option<&'static str>, &'static str); 7],
-    tab_locations: &Rc<RefCell<[TabLocation; 7]>>,
-    active_section_tabs: &Rc<RefCell<[usize; 7]>>,
+    tab_info: &[(String, Option<&'static str>, &'static str); 8],
+    tab_locations: &Rc<RefCell<[TabLocation; 8]>>,
+    active_section_tabs: &Rc<RefCell<[usize; 8]>>,
     tab_order: &Rc<RefCell<Vec<usize>>>,
-    tab_widgets: &[gtk4::Widget; 7],
+    tab_widgets: &[gtk4::Widget; 8],
     sections_container: &gtk4::Box,
     header_add_btn: &gtk4::MenuButton,
     canvas: &CanvasWidget,
@@ -31,7 +31,7 @@ pub fn render_dock_sections(
 
     // 3. Collect active docked section indices in sorted order
     let mut active_sections: Vec<usize> = Vec::new();
-    for i in 0..7 {
+    for i in 0..8 {
         if let TabLocation::Docked(sec) = locs[i] {
             if !active_sections.contains(&sec) {
                 active_sections.push(sec);
@@ -42,7 +42,7 @@ pub fn render_dock_sections(
 
     // Compact section IDs to 0..num_sections
     let mut remapped_locs = locs;
-    for i in 0..7 {
+    for i in 0..8 {
         if let TabLocation::Docked(sec) = locs[i] {
             let new_sec = active_sections.iter().position(|&s| s == sec).unwrap_or(0);
             remapped_locs[i] = TabLocation::Docked(new_sec);
@@ -67,7 +67,7 @@ pub fn render_dock_sections(
         header_add_btn.set_popover(Some(&add_sec_pop));
         header_add_btn.set_visible(true);
 
-        let has_floating = (0..7).any(|k| locs[k] == TabLocation::Floating);
+        let has_floating = (0..8).any(|k| locs[k] == TabLocation::Floating);
         let empty_box = gtk4::Box::builder()
             .orientation(gtk4::Orientation::Vertical)
             .spacing(8)
@@ -165,7 +165,7 @@ pub fn render_dock_sections(
                 if let Ok(s) = value.get::<String>() {
                     if let Some(idx_str) = s.strip_prefix("tab:") {
                         if let Ok(idx) = idx_str.parse::<usize>() {
-                            if idx < 7 {
+                            if idx < 8 {
                                 locs_drop_bar.borrow_mut()[idx] = TabLocation::Docked(sec_idx);
 
                                 let mut order = tab_order_drop_bar.borrow().clone();
@@ -322,7 +322,7 @@ pub fn render_dock_sections(
                     if let Ok(s) = value.get::<String>() {
                         if let Some(idx_str) = s.strip_prefix("tab:") {
                             if let Ok(idx) = idx_str.parse::<usize>() {
-                                if idx < 7 {
+                                if idx < 8 {
                                     locs_drop_btn.borrow_mut()[idx] = TabLocation::Docked(sec_idx);
 
                                     let mut order = tab_order_drop_btn.borrow().clone();

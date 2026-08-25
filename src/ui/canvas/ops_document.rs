@@ -10,6 +10,18 @@ use crate::core::{
 };
 
 impl CanvasWidget {
+    pub fn queue_draw(&self) {
+        self.drawing_area.queue_draw();
+    }
+
+    pub fn selected_element_ids(&self) -> Vec<ElementId> {
+        if let Ok(state) = self.state.try_borrow() {
+            state.document.selected_ids.iter().cloned().collect()
+        } else {
+            Vec::new()
+        }
+    }
+
     pub fn get_document_colors(&self) -> Vec<Option<Color>> {
         if let Ok(state) = self.state.try_borrow() {
             state.document.get_document_colors()

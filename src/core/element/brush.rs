@@ -169,6 +169,8 @@ pub struct BrushStroke {
     pub opacity: f32,
     pub blend_mode: BlendMode,
     pub blur: f32,
+    #[serde(default)]
+    pub modifiers: Vec<crate::core::modifier::Modifier>,
 }
 
 impl BrushStroke {
@@ -199,6 +201,7 @@ impl BrushStroke {
             opacity: 1.0,
             blend_mode: BlendMode::default(),
             blur: 0.0,
+            modifiers: Vec::new(),
         }
     }
 

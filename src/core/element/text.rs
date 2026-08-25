@@ -209,6 +209,8 @@ pub struct TextElement {
     pub opacity: f32,
     pub blend_mode: BlendMode,
     pub blur: f32,
+    #[serde(default)]
+    pub modifiers: Vec<crate::core::modifier::Modifier>,
 }
 
 fn default_stroke_width() -> f32 {
@@ -266,6 +268,7 @@ impl TextElement {
             opacity: 1.0,
             blend_mode: BlendMode::default(),
             blur: 0.0,
+            modifiers: Vec::new(),
         }
     }
 
@@ -317,6 +320,7 @@ impl TextElement {
             opacity: 1.0,
             blend_mode: BlendMode::default(),
             blur: 0.0,
+            modifiers: Vec::new(),
         }
     }
 
