@@ -27,6 +27,17 @@
   </a>
 </div>
 
+<br/>
+
+<div align="center">
+
+> [!CAUTION]
+> **⚠️ Software Extremamente Experimental**
+>
+> Este programa está em um **estágio inicial e extremamente experimental**. Ele está **incompleto**, provavelmente **cheio de bugs**, e pode **travar, corromper arquivos ou se comportar de forma inesperada** a qualquer momento. Use-o **por sua conta e risco** e **não** o utilize para trabalhos em produção. Espere mudanças quebras de compatibilidade a qualquer momento, sem aviso prévio.
+
+</div>
+
 ---
 
 ## Capturas de Tela
