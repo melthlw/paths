@@ -1995,3 +1995,12 @@ msgstr ""
 
 msgid "Manage external extensions added to the studio"
 msgstr ""
+
+msgid "Save Changes?"
+msgstr ""
+
+msgid "Open document contains unsaved changes. If you don't save, changes will be permanently lost."
+msgstr ""
+
+msgid "Discard Changes"
+msgstr ""

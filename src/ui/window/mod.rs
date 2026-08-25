@@ -140,19 +140,50 @@ impl DesignWindow {
 
         let win_close = window.clone();
         let canvas_close = canvas.clone();
-        window.connect_close_request(move |_| {
-            let max = win_close.is_maximized();
-            let full = win_close.is_fullscreen();
-            crate::core::AppSettings::set_is_maximized(max);
-            crate::core::AppSettings::set_is_fullscreen(full);
-            if !max && !full {
-                crate::core::AppSettings::set_window_size(
-                    win_close.default_width(),
-                    win_close.default_height(),
-                );
+        let is_closing = Rc::new(std::cell::Cell::new(false));
+        let is_closing_c = is_closing.clone();
+        window.connect_close_request(move |win| {
+            if is_closing_c.get() {
+                let max = win_close.is_maximized();
+                let full = win_close.is_fullscreen();
+                crate::core::AppSettings::set_is_maximized(max);
+                crate::core::AppSettings::set_is_fullscreen(full);
+                if !max && !full {
+                    crate::core::AppSettings::set_window_size(
+                        win_close.default_width(),
+                        win_close.default_height(),
+                    );
+                }
+                crate::core::AppSettings::set_active_zoom(canvas_close.zoom() as f64);
+                return glib::Propagation::Proceed;
             }
-            crate::core::AppSettings::set_active_zoom(canvas_close.zoom() as f64);
-            glib::Propagation::Proceed
+
+            if canvas_close.has_unsaved_changes() {
+                let win_ref = win.clone();
+                let is_cl = is_closing_c.clone();
+                crate::ui::window::file_ops::prompt_save_changes(
+                    Some(win),
+                    &canvas_close,
+                    move || {
+                        is_cl.set(true);
+                        win_ref.close();
+                    },
+                );
+                glib::Propagation::Stop
+            } else {
+                let max = win_close.is_maximized();
+                let full = win_close.is_fullscreen();
+                crate::core::AppSettings::set_is_maximized(max);
+                crate::core::AppSettings::set_is_fullscreen(full);
+                if !max && !full {
+                    crate::core::AppSettings::set_window_size(
+                        win_close.default_width(),
+                        win_close.default_height(),
+                    );
+                }
+                crate::core::AppSettings::set_active_zoom(canvas_close.zoom() as f64);
+                glib::Propagation::Proceed
+            }
         });
 
         window.connect_notify(Some("maximized"), move |w, _| {

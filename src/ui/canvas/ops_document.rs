@@ -59,6 +59,14 @@ impl CanvasWidget {
         state.on_file_dialog_request = Some(Box::new(f));
     }
 
+    pub fn has_unsaved_changes(&self) -> bool {
+        if let Ok(s) = self.state.try_borrow() {
+            s.is_dirty && (!s.document.elements.is_empty() || s.current_file_path.is_some())
+        } else {
+            false
+        }
+    }
+
     pub fn save(&self) -> Result<bool, String> {
         let mut state = self.state.borrow_mut();
         if let Some(ref path) = state.current_file_path.clone() {

@@ -23,12 +23,12 @@ impl SpiralHandle {
         match self {
             SpiralHandle::InnerRadius => {
                 let cur_rx = rx * inner_radius;
-                Point::new(cx + cur_rx, cy).round()
+                Point::new(cx + cur_rx, cy)
             }
             SpiralHandle::Turns => {
                 let total_turns = turns.max(0.25);
                 let total_angle = total_turns * std::f32::consts::TAU;
-                Point::new(cx + rx * total_angle.cos(), cy + ry * total_angle.sin()).round()
+                Point::new(cx + rx * total_angle.cos(), cy + ry * total_angle.sin())
             }
         }
     }
@@ -124,7 +124,7 @@ impl SpiralFeature {
                 } else {
                     (dx, dy)
                 };
-                Some(Rect::new(start_pos.x - rx, start_pos.y - ry, rx * 2.0, ry * 2.0).round())
+                Some(Rect::new(start_pos.x - rx, start_pos.y - ry, rx * 2.0, ry * 2.0))
             } else if is_square_locked {
                 let dx = current_pos.x - start_pos.x;
                 let dy = current_pos.y - start_pos.y;
@@ -132,12 +132,12 @@ impl SpiralFeature {
                 let sx = if dx >= 0.0 { size } else { -size };
                 let sy = if dy >= 0.0 { size } else { -size };
                 let p2_adj = Point::new(start_pos.x + sx, start_pos.y + sy);
-                Some(Rect::from_points(start_pos, p2_adj).round())
+                Some(Rect::from_points(start_pos, p2_adj))
             } else {
                 let dx = current_pos.x - start_pos.x;
                 let dy = current_pos.y - start_pos.y;
                 let p2_adj = Point::new(start_pos.x + dx, start_pos.y + dy);
-                Some(Rect::from_points(start_pos, p2_adj).round())
+                Some(Rect::from_points(start_pos, p2_adj))
             }
         } else {
             None
@@ -160,18 +160,63 @@ impl SpiralFeature {
 
         let total_turns = turns.max(0.25);
         let total_angle = total_turns * std::f32::consts::TAU;
-        let num_steps = ((total_turns * 32.0).ceil() as usize).max(32);
-        let mut nodes = Vec::with_capacity(num_steps + 1);
+        let div = divergence.max(0.05);
+        let r_inner = inner_radius.clamp(0.0, 0.999);
 
-        for i in 0..=num_steps {
-            let t = i as f32 / num_steps as f32;
+        // 8 cubic Bezier segments per complete turn (every 45 degrees) for silky smooth curves
+        let num_steps = ((total_turns * 8.0).ceil() as usize).max(8);
+        let dt = 1.0 / (num_steps as f32);
+
+        // Evaluate spiral position and derivative at parametric parameter t in [0.0, 1.0]
+        let eval_spiral = |t: f32| -> (Point, Point) {
             let angle = t * total_angle;
-            let r_factor = inner_radius + (1.0 - inner_radius) * t.powf(divergence.max(0.05));
-            let cur_rx = rx * r_factor;
-            let cur_ry = ry * r_factor;
-            let px = cx + cur_rx * angle.cos();
-            let py = cy + cur_ry * angle.sin();
-            nodes.push(PathNode::new(Point::new(px.round(), py.round())));
+            let cos_a = angle.cos();
+            let sin_a = angle.sin();
+
+            let r_factor = r_inner + (1.0 - r_inner) * t.powf(div);
+            let px = cx + rx * r_factor * cos_a;
+            let py = cy + ry * r_factor * sin_a;
+
+            let dr_dt = if t <= 0.0 {
+                if (div - 1.0).abs() < 1e-4 {
+                    1.0 - r_inner
+                } else if div > 1.0 {
+                    0.0
+                } else {
+                    ((1.0 - r_inner) * div * (0.0001f32).powf(div - 1.0)).min(50.0)
+                }
+            } else {
+                ((1.0 - r_inner) * div * t.powf(div - 1.0)).min(100.0)
+            };
+
+            // Tangent: dP/dt = (rx * (r' * cos(a) - r * theta_max * sin(a)), ry * (r' * sin(a) + r * theta_max * cos(a)))
+            let vx = rx * (dr_dt * cos_a - r_factor * total_angle * sin_a);
+            let vy = ry * (dr_dt * sin_a + r_factor * total_angle * cos_a);
+
+            (Point::new(px, py), Point::new(vx, vy))
+        };
+
+        let mut samples = Vec::with_capacity(num_steps + 1);
+        for i in 0..=num_steps {
+            let t = i as f32 * dt;
+            samples.push(eval_spiral(t));
+        }
+
+        let mut nodes = Vec::with_capacity(num_steps + 1);
+        for i in 0..=num_steps {
+            let (p, v) = samples[i];
+            let handle_in = if i > 0 {
+                Some(Point::new(p.x - (dt / 3.0) * v.x, p.y - (dt / 3.0) * v.y))
+            } else {
+                None
+            };
+            let handle_out = if i < num_steps {
+                Some(Point::new(p.x + (dt / 3.0) * v.x, p.y + (dt / 3.0) * v.y))
+            } else {
+                None
+            };
+
+            nodes.push(PathNode::with_handles(p, handle_in, handle_out));
         }
 
         let mut elem = PathElement::new(nodes, false, None, stroke_color, stroke_width);
@@ -663,5 +708,12 @@ mod tests {
         );
         assert!(!elem.nodes.is_empty());
         assert!(!elem.is_closed);
+        // Ensure nodes have smooth handles
+        assert!(elem.nodes[0].handle_out.is_some());
+        assert!(elem.nodes[1].handle_in.is_some());
+        assert!(elem.nodes[1].handle_out.is_some());
+        let last = elem.nodes.len() - 1;
+        assert!(elem.nodes[last].handle_in.is_some());
+        assert!(elem.nodes[last].handle_out.is_none());
     }
 }

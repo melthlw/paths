@@ -2687,3 +2687,12 @@ msgstr "Rede"
 
 msgid "Info"
 msgstr "Informações"
+
+msgid "Save Changes?"
+msgstr "Salvar alterações?"
+
+msgid "Open document contains unsaved changes. If you don't save, changes will be permanently lost."
+msgstr "O documento aberto contém alterações não salvas. Se você não salvar, as alterações serão perdidas permanentemente."
+
+msgid "Discard Changes"
+msgstr "Descartar alterações"
