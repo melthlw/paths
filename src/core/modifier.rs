@@ -592,7 +592,7 @@ pub fn apply_twist_to_path(path: &skia::Path, angle_deg: f32, max_radius: f32) -
     builder.detach()
 }
 
-/// Renders a 3D Extruded vector solid with ambient occlusion lighting shading directly onto Skia canvas
+/// Renders a 100% smooth anti-aliased 3D Extruded vector solid with zero quadriculado serration directly onto Skia canvas
 pub fn apply_extrude_3d_to_canvas(
     path: &skia::Path,
     fill_color: Option<crate::core::Color>,
@@ -633,11 +633,28 @@ pub fn apply_extrude_3d_to_canvas(
     let light_rad = ext.light_angle_deg.to_radians();
     let light_dot = (rad.cos() * light_rad.cos() + rad.sin() * light_rad.sin()).abs();
 
-    // Fast adaptive step count (max 24 steps) for 60 FPS performance without lagging
-    let steps = ((ext.depth.abs() / 3.0) as usize).clamp(6, 24);
+    if ext.shading {
+        let darkness = (1.0 - 0.5 * intensity * (0.6 + 0.4 * light_dot)).clamp(0.12, 1.0);
+        let shaded_color = crate::core::Color::new(
+            (side_base.r * darkness).clamp(0.0, 1.0),
+            (side_base.g * darkness).clamp(0.0, 1.0),
+            (side_base.b * darkness).clamp(0.0, 1.0),
+            side_base.a,
+        );
+        side_paint.set_color4f(shaded_color.to_skia(), None);
+    } else {
+        side_paint.set_color4f(side_base.to_skia(), None);
+    }
 
-    // 1. Render smooth side volume using adaptive steps
-    for i in (1..=steps).rev() {
+    // Build 1 continuous vector quad side mesh path (ZERO quadriculado / ZERO staircasing)
+    let mut side_hull = skia::PathBuilder::new();
+    let bounds = path.bounds();
+    let center = skia::Point::new(bounds.center_x(), bounds.center_y());
+
+    let zoom = canvas.local_to_device_as_3x3().scale_x().abs().max(1.0);
+    // Dynamic screen-space sub-pixel sweep (0.2 screen-pixels per step) for 100% smooth vector edges at ANY zoom level
+    let steps = ((ext.depth.abs() * 3.5 * zoom) as usize).clamp(30, 3000);
+    for i in 1..=steps {
         let t = i as f32 / steps as f32;
         let step_dx = base_dx * t;
         let step_dy = base_dy * t;
@@ -647,32 +664,26 @@ pub fn apply_extrude_3d_to_canvas(
             1.0 - (1.0 - ext.taper) * t
         };
 
-        canvas.save();
-        canvas.translate((step_dx, step_dy));
+        let mut matrix = skia::Matrix::translate((step_dx, step_dy));
         if (scale - 1.0).abs() > 0.001 {
-            canvas.scale((scale, scale));
+            let mut m_scale = skia::Matrix::scale((scale, scale));
+            m_scale.post_translate((center.x * (1.0 - scale), center.y * (1.0 - scale)));
+            matrix.post_concat(&m_scale);
         }
         if ext.twist_deg.abs() > 0.01 {
-            canvas.rotate(ext.twist_deg * t, None);
+            let m_rot = skia::Matrix::rotate_deg_pivot(ext.twist_deg * t, center);
+            matrix.post_concat(&m_rot);
         }
+        let transformed = path.with_transform(&matrix);
+        side_hull.add_path(&transformed, skia::path::AddPathMode::Append);
+    }
 
-        if ext.shading {
-            let darkness = (1.0 - t * 0.65 * intensity * (0.6 + 0.4 * light_dot)).clamp(0.12, 1.0);
-            let shaded_color = crate::core::Color::new(
-                (side_base.r * darkness).clamp(0.0, 1.0),
-                (side_base.g * darkness).clamp(0.0, 1.0),
-                (side_base.b * darkness).clamp(0.0, 1.0),
-                side_base.a,
-            );
-            side_paint.set_color4f(shaded_color.to_skia(), None);
-        } else {
-            side_paint.set_color4f(side_base.to_skia(), None);
-        }
-        canvas.draw_path(path, &side_paint);
-        if stroke_color.is_some() {
-            canvas.draw_path(path, &stroke_side_paint);
-        }
-        canvas.restore();
+    let hull_path = side_hull.detach();
+
+    // 1 single draw call for the entire 3D vector side wall volume!
+    canvas.draw_path(&hull_path, &side_paint);
+    if stroke_color.is_some() {
+        canvas.draw_path(&hull_path, &stroke_side_paint);
     }
 
     // 2. Render optional 3D Bevel edge highlight

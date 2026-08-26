@@ -139,7 +139,7 @@ impl DesignApplication {
             .application_name("Paths")
             .application_icon("io.gitlab.lewisHeart.GnomePaths")
             .developer_name("Lewis")
-            .version("0.3.0")
+            .version("0.3.1")
             .copyright("© 2026 Lewis")
             .license_type(gtk4::License::Gpl30Only)
             .comments(&crate::core::gettext(

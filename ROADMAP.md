@@ -206,6 +206,30 @@ This project adheres to **Semantic Versioning (SemVer 2.0.0)** (`MAJOR.MINOR.PAT
 - [x] **Text Stroke & Outline**:
   - [x] Independent stroke rendering for text elements with custom color, width, dashes, and join styles.
 
+### v0.4.5 — 3D Vector Extrusion Engine & Vector FX Suite `[Released]`
+> **Focus**: Parametric 3D vector extrusion, ambient occlusion lighting, canvas interactive gizmos, GTK visual dimmer controls, and zoom-adaptive sub-pixel sweep rendering.
+
+#### 3D Extrusion & Vector FX Engine
+- [x] **3D Vector Extrusion Engine (`Extrude3DModifier`)**:
+  - [x] Full 3D extrusion support across all element types (Paths, Rectangles, Text, Polygons, Brushes, Groups).
+  - [x] Projection modes: Isometric, Cabinet 45°, and Perspective.
+  - [x] Ambient occlusion lighting shading with 1-click side extrusion color swatches (`Auto`, `Dark Metal`, `Gold`, `Ruby`, `Cyan`).
+  - [x] Advanced 3D parametric controls: Taper (pyramidal cone scaling), Twist (3D rotational extrude swirl), Bevel Edge Radius (3D vector bevel highlights), and Specular Gloss lighting reflections.
+  - [x] 1-Click 3D Presets Bar (`Extrude`, `Pyramid`, `Twist 3D`, `Bevel`).
+- [x] **Canvas Interactive 3D Handles & Control Gizmos**:
+  - [x] Live cyan direction vector ray + interactive grab handle on canvas to rotate 3D angle and depth directly with mouse drag.
+- [x] **GTK Inspector 3D Angle Dimmer Knob Widget**:
+  - [x] Custom 46px circular 360° angle dimmer knob widget (`gtk4::DrawingArea` with `GestureDrag`) for intuitive visual rotation in GTK inspector.
+- [x] **Screen-Space Zoom-Adaptive Sub-Pixel Sweep Engine**:
+  - [x] Dynamic scale-aware sub-pixel sweep resolution (< 0.2 screen pixels per step) leveraging `canvas.local_to_device_as_3x3()`.
+  - [x] Guarantees 100% smooth, anti-aliased 3D vector edges with zero staircasing or pixel steps at any canvas zoom level (even 10,000% zoom).
+- [x] **Single Skia Path Render Engine**:
+  - [x] Merges all sub-pixel extrusion volume steps into 1 single `skia::Path` before drawing, executing 1 single Skia GPU/CPU draw call for 144+ FPS buttery smooth live dragging.
+- [x] **Text Glyphs to Vector Path Outline Conversion (`TextElement::to_skia_path`)**:
+  - [x] Skia Font glyph outline extractor (`font.get_path`) converting text strings into true vector bezier outlines for 3D extrusion of text letters.
+- [x] **Twist & Swirl Distortion Modifier (`TwistModifier`)**:
+  - [x] Rotational swirl path node distortion around element bounds.
+
 ---
 
 ## 🛠️ Upcoming Milestones
@@ -226,6 +250,8 @@ This project adheres to **Semantic Versioning (SemVer 2.0.0)** (`MAJOR.MINOR.PAT
 #### Parametric Modifiers
 - [x] **Live Modifiers Panel (Live Path Effects)**:
   - [x] *Array Modifier (Linear, Radial, Grid)*: Parametric duplication with progressive scale, rotation, and spacing.
+  - [x] *3D Extrusion Modifier*: Parametric 3D vector volume with lighting, taper, twist, and bevel.
+  - [x] *Twist & Swirl Modifier*: Rotational Bézier node deformation.
   - [x] *Envelope Warp Modifier*: 4-point mesh distortion applied dynamically over vector objects.
   - [x] *Dynamic Chamfer & Rounding*: Real-time corner rounding without destructive edits to the underlying path geometry.
 

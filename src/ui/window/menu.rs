@@ -214,7 +214,7 @@ pub fn build_main_menu(
                 let about = adw::AboutDialog::builder()
                     .application_name("Paths")
                     .application_icon("io.gitlab.lewisHeart.Paths")
-                    .version("0.3.0-alpha")
+                    .version("0.3.1-alpha")
                     .developer_name("Lewis")
                     .developers(["Lewis"])
                     .artists(["Lewis"])

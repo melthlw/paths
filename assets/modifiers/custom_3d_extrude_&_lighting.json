@@ -1,6 +1,6 @@
 {
   "id": "custom_3d_extrude_&_lighting",
-  "name": "Custom 3D Extrude & Lighting",
+  "name": "Custom 3D Extrude",
   "description": "Saved user modifier preset",
   "modifier": {
     "Extrude3D": {

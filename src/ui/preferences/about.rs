@@ -48,7 +48,7 @@ pub fn build_about_page() -> gtk4::ScrolledWindow {
 
     let version_row = adw::ActionRow::builder()
         .title(crate::core::gettext("Version"))
-        .subtitle("0.3.0-alpha (Modern Skia Engine)")
+        .subtitle("0.3.1-alpha (Modern Skia Engine)")
         .build();
     app_info_group.add(&version_row);
 

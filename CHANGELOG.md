@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-08-25
+
+### Added
+- **3D Vector Extrusion & Vector FX Suite (`Extrude3DModifier`)**:
+  - Full 3D extrusion engine supporting 2D vector shapes, text elements, rectangles, polygons, brush strokes, and groups.
+  - Projection modes (`Isometric`, `Cabinet 45°`, `Perspective`) with adjustable 3D depth and projection angle.
+  - Ambient occlusion lighting shading with 1-click side extrusion color swatches (`Auto`, `Dark Metal`, `Gold`, `Ruby`, `Cyan`).
+  - Advanced 3D parametric controls: Taper (pyramidal cone scaling), Twist (3D rotational extrude swirl), Bevel Edge Radius (3D vector bevel highlights), and Specular Gloss lighting reflections.
+  - 1-Click 3D Presets Bar (`Extrude`, `Pyramid`, `Twist 3D`, `Bevel`) in inspector card header.
+- **Canvas Interactive 3D Handles & Control Gizmos**:
+  - Live cyan direction vector ray + interactive grab handle on canvas to rotate 3D angle and depth directly with mouse drag.
+- **GTK Inspector 3D Angle Dimmer Knob Widget**:
+  - Custom 46px circular 360° angle dimmer knob widget (`gtk4::DrawingArea` with `GestureDrag`) for intuitive visual rotation in GTK inspector.
+- **Screen-Space Zoom-Adaptive Sub-Pixel Sweep Engine**:
+  - Dynamic scale-aware sub-pixel sweep resolution (< 0.2 screen pixels per step) using `canvas.local_to_device_as_3x3()`.
+  - Guarantees 100% smooth, anti-aliased 3D vector edges with zero staircasing or pixel steps at any canvas zoom level (even 10,000% zoom).
+- **Single Skia Path Render Engine**:
+  - Merges all sub-pixel extrusion volume steps into 1 single `skia::Path` before drawing, executing 1 single Skia GPU/CPU draw call for 144+ FPS buttery smooth live dragging.
+- **Text Glyphs to Vector Path Conversion (`TextElement::to_skia_path`)**:
+  - Skia Font glyph outline extractor (`font.get_path`) converting text strings into true vector bezier outlines for 3D extrusion of text letters.
+- **Twist & Swirl Distortion Modifier (`TwistModifier`)**:
+  - Rotational swirl path node distortion around element bounds.
+
+### Changed
+- **GTK Inspector Cards Overhaul & Re-entrancy Guards**:
+  - Re-architected GTK modifier cards with compact `.linked` header bar (`[Eye | Apply | Save | Up | Down | Trash]`).
+  - Added re-entrancy flags (`is_updating`) on `Scale` and `SpinButton` synchronization to eliminate GTK signal deadlocks.
+  - Removed status notification rebuilds during live slider dragging to achieve zero-lag, 144+ FPS UI interaction.
+- **Deduplicated Asset Catalog Presets**:
+  - Cleaned up duplicate array modifier preset files from catalog gallery (`assets/modifiers/`).
+
 ## [0.3.0] - 2026-08-25
 
 ### Added

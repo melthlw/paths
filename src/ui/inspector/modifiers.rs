@@ -134,7 +134,7 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
 
     let btn_add_extrude = create_menu_item_button(
         "orientation-landscape-symbolic",
-        &crate::core::gettext("3D Extrude & Lighting"),
+        &crate::core::gettext("3D Extrude"),
         &crate::core::gettext("3D Extrusion & Shaded Projection"),
     );
     let btn_add_twist = create_menu_item_button(
@@ -224,7 +224,11 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
             }
         } else {
             let rect = Rect::new(200.0, 200.0, 160.0, 160.0);
-            let mut new_rect = crate::core::RectElement::new(rect, Some(crate::core::Color::new(0.2, 0.5, 0.9, 1.0)), None);
+            let mut new_rect = crate::core::RectElement::new(
+                rect,
+                Some(crate::core::Color::new(0.2, 0.5, 0.9, 1.0)),
+                None,
+            );
             new_rect.modifiers.push(modifier);
             let new_elem = crate::core::Element::Rect(new_rect);
             let new_id = new_elem.id();
@@ -241,11 +245,8 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
     };
 
     for asset in local_assets {
-        let btn_asset = create_menu_item_button(
-            asset.modifier.icon_name(),
-            &asset.name,
-            &asset.description,
-        );
+        let btn_asset =
+            create_menu_item_button(asset.modifier.icon_name(), &asset.name, &asset.description);
         let canvas_ast = canvas.clone();
         let pop_ast = popover.clone();
         let ast_mod = asset.modifier.clone();
@@ -288,14 +289,22 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
     let b_off_c = btn_add_offset.clone();
     search_entry.connect_search_changed(move |se| {
         let q = se.text().to_lowercase();
-        b_array_c.set_visible(q.is_empty() || "array modifier linear radial grid duplication".contains(&q));
-        b_ext_c.set_visible(q.is_empty() || "3d extrude lighting projection isometric".contains(&q));
+        b_array_c.set_visible(
+            q.is_empty() || "array modifier linear radial grid duplication".contains(&q),
+        );
+        b_ext_c
+            .set_visible(q.is_empty() || "3d extrude lighting projection isometric".contains(&q));
         b_tw_c.set_visible(q.is_empty() || "twist swirl distortion rotational".contains(&q));
         b_env_c.set_visible(q.is_empty() || "envelope warp distortion mesh 4-point".contains(&q));
         b_wave_c.set_visible(q.is_empty() || "sine wave ripple distortion wave".contains(&q));
-        b_zz_c.set_visible(q.is_empty() || "zigzag distortion serrated sawtooth contour".contains(&q));
-        b_chamf_c.set_visible(q.is_empty() || "dynamic chamfer corner rounding bevels".contains(&q));
-        b_off_c.set_visible(q.is_empty() || "offset path outline expand contract contour".contains(&q));
+        b_zz_c.set_visible(
+            q.is_empty() || "zigzag distortion serrated sawtooth contour".contains(&q),
+        );
+        b_chamf_c
+            .set_visible(q.is_empty() || "dynamic chamfer corner rounding bevels".contains(&q));
+        b_off_c.set_visible(
+            q.is_empty() || "offset path outline expand contract contour".contains(&q),
+        );
 
         for (ast_name, btn) in &asset_buttons {
             btn.set_visible(q.is_empty() || ast_name.contains(&q));
@@ -403,7 +412,10 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
     let pop_ext = popover.clone();
     btn_add_extrude.connect_clicked(move |_| {
         pop_ext.popdown();
-        ensure_target_element(&canvas_ext, Modifier::Extrude3D(Extrude3DModifier::default()));
+        ensure_target_element(
+            &canvas_ext,
+            Modifier::Extrude3D(Extrude3DModifier::default()),
+        );
         canvas_ext.queue_draw();
         update_ref_ext();
     });
@@ -423,7 +435,10 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
     let pop_wave = popover.clone();
     btn_add_wave.connect_clicked(move |_| {
         pop_wave.popdown();
-        ensure_target_element(&canvas_wave, Modifier::WaveDeform(WaveDeformModifier::default()));
+        ensure_target_element(
+            &canvas_wave,
+            Modifier::WaveDeform(WaveDeformModifier::default()),
+        );
         canvas_wave.queue_draw();
         update_ref_wave();
     });
@@ -443,7 +458,10 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
     let pop_off_c = popover.clone();
     btn_add_offset.connect_clicked(move |_| {
         pop_off_c.popdown();
-        ensure_target_element(&canvas_off, Modifier::OffsetPath(OffsetPathModifier::default()));
+        ensure_target_element(
+            &canvas_off,
+            Modifier::OffsetPath(OffsetPathModifier::default()),
+        );
         canvas_off.queue_draw();
         update_ref_off();
     });
@@ -453,7 +471,10 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
     let pop_e = popover.clone();
     btn_add_env.connect_clicked(move |_| {
         pop_e.popdown();
-        ensure_target_element(&canvas_e, Modifier::EnvelopeWarp(EnvelopeWarpModifier::default()));
+        ensure_target_element(
+            &canvas_e,
+            Modifier::EnvelopeWarp(EnvelopeWarpModifier::default()),
+        );
         canvas_e.queue_draw();
         update_ref2();
     });
@@ -463,7 +484,10 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
     let pop_c_chamf = popover.clone();
     btn_add_chamfer.connect_clicked(move |_| {
         pop_c_chamf.popdown();
-        ensure_target_element(&canvas_c_chamf, Modifier::ChamferRounding(ChamferRoundingModifier::default()));
+        ensure_target_element(
+            &canvas_c_chamf,
+            Modifier::ChamferRounding(ChamferRoundingModifier::default()),
+        );
         canvas_c_chamf.queue_draw();
         update_ref3();
     });
@@ -568,12 +592,20 @@ fn build_modifier_card(
         .build();
 
     let is_enabled = modifier.enabled();
-    let vis_icon_name = if is_enabled { "view-visible-symbolic" } else { "view-hidden-symbolic" };
+    let vis_icon_name = if is_enabled {
+        "view-visible-symbolic"
+    } else {
+        "view-hidden-symbolic"
+    };
     let img_vis = gtk4::Image::from_icon_name(vis_icon_name);
     img_vis.set_pixel_size(14);
     let btn_vis = gtk4::Button::builder()
         .child(&img_vis)
-        .tooltip_text(if is_enabled { crate::core::gettext("Hide Modifier") } else { crate::core::gettext("Show Modifier") })
+        .tooltip_text(if is_enabled {
+            crate::core::gettext("Hide Modifier")
+        } else {
+            crate::core::gettext("Show Modifier")
+        })
         .css_classes(["flat"])
         .build();
 
@@ -810,7 +842,10 @@ fn build_modifier_card(
                     scale_step: _,
                     rotate_step_deg,
                 } => {
-                    let grid = gtk4::Grid::builder().column_spacing(8).row_spacing(6).build();
+                    let grid = gtk4::Grid::builder()
+                        .column_spacing(8)
+                        .row_spacing(6)
+                        .build();
 
                     let lbl_count = gtk4::Label::new(Some(&crate::core::gettext("Count")));
                     lbl_count.set_css_classes(&["caption", "dim-label"]);
@@ -871,7 +906,12 @@ fn build_modifier_card(
                     let s_dy = spin_dy.clone();
                     let s_rot = spin_rot.clone();
                     spin_count.connect_value_changed(move |s| {
-                        u_sc(s.value() as u32, s_dx.value() as f32, s_dy.value() as f32, s_rot.value() as f32);
+                        u_sc(
+                            s.value() as u32,
+                            s_dx.value() as f32,
+                            s_dy.value() as f32,
+                            s_rot.value() as f32,
+                        );
                     });
 
                     let u_dx = update_array.clone();
@@ -879,7 +919,12 @@ fn build_modifier_card(
                     let s_dy2 = spin_dy.clone();
                     let s_rot2 = spin_rot.clone();
                     spin_dx.connect_value_changed(move |s| {
-                        u_dx(s_cnt.value() as u32, s.value() as f32, s_dy2.value() as f32, s_rot2.value() as f32);
+                        u_dx(
+                            s_cnt.value() as u32,
+                            s.value() as f32,
+                            s_dy2.value() as f32,
+                            s_rot2.value() as f32,
+                        );
                     });
 
                     let u_dy = update_array.clone();
@@ -887,7 +932,12 @@ fn build_modifier_card(
                     let s_dx3 = spin_dx.clone();
                     let s_rot3 = spin_rot.clone();
                     spin_dy.connect_value_changed(move |s| {
-                        u_dy(s_cnt3.value() as u32, s_dx3.value() as f32, s.value() as f32, s_rot3.value() as f32);
+                        u_dy(
+                            s_cnt3.value() as u32,
+                            s_dx3.value() as f32,
+                            s.value() as f32,
+                            s_rot3.value() as f32,
+                        );
                     });
 
                     let u_rot = update_array.clone();
@@ -895,7 +945,12 @@ fn build_modifier_card(
                     let s_dx4 = spin_dx.clone();
                     let s_dy4 = spin_dy.clone();
                     spin_rot.connect_value_changed(move |s| {
-                        u_rot(s_cnt4.value() as u32, s_dx4.value() as f32, s_dy4.value() as f32, s.value() as f32);
+                        u_rot(
+                            s_cnt4.value() as u32,
+                            s_dx4.value() as f32,
+                            s_dy4.value() as f32,
+                            s.value() as f32,
+                        );
                     });
                 }
                 ArrayMode::Radial {
@@ -905,7 +960,10 @@ fn build_modifier_card(
                     total_angle_deg: _,
                     rotate_copies: _,
                 } => {
-                    let grid = gtk4::Grid::builder().column_spacing(8).row_spacing(6).build();
+                    let grid = gtk4::Grid::builder()
+                        .column_spacing(8)
+                        .row_spacing(6)
+                        .build();
 
                     let lbl_count = gtk4::Label::new(Some(&crate::core::gettext("Count")));
                     lbl_count.set_css_classes(&["caption", "dim-label"]);
@@ -966,7 +1024,10 @@ fn build_modifier_card(
                     spacing_x,
                     spacing_y,
                 } => {
-                    let grid = gtk4::Grid::builder().column_spacing(8).row_spacing(6).build();
+                    let grid = gtk4::Grid::builder()
+                        .column_spacing(8)
+                        .row_spacing(6)
+                        .build();
 
                     let lbl_rc = gtk4::Label::new(Some(&crate::core::gettext("Rows / Cols")));
                     lbl_rc.set_css_classes(&["caption", "dim-label"]);
@@ -1023,7 +1084,12 @@ fn build_modifier_card(
                     let s_sx1 = spin_sx.clone();
                     let s_sy1 = spin_sy.clone();
                     spin_r.connect_value_changed(move |s| {
-                        u_g1(s.value() as u32, s_c1.value() as u32, s_sx1.value() as f32, s_sy1.value() as f32);
+                        u_g1(
+                            s.value() as u32,
+                            s_c1.value() as u32,
+                            s_sx1.value() as f32,
+                            s_sy1.value() as f32,
+                        );
                     });
 
                     let u_g2 = update_g.clone();
@@ -1031,7 +1097,12 @@ fn build_modifier_card(
                     let s_sx2 = spin_sx.clone();
                     let s_sy2 = spin_sy.clone();
                     spin_c.connect_value_changed(move |s| {
-                        u_g2(s_r2.value() as u32, s.value() as u32, s_sx2.value() as f32, s_sy2.value() as f32);
+                        u_g2(
+                            s_r2.value() as u32,
+                            s.value() as u32,
+                            s_sx2.value() as f32,
+                            s_sy2.value() as f32,
+                        );
                     });
 
                     let u_g3 = update_g.clone();
@@ -1039,7 +1110,12 @@ fn build_modifier_card(
                     let s_c3 = spin_c.clone();
                     let s_sy3 = spin_sy.clone();
                     spin_sx.connect_value_changed(move |s| {
-                        u_g3(s_r3.value() as u32, s_c3.value() as u32, s.value() as f32, s_sy3.value() as f32);
+                        u_g3(
+                            s_r3.value() as u32,
+                            s_c3.value() as u32,
+                            s.value() as f32,
+                            s_sy3.value() as f32,
+                        );
                     });
 
                     let u_g4 = update_g.clone();
@@ -1047,7 +1123,12 @@ fn build_modifier_card(
                     let s_c4 = spin_c.clone();
                     let s_sx4 = spin_sx.clone();
                     spin_sy.connect_value_changed(move |s| {
-                        u_g4(s_r4.value() as u32, s_c4.value() as u32, s_sx4.value() as f32, s.value() as f32);
+                        u_g4(
+                            s_r4.value() as u32,
+                            s_c4.value() as u32,
+                            s_sx4.value() as f32,
+                            s.value() as f32,
+                        );
                     });
                 }
             }
@@ -1097,7 +1178,9 @@ fn build_modifier_card(
                 .height_request(46)
                 .halign(gtk4::Align::Center)
                 .valign(gtk4::Align::Center)
-                .tooltip_text(&crate::core::gettext("Drag angle dimmer knob to rotate 3D projection"))
+                .tooltip_text(&crate::core::gettext(
+                    "Drag angle dimmer knob to rotate 3D projection",
+                ))
                 .build();
 
             let angle_draw = angle_cell.clone();
@@ -1200,7 +1283,10 @@ fn build_modifier_card(
 
             let colors = [
                 ("Auto", None),
-                ("Dark Metal", Some(crate::core::Color::new(0.12, 0.14, 0.18, 1.0))),
+                (
+                    "Dark Metal",
+                    Some(crate::core::Color::new(0.12, 0.14, 0.18, 1.0)),
+                ),
                 ("Gold", Some(crate::core::Color::new(0.95, 0.75, 0.2, 1.0))),
                 ("Ruby", Some(crate::core::Color::new(0.85, 0.2, 0.35, 1.0))),
                 ("Cyan", Some(crate::core::Color::new(0.1, 0.8, 0.95, 1.0))),
@@ -1304,9 +1390,6 @@ fn build_modifier_card(
                     }
                 }
                 drop(state);
-                if let Ok(st) = canvas_cb.state.try_borrow() {
-                    st.notify_status();
-                }
                 canvas_cb.queue_draw();
             };
 
@@ -1322,38 +1405,43 @@ fn build_modifier_card(
                 let a = s_a1.value() as f32;
                 *angle_cell_sync.borrow_mut() = a;
                 da_k_draw.queue_draw();
-                u_e(
-                    c_m1.selected(),
-                    s_d1.value() as f32,
-                    a,
-                    sw_sh1.is_active(),
-                );
+                u_e(c_m1.selected(), s_d1.value() as f32, a, sw_sh1.is_active());
             };
 
             let su1 = Rc::new(sync_update);
 
-            // Drag Gesture on Dimmer Knob Widget
+            let is_updating = Rc::new(std::cell::Cell::new(false));
+
+            // Drag Gesture on Dimmer Knob Widget with continuous mouse tracking
             let drag_knob = gtk4::GestureDrag::new();
             let da_k_drag = da_knob.clone();
             let spin_a_knob = spin_a.clone();
+            let start_pos_cell = Rc::new(std::cell::Cell::new((0.0f64, 0.0f64)));
 
-            let update_knob_drag = move |x: f64, y: f64| {
-                let cx = da_k_drag.width() as f64 * 0.5;
-                let cy = da_k_drag.height() as f64 * 0.5;
+            let sp_begin = start_pos_cell.clone();
+            let spin_a_begin = spin_a_knob.clone();
+            let da_k_begin = da_k_drag.clone();
+            drag_knob.connect_drag_begin(move |_, x, y| {
+                sp_begin.set((x, y));
+                let cx = da_k_begin.width() as f64 * 0.5;
+                let cy = da_k_begin.height() as f64 * 0.5;
                 let dx = x - cx;
                 let dy = y - cy;
                 let deg = dy.atan2(dx).to_degrees();
-                spin_a_knob.set_value(deg);
-            };
-
-            let up_k_start = update_knob_drag.clone();
-            drag_knob.connect_drag_begin(move |_, x, y| {
-                up_k_start(x, y);
+                spin_a_begin.set_value(deg);
             });
-            drag_knob.connect_drag_update(move |gesture, offset_x, offset_y| {
-                if let Some((start_x, start_y)) = gesture.start_point() {
-                    update_knob_drag(start_x + offset_x, start_y + offset_y);
-                }
+
+            let sp_update = start_pos_cell;
+            drag_knob.connect_drag_update(move |_, offset_x, offset_y| {
+                let (sx, sy) = sp_update.get();
+                let curr_x = sx + offset_x;
+                let curr_y = sy + offset_y;
+                let cx = da_k_drag.width() as f64 * 0.5;
+                let cy = da_k_drag.height() as f64 * 0.5;
+                let dx = curr_x - cx;
+                let dy = curr_y - cy;
+                let deg = dy.atan2(dx).to_degrees();
+                spin_a_knob.set_value(deg);
             });
             da_knob.add_controller(drag_knob);
 
@@ -1362,16 +1450,28 @@ fn build_modifier_card(
 
             let su_sd = su1.clone();
             let sc_d2 = scale_d.clone();
+            let is_u1 = is_updating.clone();
             spin_d.connect_value_changed(move |s| {
+                if is_u1.get() {
+                    return;
+                }
+                is_u1.set(true);
                 sc_d2.set_value(s.value());
                 su_sd();
+                is_u1.set(false);
             });
 
             let su_scd = su1.clone();
             let spin_d2 = spin_d.clone();
+            let is_u2 = is_updating.clone();
             scale_d.connect_value_changed(move |s| {
+                if is_u2.get() {
+                    return;
+                }
+                is_u2.set(true);
                 spin_d2.set_value(s.value());
                 su_scd();
+                is_u2.set(false);
             });
 
             let su_sa = su1.clone();
@@ -1383,7 +1483,10 @@ fn build_modifier_card(
             sw_sh.connect_active_notify(move |_| su_sh());
         }
         Modifier::Twist(tw) => {
-            let grid = gtk4::Grid::builder().column_spacing(8).row_spacing(6).build();
+            let grid = gtk4::Grid::builder()
+                .column_spacing(8)
+                .row_spacing(6)
+                .build();
 
             let lbl_a = gtk4::Label::new(Some(&crate::core::gettext("Twist Angle (°)")));
             lbl_a.set_css_classes(&["caption", "dim-label"]);
@@ -1434,7 +1537,10 @@ fn build_modifier_card(
             });
         }
         Modifier::OffsetPath(off) => {
-            let grid = gtk4::Grid::builder().column_spacing(8).row_spacing(6).build();
+            let grid = gtk4::Grid::builder()
+                .column_spacing(8)
+                .row_spacing(6)
+                .build();
 
             let lbl_off = gtk4::Label::new(Some(&crate::core::gettext("Offset Distance")));
             lbl_off.set_css_classes(&["caption", "dim-label"]);
@@ -1465,7 +1571,10 @@ fn build_modifier_card(
             });
         }
         Modifier::ZigZag(zz) => {
-            let grid = gtk4::Grid::builder().column_spacing(8).row_spacing(6).build();
+            let grid = gtk4::Grid::builder()
+                .column_spacing(8)
+                .row_spacing(6)
+                .build();
 
             let lbl_r = gtk4::Label::new(Some(&crate::core::gettext("Ridges per Segment")));
             lbl_r.set_css_classes(&["caption", "dim-label"]);
@@ -1516,7 +1625,10 @@ fn build_modifier_card(
             });
         }
         Modifier::WaveDeform(wave) => {
-            let grid = gtk4::Grid::builder().column_spacing(8).row_spacing(6).build();
+            let grid = gtk4::Grid::builder()
+                .column_spacing(8)
+                .row_spacing(6)
+                .build();
 
             let lbl_amp = gtk4::Label::new(Some(&crate::core::gettext("Amplitude")));
             lbl_amp.set_css_classes(&["caption", "dim-label"]);
@@ -1567,7 +1679,10 @@ fn build_modifier_card(
             });
         }
         Modifier::EnvelopeWarp(env) => {
-            let grid = gtk4::Grid::builder().column_spacing(8).row_spacing(6).build();
+            let grid = gtk4::Grid::builder()
+                .column_spacing(8)
+                .row_spacing(6)
+                .build();
 
             let lbl_tl = gtk4::Label::new(Some(&crate::core::gettext("Top-Left Offset")));
             lbl_tl.set_css_classes(&["caption", "dim-label"]);
@@ -1605,7 +1720,10 @@ fn build_modifier_card(
             });
         }
         Modifier::ChamferRounding(ch) => {
-            let grid = gtk4::Grid::builder().column_spacing(8).row_spacing(6).build();
+            let grid = gtk4::Grid::builder()
+                .column_spacing(8)
+                .row_spacing(6)
+                .build();
 
             let lbl_style = gtk4::Label::new(Some(&crate::core::gettext("Corner Style")));
             lbl_style.set_css_classes(&["caption", "dim-label"]);
