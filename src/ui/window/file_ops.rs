@@ -63,6 +63,7 @@ impl WindowFileOps {
                             if let Err(e) = canvas_c.save_to_path(&path_buf) {
                                 eprintln!("{}: {}", crate::core::gettext("Error saving: {}"), e);
                             } else {
+                                crate::core::AppSettings::add_recent_file(&path_buf.to_string_lossy());
                                 let fname =
                                     path_buf.file_name().unwrap_or_default().to_string_lossy();
                                 let toast = adw::Toast::new(&crate::i18n!(
@@ -84,6 +85,9 @@ impl WindowFileOps {
             let toast_ov = toast_overlay.clone();
             Rc::new(move || match canvas.save() {
                 Ok(true) => {
+                    if let Some(p) = canvas.current_file_path() {
+                        crate::core::AppSettings::add_recent_file(&p.to_string_lossy());
+                    }
                     let fname = canvas
                         .current_file_path()
                         .and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned()))
@@ -145,6 +149,7 @@ impl WindowFileOps {
                                 if let Err(e) = cv_open.open_from_path(&path) {
                                     eprintln!("{}", crate::i18n!("Error opening file: {}", e));
                                 } else {
+                                    crate::core::AppSettings::add_recent_file(&path.to_string_lossy());
                                     let fname =
                                         path.file_name().unwrap_or_default().to_string_lossy();
                                     let toast = adw::Toast::new(&crate::i18n!(

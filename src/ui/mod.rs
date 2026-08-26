@@ -13,5 +13,7 @@ pub mod theme;
 pub mod tool_options;
 pub mod toolbar;
 pub mod window;
+pub mod welcome;
 
 pub use window::DesignWindow;
+

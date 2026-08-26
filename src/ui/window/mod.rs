@@ -22,7 +22,34 @@ pub struct DesignWindow {
 
 impl DesignWindow {
     pub fn new(app: &adw::Application) -> Self {
+        Self::new_internal(app, None, None)
+    }
+
+    pub fn new_with_preset(app: &adw::Application, width: f32, height: f32) -> Self {
+        Self::new_internal(app, Some((width, height)), None)
+    }
+
+    pub fn new_with_file(app: &adw::Application, path: &std::path::Path) -> Self {
+        Self::new_internal(app, None, Some(path))
+    }
+
+    fn new_internal(
+        app: &adw::Application,
+        preset_size: Option<(f32, f32)>,
+        open_path: Option<&std::path::Path>,
+    ) -> Self {
         let canvas = CanvasWidget::new();
+
+        if let Some((w, h)) = preset_size {
+            canvas.new_document();
+            canvas.set_active_page_size(w, h);
+        } else if let Some(path) = open_path {
+            if let Err(e) = canvas.open_from_path(path) {
+                eprintln!("Error opening file: {}", e);
+            } else {
+                crate::core::AppSettings::add_recent_file(&path.to_string_lossy());
+            }
+        }
 
         // Restore Display & Canvas Preferences from AppSettings
         let show_grid = crate::core::AppSettings::show_grid();
@@ -342,7 +369,7 @@ impl DesignWindow {
 
         let menu_btn = menu::build_main_menu(file_ops, canvas, main_win_holder);
 
-        let header_comps = header::build_header_bar(canvas, file_ops, &menu_btn);
+        let header_comps = header::build_header_bar(canvas, file_ops, main_win_holder, &menu_btn);
 
         // Floating Zoom Controls (Positioned at bottom-right)
         let zoom_box = gtk4::Box::builder()

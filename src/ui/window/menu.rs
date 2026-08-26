@@ -166,6 +166,24 @@ pub fn build_main_menu(
         None,
     );
 
+    // Welcome / Start Screen
+    let welcome_menu_btn = create_menu_btn(
+        "window-new-symbolic",
+        &crate::core::gettext("Start Screen..."),
+        None,
+    );
+    let pop_welcome = menu_popover.clone();
+    let win_holder_w = main_win_holder.clone();
+    let cv_w = canvas.clone();
+    let fops_w = file_ops.clone();
+    welcome_menu_btn.connect_clicked(move |_| {
+        pop_welcome.popdown();
+        if let Some(win) = win_holder_w.borrow().as_ref() {
+            crate::ui::welcome::show_welcome_window(Some(win), cv_w.clone(), fops_w.clone());
+        }
+    });
+
+    menu_box.append(&welcome_menu_btn);
     menu_box.append(&new_menu_btn);
     menu_box.append(&open_menu_btn);
     menu_box.append(&save_menu_btn);

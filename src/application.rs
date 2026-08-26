@@ -5,8 +5,6 @@ use gtk4::prelude::*;
 use libadwaita as adw;
 use libadwaita::prelude::*;
 
-use crate::ui::DesignWindow;
-
 pub const APP_ID: &str = "io.gitlab.lewisHeart.Paths";
 pub const RESOURCE_PATH: &str = "/io/gitlab/lewisHeart/Paths";
 
@@ -80,8 +78,7 @@ impl DesignApplication {
                 window.set_visible(true);
                 window.present();
             } else {
-                let window = DesignWindow::new(app);
-                window.present();
+                crate::ui::welcome::show_welcome_app_window(app);
             }
         });
     }

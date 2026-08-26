@@ -65,6 +65,12 @@ pub struct AppConfig {
     pub handle_size: f64,
     pub handle_display_mode: String,
     pub shortcut_preset: String,
+
+    // Recent Files & Favorite Presets
+    #[serde(default)]
+    pub recent_files: Vec<String>,
+    #[serde(default)]
+    pub favorite_presets: Vec<String>,
 }
 
 impl Default for AppConfig {
@@ -122,6 +128,8 @@ impl Default for AppConfig {
             handle_size: 6.0,
             handle_display_mode: "selected".to_string(),
             shortcut_preset: "default".to_string(),
+            recent_files: vec![],
+            favorite_presets: vec![],
         }
     }
 }
@@ -1019,6 +1027,47 @@ impl AppSettings {
         if let Some(s) = settings() {
             let _ = s.set_string("shortcut-preset", preset);
         }
+    }
+
+    pub fn recent_files() -> Vec<String> {
+        GLOBAL_CONFIG.with(|c| c.borrow().recent_files.clone())
+    }
+
+    pub fn add_recent_file(file_path: &str) {
+        if file_path.trim().is_empty() {
+            return;
+        }
+        GLOBAL_CONFIG.with(|c| {
+            let mut cfg = c.borrow_mut();
+            cfg.recent_files.retain(|p| p != file_path);
+            cfg.recent_files.insert(0, file_path.to_string());
+            if cfg.recent_files.len() > 20 {
+                cfg.recent_files.truncate(20);
+            }
+            save_config_internal(&cfg);
+        });
+    }
+
+    pub fn favorite_presets() -> Vec<String> {
+        GLOBAL_CONFIG.with(|c| c.borrow().favorite_presets.clone())
+    }
+
+    pub fn is_favorite_preset(preset_id: &str) -> bool {
+        GLOBAL_CONFIG.with(|c| c.borrow().favorite_presets.iter().any(|id| id == preset_id))
+    }
+
+    pub fn toggle_favorite_preset(preset_id: &str) -> bool {
+        GLOBAL_CONFIG.with(|c| {
+            let mut cfg = c.borrow_mut();
+            let is_fav = cfg.favorite_presets.iter().any(|id| id == preset_id);
+            if is_fav {
+                cfg.favorite_presets.retain(|id| id != preset_id);
+            } else {
+                cfg.favorite_presets.push(preset_id.to_string());
+            }
+            save_config_internal(&cfg);
+            !is_fav
+        })
     }
 }
 

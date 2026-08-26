@@ -7,6 +7,8 @@ use super::file_ops::WindowFileOps;
 use crate::core::ExportFormat;
 use crate::ui::canvas::CanvasWidget;
 
+use std::cell::RefCell;
+
 pub struct HeaderBarComponents {
     pub header_bar: adw::HeaderBar,
     pub toggle_layers_btn: gtk4::ToggleButton,
@@ -22,6 +24,7 @@ pub struct HeaderBarComponents {
 pub fn build_header_bar(
     canvas: &CanvasWidget,
     file_ops: &WindowFileOps,
+    main_win_holder: &Rc<RefCell<Option<adw::ApplicationWindow>>>,
     menu_btn: &gtk4::MenuButton,
 ) -> HeaderBarComponents {
     let header_bar = adw::HeaderBar::builder()
@@ -36,6 +39,21 @@ pub fn build_header_bar(
         .orientation(gtk4::Orientation::Horizontal)
         .spacing(4)
         .build();
+
+    let welcome_btn = gtk4::Button::builder()
+        .icon_name("window-new-symbolic")
+        .tooltip_text(&crate::core::gettext("Start Screen / Welcome"))
+        .css_classes(["flat"])
+        .focus_on_click(false)
+        .build();
+    let canvas_w = canvas.clone();
+    let file_ops_w = file_ops.clone();
+    let main_win_w = main_win_holder.clone();
+    welcome_btn.connect_clicked(move |_| {
+        let parent = main_win_w.borrow().clone();
+        crate::ui::welcome::show_welcome_window(parent.as_ref(), canvas_w.clone(), file_ops_w.clone());
+    });
+    start_box.append(&welcome_btn);
 
     let toggle_layers_btn = gtk4::ToggleButton::builder()
         .icon_name("sidebar-layers-symbolic")

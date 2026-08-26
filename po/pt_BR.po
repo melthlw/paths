@@ -827,7 +827,7 @@ msgid "JPG / JPEG (Photography)"
 msgstr "JPG / JPEG (Fotografia)"
 
 msgid "Justify"
-msgstr "Justificado"
+msgstr "Justificar"
 
 msgid "Keyboard Shortcuts"
 msgstr "Atalhos de teclado"
@@ -2721,23 +2721,11 @@ msgstr "Tipografia"
 msgid "Family"
 msgstr "Família"
 
-msgid "Font Weight"
-msgstr "Peso da Fonte"
-
 msgid "Line Height (Leading)"
 msgstr "Entrelinha (Leading)"
 
 msgid "Tracking / Letter Spacing"
 msgstr "Espaçamento de Letras (Tracking)"
-
-msgid "Align Left"
-msgstr "Alinhar à Esquerda"
-
-msgid "Align Right"
-msgstr "Alinhar à Direita"
-
-msgid "Justify"
-msgstr "Justificar"
 
 msgid "OpenType Features"
 msgstr "Recursos OpenType"
