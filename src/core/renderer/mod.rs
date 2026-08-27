@@ -1,6 +1,8 @@
+pub mod cache;
 pub mod draw;
 pub mod export;
 
+pub use cache::PictureCache;
 pub use draw::{
     draw_alignment_grid, draw_corner_origin_drag, draw_element_node, draw_infinite_dot_grid,
     draw_modifier_canvas_overlays, draw_pages, draw_rulers, draw_selection_highlight,
@@ -101,6 +103,7 @@ pub struct SkiaRenderer {
     surface: Option<skia::Surface>,
     width: i32,
     height: i32,
+    pub picture_cache: PictureCache,
 }
 
 impl SkiaRenderer {
@@ -141,6 +144,8 @@ impl SkiaRenderer {
         if width <= 0 || height <= 0 {
             return None;
         }
+
+        let mut picture_cache = std::mem::take(&mut self.picture_cache);
 
         let surface = self.ensure_surface(width, height);
         let canvas = surface.canvas();
@@ -198,15 +203,24 @@ impl SkiaRenderer {
         }
 
         let mut visited_clones = std::collections::HashSet::new();
-        for element in &document.elements {
-            draw_element_node(
-                canvas,
-                element,
-                document,
-                render_options.high_precision_aa,
-                render_options.hardware_accelerated,
-                &mut visited_clones,
-            );
+
+        // Spatial Indexing & Viewport Frustum Culling (R-Tree O(log N))
+        let visible_world_rect = viewport.visible_world_rect(widget_size);
+        let spatial_index = crate::core::SpatialIndex::build(&document.elements);
+        let visible_indices = spatial_index.query_rect(visible_world_rect);
+
+        for &idx in &visible_indices {
+            if let Some(element) = document.elements.get(idx) {
+                draw_element_node(
+                    canvas,
+                    element,
+                    document,
+                    render_options.high_precision_aa,
+                    render_options.hardware_accelerated,
+                    &mut visited_clones,
+                    &mut picture_cache,
+                );
+            }
         }
 
         if show_selection_bbox {
@@ -242,14 +256,17 @@ impl SkiaRenderer {
         let image_info = surface.image_info();
         let row_bytes = image_info.min_row_bytes();
         let mut image_surface = ImageSurface::create(Format::ARgb32, width, height).ok()?;
-        {
+        let success = {
             let mut data = image_surface.data().ok()?;
-            let success = surface.read_pixels(&image_info, &mut data, row_bytes, (0, 0));
-            if !success {
-                return None;
-            }
+            surface.read_pixels(&image_info, &mut data, row_bytes, (0, 0))
+        };
+
+        self.picture_cache = picture_cache;
+        if success {
+            Some(image_surface)
+        } else {
+            None
         }
-        Some(image_surface)
     }
 }
 

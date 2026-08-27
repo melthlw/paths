@@ -87,6 +87,7 @@ pub fn render_rect_to_skia_surface(
     canvas.translate(skia::Vector::new(-export_rect.x, -export_rect.y));
 
     let mut visited_clones = std::collections::HashSet::new();
+    let mut picture_cache = crate::core::renderer::PictureCache::default();
     for element in &document.elements {
         draw_element_node(
             canvas,
@@ -95,6 +96,7 @@ pub fn render_rect_to_skia_surface(
             antialiasing,
             false,
             &mut visited_clones,
+            &mut picture_cache,
         );
     }
 

@@ -295,6 +295,7 @@ pub fn draw_element_node(
     antialiasing: bool,
     hardware_accelerated: bool,
     visited_clones: &mut std::collections::HashSet<crate::core::element::ElementId>,
+    picture_cache: &mut super::PictureCache,
 ) {
     if !element.visible() {
         return;
@@ -350,6 +351,7 @@ pub fn draw_element_node(
                         antialiasing,
                         hardware_accelerated,
                         visited_clones,
+                        picture_cache,
                     );
                     canvas.restore();
                 }
@@ -357,7 +359,11 @@ pub fn draw_element_node(
             }
         }
         other => {
-            other.render_with_doc(canvas, Some(document));
+            if let Some(picture) = picture_cache.get_or_record(other, document) {
+                canvas.draw_picture(&picture, None, None);
+            } else {
+                other.render_with_doc(canvas, Some(document));
+            }
         }
     }
 

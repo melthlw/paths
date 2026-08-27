@@ -19,11 +19,13 @@ pub mod ruler;
 pub mod settings;
 pub mod shortcuts;
 pub mod snap;
+pub mod spatial_index;
 pub mod svg_export;
 pub mod svg_import;
 pub mod units;
 
 pub use color::Color;
+pub use spatial_index::SpatialIndex;
 pub use document::{Document, TiledCloneParams, TransformOptions};
 pub use element::{
     ArcMode, BlendMode, BrushMode, BrushStroke, BrushStyle, CornerRadii, CornerStyle, Element,

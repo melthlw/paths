@@ -124,6 +124,7 @@ impl CanvasState {
     }
 
     pub fn mark_dirty(&mut self) {
+        self.renderer.picture_cache.clear();
         if !self.is_dirty {
             self.is_dirty = true;
             self.notify_file_state();

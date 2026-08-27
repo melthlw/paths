@@ -238,6 +238,12 @@ impl Viewport {
         self.pan.y = -center.y * target_zoom;
     }
 
+    pub fn visible_world_rect(&self, widget_size: (f32, f32)) -> Rect {
+        let p_top_left = self.screen_to_world(Point::ZERO, widget_size);
+        let p_bottom_right = self.screen_to_world(Point::new(widget_size.0, widget_size.1), widget_size);
+        Rect::from_points(p_top_left, p_bottom_right)
+    }
+
     pub fn reset(&mut self) {
         self.pan = Point::ZERO;
         self.zoom = 1.0;
