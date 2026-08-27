@@ -494,6 +494,7 @@ pub fn apply_wave_deform_to_path(path: &skia::Path, amplitude: f32, wavelength: 
 }
 
 /// Extrudes a 2D vector path into a 3D isometric perspective solid
+#[allow(dead_code)]
 pub fn apply_extrude_3d_to_path(path: &skia::Path, depth: f32, angle_deg: f32) -> skia::Path {
     if depth.abs() < 0.5 {
         return path.clone();
@@ -592,7 +593,7 @@ pub fn apply_twist_to_path(path: &skia::Path, angle_deg: f32, max_radius: f32) -
     builder.detach()
 }
 
-/// Renders a 100% smooth anti-aliased 3D Extruded vector solid with zero quadriculado serration directly onto Skia canvas
+/// Renders a smooth anti-aliased 3D Extruded vector solid directly onto Skia canvas
 pub fn apply_extrude_3d_to_canvas(
     path: &skia::Path,
     fill_color: Option<crate::core::Color>,
@@ -621,20 +622,12 @@ pub fn apply_extrude_3d_to_canvas(
     side_paint.set_style(skia::PaintStyle::Fill);
     side_paint.set_anti_alias(true);
 
-    let mut stroke_side_paint = skia::Paint::default();
-    if let Some(sc) = stroke_color {
-        stroke_side_paint.set_color4f(sc.to_skia(), None);
-        stroke_side_paint.set_style(skia::PaintStyle::Stroke);
-        stroke_side_paint.set_stroke_width(stroke_width);
-        stroke_side_paint.set_anti_alias(true);
-    }
-
     let intensity = ext.shading_intensity.clamp(0.0, 1.0);
     let light_rad = ext.light_angle_deg.to_radians();
     let light_dot = (rad.cos() * light_rad.cos() + rad.sin() * light_rad.sin()).abs();
 
     if ext.shading {
-        let darkness = (1.0 - 0.5 * intensity * (0.6 + 0.4 * light_dot)).clamp(0.12, 1.0);
+        let darkness = (1.0 - 0.45 * intensity * (0.6 + 0.4 * light_dot)).clamp(0.15, 1.0);
         let shaded_color = crate::core::Color::new(
             (side_base.r * darkness).clamp(0.0, 1.0),
             (side_base.g * darkness).clamp(0.0, 1.0),
@@ -646,14 +639,31 @@ pub fn apply_extrude_3d_to_canvas(
         side_paint.set_color4f(side_base.to_skia(), None);
     }
 
-    // Build 1 continuous vector quad side mesh path (ZERO quadriculado / ZERO staircasing)
-    let mut side_hull = skia::PathBuilder::new();
     let bounds = path.bounds();
     let center = skia::Point::new(bounds.center_x(), bounds.center_y());
 
+    // Back face transformation
+    let back_scale = if ext.mode == Extrude3DMode::Perspective {
+        ext.taper * 0.85
+    } else {
+        ext.taper
+    };
+    let mut back_matrix = skia::Matrix::translate((base_dx, base_dy));
+    if (back_scale - 1.0).abs() > 0.001 {
+        let mut m_scale = skia::Matrix::scale((back_scale, back_scale));
+        m_scale.post_translate((center.x * (1.0 - back_scale), center.y * (1.0 - back_scale)));
+        back_matrix.post_concat(&m_scale);
+    }
+    if ext.twist_deg.abs() > 0.01 {
+        let m_rot = skia::Matrix::rotate_deg_pivot(ext.twist_deg, center);
+        back_matrix.post_concat(&m_rot);
+    }
+    let back_path = path.with_transform(&back_matrix);
+
+    // 1. Draw side wall extrusion hull
     let zoom = canvas.local_to_device_as_3x3().scale_x().abs().max(1.0);
-    // Dynamic screen-space sub-pixel sweep (0.2 screen-pixels per step) for 100% smooth vector edges at ANY zoom level
-    let steps = ((ext.depth.abs() * 3.5 * zoom) as usize).clamp(30, 3000);
+    let steps = ((ext.depth.abs() * 2.5 * zoom) as usize).clamp(24, 800);
+    let mut side_hull = skia::PathBuilder::new();
     for i in 1..=steps {
         let t = i as f32 / steps as f32;
         let step_dx = base_dx * t;
@@ -677,16 +687,42 @@ pub fn apply_extrude_3d_to_canvas(
         let transformed = path.with_transform(&matrix);
         side_hull.add_path(&transformed, skia::path::AddPathMode::Append);
     }
-
     let hull_path = side_hull.detach();
-
-    // 1 single draw call for the entire 3D vector side wall volume!
     canvas.draw_path(&hull_path, &side_paint);
-    if stroke_color.is_some() {
-        canvas.draw_path(&hull_path, &stroke_side_paint);
+
+    // 2. Draw back face cap
+    let mut back_paint = side_paint.clone();
+    if ext.shading {
+        let back_darkness = (1.0 - 0.6 * intensity).clamp(0.1, 1.0);
+        let back_color = crate::core::Color::new(
+            (side_base.r * back_darkness).clamp(0.0, 1.0),
+            (side_base.g * back_darkness).clamp(0.0, 1.0),
+            (side_base.b * back_darkness).clamp(0.0, 1.0),
+            side_base.a,
+        );
+        back_paint.set_color4f(back_color.to_skia(), None);
+    }
+    canvas.draw_path(&back_path, &back_paint);
+
+    // 3. Draw strokes on back face and connecting silhouette lines
+    if let Some(sc) = stroke_color {
+        let mut stroke_paint = skia::Paint::default();
+        stroke_paint.set_color4f(sc.to_skia(), None);
+        stroke_paint.set_style(skia::PaintStyle::Stroke);
+        stroke_paint.set_stroke_width(stroke_width);
+        stroke_paint.set_anti_alias(true);
+
+        canvas.draw_path(&back_path, &stroke_paint);
+
+        let front_pts = path.points();
+        let back_pts = back_path.points();
+        let pt_count = front_pts.len().min(back_pts.len());
+        for i in 0..pt_count {
+            canvas.draw_line(front_pts[i], back_pts[i], &stroke_paint);
+        }
     }
 
-    // 2. Render optional 3D Bevel edge highlight
+    // 4. Render optional 3D Bevel edge highlight
     if ext.bevel_radius > 0.5 {
         let mut bevel_paint = skia::Paint::default();
         bevel_paint.set_style(skia::PaintStyle::Stroke);

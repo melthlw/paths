@@ -359,11 +359,16 @@ pub fn draw_element_node(
             }
         }
         other => {
-            if let Some(picture) = picture_cache.get_or_record(other, document) {
-                canvas.draw_picture(&picture, None, None);
-            } else {
-                other.render_with_doc(canvas, Some(document));
+            if !document.selected_ids.contains(&other.id()) {
+                if let Some(picture) = picture_cache.get_or_record(other, document) {
+                    canvas.draw_picture(&picture, None, None);
+                    if is_layer_needed {
+                        canvas.restore();
+                    }
+                    return;
+                }
             }
+            other.render_with_doc(canvas, Some(document));
         }
     }
 

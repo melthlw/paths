@@ -218,6 +218,7 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
                     mods.push(modifier);
                 }
             }
+            state.mark_dirty();
             drop(state);
             if let Ok(st) = canvas_widget.state.try_borrow() {
                 st.notify_status();
@@ -677,6 +678,7 @@ fn build_modifier_card(
                 }
             }
         }
+        state.mark_dirty();
         drop(state);
         if let Ok(st) = canvas_vis.state.try_borrow() {
             st.notify_status();
@@ -695,6 +697,7 @@ fn build_modifier_card(
         if let Some(elem) = state.document.find_element_mut(elem_id) {
             elem.apply_modifier(mod_idx);
         }
+        state.mark_dirty();
         drop(state);
         if let Ok(st) = canvas_apply.state.try_borrow() {
             st.notify_status();
@@ -725,6 +728,7 @@ fn build_modifier_card(
                 }
             }
         }
+        state.mark_dirty();
         drop(state);
         if let Ok(st) = canvas_up.state.try_borrow() {
             st.notify_status();
@@ -747,6 +751,7 @@ fn build_modifier_card(
                 }
             }
         }
+        state.mark_dirty();
         drop(state);
         if let Ok(st) = canvas_dn.state.try_borrow() {
             st.notify_status();
@@ -1312,6 +1317,7 @@ fn build_modifier_card(
                             }
                         }
                     }
+                    state.mark_dirty();
                     drop(state);
                     if let Ok(st) = canvas_col.state.try_borrow() {
                         st.notify_status();
@@ -1357,6 +1363,7 @@ fn build_modifier_card(
                             }
                         }
                     }
+                    state.mark_dirty();
                     drop(state);
                     if let Ok(st) = canvas_p.state.try_borrow() {
                         st.notify_status();
@@ -1389,6 +1396,7 @@ fn build_modifier_card(
                         }
                     }
                 }
+                state.mark_dirty();
                 drop(state);
                 canvas_cb.queue_draw();
             };
@@ -1816,6 +1824,7 @@ fn build_modifier_card(
                 }
             }
         }
+        state.mark_dirty();
         drop(state);
         if let Ok(st) = canvas_del.state.try_borrow() {
             st.notify_status();

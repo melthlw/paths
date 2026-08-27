@@ -1074,9 +1074,6 @@ impl PathElement {
                             ch.style,
                         );
                     }
-                    crate::core::modifier::Modifier::Extrude3D(ext) => {
-                        path = crate::core::modifier::apply_extrude_3d_to_path(&path, ext.depth, ext.angle_deg);
-                    }
                     crate::core::modifier::Modifier::Twist(tw) => {
                         path = crate::core::modifier::apply_twist_to_path(&path, tw.angle_deg, tw.radius);
                     }

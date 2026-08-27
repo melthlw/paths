@@ -93,7 +93,7 @@ fn hit_modifier_handle(
                 let rad = ext.angle_deg.to_radians();
                 let target = Point::new(center.x + ext.depth * rad.cos(), center.y + ext.depth * rad.sin());
                 if p.distance_to(target) <= hit_r {
-                    return Some((mod_idx, ModifierHandleTarget::Extrude3DHandle, Point::new(ext.depth, ext.angle_deg)));
+                    return Some((mod_idx, ModifierHandleTarget::Extrude3DHandle, center));
                 }
             }
             Modifier::EnvelopeWarp(env) => {
@@ -389,8 +389,9 @@ impl FeaturePlugin for SelectFeature {
                         if let Some(m) = mods.get_mut(*mod_idx) {
                             match (m, target) {
                                 (Modifier::Extrude3D(ext), ModifierHandleTarget::Extrude3DHandle) => {
-                                    let dx = event.world_pos.x - initial_offset.x;
-                                    let dy = event.world_pos.y - initial_offset.y;
+                                    let center = *initial_offset;
+                                    let dx = event.world_pos.x - center.x;
+                                    let dy = event.world_pos.y - center.y;
                                     ext.depth = (dx * dx + dy * dy).sqrt().clamp(0.0, 500.0);
                                     ext.angle_deg = dy.atan2(dx).to_degrees();
                                 }

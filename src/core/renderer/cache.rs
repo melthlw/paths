@@ -18,6 +18,7 @@ pub struct PictureCache {
 }
 
 impl PictureCache {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Self::default()
     }
@@ -38,10 +39,10 @@ impl PictureCache {
 
         let mut recorder = skia::PictureRecorder::new();
         let sk_bounds = skia::Rect::from_xywh(
-            bounds.x - 20.0,
-            bounds.y - 20.0,
-            bounds.width + 40.0,
-            bounds.height + 40.0,
+            bounds.x - 100.0,
+            bounds.y - 100.0,
+            bounds.width + 200.0,
+            bounds.height + 200.0,
         );
 
         let canvas = recorder.begin_recording(sk_bounds, false);
@@ -55,6 +56,7 @@ impl PictureCache {
         }
     }
 
+    #[allow(dead_code)]
     pub fn invalidate(&mut self, id: ElementId) {
         self.pictures.retain(|k, _| k.id != id);
     }
