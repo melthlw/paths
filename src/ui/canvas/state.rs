@@ -689,7 +689,7 @@ impl CanvasState {
                     }
                     Element::Brush(_) => Some("brush"),
                     Element::Group(_) => Some("select"),
-                    Element::Image(_) => Some("select"),
+                    Element::Image(_) => Some("image"),
                     Element::Clone(_) => Some("select"),
                     Element::Path(p) => {
                         if p.mesh_gradient.is_some() || cur_tool == "mesh_gradient" {
@@ -775,6 +775,7 @@ impl CanvasState {
             crate::core::ShortcutAction::ToolPen => self.set_active_tool("pen"),
             crate::core::ShortcutAction::ToolBrush => self.set_active_tool("brush"),
             crate::core::ShortcutAction::ToolText => self.set_active_tool("text"),
+            crate::core::ShortcutAction::ToolImage => self.set_active_tool("image"),
             crate::core::ShortcutAction::ToolPaintBucket => self.set_active_tool("paint_bucket"),
             crate::core::ShortcutAction::ToolEyedropper => self.set_active_tool("eyedropper"),
             crate::core::ShortcutAction::ToolGradient => self.set_active_tool("gradient"),

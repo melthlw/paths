@@ -241,9 +241,15 @@ This project adheres to **Semantic Versioning (SemVer 2.0.0)** (`MAJOR.MINOR.PAT
 - [ ] **Advanced Dynamic Clipping & Alpha Masks**:
   - [ ] Non-destructive clipping masks with isolated editing for masked contents.
   - [ ] Support for opacity/luminance masks driven by gradients and grayscale values.
-- [ ] **Raster Image (Bitmap) Toolbar & Inspector**:
-  - [ ] Controls for dimensions, aspect ratio lock, resolution (DPI), and rotation of imported images.
-  - [ ] Skia non-destructive image adjustments: brightness, contrast, saturation, sharpness, and gamma correction.
+- [x] **Image Frame Tool & Adwaita HIG Visuals**:
+  - [x] Interactive creation of image frames on canvas with custom precision cursor (`tool-image-symbolic.svg` / `Shift+I`).
+  - [x] Refined GNOME / Adwaita Dark `#242427` empty-state placeholder card with 1.5px subtle border and vector photo frame silhouette.
+  - [x] Tool options HUD bar with image replacement, aspect ratio restoration, and live opacity slider.
+- [x] **Raster Image (Bitmap) Non-Destructive Processing & Inspector**:
+  - [x] Controls for dimensions, aspect ratio lock, and native resolution (DPI) readouts.
+  - [x] Skia non-destructive GPU-accelerated adjustments: brightness, contrast, saturation, hue rotation, Gaussian blur, and color spectrum inversion.
+  - [x] Monochrome grayscale and vintage sepia tone filters with 1-click quick presets (Normal, Vibrant, B&W High, Vintage, Warm, Cool).
+  - [x] Automatic contextual switching in the Studio Inspector for active image selections.
 - [ ] **Trace Bitmap (Image Vectorization)**:
   - [ ] Auto-trace raster images (PNG, JPEG) into editable vector paths with threshold, detail, and color quantization controls.
 

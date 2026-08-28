@@ -1,6 +1,7 @@
 pub mod brush;
 pub mod gradient;
 pub mod helpers;
+pub mod image;
 pub mod mesh;
 pub mod paint_bucket;
 pub mod pattern;
@@ -15,6 +16,7 @@ use std::rc::Rc;
 
 use self::brush::{build_brush_controls, BrushControls};
 use self::gradient::{build_gradient_controls, GradientControls};
+use self::image::{build_image_controls, ImageControls};
 use self::mesh::{build_mesh_controls, MeshControls};
 use self::paint_bucket::{build_paint_bucket_controls, PaintBucketControls};
 use self::pattern::{build_pattern_controls, PatternControls};
@@ -105,6 +107,8 @@ pub struct ToolOptionsBar {
     pattern_controls: PatternControls,
     paint_bucket_box: gtk4::Box,
     paint_bucket_controls: PaintBucketControls,
+    image_box: gtk4::Box,
+    image_controls: ImageControls,
     canvas: CanvasWidget,
     is_syncing: Rc<Cell<bool>>,
     is_top: Rc<Cell<bool>>,
@@ -245,6 +249,10 @@ impl ToolOptionsBar {
         let paint_bucket_controls = build_paint_bucket_controls(&canvas, &is_syncing);
         let paint_bucket_box = paint_bucket_controls.paint_bucket_box.clone();
         left_capsule.append(&paint_bucket_box);
+
+        let image_controls = build_image_controls(&canvas, &is_syncing);
+        let image_box = image_controls.image_box.clone();
+        left_capsule.append(&image_box);
 
         container.append(&left_capsule);
         container.append(&text_capsule);
@@ -414,6 +422,8 @@ impl ToolOptionsBar {
             pattern_controls,
             paint_bucket_box,
             paint_bucket_controls,
+            image_box,
+            image_controls,
             canvas,
             is_syncing,
             is_top,
@@ -454,12 +464,14 @@ impl ToolOptionsBar {
             self.right_capsule.set_visible(false);
             self.text_capsule.set_visible(true);
             self.pen_box.set_visible(false);
+            self.image_box.set_visible(false);
         } else if tool_id == "page" {
             self.container.set_visible(true);
             self.left_capsule.set_visible(false);
             self.text_capsule.set_visible(false);
             self.right_capsule.set_visible(false);
             self.page_capsule.set_visible(true);
+            self.image_box.set_visible(false);
 
             if let Some((name, _x, _y, w, h, pages_count)) = page_info {
                 self.is_syncing.set(true);
@@ -527,6 +539,7 @@ impl ToolOptionsBar {
             self.grad_box.set_visible(false);
             self.pattern_box.set_visible(false);
             self.paint_bucket_box.set_visible(false);
+            self.image_box.set_visible(false);
 
             self.is_syncing.set(true);
             match tool_id {
@@ -692,6 +705,7 @@ impl ToolOptionsBar {
             self.grad_box.set_visible(false);
             self.pattern_box.set_visible(false);
             self.paint_bucket_box.set_visible(false);
+            self.image_box.set_visible(false);
             self.path_editor_box.set_visible(true);
         } else if tool_id == "pen" || tool_id == "vector-pen" || tool_id == "vector_pen" {
             self.container.set_visible(true);
@@ -707,6 +721,7 @@ impl ToolOptionsBar {
             self.grad_box.set_visible(false);
             self.pattern_box.set_visible(false);
             self.paint_bucket_box.set_visible(false);
+            self.image_box.set_visible(false);
             self.pen_box.set_visible(true);
 
             if let Ok(state_b) = self.canvas.state().try_borrow() {
@@ -967,6 +982,35 @@ impl ToolOptionsBar {
                     }
                 }
             }
+        } else if tool_id == "image" || (tool_id == "select" && self.canvas.get_selected_image_info().is_some()) {
+            self.container.set_visible(true);
+            self.text_capsule.set_visible(false);
+            self.page_capsule.set_visible(false);
+            self.left_capsule.set_visible(true);
+            self.right_capsule.set_visible(has_selection);
+            self.general_box.set_visible(false);
+            self.shape_options_box.set_visible(false);
+            self.path_editor_box.set_visible(false);
+            self.pen_box.set_visible(false);
+            self.brush_box.set_visible(false);
+            self.mesh_box.set_visible(false);
+            self.grad_box.set_visible(false);
+            self.pattern_box.set_visible(false);
+            self.paint_bucket_box.set_visible(false);
+            self.image_box.set_visible(true);
+
+            if let Some((name, _rect, intrinsic, opacity)) = self.canvas.get_selected_image_info() {
+                self.is_syncing.set(true);
+                self.image_controls.opacity_spin.set_value((opacity * 100.0) as f64);
+                self.image_controls.name_label.set_label(&name);
+                self.image_controls.btn_reset_aspect.set_sensitive(intrinsic.is_some());
+                self.is_syncing.set(false);
+            } else {
+                self.is_syncing.set(true);
+                self.image_controls.name_label.set_label("");
+                self.image_controls.btn_reset_aspect.set_sensitive(false);
+                self.is_syncing.set(false);
+            }
         } else if has_selection {
             self.container.set_visible(true);
             self.text_capsule.set_visible(false);
@@ -982,6 +1026,7 @@ impl ToolOptionsBar {
             self.grad_box.set_visible(false);
             self.pattern_box.set_visible(false);
             self.paint_bucket_box.set_visible(false);
+            self.image_box.set_visible(false);
 
             self.layer_box.set_visible(selected_count > 0);
             self.transform_modes_box.set_visible(true);
@@ -996,6 +1041,7 @@ impl ToolOptionsBar {
             self.pen_box.set_visible(false);
             self.brush_box.set_visible(false);
             self.paint_bucket_box.set_visible(false);
+            self.image_box.set_visible(false);
         }
 
         let (icon_res, tool_name) = match tool_id {
@@ -1046,6 +1092,10 @@ impl ToolOptionsBar {
             "text" => (
                 "tool-text-symbolic",
                 crate::core::gettext("Text"),
+            ),
+            "image" => (
+                "tool-image-symbolic",
+                crate::core::gettext("Image Frame"),
             ),
             "paint_bucket" => (
                 "tool-paint-bucket-symbolic",

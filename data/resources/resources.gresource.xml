@@ -569,6 +569,9 @@
     <file>icons/tool-text-symbolic.svg</file>
     <file alias="icons/hicolor/scalable/actions/tool-text-symbolic.svg">icons/tool-text-symbolic.svg</file>
     <file alias="icons/hicolor/symbolic/actions/tool-text-symbolic.svg">icons/tool-text-symbolic.svg</file>
+    <file>icons/tool-image-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-image-symbolic.svg">icons/tool-image-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-image-symbolic.svg">icons/tool-image-symbolic.svg</file>
     <file>icons/tool-triangle-symbolic.svg</file>
     <file alias="icons/hicolor/scalable/actions/tool-triangle-symbolic.svg">icons/tool-triangle-symbolic.svg</file>
     <file alias="icons/hicolor/symbolic/actions/tool-triangle-symbolic.svg">icons/tool-triangle-symbolic.svg</file>

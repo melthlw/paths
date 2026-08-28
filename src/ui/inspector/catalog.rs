@@ -6,9 +6,9 @@ use super::TabLocation;
 use crate::ui::canvas::CanvasWidget;
 
 pub fn build_catalog_popover(
-    tab_info: &[(String, Option<&'static str>, &'static str); 8],
-    tab_locations: &Rc<RefCell<[TabLocation; 8]>>,
-    active_section_tabs: &Rc<RefCell<[usize; 8]>>,
+    tab_info: &[(String, Option<&'static str>, &'static str); 9],
+    tab_locations: &Rc<RefCell<[TabLocation; 9]>>,
+    active_section_tabs: &Rc<RefCell<[usize; 9]>>,
     _canvas: &CanvasWidget,
     refresh_fn: Rc<dyn Fn()>,
 ) -> gtk4::Popover {

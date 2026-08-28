@@ -45,6 +45,7 @@ pub fn get_tool_meta(
         "pen" => (crate::core::gettext("Pen"), Some("P")),
         "brush" => (crate::core::gettext("Brush"), Some("B")),
         "text" => (crate::core::gettext("Text"), Some("T")),
+        "image" => (crate::core::gettext("Image Frame"), Some("Shift+I")),
         "boolean-union" => (crate::core::gettext("Arrange & Order"), Some("Ctrl++")),
         "paint_bucket" => (crate::core::gettext("Paint Bucket"), Some("K")),
         "eyedropper" => (crate::core::gettext("Eyedropper"), Some("I")),

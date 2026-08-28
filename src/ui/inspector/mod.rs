@@ -5,6 +5,7 @@ pub mod clones;
 pub mod dock;
 pub mod export;
 pub mod floating;
+pub mod image;
 pub mod libraries;
 pub mod modifiers;
 pub mod swatch;
@@ -23,6 +24,7 @@ use self::alignment::build_alignment_section;
 use self::appearance::{rebuild_fill_list, rebuild_stroke_list};
 use self::clones::build_clones_section;
 use self::export::build_export_tab;
+use self::image::build_image_section;
 use self::libraries::build_libraries_section;
 use self::modifiers::build_modifiers_section;
 use self::swatch::PillSlider;
@@ -70,6 +72,7 @@ pub struct InspectorSidebar {
     update_clones_section: Rc<dyn Fn()>,
     update_export_pages: Rc<dyn Fn()>,
     update_modifiers_section: Rc<dyn Fn()>,
+    update_image_section: Rc<dyn Fn()>,
 }
 
 impl InspectorSidebar {
@@ -476,6 +479,11 @@ impl InspectorSidebar {
         let modifiers_body = modifiers_sec.container;
         let update_modifiers_section = modifiers_sec.update_fn;
 
+        // 10. IMAGE SECTION (Dedicated Inspector Tab)
+        let image_sec = build_image_section(&canvas);
+        let image_body = image_sec.container;
+        let update_image_section = image_sec.update_fn;
+
         // Setup Dynamic Multi-Section Tab Bar & Split System
         let saved_loc_strings = crate::core::AppSettings::inspector_tab_locations();
         let mut initial_locs = [
@@ -487,9 +495,10 @@ impl InspectorSidebar {
             TabLocation::Closed,    // 5: Clones
             TabLocation::Closed,    // 6: Export
             TabLocation::Closed,    // 7: Libraries
+            TabLocation::Closed,    // 8: Image
         ];
-        if saved_loc_strings.len() >= 8 {
-            for (i, s) in saved_loc_strings.iter().enumerate().take(8) {
+        if saved_loc_strings.len() >= 9 {
+            for (i, s) in saved_loc_strings.iter().enumerate().take(9) {
                 if s == "closed" {
                     initial_locs[i] = TabLocation::Closed;
                 } else if s == "floating" {
@@ -503,27 +512,27 @@ impl InspectorSidebar {
         }
 
         let saved_active = crate::core::AppSettings::inspector_active_tabs();
-        let mut initial_active = [0usize, 1usize, 2usize, 3usize, 4usize, 5usize, 6usize, 7usize];
-        if saved_active.len() >= 8 {
-            for (i, &t) in saved_active.iter().enumerate().take(8) {
+        let mut initial_active = [0usize, 1usize, 2usize, 3usize, 4usize, 5usize, 6usize, 7usize, 8usize];
+        if saved_active.len() >= 9 {
+            for (i, &t) in saved_active.iter().enumerate().take(9) {
                 initial_active[i] = t;
             }
         }
 
         let saved_order = crate::core::AppSettings::inspector_tab_order();
-        let initial_order = if saved_order.len() == 8 {
+        let initial_order = if saved_order.len() == 9 {
             saved_order
         } else {
-            vec![0usize, 1usize, 2usize, 3usize, 4usize, 5usize, 6usize, 7usize]
+            vec![0usize, 1usize, 2usize, 3usize, 4usize, 5usize, 6usize, 7usize, 8usize]
         };
 
         let tab_locations = Rc::new(RefCell::new(initial_locs));
         let tab_order = Rc::new(RefCell::new(initial_order));
         let active_section_tabs = Rc::new(RefCell::new(initial_active));
-        let floating_wins: Rc<RefCell<[Option<adw::Window>; 8]>> =
-            Rc::new(RefCell::new([None, None, None, None, None, None, None, None]));
+        let floating_wins: Rc<RefCell<[Option<adw::Window>; 9]>> =
+            Rc::new(RefCell::new([None, None, None, None, None, None, None, None, None]));
 
-        let tab_widgets: [gtk4::Widget; 8] = [
+        let tab_widgets: [gtk4::Widget; 9] = [
             fill_stroke_body.upcast(),
             modifiers_body.upcast(),
             align_container.upcast(),
@@ -532,6 +541,7 @@ impl InspectorSidebar {
             clones_body,
             export_body,
             libraries_body,
+            image_body.upcast(),
         ];
 
         let refresh_tabs: Rc<RefCell<Option<Rc<dyn Fn()>>>> = Rc::new(RefCell::new(None));
@@ -581,9 +591,9 @@ impl InspectorSidebar {
                 if let Ok(s) = value.get::<String>() {
                     if let Some(idx_str) = s.strip_prefix("tab:") {
                         if let Ok(idx) = idx_str.parse::<usize>() {
-                            if idx < 6 {
+                            if idx < 9 {
                                 let cur_locs = *locs_drop.borrow();
-                                let max_sec = (0..6)
+                                let max_sec = (0..9)
                                     .filter_map(|k| {
                                         if let TabLocation::Docked(s) = cur_locs[k] {
                                             Some(s)
@@ -599,7 +609,7 @@ impl InspectorSidebar {
                                     if y < 80.0 {
                                         // Insert section at top
                                         let mut new_locs = cur_locs;
-                                        for k in 0..6 {
+                                        for k in 0..9 {
                                             if let TabLocation::Docked(s) = new_locs[k] {
                                                 new_locs[k] = TabLocation::Docked(s + 1);
                                             }
@@ -650,7 +660,7 @@ impl InspectorSidebar {
             let canvas_c = canvas.clone();
 
             Rc::new(move || {
-                let tab_info: [(String, Option<&'static str>, &'static str); 8] = [
+                let tab_info: [(String, Option<&'static str>, &'static str); 9] = [
                     (
                         crate::core::gettext("Appearance"),
                         None,
@@ -691,12 +701,17 @@ impl InspectorSidebar {
                         None,
                         "library-insert-symbolic",
                     ),
+                    (
+                        crate::core::gettext("Image"),
+                        None,
+                        "tool-image-symbolic",
+                    ),
                 ];
 
                 let locs = *tab_locations.borrow();
 
                 // 1. Clean up floating windows that are no longer floating before building docked sections
-                for i in 0..8 {
+                for i in 0..9 {
                     if locs[i] != TabLocation::Floating {
                         let maybe_w = floating_wins.borrow_mut()[i].take();
                         if let Some(w) = maybe_w {
@@ -721,7 +736,7 @@ impl InspectorSidebar {
                 );
 
                 // 5. Floating Windows Management
-                for i in 0..8 {
+                for i in 0..9 {
                     if locs[i] == TabLocation::Floating {
                         if floating_wins.borrow()[i].is_none() {
                             let (title, icon_res, icon_name) = &tab_info[i];
@@ -803,10 +818,10 @@ impl InspectorSidebar {
         let sidebar = Self {
             toolbar_view,
             align_box,
-            fill_list_box,
-            fill_sep,
-            stroke_list_box,
-            stroke_sep,
+            fill_list_box: fill_list_box.clone(),
+            fill_sep: fill_sep.clone(),
+            stroke_list_box: stroke_list_box.clone(),
+            stroke_sep: stroke_sep.clone(),
             x_entry,
             y_entry,
             w_entry,
@@ -823,6 +838,7 @@ impl InspectorSidebar {
             update_clones_section,
             update_export_pages,
             update_modifiers_section,
+            update_image_section,
         };
 
         sidebar.rebuild_fill_rows();
@@ -941,6 +957,10 @@ impl InspectorSidebar {
         (self.update_modifiers_section)();
     }
 
+    pub fn refresh_image_section(&self) {
+        (self.update_image_section)();
+    }
+
     pub fn update_context(
         &self,
         _tool_id: &str,
@@ -955,6 +975,7 @@ impl InspectorSidebar {
         self.refresh_export_pages();
         self.refresh_clones_section();
         self.refresh_modifiers_section();
+        self.refresh_image_section();
 
         // Keep inspector functional and interactive
         self.align_box.set_sensitive(has_selection);

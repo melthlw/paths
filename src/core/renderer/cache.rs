@@ -28,6 +28,11 @@ impl PictureCache {
         element: &Element,
         document: &Document,
     ) -> Option<skia::Picture> {
+        // Do not cache raster images in Skia PictureRecorder to prevent texture playback issues
+        if matches!(element, Element::Image(_)) {
+            return None;
+        }
+
         let bounds = element.bounds().normalize();
         let key = PictureCacheKey {
             id: element.id(),

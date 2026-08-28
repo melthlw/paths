@@ -91,9 +91,10 @@ impl Default for AppConfig {
                 "closed".to_string(),   // Clones
                 "closed".to_string(),   // Export
                 "closed".to_string(),   // Libraries
+                "closed".to_string(),   // Image
             ],
-            inspector_active_tabs: vec![0, 1, 2, 3, 4, 5, 6, 7],
-            inspector_tab_order: vec![0, 1, 2, 3, 4, 5, 6, 7],
+            inspector_active_tabs: vec![0, 1, 2, 3, 4, 5, 6, 7, 8],
+            inspector_tab_order: vec![0, 1, 2, 3, 4, 5, 6, 7, 8],
             active_zoom: 1.0,
             show_grid: false,
             show_rulers: true,

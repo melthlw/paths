@@ -4,11 +4,11 @@ use super::modules::{
     BooleanCutStudioPlugin, BooleanDifferenceStudioPlugin, BooleanDivisionStudioPlugin,
     BooleanExclusionStudioPlugin, BooleanIntersectionStudioPlugin, BooleanUnionStudioPlugin,
     BrushStudioPlugin, CircleStudioPlugin, ColorPaletteStudioPlugin, EyedropperStudioPlugin,
-    GradientStudioPlugin, MeasureStudioPlugin, MeshGradientStudioPlugin, PageStudioPlugin,
-    PaintBucketStudioPlugin, PathEditorStudioPlugin, PatternStudioPlugin, PenStudioPlugin,
-    RectangleStudioPlugin, SelectStudioPlugin, SpiralStudioPlugin, StarStudioPlugin,
-    TextStudioPlugin, TriangleStudioPlugin, Zoom100StudioPlugin, ZoomFitAllStudioPlugin,
-    ZoomPageStudioPlugin, ZoomSelectionStudioPlugin, ZoomStudioPlugin,
+    GradientStudioPlugin, ImageStudioPlugin, MeasureStudioPlugin, MeshGradientStudioPlugin,
+    PageStudioPlugin, PaintBucketStudioPlugin, PathEditorStudioPlugin, PatternStudioPlugin,
+    PenStudioPlugin, RectangleStudioPlugin, SelectStudioPlugin, SpiralStudioPlugin,
+    StarStudioPlugin, TextStudioPlugin, TriangleStudioPlugin, Zoom100StudioPlugin,
+    ZoomFitAllStudioPlugin, ZoomPageStudioPlugin, ZoomSelectionStudioPlugin, ZoomStudioPlugin,
 };
 use super::traits::{
     FeaturePlugin, PluginContext, PluginRenderContext, StudioPlugin, ToolbarItemDescriptor,
@@ -55,6 +55,7 @@ impl Default for PluginRegistry {
         registry.register_core(Box::new(PenStudioPlugin::new()));
         registry.register_core(Box::new(BrushStudioPlugin::new()));
         registry.register_core(Box::new(TextStudioPlugin::new()));
+        registry.register_core(Box::new(ImageStudioPlugin::new()));
         registry.register_core(Box::new(PaintBucketStudioPlugin::new()));
         registry.register_core(Box::new(GradientStudioPlugin::new()));
         registry.register_core(Box::new(MeshGradientStudioPlugin::new()));

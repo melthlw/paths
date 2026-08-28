@@ -27,12 +27,13 @@ pub mod units;
 pub use color::Color;
 pub use spatial_index::SpatialIndex;
 pub use document::{Document, TiledCloneParams, TransformOptions};
+#[allow(unused_imports)]
 pub use element::{
-    ArcMode, BlendMode, BrushMode, BrushStroke, BrushStyle, CornerRadii, CornerStyle, Element,
-    ElementId, FillLayer, FillStyle, Gradient, GradientStop, GradientType, ImageElement,
-    MarkerShape, MeshGradient, PathElement, PathNode, PatternType, RectElement, ShapeOrigin,
-    StrokeCap, StrokeJoin, StrokeLayer, StrokeStyle, TextAlign, TextElement, dist_to_segment,
-    get_system_font_families,
+    generate_placeholder_image, ArcMode, BlendMode, BrushMode, BrushStroke, BrushStyle,
+    CornerRadii, CornerStyle, Element, ElementId, FillLayer, FillStyle, Gradient, GradientStop,
+    GradientType, ImageElement, MarkerShape, MeshGradient, PathElement, PathNode, PatternType,
+    RectElement, ShapeOrigin, StrokeCap, StrokeJoin, StrokeLayer, StrokeStyle, TextAlign,
+    TextElement, dist_to_segment, get_system_font_families,
 };
 pub use events::{KeyEvent, PointerButton, PointerEvent};
 pub use geometry::{

@@ -426,7 +426,10 @@ pub fn apply_chamfer_rounding_to_path(
 
             match style {
                 CornerStyle::Round => {
-                    result_builder.quad_to(curr.to_skia(), t2.to_skia());
+                    let k = 0.55228475 * t;
+                    let cp1 = Point::new(t1.x - u1.x * k, t1.y - u1.y * k);
+                    let cp2 = Point::new(t2.x - u2.x * k, t2.y - u2.y * k);
+                    result_builder.cubic_to(cp1.to_skia(), cp2.to_skia(), t2.to_skia());
                 }
                 CornerStyle::Chamfer => {
                     result_builder.line_to(t2.to_skia());
@@ -999,6 +1002,15 @@ pub fn extract_subpath_polygon_loops(path: &skia::Path) -> Vec<Vec<skia::Point>>
             }
             cl.push(p);
         }
+        if cl.len() > 3 {
+            if let (Some(first), Some(last)) = (cl.first(), cl.last()) {
+                let dx = first.x - last.x;
+                let dy = first.y - last.y;
+                if (dx * dx + dy * dy) < 0.05 {
+                    cl.pop();
+                }
+            }
+        }
         if cl.len() >= 3 {
             clean_loops.push(cl);
         }
@@ -1298,8 +1310,13 @@ pub fn bake_extrude_3d_faces(
     } else {
         0.0
     };
-    let rounded_path = if ext.corner_radius_2d > 0.1 {
-        apply_chamfer_rounding_to_path(path, ext.corner_radius_2d, CornerStyle::Round)
+    let rounding_r = ext.corner_radius_2d.max(if bevel_r > 0.5 && ext.bevel_style == Bevel3DStyle::Round {
+        bevel_r.max(12.0)
+    } else {
+        0.0
+    });
+    let rounded_path = if rounding_r > 0.1 {
+        apply_chamfer_rounding_to_path(path, rounding_r, CornerStyle::Round)
     } else {
         path.clone()
     };
@@ -1731,8 +1748,13 @@ pub fn apply_extrude_3d_to_canvas(
     } else {
         0.0
     };
-    let rounded_path = if ext.corner_radius_2d > 0.1 {
-        apply_chamfer_rounding_to_path(path, ext.corner_radius_2d, CornerStyle::Round)
+    let rounding_r = ext.corner_radius_2d.max(if bevel_r > 0.5 && ext.bevel_style == Bevel3DStyle::Round {
+        bevel_r.max(12.0)
+    } else {
+        0.0
+    });
+    let rounded_path = if rounding_r > 0.1 {
+        apply_chamfer_rounding_to_path(path, rounding_r, CornerStyle::Round)
     } else {
         path.clone()
     };

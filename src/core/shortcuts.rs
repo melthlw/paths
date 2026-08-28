@@ -14,6 +14,7 @@ pub enum ShortcutAction {
     ToolPen,
     ToolBrush,
     ToolText,
+    ToolImage,
     ToolPaintBucket,
     ToolEyedropper,
     ToolGradient,
@@ -399,7 +400,11 @@ impl ShortcutManager {
                 );
                 self.set_shortcut(
                     ShortcutAction::ToolText,
-                    KeyCombo::new(gdk::Key::y, false, false, false),
+                    KeyCombo::new(gdk::Key::t, false, false, false),
+                );
+                self.set_shortcut(
+                    ShortcutAction::ToolImage,
+                    KeyCombo::new(gdk::Key::I, false, true, false),
                 );
                 self.set_shortcut(
                     ShortcutAction::ToolPaintBucket,
@@ -490,6 +495,10 @@ impl ShortcutManager {
                     KeyCombo::new(gdk::Key::t, false, false, false),
                 );
                 self.set_shortcut(
+                    ShortcutAction::ToolImage,
+                    KeyCombo::new(gdk::Key::I, false, true, false),
+                );
+                self.set_shortcut(
                     ShortcutAction::ToolPaintBucket,
                     KeyCombo::new(gdk::Key::b, false, false, false),
                 );
@@ -575,6 +584,10 @@ impl ShortcutManager {
                 self.set_shortcut(
                     ShortcutAction::ToolText,
                     KeyCombo::new(gdk::Key::t, false, false, false),
+                );
+                self.set_shortcut(
+                    ShortcutAction::ToolImage,
+                    KeyCombo::new(gdk::Key::I, false, true, false),
                 );
                 self.set_shortcut(
                     ShortcutAction::ToolPaintBucket,
@@ -664,6 +677,10 @@ impl ShortcutManager {
                     KeyCombo::new(gdk::Key::t, false, false, false),
                 );
                 self.set_shortcut(
+                    ShortcutAction::ToolImage,
+                    KeyCombo::new(gdk::Key::I, false, true, false),
+                );
+                self.set_shortcut(
                     ShortcutAction::ToolPaintBucket,
                     KeyCombo::new(gdk::Key::u, false, false, false),
                 );
@@ -741,6 +758,10 @@ impl ShortcutManager {
             }
             ShortcutAction::ToolText => (
                 crate::core::gettext("Typography Text"),
+                ShortcutCategory::Tools,
+            ),
+            ShortcutAction::ToolImage => (
+                crate::core::gettext("Image Frame Tool"),
                 ShortcutCategory::Tools,
             ),
             ShortcutAction::ToolPaintBucket => (
@@ -895,6 +916,7 @@ impl ShortcutManager {
             ShortcutAction::ToolPen,
             ShortcutAction::ToolBrush,
             ShortcutAction::ToolText,
+            ShortcutAction::ToolImage,
             ShortcutAction::ToolPaintBucket,
             ShortcutAction::ToolEyedropper,
             ShortcutAction::ToolGradient,

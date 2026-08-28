@@ -7,7 +7,7 @@ pub mod text;
 
 pub use brush::{BrushMode, BrushStroke, BrushStyle, MarkerShape, StrokeCap, StrokeJoin};
 
-pub use group::{CloneElement, GroupElement, ImageElement};
+pub use group::{generate_placeholder_image, CloneElement, GroupElement, ImageElement};
 
 pub use path::{ArcMode, PathElement, PathNode, ShapeOrigin, dist_to_segment};
 

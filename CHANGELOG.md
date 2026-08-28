@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-08-28
+
+### Added
+- **Image Frame Tool (`ImageFeature` & `ImageStudioPlugin`)**:
+  - Interactive canvas tool for creating and placing image frames via click or drag (`Shift+I`).
+  - Native GNOME/Adwaita symbolic icon (`tool-image-symbolic.svg`) and precision custom Skia cursor.
+  - Refined Adwaita Dark `#242427` empty-state placeholder graphic with 1.5px border and vector photo frame silhouette.
+  - Support for interactive double-click tool activation, direct resizing, and aspect-ratio preservation.
+- **Hardware-Accelerated Non-Destructive Image Processing (Skia Color Matrix Engine)**:
+  - Real-time Skia color matrix shader calculations supporting:
+    - Brightness adjustment (-100% to +100%).
+    - Contrast curve scaling (0.0x to 2.5x).
+    - Saturation adjustment (0.0x to 2.5x with ITU-R BT.709 luminance vector).
+    - Hue chromatic rotation (-180° to +180°).
+    - GPU Gaussian Blur filtering (0.0 to 50.0 px).
+    - Full color spectrum inversion.
+    - Black & White monochrome grayscale conversion.
+    - Classic photographic sepia tinting.
+- **Image Inspector Panel (`src/ui/inspector/image.rs`)**:
+  - Dedicated Adwaita card panel with real-time numeric sliders, switches, and file management.
+  - Dimension & native pixel readouts with 1-click aspect ratio restoration.
+  - Quick Filter Presets: Normal (Reset), Vibrant, B&W High Contrast, Vintage/Sepia, Warm, and Cool.
+  - Contextual inspector switching automatically hiding vector fill/stroke cards when an image frame is selected.
+- **Tool Options Toolbar Integration (`src/ui/tool_options/image.rs`)**:
+  - Quick access HUD bar for image replacement, aspect ratio restoration, opacity adjustment, and file name badge.
+
 ## [0.3.1] - 2026-08-25
 
 ### Added

@@ -1242,4 +1242,184 @@ impl CanvasWidget {
             smoothing,
         )
     }
+
+    pub fn replace_selected_image(&self, path: &str) -> Result<(), String> {
+        let bytes = std::fs::read(path).map_err(|e| crate::i18n!("Error reading file: {}", e))?;
+        let filename = std::path::Path::new(path)
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or("image")
+            .to_string();
+
+        let mut state = self.state.borrow_mut();
+        let sel_id = state.document.selected_ids.iter().copied().next();
+
+        let mut replaced = false;
+        if let Some(id) = sel_id {
+            let is_image = state.document.elements.iter().any(|e| e.id() == id && matches!(e, crate::core::Element::Image(_)));
+            if is_image {
+                state.document.snapshot();
+                if let Some(crate::core::Element::Image(img)) = state.document.elements.iter_mut().find(|e| e.id() == id) {
+                    img.image_data = bytes.clone();
+                    img.name = Some(filename.clone());
+                    // If original image aspect ratio changed, optionally adjust height
+                    if let Some((iw, ih)) = img.intrinsic_size() {
+                        if iw > 0.0 && ih > 0.0 {
+                            img.rect.height = img.rect.width * (ih / iw);
+                        }
+                    }
+                    replaced = true;
+                }
+            }
+        }
+
+        if replaced {
+            drop(state);
+            self.notify_status();
+            self.drawing_area.queue_draw();
+            Ok(())
+        } else {
+            drop(state);
+            self.import_file(path)
+        }
+    }
+
+    pub fn reset_selected_image_aspect_ratio(&self) -> bool {
+        let mut reset_done = false;
+        {
+            let mut state = self.state.borrow_mut();
+            let sel_id = match state.document.selected_ids.iter().copied().next() {
+                Some(id) => id,
+                None => return false,
+            };
+
+            let is_image = state.document.elements.iter().any(|e| e.id() == sel_id && matches!(e, crate::core::Element::Image(_)));
+            if is_image {
+                state.document.snapshot();
+                if let Some(crate::core::Element::Image(img)) = state.document.elements.iter_mut().find(|e| e.id() == sel_id) {
+                    if let Some((iw, ih)) = img.intrinsic_size() {
+                        if iw > 0.0 && ih > 0.0 {
+                            let cur_w = img.rect.width.abs().max(1.0);
+                            let new_h = cur_w * (ih / iw);
+                            img.rect.height = if img.rect.height < 0.0 { -new_h } else { new_h };
+                            state.mark_dirty();
+                            reset_done = true;
+                        }
+                    }
+                }
+            }
+        }
+        if reset_done {
+            self.notify_status();
+            self.drawing_area.queue_draw();
+            return true;
+        }
+        false
+    }
+
+    pub fn get_selected_image_info(&self) -> Option<(String, crate::core::Rect, Option<(f32, f32)>, f32)> {
+        let state = self.state.try_borrow().ok()?;
+        if state.document.selected_ids.len() != 1 {
+            return None;
+        }
+        let sel_id = *state.document.selected_ids.iter().next()?;
+        if let Some(crate::core::Element::Image(img)) = state.document.find_element(sel_id) {
+            let name = img.name.clone().unwrap_or_else(|| "Image".to_string());
+            let rect = img.rect.normalize();
+            let intrinsic = img.intrinsic_size();
+            let opacity = img.opacity;
+            Some((name, rect, intrinsic, opacity))
+        } else {
+            None
+        }
+    }
+
+    pub fn get_selected_image_adjustments(&self) -> Option<ImageAdjustments> {
+        let state = self.state.try_borrow().ok()?;
+        if state.document.selected_ids.is_empty() {
+            return None;
+        }
+        let sel_id = *state.document.selected_ids.iter().next()?;
+        if let Some(crate::core::Element::Image(img)) = state.document.find_element(sel_id) {
+            Some(ImageAdjustments {
+                brightness: img.brightness,
+                contrast: img.contrast,
+                saturation: img.saturation,
+                hue_rotate: img.hue_rotate,
+                blur: img.blur,
+                invert: img.invert,
+                grayscale: img.grayscale,
+                sepia: img.sepia,
+            })
+        } else {
+            None
+        }
+    }
+
+    pub fn set_selected_image_adjustments(&self, adj: ImageAdjustments, snapshot: bool) {
+        let mut modified = false;
+        {
+            let mut state = self.state.borrow_mut();
+            let sel = state.document.selected_ids.clone();
+            if sel.is_empty() {
+                return;
+            }
+            if snapshot {
+                state.document.snapshot();
+            }
+            for &id in &sel {
+                if let Some(crate::core::Element::Image(img)) = state.document.elements.iter_mut().find(|e| e.id() == id) {
+                    img.brightness = adj.brightness.clamp(-1.0, 1.0);
+                    img.contrast = adj.contrast.clamp(0.0, 3.0);
+                    img.saturation = adj.saturation.clamp(0.0, 3.0);
+                    img.hue_rotate = adj.hue_rotate.clamp(-180.0, 180.0);
+                    img.blur = adj.blur.max(0.0);
+                    img.invert = adj.invert;
+                    img.grayscale = adj.grayscale;
+                    img.sepia = adj.sepia;
+                    modified = true;
+                }
+            }
+            if modified {
+                state.mark_dirty();
+            }
+        }
+        if modified {
+            if snapshot {
+                self.notify_status();
+            }
+            self.drawing_area.queue_draw();
+        }
+    }
+
+    pub fn reset_selected_image_adjustments(&self) {
+        self.set_selected_image_adjustments(ImageAdjustments::default(), true);
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ImageAdjustments {
+    pub brightness: f32,
+    pub contrast: f32,
+    pub saturation: f32,
+    pub hue_rotate: f32,
+    pub blur: f32,
+    pub invert: bool,
+    pub grayscale: bool,
+    pub sepia: bool,
+}
+
+impl Default for ImageAdjustments {
+    fn default() -> Self {
+        Self {
+            brightness: 0.0,
+            contrast: 1.0,
+            saturation: 1.0,
+            hue_rotate: 0.0,
+            blur: 0.0,
+            invert: false,
+            grayscale: false,
+            sepia: false,
+        }
+    }
 }

@@ -57,6 +57,7 @@ impl CursorCache {
             "tool:brush" => Self::make_brush_cursor(),
             "tool:eraser" => Self::make_eraser_cursor(),
             "tool:text" => Self::make_text_cursor(),
+            "tool:image" => Self::make_image_cursor(),
             "tool:gradient" => Self::make_gradient_cursor(),
             "tool:pattern" => Self::make_pattern_cursor(),
             "tool:eyedropper" => Self::make_eyedropper_cursor(),
@@ -460,6 +461,49 @@ impl CursorCache {
             a_path.move_to((20.5, 22.0));
             a_path.line_to((24.5, 22.0));
             canvas.draw_path(&a_path.detach(), &font_paint);
+        })
+    }
+
+    fn make_image_cursor() -> Option<gdk::Cursor> {
+        Self::create_cursor_from_skia(32, 32, 6, 6, |canvas| {
+            Self::draw_precision_crosshair(canvas, 6.0, 6.0);
+
+            // Adwaita dark badge
+            let badge_rect = skia::Rect::from_xywh(14.0, 14.0, 15.0, 15.0);
+            let mut bg = skia::Paint::default();
+            bg.set_color4f(skia::Color4f::new(0.14, 0.14, 0.16, 1.0), None);
+            bg.set_style(skia::PaintStyle::Fill);
+            bg.set_anti_alias(true);
+            canvas.draw_round_rect(badge_rect, 3.0, 3.0, &bg);
+
+            let mut border = skia::Paint::default();
+            border.set_color4f(skia::Color4f::new(1.0, 1.0, 1.0, 0.22), None);
+            border.set_style(skia::PaintStyle::Stroke);
+            border.set_stroke_width(1.0);
+            border.set_anti_alias(true);
+            canvas.draw_round_rect(badge_rect, 3.0, 3.0, &border);
+
+            // Mini mountain landscape icon
+            let mut m_paint = skia::Paint::default();
+            m_paint.set_color4f(skia::Color4f::new(0.35, 0.65, 0.95, 0.85), None);
+            m_paint.set_style(skia::PaintStyle::Fill);
+            m_paint.set_anti_alias(true);
+
+            let mut m_path = skia::PathBuilder::new();
+            m_path.move_to((16.0, 26.0));
+            m_path.line_to((20.0, 19.0));
+            m_path.line_to((23.0, 23.0));
+            m_path.line_to((25.5, 18.0));
+            m_path.line_to((27.5, 26.0));
+            m_path.close();
+            canvas.draw_path(&m_path.detach(), &m_paint);
+
+            // Mini sun
+            let mut sun_paint = skia::Paint::default();
+            sun_paint.set_color4f(skia::Color4f::new(0.95, 0.82, 0.40, 0.9), None);
+            sun_paint.set_style(skia::PaintStyle::Fill);
+            sun_paint.set_anti_alias(true);
+            canvas.draw_circle(skia::Point::new(18.0, 17.5), 1.5, &sun_paint);
         })
     }
 
