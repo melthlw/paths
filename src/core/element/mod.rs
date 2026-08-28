@@ -70,6 +70,18 @@ impl Element {
         }
     }
 
+    pub fn set_id(&mut self, id: ElementId) {
+        match self {
+            Element::Rect(r) => r.id = id,
+            Element::Brush(b) => b.id = id,
+            Element::Path(p) => p.id = id,
+            Element::Text(t) => t.id = id,
+            Element::Group(g) => g.id = id,
+            Element::Image(i) => i.id = id,
+            Element::Clone(c) => c.id = id,
+        }
+    }
+
     pub fn bounds(&self) -> Rect {
         let base_b = match self {
             Element::Rect(r) => r.bounds(),
@@ -690,6 +702,7 @@ impl Element {
             return;
         }
 
+        let orig_id = self.id();
         let m = self.modifiers_mut().unwrap().remove(mod_idx);
         if !m.enabled() {
             return;
@@ -763,9 +776,12 @@ impl Element {
                 }
 
                 if children.len() == 1 {
-                    *self = children.remove(0);
+                    let mut child = children.remove(0);
+                    child.set_id(orig_id);
+                    *self = child;
                 } else if !children.is_empty() {
                     let mut grp = crate::core::element::group::GroupElement::new(children);
+                    grp.id = orig_id;
                     grp.modifiers = self.modifiers().to_vec();
                     *self = Element::Group(grp);
                 }
@@ -799,19 +815,72 @@ impl Element {
                 }
 
                 if children.len() == 1 {
-                    *self = children.remove(0);
+                    let mut child = children.remove(0);
+                    child.set_id(orig_id);
+                    *self = child;
                 } else if !children.is_empty() {
                     let mut grp = crate::core::element::group::GroupElement::new(children);
+                    grp.id = orig_id;
                     grp.modifiers = self.modifiers().to_vec();
                     *self = Element::Group(grp);
                 }
             }
-            _ => {
-                let evaluated_skia = match self {
+            single_mod => {
+                let mut evaluated_skia = match self {
                     Element::Path(p) => p.to_skia_path_evaluated(),
                     Element::Rect(r) => r.to_path_element().to_skia_path_evaluated(),
                     _ => self.to_skia_path(),
                 };
+                let bounds = self.bounds();
+
+                match &single_mod {
+                    crate::core::modifier::Modifier::ChamferRounding(ch) => {
+                        evaluated_skia = crate::core::modifier::apply_chamfer_rounding_to_path(
+                            &evaluated_skia,
+                            ch.radius,
+                            ch.style,
+                        );
+                    }
+                    crate::core::modifier::Modifier::Twist(tw) => {
+                        evaluated_skia = crate::core::modifier::apply_twist_to_path(
+                            &evaluated_skia,
+                            tw.angle_deg,
+                            tw.radius,
+                        );
+                    }
+                    crate::core::modifier::Modifier::OffsetPath(off) => {
+                        evaluated_skia = crate::core::modifier::apply_offset_path_to_path(
+                            &evaluated_skia,
+                            off.offset,
+                            off.miter_limit,
+                        );
+                    }
+                    crate::core::modifier::Modifier::ZigZag(zz) => {
+                        evaluated_skia = crate::core::modifier::apply_zigzag_to_path(
+                            &evaluated_skia,
+                            zz.ridges,
+                            zz.amplitude,
+                        );
+                    }
+                    crate::core::modifier::Modifier::WaveDeform(wave) => {
+                        evaluated_skia = crate::core::modifier::apply_wave_deform_to_path(
+                            &evaluated_skia,
+                            wave.amplitude,
+                            wave.wavelength,
+                        );
+                    }
+                    crate::core::modifier::Modifier::EnvelopeWarp(env) => {
+                        evaluated_skia = crate::core::modifier::apply_envelope_warp_to_path(
+                            &evaluated_skia,
+                            bounds,
+                            env.top_left_offset,
+                            env.top_right_offset,
+                            env.bottom_right_offset,
+                            env.bottom_left_offset,
+                        );
+                    }
+                    _ => {}
+                }
 
                 let fills = match self {
                     Element::Path(p) => p.fills.clone(),
@@ -836,6 +905,7 @@ impl Element {
 
                 if !new_paths.is_empty() {
                     let mut new_path = new_paths.remove(0);
+                    new_path.id = orig_id;
                     new_path.fills = fills;
                     new_path.strokes = strokes;
                     new_path.modifiers = self.modifiers().to_vec();
@@ -1840,6 +1910,7 @@ mod tests {
         use crate::core::modifier::{ArrayMode, ArrayModifier, Modifier};
         let rect = Rect::new(0.0, 0.0, 100.0, 100.0);
         let mut rect_elem = RectElement::new(rect, Some(Color::RED), None);
+        let orig_id = rect_elem.id;
         rect_elem.modifiers.push(Modifier::Array(ArrayModifier {
             enabled: true,
             mode: ArrayMode::Linear {
@@ -1856,11 +1927,13 @@ mod tests {
 
         elem.apply_modifier(0);
 
-        // After baking, modifier is removed and element is baked into a Group!
+        // After baking, modifier is removed, element is baked into a Group, and ID is preserved!
         assert_eq!(elem.modifiers().len(), 0);
+        assert_eq!(elem.id(), orig_id);
         match elem {
             Element::Group(g) => {
                 assert_eq!(g.children.len(), 3);
+                assert_eq!(g.id, orig_id);
             }
             _ => panic!("Expected GroupElement after applying ArrayModifier"),
         }
@@ -1871,6 +1944,7 @@ mod tests {
         use crate::core::modifier::{Extrude3DModifier, Extrude3DMode, Modifier};
         let rect = Rect::new(10.0, 10.0, 100.0, 100.0);
         let mut rect_elem = RectElement::new(rect, Some(Color::BLUE), None);
+        let orig_id = rect_elem.id;
         let mut ext = Extrude3DModifier::default();
         ext.depth = 50.0;
         ext.mode = Extrude3DMode::Isometric;
@@ -1887,11 +1961,39 @@ mod tests {
         // Verify baking
         elem.apply_modifier(0);
         assert_eq!(elem.modifiers().len(), 0);
+        assert_eq!(elem.id(), orig_id);
         match elem {
             Element::Group(g) => {
                 assert!(g.children.len() >= 2);
+                assert_eq!(g.id, orig_id);
             }
             _ => panic!("Expected GroupElement after applying Extrude3DModifier"),
+        }
+    }
+
+    #[test]
+    fn test_element_apply_chamfer_modifier_baking() {
+        use crate::core::modifier::{ChamferRoundingModifier, Modifier};
+        let rect = Rect::new(0.0, 0.0, 100.0, 100.0);
+        let mut rect_elem = RectElement::new(rect, Some(Color::EMERALD), None);
+        let orig_id = rect_elem.id;
+        rect_elem.modifiers.push(Modifier::ChamferRounding(ChamferRoundingModifier {
+            enabled: true,
+            radius: 20.0,
+            style: CornerStyle::Round,
+        }));
+
+        let mut elem = Element::Rect(rect_elem);
+        elem.apply_modifier(0);
+
+        assert_eq!(elem.modifiers().len(), 0);
+        assert_eq!(elem.id(), orig_id);
+        match elem {
+            Element::Path(p) => {
+                assert_eq!(p.id, orig_id);
+                assert!(p.nodes.len() > 4); // Corner points generated
+            }
+            _ => panic!("Expected PathElement after applying ChamferRounding"),
         }
     }
 }

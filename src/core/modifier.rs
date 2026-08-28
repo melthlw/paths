@@ -229,9 +229,9 @@ impl Default for Extrude3DModifier {
             depth: 40.0,
             taper: 1.0,
             twist_deg: 0.0,
-            corner_radius_2d: 0.0,
+            corner_radius_2d: 12.0,
             bevel_style: Bevel3DStyle::Round,
-            bevel_radius: 0.0,
+            bevel_radius: 6.0,
             bevel_segments: 6,
             shading: true,
             shading_intensity: 0.65,
@@ -915,7 +915,7 @@ pub fn extract_subpath_polygon_loops(path: &skia::Path) -> Vec<Vec<skia::Point>>
                     };
                     let p1 = points[1];
                     let p2 = points[2];
-                    let steps = 12usize;
+                    let steps = 6usize;
                     for s in 1..=steps {
                         let t = s as f32 / steps as f32;
                         let inv_t = 1.0 - t;
@@ -934,7 +934,7 @@ pub fn extract_subpath_polygon_loops(path: &skia::Path) -> Vec<Vec<skia::Point>>
                     };
                     let p1 = points[1];
                     let p2 = points[2];
-                    let steps = 12usize;
+                    let steps = 6usize;
                     for s in 1..=steps {
                         let t = s as f32 / steps as f32;
                         let inv_t = 1.0 - t;
@@ -954,7 +954,7 @@ pub fn extract_subpath_polygon_loops(path: &skia::Path) -> Vec<Vec<skia::Point>>
                     let p1 = points[1];
                     let p2 = points[2];
                     let p3 = points[3];
-                    let steps = 24usize;
+                    let steps = 8usize;
                     for s in 1..=steps {
                         let t = s as f32 / steps as f32;
                         let inv_t = 1.0 - t;
@@ -993,7 +993,7 @@ pub fn extract_subpath_polygon_loops(path: &skia::Path) -> Vec<Vec<skia::Point>>
             if let Some(last) = cl.last() {
                 let dx = p.x - last.x;
                 let dy = p.y - last.y;
-                if (dx * dx + dy * dy) < 0.001 {
+                if (dx * dx + dy * dy) < 0.05 {
                     continue;
                 }
             }
@@ -1258,7 +1258,7 @@ fn compute_inward_vertex_normals(pts: &[skia::Point]) -> Vec<skia::Point> {
         };
 
         let dot = (n1.x * n2.x + n1.y * n2.y).clamp(-0.9, 1.0);
-        let scale = (2.0 / (1.0 + dot)).min(2.5);
+        let scale = (2.0 / (1.0 + dot)).min(1.8);
         let miter_n = skia::Point::new(
             (n1.x + n2.x) * 0.5 * scale,
             (n1.y + n2.y) * 0.5 * scale,
@@ -1293,10 +1293,13 @@ pub fn bake_extrude_3d_faces(
         Extrude3DMode::Custom3D => (ext.rot_x, ext.rot_y, ext.rot_z, ext.perspective),
     };
 
-    let bevel_r = ext.bevel_radius.min(ext.depth * 0.45).min(max_dim * 0.35);
-    let rounding_r = ext.corner_radius_2d.max(if bevel_r > 0.5 { bevel_r.min(15.0) } else { 0.0 });
-    let rounded_path = if rounding_r > 0.1 {
-        apply_chamfer_rounding_to_path(path, rounding_r, CornerStyle::Round)
+    let bevel_r = if ext.bevel_radius > 0.5 {
+        ext.bevel_radius.min(ext.depth * 0.45).min(max_dim * 0.35)
+    } else {
+        0.0
+    };
+    let rounded_path = if ext.corner_radius_2d > 0.1 {
+        apply_chamfer_rounding_to_path(path, ext.corner_radius_2d, CornerStyle::Round)
     } else {
         path.clone()
     };
@@ -1364,10 +1367,10 @@ pub fn bake_extrude_3d_faces(
             + specular_intensity * (if ext.metallic > 0.5 { base_r } else { 1.0 }))
         .clamp(0.0, 1.0);
         let lit_g = (base_g * total_light * (1.0 - ext.metallic * 0.4)
-            + specular_intensity * (if ext.metallic > 0.5 { base_g } else { 1.0 }))
+            + specular_intensity * (if ext.metallic > 0.5 { base_r } else { 1.0 }))
         .clamp(0.0, 1.0);
         let lit_b = (base_b * total_light * (1.0 - ext.metallic * 0.4)
-            + specular_intensity * (if ext.metallic > 0.5 { base_b } else { 1.0 }))
+            + specular_intensity * (if ext.metallic > 0.5 { base_r } else { 1.0 }))
         .clamp(0.0, 1.0);
 
         crate::core::Color::new(lit_r, lit_g, lit_b, base.a)
@@ -1396,43 +1399,42 @@ pub fn bake_extrude_3d_faces(
 
     struct RingLevel {
         local_z: f32,
-        inset_dist: f32,
-        taper_scale: f32,
+        scale: f32,
         twist: f32,
     }
 
-    let bevel_r = ext.bevel_radius.min(ext.depth * 0.45).min(max_dim * 0.35);
     let has_bevel = bevel_r > 0.5;
-
     let mut ring_levels: Vec<RingLevel> = Vec::new();
 
     if has_bevel {
-        let bevel_steps = 6usize;
+        let bevel_steps = ext.bevel_segments.clamp(3, 8);
+        let bevel_scale_inset = (bevel_r / (max_dim * 0.5)).min(0.25);
+
         // Front shoulder fillet
         for k in 0..=bevel_steps {
             let u = k as f32 / bevel_steps as f32;
             let theta = u * std::f32::consts::FRAC_PI_2;
-            let (z_off, d_off) = match ext.bevel_style {
+            let (z_off, scale_factor) = match ext.bevel_style {
                 Bevel3DStyle::Round => {
                     let z = -bevel_r * (1.0 - theta.cos());
-                    let d = bevel_r * theta.cos();
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * theta.cos();
+                    (z, s)
                 }
                 Bevel3DStyle::Chamfer => {
                     let z = -bevel_r * u;
-                    let d = bevel_r * (1.0 - u);
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * (1.0 - u);
+                    (z, s)
                 }
                 Bevel3DStyle::Convex => {
                     let z = -bevel_r * (1.0 - theta.cos());
-                    let d = bevel_r * theta.cos() * (1.0 + 0.15 * (2.0 * theta).sin());
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * theta.cos() * (1.0 + 0.1 * (2.0 * theta).sin());
+                    (z, s)
                 }
                 Bevel3DStyle::Steps => {
                     let step = (u * 3.0).floor() / 3.0;
                     let z = -bevel_r * step;
-                    let d = bevel_r * (1.0 - step);
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * (1.0 - step);
+                    (z, s)
                 }
             };
             let norm_t = (z_off.abs() / ext.depth.max(0.1)).clamp(0.0, 1.0);
@@ -1440,8 +1442,7 @@ pub fn bake_extrude_3d_faces(
             let twist = ext.twist_deg * norm_t;
             ring_levels.push(RingLevel {
                 local_z: z_off,
-                inset_dist: d_off.max(0.0),
-                taper_scale: taper.max(0.001),
+                scale: (scale_factor * taper).max(0.001),
                 twist,
             });
         }
@@ -1454,8 +1455,7 @@ pub fn bake_extrude_3d_faces(
             let twist = ext.twist_deg * norm_t;
             ring_levels.push(RingLevel {
                 local_z: z_body,
-                inset_dist: 0.0,
-                taper_scale: taper.max(0.001),
+                scale: taper.max(0.001),
                 twist,
             });
         }
@@ -1464,27 +1464,27 @@ pub fn bake_extrude_3d_faces(
         for k in 1..=bevel_steps {
             let u = k as f32 / bevel_steps as f32;
             let theta = u * std::f32::consts::FRAC_PI_2;
-            let (z_off, d_off) = match ext.bevel_style {
+            let (z_off, scale_factor) = match ext.bevel_style {
                 Bevel3DStyle::Round => {
                     let z = -ext.depth + bevel_r * (1.0 - theta.sin());
-                    let d = bevel_r * (1.0 - theta.cos());
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * (1.0 - theta.cos());
+                    (z, s)
                 }
                 Bevel3DStyle::Chamfer => {
                     let z = -ext.depth + bevel_r * (1.0 - u);
-                    let d = bevel_r * u;
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * u;
+                    (z, s)
                 }
                 Bevel3DStyle::Convex => {
                     let z = -ext.depth + bevel_r * (1.0 - theta.sin());
-                    let d = bevel_r * (1.0 - theta.cos()) * (1.0 + 0.15 * (2.0 * theta).sin());
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * (1.0 - theta.cos()) * (1.0 + 0.1 * (2.0 * theta).sin());
+                    (z, s)
                 }
                 Bevel3DStyle::Steps => {
                     let step = ((1.0 - u) * 3.0).floor() / 3.0;
                     let z = -ext.depth + bevel_r * step;
-                    let d = bevel_r * (1.0 - step);
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * (1.0 - step);
+                    (z, s)
                 }
             };
             let norm_t = (z_off.abs() / ext.depth.max(0.1)).clamp(0.0, 1.0);
@@ -1492,16 +1492,14 @@ pub fn bake_extrude_3d_faces(
             let twist = ext.twist_deg * norm_t;
             ring_levels.push(RingLevel {
                 local_z: z_off,
-                inset_dist: d_off.max(0.0),
-                taper_scale: taper.max(0.001),
+                scale: (scale_factor * taper).max(0.001),
                 twist,
             });
         }
     } else {
         ring_levels.push(RingLevel {
             local_z: 0.0,
-            inset_dist: 0.0,
-            taper_scale: 1.0,
+            scale: 1.0,
             twist: 0.0,
         });
         let has_twist_or_taper = ext.twist_deg.abs() > 0.01 || (ext.taper - 1.0).abs() > 0.01;
@@ -1510,16 +1508,14 @@ pub fn bake_extrude_3d_faces(
                 let t = k as f32 / 3.0;
                 ring_levels.push(RingLevel {
                     local_z: -ext.depth * t,
-                    inset_dist: 0.0,
-                    taper_scale: (1.0 - (1.0 - ext.taper) * t).max(0.001),
+                    scale: (1.0 - (1.0 - ext.taper) * t).max(0.001),
                     twist: ext.twist_deg * t,
                 });
             }
         }
         ring_levels.push(RingLevel {
             local_z: -ext.depth,
-            inset_dist: 0.0,
-            taper_scale: ext.taper.max(0.001),
+            scale: ext.taper.max(0.001),
             twist: ext.twist_deg,
         });
     }
@@ -1535,17 +1531,12 @@ pub fn bake_extrude_3d_faces(
     let mut all_rings: Vec<Vec<Vec<(Vec3, skia::Point)>>> = Vec::with_capacity(loops.len());
 
     for loop_pts in &loops {
-        let v_normals = compute_inward_vertex_normals(loop_pts);
         let mut rings: Vec<Vec<(Vec3, skia::Point)>> = Vec::with_capacity(ring_levels.len());
         for rl in &ring_levels {
             let mut ring_pts = Vec::with_capacity(loop_pts.len());
-            for (i, &p) in loop_pts.iter().enumerate() {
-                let offset_p = skia::Point::new(
-                    p.x + v_normals[i].x * rl.inset_dist,
-                    p.y + v_normals[i].y * rl.inset_dist,
-                );
+            for &p in loop_pts {
                 let (v3d, p2d) =
-                    transform_pt_to_3d_and_2d(offset_p, rl.local_z, rl.taper_scale, rl.twist);
+                    transform_pt_to_3d_and_2d(p, rl.local_z, rl.scale, rl.twist);
                 ring_pts.push((v3d, p2d));
             }
             rings.push(ring_pts);
@@ -1735,10 +1726,13 @@ pub fn apply_extrude_3d_to_canvas(
         Extrude3DMode::Custom3D => (ext.rot_x, ext.rot_y, ext.rot_z, ext.perspective),
     };
 
-    let bevel_r = ext.bevel_radius.min(ext.depth * 0.45).min(max_dim * 0.35);
-    let rounding_r = ext.corner_radius_2d.max(if bevel_r > 0.5 { bevel_r.min(15.0) } else { 0.0 });
-    let rounded_path = if rounding_r > 0.1 {
-        apply_chamfer_rounding_to_path(path, rounding_r, CornerStyle::Round)
+    let bevel_r = if ext.bevel_radius > 0.5 {
+        ext.bevel_radius.min(ext.depth * 0.45).min(max_dim * 0.35)
+    } else {
+        0.0
+    };
+    let rounded_path = if ext.corner_radius_2d > 0.1 {
+        apply_chamfer_rounding_to_path(path, ext.corner_radius_2d, CornerStyle::Round)
     } else {
         path.clone()
     };
@@ -1811,10 +1805,10 @@ pub fn apply_extrude_3d_to_canvas(
             + specular_intensity * (if ext.metallic > 0.5 { base_r } else { 1.0 }))
         .clamp(0.0, 1.0);
         let lit_g = (base_g * total_light * (1.0 - ext.metallic * 0.4)
-            + specular_intensity * (if ext.metallic > 0.5 { base_g } else { 1.0 }))
+            + specular_intensity * (if ext.metallic > 0.5 { base_r } else { 1.0 }))
         .clamp(0.0, 1.0);
         let lit_b = (base_b * total_light * (1.0 - ext.metallic * 0.4)
-            + specular_intensity * (if ext.metallic > 0.5 { base_b } else { 1.0 }))
+            + specular_intensity * (if ext.metallic > 0.5 { base_r } else { 1.0 }))
         .clamp(0.0, 1.0);
 
         let shaded_color = crate::core::Color::new(lit_r, lit_g, lit_b, base.a);
@@ -1845,43 +1839,42 @@ pub fn apply_extrude_3d_to_canvas(
 
     struct RingLevel {
         local_z: f32,
-        inset_dist: f32,
-        taper_scale: f32,
+        scale: f32,
         twist: f32,
     }
 
-    let bevel_r = ext.bevel_radius.min(ext.depth * 0.45).min(max_dim * 0.35);
     let has_bevel = bevel_r > 0.5;
-
     let mut ring_levels: Vec<RingLevel> = Vec::new();
 
     if has_bevel {
-        let bevel_steps = 6usize;
+        let bevel_steps = ext.bevel_segments.clamp(3, 8);
+        let bevel_scale_inset = (bevel_r / (max_dim * 0.5)).min(0.25);
+
         // Front shoulder fillet
         for k in 0..=bevel_steps {
             let u = k as f32 / bevel_steps as f32;
             let theta = u * std::f32::consts::FRAC_PI_2;
-            let (z_off, d_off) = match ext.bevel_style {
+            let (z_off, scale_factor) = match ext.bevel_style {
                 Bevel3DStyle::Round => {
                     let z = -bevel_r * (1.0 - theta.cos());
-                    let d = bevel_r * theta.cos();
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * theta.cos();
+                    (z, s)
                 }
                 Bevel3DStyle::Chamfer => {
                     let z = -bevel_r * u;
-                    let d = bevel_r * (1.0 - u);
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * (1.0 - u);
+                    (z, s)
                 }
                 Bevel3DStyle::Convex => {
                     let z = -bevel_r * (1.0 - theta.cos());
-                    let d = bevel_r * theta.cos() * (1.0 + 0.15 * (2.0 * theta).sin());
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * theta.cos() * (1.0 + 0.1 * (2.0 * theta).sin());
+                    (z, s)
                 }
                 Bevel3DStyle::Steps => {
                     let step = (u * 3.0).floor() / 3.0;
                     let z = -bevel_r * step;
-                    let d = bevel_r * (1.0 - step);
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * (1.0 - step);
+                    (z, s)
                 }
             };
             let norm_t = (z_off.abs() / ext.depth.max(0.1)).clamp(0.0, 1.0);
@@ -1889,8 +1882,7 @@ pub fn apply_extrude_3d_to_canvas(
             let twist = ext.twist_deg * norm_t;
             ring_levels.push(RingLevel {
                 local_z: z_off,
-                inset_dist: d_off.max(0.0),
-                taper_scale: taper.max(0.001),
+                scale: (scale_factor * taper).max(0.001),
                 twist,
             });
         }
@@ -1903,8 +1895,7 @@ pub fn apply_extrude_3d_to_canvas(
             let twist = ext.twist_deg * norm_t;
             ring_levels.push(RingLevel {
                 local_z: z_body,
-                inset_dist: 0.0,
-                taper_scale: taper.max(0.001),
+                scale: taper.max(0.001),
                 twist,
             });
         }
@@ -1913,27 +1904,27 @@ pub fn apply_extrude_3d_to_canvas(
         for k in 1..=bevel_steps {
             let u = k as f32 / bevel_steps as f32;
             let theta = u * std::f32::consts::FRAC_PI_2;
-            let (z_off, d_off) = match ext.bevel_style {
+            let (z_off, scale_factor) = match ext.bevel_style {
                 Bevel3DStyle::Round => {
                     let z = -ext.depth + bevel_r * (1.0 - theta.sin());
-                    let d = bevel_r * (1.0 - theta.cos());
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * (1.0 - theta.cos());
+                    (z, s)
                 }
                 Bevel3DStyle::Chamfer => {
                     let z = -ext.depth + bevel_r * (1.0 - u);
-                    let d = bevel_r * u;
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * u;
+                    (z, s)
                 }
                 Bevel3DStyle::Convex => {
                     let z = -ext.depth + bevel_r * (1.0 - theta.sin());
-                    let d = bevel_r * (1.0 - theta.cos()) * (1.0 + 0.15 * (2.0 * theta).sin());
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * (1.0 - theta.cos()) * (1.0 + 0.1 * (2.0 * theta).sin());
+                    (z, s)
                 }
                 Bevel3DStyle::Steps => {
                     let step = ((1.0 - u) * 3.0).floor() / 3.0;
                     let z = -ext.depth + bevel_r * step;
-                    let d = bevel_r * (1.0 - step);
-                    (z, d)
+                    let s = 1.0 - bevel_scale_inset * (1.0 - step);
+                    (z, s)
                 }
             };
             let norm_t = (z_off.abs() / ext.depth.max(0.1)).clamp(0.0, 1.0);
@@ -1941,16 +1932,14 @@ pub fn apply_extrude_3d_to_canvas(
             let twist = ext.twist_deg * norm_t;
             ring_levels.push(RingLevel {
                 local_z: z_off,
-                inset_dist: d_off.max(0.0),
-                taper_scale: taper.max(0.001),
+                scale: (scale_factor * taper).max(0.001),
                 twist,
             });
         }
     } else {
         ring_levels.push(RingLevel {
             local_z: 0.0,
-            inset_dist: 0.0,
-            taper_scale: 1.0,
+            scale: 1.0,
             twist: 0.0,
         });
         let has_twist_or_taper = ext.twist_deg.abs() > 0.01 || (ext.taper - 1.0).abs() > 0.01;
@@ -1959,16 +1948,14 @@ pub fn apply_extrude_3d_to_canvas(
                 let t = k as f32 / 3.0;
                 ring_levels.push(RingLevel {
                     local_z: -ext.depth * t,
-                    inset_dist: 0.0,
-                    taper_scale: (1.0 - (1.0 - ext.taper) * t).max(0.001),
+                    scale: (1.0 - (1.0 - ext.taper) * t).max(0.001),
                     twist: ext.twist_deg * t,
                 });
             }
         }
         ring_levels.push(RingLevel {
             local_z: -ext.depth,
-            inset_dist: 0.0,
-            taper_scale: ext.taper.max(0.001),
+            scale: ext.taper.max(0.001),
             twist: ext.twist_deg,
         });
     }
@@ -1977,17 +1964,12 @@ pub fn apply_extrude_3d_to_canvas(
     let mut all_rings: Vec<Vec<Vec<(Vec3, skia::Point)>>> = Vec::with_capacity(loops.len());
 
     for loop_pts in &loops {
-        let v_normals = compute_inward_vertex_normals(loop_pts);
         let mut rings: Vec<Vec<(Vec3, skia::Point)>> = Vec::with_capacity(ring_levels.len());
         for rl in &ring_levels {
             let mut ring_pts = Vec::with_capacity(loop_pts.len());
-            for (i, &p) in loop_pts.iter().enumerate() {
-                let offset_p = skia::Point::new(
-                    p.x + v_normals[i].x * rl.inset_dist,
-                    p.y + v_normals[i].y * rl.inset_dist,
-                );
+            for &p in loop_pts {
                 let (v3d, p2d) =
-                    transform_pt_to_3d_and_2d(offset_p, rl.local_z, rl.taper_scale, rl.twist);
+                    transform_pt_to_3d_and_2d(p, rl.local_z, rl.scale, rl.twist);
                 ring_pts.push((v3d, p2d));
             }
             rings.push(ring_pts);
@@ -2125,6 +2107,13 @@ pub fn apply_extrude_3d_to_canvas(
     for face in faces {
         let paint = compute_face_paint(face.base_color, face.normal);
         canvas.draw_path(&face.polygon_2d, &paint);
+
+        // Seam-seal: eliminate subpixel AA background bleeding / wireframe lines between adjacent 3D faces
+        let mut seam_paint = paint.clone();
+        seam_paint.set_style(skia::PaintStyle::Stroke);
+        seam_paint.set_stroke_width(0.75);
+        seam_paint.set_anti_alias(true);
+        canvas.draw_path(&face.polygon_2d, &seam_paint);
 
         if face.is_front_cap && stroke_color.is_some() && stroke_width > 0.05 {
             if let Some(sc) = stroke_color {

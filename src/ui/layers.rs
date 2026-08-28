@@ -287,7 +287,7 @@ impl LayersSidebar {
                     child_selected = true;
                 }
             }
-            if (layer.is_selected || child_selected) && layer.is_group {
+            if child_selected && layer.is_group {
                 expanded.insert(layer.id);
             }
             layer.is_selected || child_selected
@@ -324,7 +324,28 @@ impl LayersSidebar {
         self.list_box.append(&row);
 
         if layer.is_group && self.expanded_groups.borrow().contains(&layer.id) {
-            for child in &layer.children {
+            let max_display_children = 50;
+            let total_children = layer.children.len();
+            for (idx, child) in layer.children.iter().enumerate() {
+                if idx >= max_display_children {
+                    let remaining = total_children - max_display_children;
+                    let more_row = gtk4::ListBoxRow::builder()
+                        .activatable(false)
+                        .selectable(false)
+                        .css_classes(["layer-row"])
+                        .build();
+                    let more_lbl = gtk4::Label::builder()
+                        .label(format!("... (+{} more layers)", remaining))
+                        .css_classes(["caption", "dim-label"])
+                        .xalign(0.0)
+                        .margin_start((depth + 1) as i32 * 14 + 24)
+                        .margin_top(4)
+                        .margin_bottom(4)
+                        .build();
+                    more_row.set_child(Some(&more_lbl));
+                    self.list_box.append(&more_row);
+                    break;
+                }
                 self.append_tree_node(child, depth + 1);
             }
         }
