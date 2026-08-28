@@ -82,8 +82,8 @@ impl Element {
         }
     }
 
-    pub fn bounds(&self) -> Rect {
-        let base_b = match self {
+    pub fn base_bounds(&self) -> Rect {
+        match self {
             Element::Rect(r) => r.bounds(),
             Element::Brush(b) => b.bounds(),
             Element::Path(p) => p.bounds(),
@@ -91,9 +91,11 @@ impl Element {
             Element::Group(g) => g.bounds(),
             Element::Image(i) => i.bounds(),
             Element::Clone(c) => c.bounds(),
-        };
+        }
+    }
 
-        self.evaluate_modifier_bounds(base_b)
+    pub fn bounds(&self) -> Rect {
+        self.evaluate_modifier_bounds(self.base_bounds())
     }
 
     pub fn evaluate_modifier_bounds(&self, base_b: Rect) -> Rect {
@@ -1051,6 +1053,10 @@ impl Element {
                 }
             }
             crate::core::modifier::Modifier::Extrude3D(ext) => {
+                if matches!(self, Element::Image(_) | Element::Text(_)) {
+                    self.render_modifier_stack_step(step_idx + 1, mods, canvas, doc);
+                    return;
+                }
                 let fill_c = self.fill_color();
                 let stroke_c = self.stroke_color();
                 let stroke_w = self.stroke_width();

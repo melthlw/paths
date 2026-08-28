@@ -75,16 +75,21 @@ pub enum ModifierHandleTarget {
     ArrayRadialRadius,
 }
 
-fn hit_modifier_handle(
+pub fn hit_modifier_handle(
     elem: &Element,
     p: Point,
     zoom: f32,
 ) -> Option<(usize, ModifierHandleTarget, Point)> {
-    let bounds = elem.bounds().normalize();
+    let bounds = elem.base_bounds().normalize();
     let hit_r = (14.0 / zoom).max(10.0);
 
     for (mod_idx, m) in elem.modifiers().iter().enumerate() {
         if !m.enabled() {
+            continue;
+        }
+        if (matches!(elem, Element::Image(_)) || matches!(elem, Element::Text(_)))
+            && !matches!(m, Modifier::Array(_))
+        {
             continue;
         }
         match m {
@@ -757,13 +762,6 @@ impl FeaturePlugin for SelectFeature {
 
             canvas.draw_rect(r.to_skia(), &fill_paint);
             canvas.draw_rect(r.to_skia(), &stroke_paint);
-        }
-
-        // Render Interactive Canvas Overlays for Modifiers on Selected Elements
-        for sel_id in &ctx.document.selected_ids {
-            if let Some(elem) = ctx.document.elements.iter().find(|e| e.id() == *sel_id) {
-                crate::core::renderer::draw_modifier_canvas_overlays(canvas, elem, viewport.zoom);
-            }
         }
 
         // Render Corner Radius Handles if a single RectElement is selected

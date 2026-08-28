@@ -540,6 +540,7 @@ impl CanvasWidget {
         };
         let ws = state.widget_size;
         state.viewport.zoom_to_rect(target, ws);
+        state.notify_status();
         drop(state);
         self.drawing_area.queue_draw();
     }

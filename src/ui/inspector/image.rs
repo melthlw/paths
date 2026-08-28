@@ -26,7 +26,7 @@ pub struct ImageSection {
     #[allow(dead_code)]
     pub btn_reset_aspect: gtk4::Button,
     pub is_updating: Rc<Cell<bool>>,
-    pub update_fn: Rc<dyn Fn()>,
+    pub update_fn: Rc<dyn Fn(Option<(String, crate::core::Rect, Option<(f32, f32)>, f32)>, Option<ImageAdjustments>)>,
 }
 
 fn create_slider_row(
@@ -811,8 +811,9 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     let empty_b_c = empty_state_box.clone();
     let is_upd_c = is_updating.clone();
 
-    let update_fn: Rc<dyn Fn()> = Rc::new(move || {
-        if let Some((name, rect, intrinsic, _opacity)) = cv_for_upd.get_selected_image_info() {
+    let update_fn: Rc<dyn Fn(Option<(String, crate::core::Rect, Option<(f32, f32)>, f32)>, Option<ImageAdjustments>)> = Rc::new(move |passed_info, passed_adj| {
+        let info = passed_info.or_else(|| cv_for_upd.get_selected_image_info());
+        if let Some((name, rect, intrinsic, _opacity)) = info {
             empty_b_c.set_visible(false);
             content_b_c.set_visible(true);
             is_upd_c.set(true);
@@ -830,7 +831,8 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
             dim_lbl_c.set_text(&dim_str);
             reset_aspect_c.set_sensitive(intrinsic.is_some());
 
-            if let Some(adj) = cv_for_upd.get_selected_image_adjustments() {
+            let adj_opt = passed_adj.or_else(|| cv_for_upd.get_selected_image_adjustments());
+            if let Some(adj) = adj_opt {
                 let b_pct = (adj.brightness * 100.0) as f64;
                 bright_scale_c.set_value(b_pct.clamp(-100.0, 100.0));
 

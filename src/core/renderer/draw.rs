@@ -1122,11 +1122,16 @@ pub fn draw_modifier_canvas_overlays(
     zoom: f32,
 ) {
     let z = zoom.max(0.001);
-    let bounds = element.bounds().normalize();
+    let bounds = element.base_bounds().normalize();
     let mods = element.modifiers();
 
     for m in mods {
         if !m.enabled() {
+            continue;
+        }
+        if (matches!(element, Element::Image(_)) || matches!(element, Element::Text(_)))
+            && !matches!(m, crate::core::modifier::Modifier::Array(_))
+        {
             continue;
         }
         match m {

@@ -899,4 +899,112 @@ mod tests {
         assert_eq!(el2.stroke_width(), 4.5);
         assert_eq!(el2.opacity(), 0.8);
     }
+
+    #[test]
+    fn test_instant_zoom_actions_preserve_active_tool() {
+        let mut state = crate::ui::canvas::state::CanvasState::new();
+
+        // 1. Set active tool to rectangle
+        state.set_active_tool("rectangle");
+        assert_eq!(state.plugin_manager.active_id(), "rectangle");
+
+        // 2. Execute instant zoom 100%
+        state.viewport.zoom = 2.5;
+        state.set_active_tool("zoom_100");
+        assert_eq!(state.plugin_manager.active_id(), "rectangle");
+        assert_eq!(state.viewport.zoom, 1.0);
+
+        // 3. Execute instant zoom fit page
+        state.set_active_tool("zoom_fit_page");
+        assert_eq!(state.plugin_manager.active_id(), "rectangle");
+
+        // 4. Set active tool to image
+        state.set_active_tool("image");
+        assert_eq!(state.plugin_manager.active_id(), "image");
+
+        // 5. Execute zoom selection and zoom fit all
+        state.set_active_tool("zoom_selection");
+        assert_eq!(state.plugin_manager.active_id(), "image");
+
+        state.set_active_tool("zoom_fit_all");
+        assert_eq!(state.plugin_manager.active_id(), "image");
+    }
+
+    #[test]
+    fn test_modifier_handle_interaction_in_non_select_tools() {
+        let mut state = crate::ui::canvas::state::CanvasState::new();
+
+        let mut rect = RectElement::new(Rect::new(100.0, 100.0, 200.0, 100.0), Some(Color::BLACK), None);
+        let arr_mod = crate::core::modifier::ArrayModifier {
+            enabled: true,
+            mode: crate::core::modifier::ArrayMode::Linear {
+                count: 3,
+                offset_x: 60.0,
+                offset_y: 0.0,
+                scale_step: 1.0,
+                rotate_step_deg: 0.0,
+            },
+            ..Default::default()
+        };
+        rect.modifiers.push(crate::core::modifier::Modifier::Array(arr_mod));
+        let rect_id = rect.id;
+        state.document.add_element(Element::Rect(rect));
+        state.document.select(rect_id, false);
+
+        // Active tool is Rectangle (not Select!)
+        state.set_active_tool("rectangle");
+        assert_eq!(state.plugin_manager.active_id(), "rectangle");
+
+        // Target handle position for Array Linear: center (200, 150) + offset (60, 0) -> (260, 150)
+        let handle_pos = Point::new(260.0, 150.0);
+        let el = state.document.find_element(rect_id).unwrap();
+        let hit = crate::plugins::features::select::hit_modifier_handle(el, handle_pos, 1.0);
+        assert!(hit.is_some(), "Modifier handle should be hit");
+
+        // Pointer down on modifier handle while in Rectangle tool
+        let screen_pt = state.viewport.world_to_screen(handle_pos, state.widget_size);
+        let (redraw, _) = state.pointer_down(screen_pt, crate::core::PointerButton::Primary, false, false, false);
+        assert!(redraw);
+        assert!(state.is_universal_selecting, "is_universal_selecting should be activated on modifier handle hit");
+
+        // Pointer move to drag modifier offset to x = 320
+        let drag_screen_pt = state.viewport.world_to_screen(Point::new(320.0, 150.0), state.widget_size);
+        state.pointer_move(drag_screen_pt, false, false, false);
+
+        let updated_el = state.document.find_element(rect_id).unwrap();
+        if let Some(crate::core::modifier::Modifier::Array(arr)) = updated_el.modifiers().first() {
+            if let crate::core::modifier::ArrayMode::Linear { offset_x, .. } = arr.mode {
+                assert!(offset_x > 60.0, "Array offset_x should have been updated by dragging handle");
+            } else {
+                panic!("Expected ArrayMode::Linear");
+            }
+        } else {
+            panic!("Expected Array modifier");
+        }
+
+        // Pointer up finishes the drag
+        state.pointer_up(drag_screen_pt, crate::core::PointerButton::Primary, false, false, false);
+        assert!(!state.is_universal_selecting);
+    }
+
+    #[test]
+    fn test_image_modifier_compatibility() {
+        let img = crate::core::ImageElement::new(
+            Rect::new(50.0, 50.0, 300.0, 200.0),
+            Vec::new(),
+            None,
+        );
+        let mut elem = Element::Image(img);
+
+        // Verify Array modifier is supported on Image
+        let arr_mod = crate::core::modifier::ArrayModifier::default();
+        if let Some(mods) = elem.modifiers_mut() {
+            mods.push(crate::core::modifier::Modifier::Array(arr_mod));
+        }
+        assert_eq!(elem.modifiers().len(), 1);
+
+        // Verify bounds evaluate properly with Array modifier on Image
+        let b = elem.bounds();
+        assert!(b.width > 0.0 && b.height > 0.0);
+    }
 }

@@ -199,6 +199,16 @@ impl Viewport {
         )
     }
 
+    #[allow(dead_code)]
+    pub fn world_to_screen(&self, world: Point, widget_size: (f32, f32)) -> Point {
+        let cx = widget_size.0 / 2.0;
+        let cy = widget_size.1 / 2.0;
+        Point::new(
+            world.x * self.zoom + cx + self.pan.x,
+            world.y * self.zoom + cy + self.pan.y,
+        )
+    }
+
     pub fn zoom_at(&mut self, screen_focus: Point, zoom_factor: f32, widget_size: (f32, f32)) {
         let old_zoom = self.zoom;
         let new_zoom = (self.zoom * zoom_factor).clamp(Self::MIN_ZOOM, Self::MAX_ZOOM);

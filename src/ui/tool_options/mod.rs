@@ -13,6 +13,7 @@ pub mod shapes;
 use gtk4::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use crate::core::{Color, Point};
 
 use self::brush::{build_brush_controls, BrushControls};
 use self::gradient::{build_gradient_controls, GradientControls};
@@ -450,14 +451,21 @@ impl ToolOptionsBar {
         shape_origin: Option<crate::core::ShapeOrigin>,
         page_info: Option<(String, f32, f32, f32, f32, usize)>,
         node_coord: Option<crate::core::Point>,
+        image_info: Option<(String, crate::core::Rect, Option<(f32, f32)>, f32)>,
+        gradient_info: Option<(usize, crate::core::GradientType, f32, Vec<crate::core::GradientStop>, Color)>,
+        pattern_info: Option<(crate::core::element::PatternType, Color, Color, f32, f32, Point, Option<String>)>,
+        mesh_info: Option<(usize, usize, usize, Color, bool)>,
     ) {
         let has_selection = selected_count > 0;
+        let selected_img_info = image_info;
+        let is_image_selected = selected_img_info.is_some();
+        let is_shape_origin = shape_origin.is_some();
         let is_shape_tool = matches!(
             tool_id,
             "rectangle" | "square" | "star" | "triangle" | "circle" | "spiral"
-        );
+        ) || (has_selection && is_shape_origin);
 
-        if is_editing_text || tool_id == "text" || (tool_id == "select" && has_selection && text_info.is_some()) {
+        if is_editing_text || tool_id == "text" || (has_selection && text_info.is_some()) {
             self.container.set_visible(true);
             self.left_capsule.set_visible(false);
             self.page_capsule.set_visible(false);
@@ -542,7 +550,15 @@ impl ToolOptionsBar {
             self.image_box.set_visible(false);
 
             self.is_syncing.set(true);
-            match tool_id {
+            let shape_type = match &shape_origin {
+                Some(crate::core::ShapeOrigin::Rectangle { .. }) => "rectangle",
+                Some(crate::core::ShapeOrigin::Star { .. }) => "star",
+                Some(crate::core::ShapeOrigin::Triangle { .. }) => "triangle",
+                Some(crate::core::ShapeOrigin::Circle { .. }) => "circle",
+                Some(crate::core::ShapeOrigin::Spiral { .. }) => "spiral",
+                None => tool_id,
+            };
+            match shape_type {
                 "rectangle" | "square" => {
                     self.rect_radius_box.set_visible(true);
                     if let Some(crate::core::ShapeOrigin::Rectangle {
@@ -832,7 +848,7 @@ impl ToolOptionsBar {
             self.paint_bucket_box.set_visible(false);
             self.mesh_box.set_visible(true);
 
-            if let Some((node_idx, rows, cols, color, smooth_curves)) = self.canvas.get_active_mesh_info() {
+            if let Some((node_idx, rows, cols, color, smooth_curves)) = mesh_info {
                 self.is_syncing.set(true);
                 self.mesh_controls.btn_smooth_curves.set_active(smooth_curves);
                 self.mesh_controls.btn_delete_node.set_sensitive(rows > 2 || cols > 2);
@@ -862,7 +878,7 @@ impl ToolOptionsBar {
             self.paint_bucket_box.set_visible(false);
             self.grad_box.set_visible(true);
 
-            if let Some((stop_idx, kind, angle, stops, color)) = self.canvas.get_active_gradient_info() {
+            if let Some((stop_idx, kind, angle, stops, color)) = gradient_info {
                 self.is_syncing.set(true);
                 let is_radial = kind == crate::core::GradientType::Radial;
                 self.grad_controls.btn_type_linear.set_active(!is_radial);
@@ -898,7 +914,7 @@ impl ToolOptionsBar {
             self.paint_bucket_box.set_visible(false);
             self.pattern_box.set_visible(true);
 
-            if let Some((pt, c1, c2, scale, angle, offset, custom_path)) = self.canvas.get_active_pattern_info() {
+            if let Some((pt, c1, c2, scale, angle, offset, custom_path)) = pattern_info {
                 self.is_syncing.set(true);
                 self.pattern_controls.pattern_type_cell.set(pt);
                 *self.pattern_controls.custom_path_cell.borrow_mut() = custom_path.clone();
@@ -982,7 +998,7 @@ impl ToolOptionsBar {
                     }
                 }
             }
-        } else if tool_id == "image" || (tool_id == "select" && self.canvas.get_selected_image_info().is_some()) {
+        } else if tool_id == "image" || (has_selection && is_image_selected) {
             self.container.set_visible(true);
             self.text_capsule.set_visible(false);
             self.page_capsule.set_visible(false);
@@ -999,7 +1015,7 @@ impl ToolOptionsBar {
             self.paint_bucket_box.set_visible(false);
             self.image_box.set_visible(true);
 
-            if let Some((name, _rect, intrinsic, opacity)) = self.canvas.get_selected_image_info() {
+            if let Some((name, _rect, intrinsic, opacity)) = selected_img_info {
                 self.is_syncing.set(true);
                 self.image_controls.opacity_spin.set_value((opacity * 100.0) as f64);
                 self.image_controls.name_label.set_label(&name);
@@ -1044,7 +1060,24 @@ impl ToolOptionsBar {
             self.image_box.set_visible(false);
         }
 
-        let (icon_res, tool_name) = match tool_id {
+        let effective_tool_id = if is_editing_text || (has_selection && text_info.is_some()) {
+            "text"
+        } else if has_selection && is_image_selected {
+            "image"
+        } else if has_selection && is_shape_origin {
+            match &shape_origin {
+                Some(crate::core::ShapeOrigin::Rectangle { .. }) => "rectangle",
+                Some(crate::core::ShapeOrigin::Star { .. }) => "star",
+                Some(crate::core::ShapeOrigin::Triangle { .. }) => "triangle",
+                Some(crate::core::ShapeOrigin::Circle { .. }) => "circle",
+                Some(crate::core::ShapeOrigin::Spiral { .. }) => "spiral",
+                None => tool_id,
+            }
+        } else {
+            tool_id
+        };
+
+        let (icon_res, tool_name) = match effective_tool_id {
             "select" => (
                 "tool-selection-options-symbolic",
                 crate::core::gettext("Selection"),

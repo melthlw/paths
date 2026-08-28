@@ -214,6 +214,12 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
         if !sel_ids.is_empty() {
             let mut state = canvas_widget.state.borrow_mut();
             if let Some(elem) = state.document.find_element_mut(sel_ids[0]) {
+                if (matches!(elem, crate::core::Element::Image(_)) || matches!(elem, crate::core::Element::Text(_)))
+                    && !matches!(modifier, Modifier::Array(_))
+                {
+                    // Photos and live Text/Fonts only support Array modifier
+                    return;
+                }
                 if let Some(mods) = elem.modifiers_mut() {
                     mods.push(modifier);
                 }
@@ -261,7 +267,8 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
             }
         });
         cat_assets_box.append(&btn_asset);
-        asset_buttons.push((asset.name.to_lowercase(), btn_asset));
+        let is_arr = matches!(asset.modifier, Modifier::Array(_));
+        asset_buttons.push((asset.name.to_lowercase(), is_arr, btn_asset));
     }
 
     catalog_box.append(&cat_dup_title);
@@ -279,37 +286,115 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
     popover.set_child(Some(&pop_box));
     add_mod_btn.set_popover(Some(&popover));
 
-    // Search filter callback
-    let b_array_c = btn_add_array.clone();
-    let b_ext_c = btn_add_extrude.clone();
-    let b_tw_c = btn_add_twist.clone();
-    let b_env_c = btn_add_env.clone();
-    let b_wave_c = btn_add_wave.clone();
-    let b_zz_c = btn_add_zigzag.clone();
-    let b_chamf_c = btn_add_chamfer.clone();
-    let b_off_c = btn_add_offset.clone();
-    search_entry.connect_search_changed(move |se| {
-        let q = se.text().to_lowercase();
-        b_array_c.set_visible(
-            q.is_empty() || "array modifier linear radial grid duplication".contains(&q),
-        );
-        b_ext_c
-            .set_visible(q.is_empty() || "3d extrude lighting projection isometric".contains(&q));
-        b_tw_c.set_visible(q.is_empty() || "twist swirl distortion rotational".contains(&q));
-        b_env_c.set_visible(q.is_empty() || "envelope warp distortion mesh 4-point".contains(&q));
-        b_wave_c.set_visible(q.is_empty() || "sine wave ripple distortion wave".contains(&q));
-        b_zz_c.set_visible(
-            q.is_empty() || "zigzag distortion serrated sawtooth contour".contains(&q),
-        );
-        b_chamf_c
-            .set_visible(q.is_empty() || "dynamic chamfer corner rounding bevels".contains(&q));
-        b_off_c.set_visible(
-            q.is_empty() || "offset path outline expand contract contour".contains(&q),
-        );
+    // Dynamic catalog visibility filter by selected element type and query
+    let update_catalog_visibility = {
+        let b_array = btn_add_array.clone();
+        let b_ext = btn_add_extrude.clone();
+        let b_tw = btn_add_twist.clone();
+        let b_env = btn_add_env.clone();
+        let b_wave = btn_add_wave.clone();
+        let b_zz = btn_add_zigzag.clone();
+        let b_chamf = btn_add_chamfer.clone();
+        let b_off = btn_add_offset.clone();
 
-        for (ast_name, btn) in &asset_buttons {
-            btn.set_visible(q.is_empty() || ast_name.contains(&q));
-        }
+        let c_dup_t = cat_dup_title.clone();
+        let c_dup_b = cat_dup_box.clone();
+        let c_def_t = cat_deform_title.clone();
+        let c_def_b = cat_deform_box.clone();
+        let c_pth_t = cat_path_title.clone();
+        let c_pth_b = cat_path_box.clone();
+        let c_ast_t = cat_assets_title.clone();
+        let c_ast_b = cat_assets_box.clone();
+
+        let canvas_cat = canvas.clone();
+        let asset_buttons_cat = asset_buttons.clone();
+
+        Rc::new(move |query: &str| {
+            let q = query.to_lowercase();
+
+            let (is_image, is_text, is_vector) = if let Ok(st) = canvas_cat.state.try_borrow() {
+                if let Some(&sel_id) = st.document.selected_ids.iter().next() {
+                    if let Some(el) = st.document.find_element(sel_id) {
+                        match el {
+                            crate::core::Element::Image(_) => (true, false, false),
+                            crate::core::Element::Text(_) => (false, true, false),
+                            _ => (false, false, true),
+                        }
+                    } else {
+                        (false, false, true)
+                    }
+                } else {
+                    (false, false, true)
+                }
+            } else {
+                (false, false, true)
+            };
+
+            // Array is supported for all elements (Image, Text, Vector)
+            let array_match = q.is_empty() || "array modifier linear radial grid duplication".contains(&q);
+            b_array.set_visible(array_match);
+            c_dup_t.set_visible(array_match);
+            c_dup_b.set_visible(array_match);
+
+            // Deform & Warp modifiers (3D Extrude, Twist, Envelope, Wave, Zigzag)
+            // NEVER shown on raster photos/images OR live Text/fonts!
+            let allow_deform = is_vector;
+            let ext_match = allow_deform && (q.is_empty() || "3d extrude lighting projection isometric".contains(&q));
+            let tw_match = allow_deform && (q.is_empty() || "twist swirl distortion rotational".contains(&q));
+            let env_match = allow_deform && (q.is_empty() || "envelope warp distortion mesh 4-point".contains(&q));
+            let wave_match = allow_deform && (q.is_empty() || "sine wave ripple distortion wave".contains(&q));
+            let zz_match = allow_deform && (q.is_empty() || "zigzag distortion serrated sawtooth contour".contains(&q));
+
+            b_ext.set_visible(ext_match);
+            b_tw.set_visible(tw_match);
+            b_env.set_visible(env_match);
+            b_wave.set_visible(wave_match);
+            b_zz.set_visible(zz_match);
+
+            let has_deform = ext_match || tw_match || env_match || wave_match || zz_match;
+            c_def_t.set_visible(has_deform);
+            c_def_b.set_visible(has_deform);
+
+            // Path & Corners (Chamfer, Offset Path)
+            let allow_path = is_vector;
+            let chamf_match = allow_path && (q.is_empty() || "dynamic chamfer corner rounding bevels".contains(&q));
+            let off_match = allow_path && (q.is_empty() || "offset path outline expand contract contour".contains(&q));
+
+            b_chamf.set_visible(chamf_match);
+            b_off.set_visible(off_match);
+
+            let has_path = chamf_match || off_match;
+            c_pth_t.set_visible(has_path);
+            c_pth_b.set_visible(has_path);
+
+            // Local Assets
+            let mut any_ast = false;
+            for (ast_name, is_arr, btn) in &asset_buttons_cat {
+                let allow_ast = if is_image || is_text {
+                    *is_arr
+                } else {
+                    true
+                };
+                let v = allow_ast && (q.is_empty() || ast_name.contains(&q));
+                btn.set_visible(v);
+                if v {
+                    any_ast = true;
+                }
+            }
+            c_ast_t.set_visible(any_ast);
+            c_ast_b.set_visible(any_ast);
+        })
+    };
+
+    let upd_cat_se = update_catalog_visibility.clone();
+    search_entry.connect_search_changed(move |se| {
+        upd_cat_se(&se.text());
+    });
+
+    let upd_cat_pop = update_catalog_visibility.clone();
+    let se_pop = search_entry.clone();
+    popover.connect_show(move |_| {
+        upd_cat_pop(&se_pop.text());
     });
 
     header_row.append(&header_icon);

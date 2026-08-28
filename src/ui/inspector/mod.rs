@@ -72,7 +72,7 @@ pub struct InspectorSidebar {
     update_clones_section: Rc<dyn Fn()>,
     update_export_pages: Rc<dyn Fn()>,
     update_modifiers_section: Rc<dyn Fn()>,
-    update_image_section: Rc<dyn Fn()>,
+    update_image_section: Rc<dyn Fn(Option<(String, crate::core::Rect, Option<(f32, f32)>, f32)>, Option<crate::ui::canvas::ImageAdjustments>)>,
 }
 
 impl InspectorSidebar {
@@ -957,8 +957,8 @@ impl InspectorSidebar {
         (self.update_modifiers_section)();
     }
 
-    pub fn refresh_image_section(&self) {
-        (self.update_image_section)();
+    pub fn refresh_image_section(&self, image_info: Option<(String, crate::core::Rect, Option<(f32, f32)>, f32)>, image_adjustments: Option<crate::ui::canvas::ImageAdjustments>) {
+        (self.update_image_section)(image_info, image_adjustments);
     }
 
     pub fn update_context(
@@ -970,12 +970,14 @@ impl InspectorSidebar {
         can_convert_to_path: bool,
         fills_and_strokes: Option<(Vec<crate::core::FillLayer>, Vec<crate::core::StrokeLayer>)>,
         blend_info: Option<(crate::core::BlendMode, f32, f32)>,
+        image_info: Option<(String, crate::core::Rect, Option<(f32, f32)>, f32)>,
+        image_adjustments: Option<crate::ui::canvas::ImageAdjustments>,
     ) {
         let has_selection = selected_count >= 1;
         self.refresh_export_pages();
         self.refresh_clones_section();
         self.refresh_modifiers_section();
-        self.refresh_image_section();
+        self.refresh_image_section(image_info, image_adjustments);
 
         // Keep inspector functional and interactive
         self.align_box.set_sensitive(has_selection);

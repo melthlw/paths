@@ -227,6 +227,11 @@ impl SkiaRenderer {
             if let Some(sel_bounds) = document.selection_bounds() {
                 draw_selection_highlight(canvas, sel_bounds, viewport.zoom);
             }
+            for sel_id in &document.selected_ids {
+                if let Some(elem) = document.elements.iter().find(|e| e.id() == *sel_id) {
+                    draw_modifier_canvas_overlays(canvas, elem, viewport.zoom);
+                }
+            }
         }
 
         render_overlay(canvas, viewport);

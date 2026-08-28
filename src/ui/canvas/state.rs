@@ -6,6 +6,35 @@ use crate::core::{
     PointerEvent, RulerConfig, SkiaRenderer, SnapConfig, SnapEngine, SnapGuide, Viewport,
 };
 use crate::plugins::{PluginContext, PluginManager};
+use crate::ui::canvas::ops_document::ImageAdjustments;
+
+pub struct CanvasStatusSnapshot {
+    pub tool_id: &'static str,
+    pub zoom: f32,
+    pub selected_count: usize,
+    pub bounds: Option<crate::core::Rect>,
+    pub style: (Option<Color>, Option<Color>, f32),
+    pub is_editing_text: bool,
+    pub text_info: Option<(String, u32, f32, f32, crate::core::TextAlign, f32, f32)>,
+    pub grid_visible: bool,
+    pub ruler_visible: bool,
+    pub snap_enabled: bool,
+    pub can_convert_to_path: bool,
+    pub shape_origin: Option<crate::core::ShapeOrigin>,
+    pub page_info: Option<(String, f32, f32, f32, f32, usize)>,
+    pub layers_info: Vec<crate::core::layer::LayerItemInfo>,
+    pub can_undo: bool,
+    pub can_redo: bool,
+    pub fills_and_strokes: Option<(Vec<crate::core::FillLayer>, Vec<crate::core::StrokeLayer>)>,
+    pub blend_info: Option<(crate::core::BlendMode, f32, f32)>,
+    pub node_coord: Option<Point>,
+    pub doc_colors: Vec<Option<Color>>,
+    pub image_info: Option<(String, crate::core::Rect, Option<(f32, f32)>, f32)>,
+    pub image_adjustments: Option<ImageAdjustments>,
+    pub gradient_info: Option<(usize, crate::core::GradientType, f32, Vec<crate::core::GradientStop>, Color)>,
+    pub pattern_info: Option<(crate::core::element::PatternType, Color, Color, f32, f32, Point, Option<String>)>,
+    pub mesh_info: Option<(usize, usize, usize, Color, bool)>,
+}
 
 pub struct CanvasState {
     pub document: Document,
@@ -31,32 +60,7 @@ pub struct CanvasState {
     pub is_panning: bool,
     pub pan_last_pos: Point,
     pub on_tool_change: Option<Box<dyn Fn(&'static str)>>,
-    pub on_status_change: Option<
-        Box<
-            dyn Fn(
-                &str,
-                f32,
-                usize,
-                Option<crate::core::Rect>,
-                (Option<Color>, Option<Color>, f32),
-                bool,
-                Option<(String, u32, f32, f32, crate::core::TextAlign, f32, f32)>,
-                bool,
-                bool,
-                bool,
-                bool,
-                Option<crate::core::ShapeOrigin>,
-                Option<(String, f32, f32, f32, f32, usize)>,
-                Vec<crate::core::layer::LayerItemInfo>,
-                bool,
-                bool,
-                Option<(Vec<crate::core::FillLayer>, Vec<crate::core::StrokeLayer>)>,
-                Option<(crate::core::BlendMode, f32, f32)>,
-                Option<Point>,
-                Vec<Option<Color>>,
-            ),
-        >,
-    >,
+    pub on_status_change: Option<Box<dyn Fn(&CanvasStatusSnapshot)>>,
     pub shortcuts: crate::core::ShortcutManager,
     pub render_options: crate::core::RenderOptions,
     pub path_editor_config: crate::core::PathEditorConfig,
@@ -183,18 +187,142 @@ impl CanvasState {
                 None
             };
             let doc_colors = self.document.get_document_colors();
-            cb(
+
+            let image_info = if self.document.selected_ids.len() == 1 {
+                let sel_id = *self.document.selected_ids.iter().next().unwrap();
+                if let Some(crate::core::Element::Image(img)) = self.document.find_element(sel_id) {
+                    let name = img.name.clone().unwrap_or_else(|| "Image".to_string());
+                    let rect = img.rect.normalize();
+                    let intrinsic = img.intrinsic_size();
+                    let opacity = img.opacity;
+                    Some((name, rect, intrinsic, opacity))
+                } else {
+                    None
+                }
+            } else {
+                None
+            };
+
+            let image_adjustments = if self.document.selected_ids.len() == 1 {
+                let sel_id = *self.document.selected_ids.iter().next().unwrap();
+                if let Some(crate::core::Element::Image(img)) = self.document.find_element(sel_id) {
+                    Some(crate::ui::canvas::ImageAdjustments {
+                        brightness: img.brightness,
+                        contrast: img.contrast,
+                        saturation: img.saturation,
+                        hue_rotate: img.hue_rotate,
+                        blur: img.blur,
+                        invert: img.invert,
+                        grayscale: img.grayscale,
+                        sepia: img.sepia,
+                    })
+                } else {
+                    None
+                }
+            } else {
+                None
+            };
+
+            let gradient_info = {
+                let sel_id = self.document.selected_ids.iter().next().copied();
+                if let Some(id) = sel_id {
+                    if let Some(el) = self.document.elements.iter().find(|e| e.id() == id) {
+                        let fills = el.fills();
+                        let f0 = fills.first();
+                        f0.and_then(|f| {
+                            if matches!(f.style, crate::core::FillStyle::LinearGradient | crate::core::FillStyle::RadialGradient) {
+                                let kind = match f.style {
+                                    crate::core::FillStyle::RadialGradient => crate::core::GradientType::Radial,
+                                    _ => crate::core::GradientType::Linear,
+                                };
+                                let stops = f.effective_stops();
+                                let active_stop = self
+                                    .plugin_manager
+                                    .active_feature()
+                                    .and_then(|feat| feat.get_active_gradient_stop())
+                                    .unwrap_or(0)
+                                    .min(stops.len().saturating_sub(1));
+                                let col = stops.get(active_stop).map(|s| s.color).unwrap_or(crate::core::Color::BLACK);
+                                Some((active_stop, kind, f.angle, stops, col))
+                            } else {
+                                None
+                            }
+                        })
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            };
+
+            let pattern_info = {
+                let sel_id = self.document.selected_ids.iter().next().copied();
+                if let Some(id) = sel_id {
+                    if let Some(el) = self.document.elements.iter().find(|e| e.id() == id) {
+                        let fills = el.fills();
+                        let fill = fills
+                            .iter()
+                            .find(|f| f.style == crate::core::FillStyle::Pattern && f.enabled)
+                            .or_else(|| fills.iter().find(|f| f.style == crate::core::FillStyle::Pattern));
+                        fill.map(|f| {
+                            (
+                                f.pattern_type,
+                                f.color,
+                                f.secondary_color,
+                                f.pattern_scale,
+                                f.angle,
+                                f.pattern_offset,
+                                f.custom_pattern_path.clone(),
+                            )
+                        })
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            };
+
+            let mesh_info = {
+                let sel_id = self.document.selected_ids.iter().next().copied();
+                if let Some(id) = sel_id {
+                    if let Some(el) = self.document.elements.iter().find(|e| e.id() == id) {
+                        let mesh = match el {
+                            crate::core::Element::Rect(r) => r.mesh_gradient.as_ref(),
+                            crate::core::Element::Path(p) => p.mesh_gradient.as_ref(),
+                            _ => None,
+                        };
+                        mesh.map(|m| {
+                            let active_node = self
+                                .plugin_manager
+                                .active_feature()
+                                .and_then(|f| f.get_active_mesh_node())
+                                .unwrap_or(0)
+                                .min(m.nodes.len().saturating_sub(1));
+                            let col = m.nodes.get(active_node).map(|n| n.color).unwrap_or(crate::core::Color::BLACK);
+                            (active_node, m.rows, m.cols, col, m.smooth_curves)
+                        })
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            };
+
+            let snapshot = CanvasStatusSnapshot {
                 tool_id,
-                self.viewport.zoom,
-                self.document.selected_ids.len(),
+                zoom: self.viewport.zoom,
+                selected_count: self.document.selected_ids.len(),
                 bounds,
                 style,
                 is_editing_text,
                 text_info,
-                self.grid_config.visible,
-                self.ruler_config.visible,
-                self.snap_config.enabled,
-                can_convert,
+                grid_visible: self.grid_config.visible,
+                ruler_visible: self.ruler_config.visible,
+                snap_enabled: self.snap_config.enabled,
+                can_convert_to_path: can_convert,
                 shape_origin,
                 page_info,
                 layers_info,
@@ -204,7 +332,14 @@ impl CanvasState {
                 blend_info,
                 node_coord,
                 doc_colors,
-            );
+                image_info,
+                image_adjustments,
+                gradient_info,
+                pattern_info,
+                mesh_info,
+            };
+
+            cb(&snapshot);
         }
     }
 
@@ -213,6 +348,60 @@ impl CanvasState {
             return;
         }
         self.is_switching_tool = true;
+
+        // Handle one-shot instant zoom actions without leaving the user's active tool
+        match tool_id {
+            "zoom_selection" => {
+                let target_rect = self
+                    .document
+                    .selection_bounds()
+                    .or_else(|| self.document.active_page().map(|p| p.rect))
+                    .unwrap_or_else(|| crate::core::Rect::new(-400.0, -300.0, 800.0, 600.0));
+                self.viewport.zoom_to_rect(target_rect, self.widget_size);
+                self.notify_status();
+                self.is_switching_tool = false;
+                return;
+            }
+            "zoom_fit_all" => {
+                let mut all: Option<crate::core::Rect> = None;
+                for el in &self.document.elements {
+                    all = match all {
+                        Some(a) => Some(a.union(el.bounds())),
+                        None => Some(el.bounds()),
+                    };
+                }
+                for page in &self.document.pages {
+                    all = match all {
+                        Some(a) => Some(a.union(page.rect)),
+                        None => Some(page.rect),
+                    };
+                }
+                let rect =
+                    all.unwrap_or_else(|| crate::core::Rect::new(-400.0, -300.0, 800.0, 600.0));
+                self.viewport.zoom_to_rect(rect, self.widget_size);
+                self.notify_status();
+                self.is_switching_tool = false;
+                return;
+            }
+            "zoom_100" => {
+                self.viewport.zoom = 1.0;
+                self.notify_status();
+                self.is_switching_tool = false;
+                return;
+            }
+            "zoom_fit_page" | "zoom_page" => {
+                let target_rect = self
+                    .document
+                    .active_page()
+                    .map(|p| p.rect)
+                    .unwrap_or_else(|| crate::core::Rect::new(0.0, 0.0, 794.0, 1123.0));
+                self.viewport.zoom_to_rect(target_rect, self.widget_size);
+                self.notify_status();
+                self.is_switching_tool = false;
+                return;
+            }
+            _ => {}
+        }
 
         let widget_size = self.widget_size;
         let active_fill = self.active_fill_color;
@@ -333,15 +522,26 @@ impl CanvasState {
         }
 
         let is_selecting_active = self.plugin_manager.active_id() == "select";
-        let hit_handle = if !is_selecting_active {
-            self.document
-                .selection_bounds()
-                .and_then(|b| crate::core::hit_transform_handle(b, world_pos, self.viewport.zoom))
+        let is_handle_hit = if !is_selecting_active {
+            let hit_mod = self.document.selected_ids.iter().find_map(|&id| {
+                self.document.find_element(id).and_then(|e| {
+                    crate::plugins::features::select::hit_modifier_handle(e, world_pos, self.viewport.zoom)
+                })
+            });
+
+            if hit_mod.is_some() {
+                true
+            } else {
+                self.document
+                    .selection_bounds()
+                    .and_then(|b| crate::core::hit_transform_handle(b, world_pos, self.viewport.zoom))
+                    .is_some()
+            }
         } else {
-            None
+            false
         };
 
-        if (ctrl_pressed || hit_handle.is_some()) && !is_selecting_active {
+        if (ctrl_pressed || is_handle_hit) && !is_selecting_active {
             self.is_universal_selecting = true;
         } else {
             self.is_universal_selecting = false;
@@ -521,7 +721,20 @@ impl CanvasState {
                 feat.on_pointer_move(&mut ctx, &event);
             }
 
-            (ctx.needs_redraw, ctx.cursor_name)
+            let mut final_cursor = ctx.cursor_name;
+            if final_cursor.is_none() && !self.is_universal_selecting && !ctx.document.selected_ids.is_empty() {
+                let zoom = ctx.viewport.zoom;
+                let hit_mod = ctx.document.selected_ids.iter().find_map(|&id| {
+                    ctx.document.find_element(id).and_then(|e| {
+                        crate::plugins::features::select::hit_modifier_handle(e, world_pos, zoom)
+                    })
+                });
+                if hit_mod.is_some() {
+                    final_cursor = Some("crosshair");
+                }
+            }
+
+            (ctx.needs_redraw, final_cursor)
         };
         (redraw, cursor)
     }

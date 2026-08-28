@@ -526,82 +526,69 @@ impl DesignWindow {
         let state_rc = canvas.state();
         let mut state = state_rc.borrow_mut();
         state.on_status_change = Some(Box::new(
-            move |tool_id,
-                  zoom,
-                  selected_count,
-                  sel_bounds,
-                  style,
-                  is_editing_text,
-                  text_info,
-                  grid_vis,
-                  ruler_vis,
-                  snap_en,
-                  can_convert,
-                  shape_origin,
-                  page_info,
-                  layers_info,
-                  can_undo,
-                  can_redo,
-                  fills_and_strokes,
-                  blend_info,
-                  node_coord,
-                  doc_colors| {
-                let pct = (zoom * 100.0).round() as i32;
+            move |snap| {
+                let pct = (snap.zoom * 100.0).round() as i32;
                 let zoom_str = format!("{}%", pct);
                 if zoom_lbl_clone.text().as_str() != zoom_str.as_str() {
                     zoom_lbl_clone.set_label(&zoom_str);
                 }
 
-                crate::core::AppSettings::set_active_zoom(zoom as f64);
+                crate::core::AppSettings::set_active_zoom(snap.zoom as f64);
 
-                if undo_btn_clone.is_sensitive() != can_undo {
-                    undo_btn_clone.set_sensitive(can_undo);
+                if undo_btn_clone.is_sensitive() != snap.can_undo {
+                    undo_btn_clone.set_sensitive(snap.can_undo);
                 }
-                if redo_btn_clone.is_sensitive() != can_redo {
-                    redo_btn_clone.set_sensitive(can_redo);
+                if redo_btn_clone.is_sensitive() != snap.can_redo {
+                    redo_btn_clone.set_sensitive(snap.can_redo);
                 }
 
                 is_syncing_cb.set(true);
-                if grid_btn_clone.is_active() != grid_vis {
-                    grid_btn_clone.set_active(grid_vis);
+                if grid_btn_clone.is_active() != snap.grid_visible {
+                    grid_btn_clone.set_active(snap.grid_visible);
                 }
-                if ruler_btn_clone.is_active() != ruler_vis {
-                    ruler_btn_clone.set_active(ruler_vis);
+                if ruler_btn_clone.is_active() != snap.ruler_visible {
+                    ruler_btn_clone.set_active(snap.ruler_visible);
                 }
-                if snap_btn_clone.is_active() != snap_en {
-                    snap_btn_clone.set_active(snap_en);
+                if snap_btn_clone.is_active() != snap.snap_enabled {
+                    snap_btn_clone.set_active(snap.snap_enabled);
                 }
                 is_syncing_cb.set(false);
 
                 tool_options_clone.update_state(
-                    tool_id,
-                    selected_count,
-                    sel_bounds,
-                    is_editing_text,
-                    text_info,
-                    can_convert,
-                    shape_origin,
-                    page_info,
-                    node_coord,
+                    snap.tool_id,
+                    snap.selected_count,
+                    snap.bounds,
+                    snap.is_editing_text,
+                    snap.text_info.clone(),
+                    snap.can_convert_to_path,
+                    snap.shape_origin.clone(),
+                    snap.page_info.clone(),
+                    snap.node_coord,
+                    snap.image_info.clone(),
+                    snap.gradient_info.clone(),
+                    snap.pattern_info.clone(),
+                    snap.mesh_info,
                 );
                 inspector_clone.update_context(
-                    tool_id,
-                    selected_count,
-                    sel_bounds,
-                    style,
-                    can_convert,
-                    fills_and_strokes,
-                    blend_info,
+                    snap.tool_id,
+                    snap.selected_count,
+                    snap.bounds,
+                    snap.style,
+                    snap.can_convert_to_path,
+                    snap.fills_and_strokes.clone(),
+                    snap.blend_info,
+                    snap.image_info.clone(),
+                    snap.image_adjustments,
                 );
-                color_bar_clone.update_state(selected_count, style);
+                color_bar_clone.update_state(snap.selected_count, snap.style);
                 let is_palette_enabled = canvas_unit_sync.is_plugin_enabled("color_palette_toolbar");
                 palette_bar_clone.widget().set_visible(is_palette_enabled);
                 dock_manager_clone.update_visibility("color_palette", is_palette_enabled);
                 if is_palette_enabled {
-                    palette_bar_clone.update_state(selected_count, style, &doc_colors);
+                    palette_bar_clone.update_state(snap.selected_count, snap.style, &snap.doc_colors);
                     palette_bar_clone.widget().queue_draw();
                 }
-                layers_clone.update_state(&layers_info);
+                layers_clone.update_state(&snap.layers_info);
             },
         ));
 
@@ -642,6 +629,8 @@ impl DesignWindow {
             init_can_convert,
             init_fills_and_strokes,
             init_blend_info,
+            None,
+            None,
         );
         tool_options_ref.update_state(
             init_tool,
@@ -652,6 +641,10 @@ impl DesignWindow {
             init_can_convert,
             None,
             init_page_info,
+            None,
+            None,
+            None,
+            None,
             None,
         );
         color_bar_ref.update_state(init_count, init_style);

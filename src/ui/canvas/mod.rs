@@ -6,7 +6,9 @@ pub mod ops_transform;
 pub mod state;
 
 pub use cursors::CursorCache;
-pub use state::CanvasState;
+pub use ops_document::ImageAdjustments;
+#[allow(unused_imports)]
+pub use state::{CanvasState, CanvasStatusSnapshot};
 
 use gtk4::prelude::*;
 use std::cell::RefCell;
