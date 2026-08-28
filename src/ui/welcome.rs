@@ -144,9 +144,13 @@ pub fn show_welcome_app_window(app: &adw::Application) {
     let window = adw::ApplicationWindow::builder()
         .application(app)
         .title("Paths")
-        .default_width(980)
-        .default_height(660)
+        .default_width(860)
+        .default_height(580)
+        .resizable(false)
         .build();
+
+    window.unmaximize();
+    window.set_size_request(860, 580);
 
     let app_clone = app.clone();
     let win_clone = window.clone();
@@ -180,11 +184,14 @@ pub fn show_welcome_window(
 ) {
     let window = adw::Window::builder()
         .title(&crate::core::gettext("Welcome to Paths"))
-        .default_width(980)
-        .default_height(660)
+        .default_width(860)
+        .default_height(580)
         .modal(true)
-        .resizable(true)
+        .resizable(false)
         .build();
+
+    window.unmaximize();
+    window.set_size_request(860, 580);
 
     if let Some(p) = parent {
         window.set_transient_for(Some(p));
