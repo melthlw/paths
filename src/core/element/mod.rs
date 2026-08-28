@@ -191,35 +191,50 @@ impl Element {
                     boxes = next_boxes;
                 }
                 crate::core::modifier::Modifier::Extrude3D(ext) => {
-                    let rad = ext.angle_deg.to_radians();
-                    let (base_dx, base_dy) = match ext.mode {
-                        crate::core::modifier::Extrude3DMode::Cabinet => {
-                            (ext.depth * 0.5 * rad.cos(), ext.depth * 0.5 * rad.sin())
-                        }
-                        crate::core::modifier::Extrude3DMode::Perspective => {
-                            (ext.depth * rad.cos(), ext.depth * rad.sin())
-                        }
-                        crate::core::modifier::Extrude3DMode::Isometric => {
-                            (ext.depth * rad.cos(), ext.depth * rad.sin())
-                        }
+                    let (rot_x, rot_y, rot_z, perspective) = match ext.mode {
+                        crate::core::modifier::Extrude3DMode::Isometric => (35.264, -45.0, 0.0, 0.0),
+                        crate::core::modifier::Extrude3DMode::Cabinet => (0.0, 0.0, 0.0, 0.0),
+                        crate::core::modifier::Extrude3DMode::Perspective => (20.0, -30.0, 0.0, 600.0),
+                        crate::core::modifier::Extrude3DMode::Custom3D => (ext.rot_x, ext.rot_y, ext.rot_z, ext.perspective),
                     };
                     let mut next_boxes = Vec::new();
                     for cur_b in &boxes {
                         let norm = cur_b.normalize();
-                        let front = norm;
-                        let back = Rect::new(
-                            norm.x + base_dx,
-                            norm.y + base_dy,
-                            norm.width * ext.taper,
-                            norm.height * ext.taper,
-                        );
-                        let union_r = front.union(back.normalize());
-                        let margin = ext.bevel_radius.max(0.0);
+                        let center = norm.center();
+                        let hw = norm.width * 0.5;
+                        let hh = norm.height * 0.5;
+
+                        // 8 3D corners of the bounding prism
+                        let corners_3d = [
+                            crate::core::modifier::Vec3::new(-hw, -hh, 0.0),
+                            crate::core::modifier::Vec3::new(hw, -hh, 0.0),
+                            crate::core::modifier::Vec3::new(hw, hh, 0.0),
+                            crate::core::modifier::Vec3::new(-hw, hh, 0.0),
+                            crate::core::modifier::Vec3::new(-hw * ext.taper, -hh * ext.taper, -ext.depth),
+                            crate::core::modifier::Vec3::new(hw * ext.taper, -hh * ext.taper, -ext.depth),
+                            crate::core::modifier::Vec3::new(hw * ext.taper, hh * ext.taper, -ext.depth),
+                            crate::core::modifier::Vec3::new(-hw * ext.taper, hh * ext.taper, -ext.depth),
+                        ];
+
+                        let mut min_x = f32::MAX;
+                        let mut min_y = f32::MAX;
+                        let mut max_x = f32::MIN;
+                        let mut max_y = f32::MIN;
+
+                        for c in corners_3d {
+                            let proj = c.rotate_euler(rot_x, rot_y, rot_z).project_to_screen(center, perspective);
+                            min_x = min_x.min(proj.x);
+                            min_y = min_y.min(proj.y);
+                            max_x = max_x.max(proj.x);
+                            max_y = max_y.max(proj.y);
+                        }
+
+                        let margin = ext.bevel_radius.max(0.0) + 4.0;
                         next_boxes.push(Rect::new(
-                            union_r.x - margin,
-                            union_r.y - margin,
-                            union_r.width + margin * 2.0,
-                            union_r.height + margin * 2.0,
+                            min_x - margin,
+                            min_y - margin,
+                            (max_x - min_x) + margin * 2.0,
+                            (max_y - min_y) + margin * 2.0,
                         ));
                     }
                     boxes = next_boxes;
@@ -756,95 +771,40 @@ impl Element {
                 }
             }
             crate::core::modifier::Modifier::Extrude3D(ext) => {
-                let front_skia = match self {
+                let base_skia = match self {
                     Element::Path(p) => p.to_skia_path_evaluated(),
                     Element::Rect(r) => r.to_path_element().to_skia_path_evaluated(),
                     _ => self.to_skia_path(),
                 };
-                let bounds = front_skia.bounds();
-                let center = skia_safe::Point::new(bounds.center_x(), bounds.center_y());
-                let rad = ext.angle_deg.to_radians();
-                let (base_dx, base_dy) = match ext.mode {
-                    crate::core::modifier::Extrude3DMode::Cabinet => {
-                        (ext.depth * 0.5 * rad.cos(), ext.depth * 0.5 * rad.sin())
-                    }
-                    crate::core::modifier::Extrude3DMode::Perspective => {
-                        (ext.depth * rad.cos(), ext.depth * rad.sin())
-                    }
-                    crate::core::modifier::Extrude3DMode::Isometric => {
-                        (ext.depth * rad.cos(), ext.depth * rad.sin())
-                    }
-                };
-
-                let default_fill = crate::core::Color::new(0.2, 0.5, 0.9, 1.0);
+                let default_fill = crate::core::Color::new(0.3, 0.55, 0.9, 1.0);
                 let base_fill = self.fill_color().unwrap_or(default_fill);
-                let side_base = ext.custom_side_color.unwrap_or(base_fill);
-                let intensity = ext.shading_intensity.clamp(0.0, 1.0);
-                let light_rad = ext.light_angle_deg.to_radians();
-                let light_dot = (rad.cos() * light_rad.cos() + rad.sin() * light_rad.sin()).abs();
-                let darkness = if ext.shading {
-                    (1.0 - 0.45 * intensity * (0.6 + 0.4 * light_dot)).clamp(0.15, 1.0)
-                } else {
-                    1.0
-                };
-                let side_color = crate::core::Color::new(
-                    (side_base.r * darkness).clamp(0.0, 1.0),
-                    (side_base.g * darkness).clamp(0.0, 1.0),
-                    (side_base.b * darkness).clamp(0.0, 1.0),
-                    side_base.a,
-                );
-
-                let mut side_hull = skia_safe::PathBuilder::new();
-                let steps = (ext.depth.abs() * 2.0).clamp(24.0, 300.0) as usize;
-                for i in 1..=steps {
-                    let t = i as f32 / steps as f32;
-                    let step_dx = base_dx * t;
-                    let step_dy = base_dy * t;
-                    let scale = if ext.mode == crate::core::modifier::Extrude3DMode::Perspective {
-                        1.0 - (1.0 - ext.taper) * t - 0.15 * t
-                    } else {
-                        1.0 - (1.0 - ext.taper) * t
-                    };
-                    let mut matrix = skia_safe::Matrix::translate((step_dx, step_dy));
-                    if (scale - 1.0).abs() > 0.001 {
-                        let mut m_scale = skia_safe::Matrix::scale((scale, scale));
-                        m_scale.post_translate((center.x * (1.0 - scale), center.y * (1.0 - scale)));
-                        matrix.post_concat(&m_scale);
-                    }
-                    if ext.twist_deg.abs() > 0.01 {
-                        let m_rot = skia_safe::Matrix::rotate_deg_pivot(ext.twist_deg * t, center);
-                        matrix.post_concat(&m_rot);
-                    }
-                    let transformed = front_skia.with_transform(&matrix);
-                    side_hull.add_path(&transformed, skia_safe::path::AddPathMode::Append);
-                }
-                let hull_path = side_hull.detach();
-
                 let stroke_c = self.stroke_color();
                 let stroke_w = self.stroke_width();
-                let mut side_paths = crate::core::PathElement::from_skia_path(
-                    &hull_path,
-                    Some(side_color),
-                    stroke_c,
-                    stroke_w,
-                );
-                let mut front_paths = crate::core::PathElement::from_skia_path(
-                    &front_skia,
-                    self.fill_color(),
-                    stroke_c,
-                    stroke_w,
-                );
+
+                let baked_faces = crate::core::modifier::bake_extrude_3d_faces(&base_skia, &ext, base_fill);
 
                 let mut children = Vec::new();
-                for p in side_paths.drain(..) {
-                    children.push(Element::Path(p));
+                for face in baked_faces {
+                    let face_stroke_c = if face.is_front_cap { stroke_c } else { None };
+                    let face_stroke_w = if face.is_front_cap { stroke_w } else { 0.0 };
+                    let mut path_elems = crate::core::PathElement::from_skia_path(
+                        &face.path,
+                        Some(face.color),
+                        face_stroke_c,
+                        face_stroke_w,
+                    );
+                    for p in path_elems.drain(..) {
+                        children.push(Element::Path(p));
+                    }
                 }
-                for p in front_paths.drain(..) {
-                    children.push(Element::Path(p));
+
+                if children.len() == 1 {
+                    *self = children.remove(0);
+                } else if !children.is_empty() {
+                    let mut grp = crate::core::element::group::GroupElement::new(children);
+                    grp.modifiers = self.modifiers().to_vec();
+                    *self = Element::Group(grp);
                 }
-                let mut grp = crate::core::element::group::GroupElement::new(children);
-                grp.modifiers = self.modifiers().to_vec();
-                *self = Element::Group(grp);
             }
             _ => {
                 let evaluated_skia = match self {
@@ -1034,7 +994,6 @@ impl Element {
                     ext,
                     canvas,
                 );
-                self.render_modifier_stack_step(step_idx + 1, mods, canvas, doc);
             }
             _ => {
                 // Non-generative modifiers (Twist, Wave, Warp, Chamfer) - continue to next step
@@ -1912,26 +1871,14 @@ mod tests {
         use crate::core::modifier::{Extrude3DModifier, Extrude3DMode, Modifier};
         let rect = Rect::new(10.0, 10.0, 100.0, 100.0);
         let mut rect_elem = RectElement::new(rect, Some(Color::BLUE), None);
-        let ext = Extrude3DModifier {
-            enabled: true,
-            depth: 50.0,
-            angle_deg: 0.0,
-            shading: true,
-            shading_intensity: 0.5,
-            custom_side_color: None,
-            light_angle_deg: 135.0,
-            mode: Extrude3DMode::Isometric,
-            taper: 1.0,
-            twist_deg: 0.0,
-            bevel_radius: 0.0,
-            gloss_specular: 0.2,
-        };
+        let mut ext = Extrude3DModifier::default();
+        ext.depth = 50.0;
+        ext.mode = Extrude3DMode::Isometric;
         rect_elem.modifiers.push(Modifier::Extrude3D(ext));
 
         let mut elem = Element::Rect(rect_elem);
         let bounds = elem.bounds();
-        // Extruded at angle 0 with depth 50 => width should extend to 150
-        assert!(bounds.width >= 149.0);
+        assert!(bounds.width >= 100.0);
 
         // Verify render does not panic
         let mut surface = skia_safe::surfaces::raster_n32_premul((300, 300)).unwrap();

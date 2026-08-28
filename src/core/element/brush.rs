@@ -1,12 +1,12 @@
 use skia_safe as skia;
 
+use super::ElementId;
 use super::path::dist_to_segment;
 use super::style::BlendMode;
-use super::ElementId;
+use crate::core::NodeType;
 use crate::core::color::Color;
 use crate::core::element::path::{PathElement, PathNode};
 use crate::core::geometry::{Point, Rect};
-use crate::core::NodeType;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, Default)]
 pub enum StrokeCap {
@@ -58,8 +58,8 @@ pub enum MarkerShape {
     CustomPath(String),
 }
 
+#[allow(dead_code)]
 impl MarkerShape {
-    #[allow(dead_code)]
     pub fn name(&self) -> String {
         match self {
             MarkerShape::None => crate::core::gettext("None"),
@@ -94,8 +94,8 @@ pub enum BrushStyle {
     ArrowTrail,
 }
 
+#[allow(dead_code)]
 impl BrushStyle {
-    #[allow(dead_code)]
     pub fn name(self) -> String {
         match self {
             BrushStyle::Round => crate::core::gettext("Solid Round"),
@@ -115,14 +115,15 @@ impl BrushStyle {
         }
     }
 
-    #[allow(dead_code)]
     pub fn desc(self) -> String {
         match self {
             BrushStyle::Round => crate::core::gettext("Smooth uniform solid vector stroke"),
             BrushStyle::Pencil => crate::core::gettext("Fine textured graphite pencil line"),
             BrushStyle::Calligraphy => crate::core::gettext("45° chisel nib calligraphy ribbon"),
             BrushStyle::Ink => crate::core::gettext("Tapered fluid inking pen"),
-            BrushStyle::Marker => crate::core::gettext("Semi-transparent multiplicative highlighter"),
+            BrushStyle::Marker => {
+                crate::core::gettext("Semi-transparent multiplicative highlighter")
+            }
             BrushStyle::Airbrush => crate::core::gettext("Soft radial blur spray wash"),
             BrushStyle::Charcoal => crate::core::gettext("Rough grainy sketching charcoal"),
             BrushStyle::Watercolor => crate::core::gettext("Soft blended wet paint wash"),
@@ -367,7 +368,9 @@ impl BrushStroke {
             base_color.a *= 0.35;
             paint.set_color4f(base_color.to_skia(), None);
             paint.set_blend_mode(skia::BlendMode::Multiply);
-            if let Some(mask) = skia::MaskFilter::blur(skia::BlurStyle::Normal, self.width * 0.5, false) {
+            if let Some(mask) =
+                skia::MaskFilter::blur(skia::BlurStyle::Normal, self.width * 0.5, false)
+            {
                 paint.set_mask_filter(mask);
             }
         }
@@ -379,7 +382,9 @@ impl BrushStroke {
             let mut glow_paint = paint.clone();
             glow_paint.set_style(skia::PaintStyle::Stroke);
             glow_paint.set_stroke_width(self.width * 2.2);
-            if let Some(mask) = skia::MaskFilter::blur(skia::BlurStyle::Normal, self.width * 0.8, false) {
+            if let Some(mask) =
+                skia::MaskFilter::blur(skia::BlurStyle::Normal, self.width * 0.8, false)
+            {
                 glow_paint.set_mask_filter(mask);
             }
             let mut glow_path = skia::PathBuilder::new();
@@ -487,7 +492,9 @@ impl BrushStroke {
             let radius = (self.width * 0.8).max(3.0);
 
             for (idx, p) in self.points.iter().enumerate() {
-                let seed = (p.x * 12.9898 + p.y * 78.233 + (idx as f32) * 43758.5453).sin().abs();
+                let seed = (p.x * 12.9898 + p.y * 78.233 + (idx as f32) * 43758.5453)
+                    .sin()
+                    .abs();
                 let num_dots = 6 + ((seed * 8.0) as usize);
 
                 for d in 0..num_dots {
@@ -526,7 +533,10 @@ impl BrushStroke {
             for (dx, dy, opacity_mult) in offsets {
                 let mut path_b = skia::PathBuilder::new();
                 if !self.points.is_empty() {
-                    path_b.move_to(skia::Point::new(self.points[0].x + dx, self.points[0].y + dy));
+                    path_b.move_to(skia::Point::new(
+                        self.points[0].x + dx,
+                        self.points[0].y + dy,
+                    ));
                     for p in &self.points[1..] {
                         path_b.line_to(skia::Point::new(p.x + dx, p.y + dy));
                     }
@@ -548,7 +558,10 @@ impl BrushStroke {
             for (dx, dy, opacity_mult) in offsets {
                 let mut path_b = skia::PathBuilder::new();
                 if !self.points.is_empty() {
-                    path_b.move_to(skia::Point::new(self.points[0].x + dx, self.points[0].y + dy));
+                    path_b.move_to(skia::Point::new(
+                        self.points[0].x + dx,
+                        self.points[0].y + dy,
+                    ));
                     for p in &self.points[1..] {
                         path_b.line_to(skia::Point::new(p.x + dx, p.y + dy));
                     }
@@ -613,7 +626,14 @@ impl BrushStroke {
                 let p0 = self.points[0];
                 let p1 = self.points[1];
                 let angle = (p1.y - p0.y).atan2(p1.x - p0.x);
-                draw_marker_shape(canvas, &effective_start_marker, p0, angle, marker_scale_factor, base_color);
+                draw_marker_shape(
+                    canvas,
+                    &effective_start_marker,
+                    p0,
+                    angle,
+                    marker_scale_factor,
+                    base_color,
+                );
             }
 
             // End Marker
@@ -621,7 +641,14 @@ impl BrushStroke {
                 let p_last = self.points[n - 1];
                 let p_prev = self.points[n - 2];
                 let angle = (p_last.y - p_prev.y).atan2(p_last.x - p_prev.x);
-                draw_marker_shape(canvas, &effective_end_marker, p_last, angle, marker_scale_factor, base_color);
+                draw_marker_shape(
+                    canvas,
+                    &effective_end_marker,
+                    p_last,
+                    angle,
+                    marker_scale_factor,
+                    base_color,
+                );
             }
 
             // Body / Middle Repeat Marker
@@ -638,10 +665,19 @@ impl BrushStroke {
                         accumulated += step_dist;
                         let t = accumulated / seg_len;
                         let pos = Point::new(p0.x + t * (p1.x - p0.x), p0.y + t * (p1.y - p0.y));
-                        draw_marker_shape(canvas, &effective_body_marker, pos, angle, marker_scale_factor, base_color);
+                        draw_marker_shape(
+                            canvas,
+                            &effective_body_marker,
+                            pos,
+                            angle,
+                            marker_scale_factor,
+                            base_color,
+                        );
                     }
                     accumulated -= seg_len;
-                    if accumulated < 0.0 { accumulated = 0.0; }
+                    if accumulated < 0.0 {
+                        accumulated = 0.0;
+                    }
                 }
             }
         }

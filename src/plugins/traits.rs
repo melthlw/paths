@@ -103,6 +103,18 @@ pub trait FeaturePlugin: 'static + Send + Sync {
         None
     }
 
+    fn as_paint_bucket_feature(
+        &self,
+    ) -> Option<&crate::plugins::features::paint_bucket::PaintBucketFeature> {
+        None
+    }
+
+    fn as_paint_bucket_feature_mut(
+        &mut self,
+    ) -> Option<&mut crate::plugins::features::paint_bucket::PaintBucketFeature> {
+        None
+    }
+
     fn render_overlay(
         &self,
         _ctx: &PluginRenderContext,

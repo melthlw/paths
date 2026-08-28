@@ -4,7 +4,7 @@ use std::rc::Rc;
 use crate::core::element::CornerStyle;
 use crate::core::geometry::Rect;
 use crate::core::modifier::{
-    ArrayMode, ArrayModifier, ChamferRoundingModifier, EnvelopeWarpModifier, Extrude3DMode,
+    ArrayMode, ArrayModifier, Bevel3DStyle, ChamferRoundingModifier, EnvelopeWarpModifier, Extrude3DMode,
     Extrude3DModifier, Modifier, OffsetPathModifier, TwistModifier, WaveDeformModifier,
     ZigZagModifier,
 };
@@ -1139,260 +1139,671 @@ fn build_modifier_card(
             }
         }
         Modifier::Extrude3D(ext) => {
-            // Row 1: Projection Mode + Lighting Switch
-            let row_top = gtk4::Box::builder()
-                .orientation(gtk4::Orientation::Horizontal)
+            let container_3d = gtk4::Box::builder()
+                .orientation(gtk4::Orientation::Vertical)
                 .spacing(8)
-                .margin_bottom(6)
                 .build();
 
-            let combo_m = gtk4::DropDown::from_strings(&[
-                &crate::core::gettext("Isometric"),
+            // Row 1: Presets DropDown + Shading Toggle Switch
+            let row_top = gtk4::Box::builder().spacing(6).build();
+
+            let combo_pres = gtk4::DropDown::from_strings(&[
+                &crate::core::gettext("Custom 3D"),
+                &crate::core::gettext("Isometric Top"),
+                &crate::core::gettext("Isometric Left"),
+                &crate::core::gettext("Front View"),
+                &crate::core::gettext("Top View"),
+                &crate::core::gettext("Tilt 3D"),
+                &crate::core::gettext("Dramatic 3D"),
+                &crate::core::gettext("Coin Spin"),
                 &crate::core::gettext("Cabinet 45°"),
-                &crate::core::gettext("Perspective"),
             ]);
-            let active_m_idx = match ext.mode {
-                Extrude3DMode::Isometric => 0,
-                Extrude3DMode::Cabinet => 1,
-                Extrude3DMode::Perspective => 2,
+            combo_pres.set_hexpand(true);
+
+            let active_pres_idx = match ext.mode {
+                Extrude3DMode::Isometric => 1,
+                Extrude3DMode::Cabinet => 8,
+                _ => 0,
             };
-            combo_m.set_selected(active_m_idx);
-            combo_m.set_hexpand(true);
+            combo_pres.set_selected(active_pres_idx);
 
             let sw_sh = gtk4::Switch::builder()
                 .active(ext.shading)
                 .valign(gtk4::Align::Center)
-                .tooltip_text(&crate::core::gettext("3D Lighting Shading"))
+                .tooltip_text(&crate::core::gettext("Toggle 3D Lighting"))
                 .build();
 
-            row_top.append(&combo_m);
+            row_top.append(&combo_pres);
             row_top.append(&sw_sh);
-            body.append(&row_top);
+            container_3d.append(&row_top);
 
-            // Row 2: Visual 3D Dimmer Knob + Depth & Angle Quick Inputs
-            let row_knobs = gtk4::Box::builder()
-                .orientation(gtk4::Orientation::Horizontal)
-                .spacing(10)
-                .margin_bottom(6)
-                .build();
+            // State Cells
+            let rx_cell = Rc::new(std::cell::RefCell::new(ext.rot_x));
+            let ry_cell = Rc::new(std::cell::RefCell::new(ext.rot_y));
+            let rz_cell = Rc::new(std::cell::RefCell::new(ext.rot_z));
+            let light_az_cell = Rc::new(std::cell::RefCell::new(ext.light_angle_deg));
+            let light_el_cell = Rc::new(std::cell::RefCell::new(ext.light_elevation_deg));
+            let active_color_cell = Rc::new(std::cell::RefCell::new(ext.custom_side_color));
+            let active_preset_cell = Rc::new(std::cell::RefCell::new(ext.material_preset));
 
-            // Interactive GTK Angle Dimmer Knob Widget
-            let angle_cell = Rc::new(std::cell::RefCell::new(ext.angle_deg));
-            let da_knob = gtk4::DrawingArea::builder()
-                .width_request(46)
-                .height_request(46)
+            // Row 2: Dual Interactive Gizmos (Trackball on Left + Light Gizmo on Right)
+            let row_gizmos = gtk4::Box::builder().spacing(10).homogeneous(true).build();
+
+            // Trackball Box
+            let box_tb = gtk4::Box::builder().orientation(gtk4::Orientation::Vertical).spacing(3).halign(gtk4::Align::Center).build();
+            let da_trackball = gtk4::DrawingArea::builder()
+                .width_request(68)
+                .height_request(68)
                 .halign(gtk4::Align::Center)
                 .valign(gtk4::Align::Center)
-                .tooltip_text(&crate::core::gettext(
-                    "Drag angle dimmer knob to rotate 3D projection",
-                ))
+                .tooltip_text(&crate::core::gettext("Drag to rotate 3D object\nDouble-click to reset"))
                 .build();
 
-            let angle_draw = angle_cell.clone();
-            da_knob.set_draw_func(move |_da, cr, width, height| {
+            let lbl_tb_title = gtk4::Label::builder()
+                .label(&crate::core::gettext("Rotation 3D"))
+                .css_classes(["caption", "dim-label"])
+                .halign(gtk4::Align::Center)
+                .build();
+
+            box_tb.append(&da_trackball);
+            box_tb.append(&lbl_tb_title);
+
+            let rx_draw = rx_cell.clone();
+            let ry_draw = ry_cell.clone();
+            let rz_draw = rz_cell.clone();
+
+            da_trackball.set_draw_func(move |_da, cr, width, height| {
                 let cx = width as f64 * 0.5;
                 let cy = height as f64 * 0.5;
-                let r = (width.min(height) as f64 * 0.45) - 2.0;
+                let r = (width.min(height) as f64 * 0.46) - 2.0;
 
                 cr.arc(cx, cy, r, 0.0, std::f64::consts::TAU);
-                cr.set_source_rgba(0.15, 0.18, 0.25, 0.9);
+                cr.set_source_rgba(0.12, 0.14, 0.20, 0.95);
                 cr.fill_preserve().unwrap();
-                cr.set_source_rgba(0.35, 0.45, 0.6, 0.6);
+                cr.set_source_rgba(0.32, 0.42, 0.58, 0.8);
                 cr.set_line_width(1.5);
                 cr.stroke().unwrap();
 
-                let a_rad = (*angle_draw.borrow() as f64).to_radians();
-                let dot_x = cx + r * 0.65 * a_rad.cos();
-                let dot_y = cy + r * 0.65 * a_rad.sin();
+                let rx = *rx_draw.borrow();
+                let ry = *ry_draw.borrow();
+                let rz = *rz_draw.borrow();
+
+                let cube_sz = r * 0.50;
+                let corners = [
+                    (-1.0, -1.0, -1.0), (1.0, -1.0, -1.0), (1.0, 1.0, -1.0), (-1.0, 1.0, -1.0),
+                    (-1.0, -1.0, 1.0), (1.0, -1.0, 1.0), (1.0, 1.0, 1.0), (-1.0, 1.0, 1.0),
+                ];
+
+                let proj_corner = |(x, y, z): (f64, f64, f64)| -> (f64, f64, f64) {
+                    let v = crate::core::modifier::Vec3::new(
+                        (x * cube_sz) as f32, (y * cube_sz) as f32, (z * cube_sz) as f32,
+                    ).rotate_euler(rx, ry, rz);
+                    (cx + v.x as f64, cy + v.y as f64, v.z as f64)
+                };
+
+                let projected: Vec<(f64, f64, f64)> = corners.iter().map(|&c| proj_corner(c)).collect();
+                let edges = [
+                    (0, 1), (1, 2), (2, 3), (3, 0),
+                    (4, 5), (5, 6), (6, 7), (7, 4),
+                    (0, 4), (1, 5), (2, 6), (3, 7),
+                ];
+
+                cr.set_line_width(1.2);
+                for (i1, i2) in edges {
+                    let p1 = projected[i1];
+                    let p2 = projected[i2];
+                    let avg_z = (p1.2 + p2.2) * 0.5;
+                    if avg_z >= 0.0 {
+                        cr.set_source_rgba(0.0, 0.9, 1.0, 0.9);
+                    } else {
+                        cr.set_source_rgba(0.3, 0.45, 0.6, 0.35);
+                    }
+                    cr.move_to(p1.0, p1.1);
+                    cr.line_to(p2.0, p2.1);
+                    cr.stroke().unwrap();
+                }
+
+                let axis_len = r * 0.78;
+                let x_axis = crate::core::modifier::Vec3::new(axis_len as f32, 0.0, 0.0).rotate_euler(rx, ry, rz);
+                let y_axis = crate::core::modifier::Vec3::new(0.0, axis_len as f32, 0.0).rotate_euler(rx, ry, rz);
+                let z_axis = crate::core::modifier::Vec3::new(0.0, 0.0, axis_len as f32).rotate_euler(rx, ry, rz);
 
                 cr.move_to(cx, cy);
-                cr.line_to(dot_x, dot_y);
-                cr.set_source_rgba(0.0, 0.8, 1.0, 0.9);
+                cr.line_to(cx + x_axis.x as f64, cy + x_axis.y as f64);
+                cr.set_source_rgba(1.0, 0.35, 0.35, 0.95);
                 cr.set_line_width(2.0);
                 cr.stroke().unwrap();
 
-                cr.arc(dot_x, dot_y, 3.5, 0.0, std::f64::consts::TAU);
-                cr.set_source_rgba(0.0, 0.95, 1.0, 1.0);
+                cr.move_to(cx, cy);
+                cr.line_to(cx + y_axis.x as f64, cy + y_axis.y as f64);
+                cr.set_source_rgba(0.35, 0.9, 0.45, 0.95);
+                cr.set_line_width(2.0);
+                cr.stroke().unwrap();
+
+                cr.move_to(cx, cy);
+                cr.line_to(cx + z_axis.x as f64, cy + z_axis.y as f64);
+                cr.set_source_rgba(0.2, 0.8, 1.0, 0.95);
+                cr.set_line_width(2.0);
+                cr.stroke().unwrap();
+            });
+
+            // Light Gizmo Box
+            let box_lg = gtk4::Box::builder().orientation(gtk4::Orientation::Vertical).spacing(3).halign(gtk4::Align::Center).build();
+            let da_light = gtk4::DrawingArea::builder()
+                .width_request(68)
+                .height_request(68)
+                .halign(gtk4::Align::Center)
+                .valign(gtk4::Align::Center)
+                .tooltip_text(&crate::core::gettext("Drag to position Light source in 3D\nDouble-click to reset"))
+                .build();
+
+            let lbl_lg_title = gtk4::Label::builder()
+                .label(&crate::core::gettext("Lighting Gizmo"))
+                .css_classes(["caption", "dim-label"])
+                .halign(gtk4::Align::Center)
+                .build();
+
+            box_lg.append(&da_light);
+            box_lg.append(&lbl_lg_title);
+
+            let laz_draw = light_az_cell.clone();
+            let lel_draw = light_el_cell.clone();
+
+            da_light.set_draw_func(move |_da, cr, width, height| {
+                let cx = width as f64 * 0.5;
+                let cy = height as f64 * 0.5;
+                let r = (width.min(height) as f64 * 0.46) - 2.0;
+
+                // Base Dial
+                cr.arc(cx, cy, r, 0.0, std::f64::consts::TAU);
+                cr.set_source_rgba(0.10, 0.12, 0.17, 0.95);
+                cr.fill_preserve().unwrap();
+                cr.set_source_rgba(0.28, 0.36, 0.48, 0.8);
+                cr.set_line_width(1.5);
+                cr.stroke().unwrap();
+
+                // Crosshairs
+                cr.set_source_rgba(0.3, 0.4, 0.5, 0.35);
+                cr.set_line_width(1.0);
+                cr.move_to(cx - r * 0.8, cy);
+                cr.line_to(cx + r * 0.8, cy);
+                cr.move_to(cx, cy - r * 0.8);
+                cr.line_to(cx, cy + r * 0.8);
+                cr.stroke().unwrap();
+
+                // Elevation ring
+                cr.arc(cx, cy, r * 0.5, 0.0, std::f64::consts::TAU);
+                cr.set_source_rgba(0.3, 0.4, 0.5, 0.25);
+                cr.stroke().unwrap();
+
+                let az_rad = (*laz_draw.borrow() as f64).to_radians();
+                let el_val = *lel_draw.borrow() as f64; // 0 (edge) to 90 (center)
+                let dist_from_center = r * 0.78 * (1.0 - (el_val / 90.0).clamp(0.0, 1.0));
+
+                let sun_x = cx + dist_from_center * az_rad.cos();
+                let sun_y = cy - dist_from_center * az_rad.sin();
+
+                // Ray from center to sun
+                cr.move_to(cx, cy);
+                cr.line_to(sun_x, sun_y);
+                cr.set_source_rgba(1.0, 0.8, 0.2, 0.6);
+                cr.set_line_width(1.5);
+                cr.stroke().unwrap();
+
+                // Sun puck
+                cr.arc(sun_x, sun_y, 6.0, 0.0, std::f64::consts::TAU);
+                cr.set_source_rgba(1.0, 0.88, 0.2, 0.98);
+                cr.fill_preserve().unwrap();
+                cr.set_source_rgba(1.0, 0.5, 0.0, 0.9);
+                cr.set_line_width(1.5);
+                cr.stroke().unwrap();
+
+                // Center origin dot
+                cr.arc(cx, cy, 2.5, 0.0, std::f64::consts::TAU);
+                cr.set_source_rgba(0.8, 0.8, 0.9, 0.7);
                 cr.fill().unwrap();
             });
 
-            let box_numeric = gtk4::Box::builder()
+            row_gizmos.append(&box_tb);
+            row_gizmos.append(&box_lg);
+            container_3d.append(&row_gizmos);
+
+            // Row 3: Core Geometry Sliders (Depth & Bevel)
+            let box_geo = gtk4::Box::builder().orientation(gtk4::Orientation::Vertical).spacing(6).build();
+
+            // Depth Slider
+            let row_depth = gtk4::Box::builder().spacing(6).build();
+            let lbl_d = gtk4::Label::builder().label("Depth:").css_classes(["caption", "dim-label"]).width_request(45).xalign(0.0).build();
+            let adj_dep = gtk4::Adjustment::new(ext.depth as f64, 0.0, 300.0, 2.0, 10.0, 0.0);
+            let scale_dep = gtk4::Scale::builder()
+                .adjustment(&adj_dep)
+                .hexpand(true)
+                .draw_value(false)
+                .valign(gtk4::Align::Center)
+                .build();
+            let lbl_dep_val = gtk4::Label::builder()
+                .label(&format!("{:.0}px", ext.depth))
+                .css_classes(["caption", "numeric"])
+                .width_request(42)
+                .xalign(1.0)
+                .build();
+            let lbl_dep_c = lbl_dep_val.clone();
+            scale_dep.connect_value_changed(move |s| {
+                lbl_dep_c.set_label(&format!("{:.0}px", s.value()));
+            });
+
+            row_depth.append(&lbl_d);
+            row_depth.append(&scale_dep);
+            row_depth.append(&lbl_dep_val);
+            box_geo.append(&row_depth);
+
+            // Bevel / Corner Rounding Slider & Style
+            let row_bevel = gtk4::Box::builder().spacing(4).build();
+            let lbl_b = gtk4::Label::builder().label("Bevel:").css_classes(["caption", "dim-label"]).width_request(45).xalign(0.0).build();
+            let combo_bstyle = gtk4::DropDown::from_strings(&[
+                &crate::core::gettext("Round"),
+                &crate::core::gettext("Chamfer"),
+                &crate::core::gettext("Concave"),
+            ]);
+            let active_bstyle_idx = match ext.bevel_style {
+                Bevel3DStyle::Chamfer => 1,
+                Bevel3DStyle::Convex => 2,
+                _ => 0,
+            };
+            combo_bstyle.set_selected(active_bstyle_idx);
+            combo_bstyle.set_width_request(85);
+
+            let adj_bev = gtk4::Adjustment::new(ext.bevel_radius as f64, 0.0, 60.0, 1.0, 5.0, 0.0);
+            let scale_bev = gtk4::Scale::builder()
+                .adjustment(&adj_bev)
+                .hexpand(true)
+                .draw_value(false)
+                .valign(gtk4::Align::Center)
+                .build();
+            let lbl_bev_val = gtk4::Label::builder()
+                .label(&format!("{:.0}px", ext.bevel_radius))
+                .css_classes(["caption", "numeric"])
+                .width_request(38)
+                .xalign(1.0)
+                .build();
+            let lbl_bev_c = lbl_bev_val.clone();
+            scale_bev.connect_value_changed(move |s| {
+                lbl_bev_c.set_label(&format!("{:.0}px", s.value()));
+            });
+
+            row_bevel.append(&lbl_b);
+            row_bevel.append(&combo_bstyle);
+            row_bevel.append(&scale_bev);
+            row_bevel.append(&lbl_bev_val);
+            box_geo.append(&row_bevel);
+
+            container_3d.append(&box_geo);
+
+            // Row 5: Collapsible "Advanced 3D & Materials" Expander
+            let exp_adv = gtk4::Expander::builder()
+                .label(&crate::core::gettext("Advanced 3D & Materials"))
+                .expanded(false)
+                .build();
+
+            let box_adv = gtk4::Box::builder()
                 .orientation(gtk4::Orientation::Vertical)
-                .spacing(4)
-                .hexpand(true)
-                .build();
-
-            // Depth Spin Row
-            let line_d = gtk4::Box::builder()
-                .orientation(gtk4::Orientation::Horizontal)
-                .spacing(4)
-                .build();
-            let lbl_d = gtk4::Label::builder()
-                .label(crate::core::gettext("Depth"))
-                .css_classes(["caption", "dim-label"])
-                .hexpand(true)
-                .xalign(0.0)
-                .build();
-            let spin_d = gtk4::SpinButton::with_range(0.0, 500.0, 2.0);
-            spin_d.set_value(ext.depth as f64);
-            line_d.append(&lbl_d);
-            line_d.append(&spin_d);
-
-            // Angle Spin Row
-            let line_a = gtk4::Box::builder()
-                .orientation(gtk4::Orientation::Horizontal)
-                .spacing(4)
-                .build();
-            let lbl_a = gtk4::Label::builder()
-                .label(crate::core::gettext("Angle °"))
-                .css_classes(["caption", "dim-label"])
-                .hexpand(true)
-                .xalign(0.0)
-                .build();
-            let spin_a = gtk4::SpinButton::with_range(-360.0, 360.0, 5.0);
-            spin_a.set_value(ext.angle_deg as f64);
-            line_a.append(&lbl_a);
-            line_a.append(&spin_a);
-
-            box_numeric.append(&line_d);
-            box_numeric.append(&line_a);
-
-            row_knobs.append(&da_knob);
-            row_knobs.append(&box_numeric);
-            body.append(&row_knobs);
-
-            // Row 3: Single Master Depth Slider
-            let scale_d = gtk4::Scale::with_range(gtk4::Orientation::Horizontal, 0.0, 200.0, 1.0);
-            scale_d.set_value(ext.depth as f64);
-            scale_d.set_hexpand(true);
-            scale_d.set_margin_bottom(6);
-            body.append(&scale_d);
-
-            // Row 4: 3D Extrusion Side Color Swatches
-            let row_col = gtk4::Box::builder()
-                .orientation(gtk4::Orientation::Horizontal)
                 .spacing(6)
+                .margin_top(6)
                 .margin_bottom(4)
                 .build();
-            let lbl_c = gtk4::Label::builder()
-                .label(crate::core::gettext("Extrusion Color"))
+
+            let (row_pers, scale_pers, _lbl_pers_v) = {
+                let row = gtk4::Box::builder().spacing(6).build();
+                let lbl = gtk4::Label::builder().label("Camera:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let adj = gtk4::Adjustment::new(ext.perspective as f64, 0.0, 1500.0, 10.0, 50.0, 0.0);
+                let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
+                let init_str = if ext.perspective > 0.0 { format!("{:.0}", ext.perspective) } else { "Ortho".to_string() };
+                let lbl_val = gtk4::Label::builder().label(&init_str).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();
+                let lbl_v_c = lbl_val.clone();
+                scale.connect_value_changed(move |s| {
+                    let v = s.value();
+                    if v <= 5.0 {
+                        lbl_v_c.set_label("Ortho");
+                    } else {
+                        lbl_v_c.set_label(&format!("{:.0}", v));
+                    }
+                });
+                row.append(&lbl);
+                row.append(&scale);
+                row.append(&lbl_val);
+                (row, scale, lbl_val)
+            };
+
+            let (row_metal, scale_metal, _lbl_metal_v) = {
+                let row = gtk4::Box::builder().spacing(6).build();
+                let lbl = gtk4::Label::builder().label("Metallic:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let adj = gtk4::Adjustment::new(ext.metallic as f64 * 100.0, 0.0, 100.0, 1.0, 10.0, 0.0);
+                let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
+                let lbl_val = gtk4::Label::builder().label(&format!("{:.0}%", ext.metallic * 100.0)).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();
+                let lbl_v_c = lbl_val.clone();
+                scale.connect_value_changed(move |s| {
+                    lbl_v_c.set_label(&format!("{:.0}%", s.value()));
+                });
+                row.append(&lbl);
+                row.append(&scale);
+                row.append(&lbl_val);
+                (row, scale, lbl_val)
+            };
+
+            let (row_rough, scale_rough, _lbl_rough_v) = {
+                let row = gtk4::Box::builder().spacing(6).build();
+                let lbl = gtk4::Label::builder().label("Roughness:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let adj = gtk4::Adjustment::new(ext.roughness as f64 * 100.0, 0.0, 100.0, 1.0, 10.0, 0.0);
+                let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
+                let lbl_val = gtk4::Label::builder().label(&format!("{:.0}%", ext.roughness * 100.0)).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();
+                let lbl_v_c = lbl_val.clone();
+                scale.connect_value_changed(move |s| {
+                    lbl_v_c.set_label(&format!("{:.0}%", s.value()));
+                });
+                row.append(&lbl);
+                row.append(&scale);
+                row.append(&lbl_val);
+                (row, scale, lbl_val)
+            };
+
+            let (row_rim, scale_rim, _lbl_rim_v) = {
+                let row = gtk4::Box::builder().spacing(6).build();
+                let lbl = gtk4::Label::builder().label("Rim Light:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let adj = gtk4::Adjustment::new(ext.rim_light as f64 * 100.0, 0.0, 100.0, 1.0, 10.0, 0.0);
+                let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
+                let lbl_val = gtk4::Label::builder().label(&format!("{:.0}%", ext.rim_light * 100.0)).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();
+                let lbl_v_c = lbl_val.clone();
+                scale.connect_value_changed(move |s| {
+                    lbl_v_c.set_label(&format!("{:.0}%", s.value()));
+                });
+                row.append(&lbl);
+                row.append(&scale);
+                row.append(&lbl_val);
+                (row, scale, lbl_val)
+            };
+
+            let (row_spec, scale_spec, _lbl_spec_v) = {
+                let row = gtk4::Box::builder().spacing(6).build();
+                let lbl = gtk4::Label::builder().label("Gloss:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let adj = gtk4::Adjustment::new(ext.gloss_specular as f64 * 100.0, 0.0, 100.0, 1.0, 10.0, 0.0);
+                let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
+                let lbl_val = gtk4::Label::builder().label(&format!("{:.0}%", ext.gloss_specular * 100.0)).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();
+                let lbl_v_c = lbl_val.clone();
+                scale.connect_value_changed(move |s| {
+                    lbl_v_c.set_label(&format!("{:.0}%", s.value()));
+                });
+                row.append(&lbl);
+                row.append(&scale);
+                row.append(&lbl_val);
+                (row, scale, lbl_val)
+            };
+
+            let (row_tap, scale_tap, _lbl_tap_v) = {
+                let row = gtk4::Box::builder().spacing(6).build();
+                let lbl = gtk4::Label::builder().label("Taper:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let adj = gtk4::Adjustment::new(ext.taper as f64, 0.2, 2.5, 0.05, 0.2, 0.0);
+                let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
+                let lbl_val = gtk4::Label::builder().label(&format!("{:.2}x", ext.taper)).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();
+                let lbl_v_c = lbl_val.clone();
+                scale.connect_value_changed(move |s| {
+                    lbl_v_c.set_label(&format!("{:.2}x", s.value()));
+                });
+                row.append(&lbl);
+                row.append(&scale);
+                row.append(&lbl_val);
+                (row, scale, lbl_val)
+            };
+
+            let (row_twist, scale_twist, _lbl_twist_v) = {
+                let row = gtk4::Box::builder().spacing(6).build();
+                let lbl = gtk4::Label::builder().label("Twist:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let adj = gtk4::Adjustment::new(ext.twist_deg as f64, -180.0, 180.0, 2.0, 15.0, 0.0);
+                let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
+                let lbl_val = gtk4::Label::builder().label(&format!("{:.0}°", ext.twist_deg)).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();
+                let lbl_v_c = lbl_val.clone();
+                scale.connect_value_changed(move |s| {
+                    lbl_v_c.set_label(&format!("{:.0}°", s.value()));
+                });
+                row.append(&lbl);
+                row.append(&scale);
+                row.append(&lbl_val);
+                (row, scale, lbl_val)
+            };
+
+            let (row_c2d, scale_c2d, _lbl_c2d_v) = {
+                let row = gtk4::Box::builder().spacing(6).build();
+                let lbl = gtk4::Label::builder().label("Corner 2D:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let adj = gtk4::Adjustment::new(ext.corner_radius_2d as f64, 0.0, 60.0, 1.0, 5.0, 0.0);
+                let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
+                let lbl_val = gtk4::Label::builder().label(&format!("{:.0}px", ext.corner_radius_2d)).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();
+                let lbl_v_c = lbl_val.clone();
+                scale.connect_value_changed(move |s| {
+                    lbl_v_c.set_label(&format!("{:.0}px", s.value()));
+                });
+                row.append(&lbl);
+                row.append(&scale);
+                row.append(&lbl_val);
+                (row, scale, lbl_val)
+            };
+
+            box_adv.append(&row_pers);
+            box_adv.append(&row_metal);
+            box_adv.append(&row_rough);
+            box_adv.append(&row_rim);
+            box_adv.append(&row_spec);
+            box_adv.append(&row_tap);
+            box_adv.append(&row_twist);
+            box_adv.append(&row_c2d);
+
+            exp_adv.set_child(Some(&box_adv));
+
+            // Row 4: Clean Libadwaita Material DropDown + Custom Side Color Picker
+            let row_material = gtk4::Box::builder().spacing(6).build();
+            let lbl_mat = gtk4::Label::builder()
+                .label(&crate::core::gettext("Material:"))
                 .css_classes(["caption", "dim-label"])
-                .hexpand(true)
+                .width_request(45)
                 .xalign(0.0)
                 .build();
 
-            let color_palette = gtk4::Box::builder()
-                .orientation(gtk4::Orientation::Horizontal)
-                .spacing(4)
-                .build();
+            let combo_mat = gtk4::DropDown::from_strings(&[
+                &crate::core::gettext("Default Plastic"),
+                &crate::core::gettext("Chrome Mirror"),
+                &crate::core::gettext("Polished Gold"),
+                &crate::core::gettext("Crystal Glass"),
+                &crate::core::gettext("Matte Clay"),
+                &crate::core::gettext("Neon Glow"),
+                &crate::core::gettext("Titanium Dark"),
+                &crate::core::gettext("Royal Velvet"),
+            ]);
+            combo_mat.set_hexpand(true);
 
-            let colors = [
-                ("Auto", None),
-                (
-                    "Dark Metal",
-                    Some(crate::core::Color::new(0.12, 0.14, 0.18, 1.0)),
-                ),
-                ("Gold", Some(crate::core::Color::new(0.95, 0.75, 0.2, 1.0))),
-                ("Ruby", Some(crate::core::Color::new(0.85, 0.2, 0.35, 1.0))),
-                ("Cyan", Some(crate::core::Color::new(0.1, 0.8, 0.95, 1.0))),
-            ];
+            let mat_idx = match ext.material_preset {
+                crate::core::modifier::Material3DPreset::Chrome => 1,
+                crate::core::modifier::Material3DPreset::Gold => 2,
+                crate::core::modifier::Material3DPreset::Glass => 3,
+                crate::core::modifier::Material3DPreset::MatteClay => 4,
+                crate::core::modifier::Material3DPreset::Neon => 5,
+                crate::core::modifier::Material3DPreset::Titanium => 6,
+                crate::core::modifier::Material3DPreset::Velvet => 7,
+                crate::core::modifier::Material3DPreset::Default => 0,
+            };
+            combo_mat.set_selected(mat_idx);
 
-            let active_color_cell = Rc::new(std::cell::RefCell::new(ext.custom_side_color));
-
-            for (c_name, c_opt) in colors {
-                let btn = gtk4::Button::builder()
-                    .label(c_name)
-                    .css_classes(["flat", "caption"])
-                    .build();
-
-                let canvas_col = canvas.clone();
-                let active_cell = active_color_cell.clone();
-                btn.connect_clicked(move |_| {
-                    *active_cell.borrow_mut() = c_opt;
-                    let mut state = canvas_col.state.borrow_mut();
-                    if let Some(elem) = state.document.find_element_mut(elem_id) {
-                        if let Some(mods) = elem.modifiers_mut() {
-                            if let Some(Modifier::Extrude3D(e)) = mods.get_mut(mod_idx) {
-                                e.custom_side_color = c_opt;
-                            }
-                        }
-                    }
-                    state.mark_dirty();
-                    drop(state);
-                    if let Ok(st) = canvas_col.state.try_borrow() {
-                        st.notify_status();
-                    }
-                    canvas_col.queue_draw();
-                });
-                color_palette.append(&btn);
+            let color_dialog = gtk4::ColorDialog::builder().with_alpha(true).build();
+            let color_btn = gtk4::ColorDialogButton::new(Some(color_dialog));
+            color_btn.set_tooltip_text(Some(&crate::core::gettext("Custom Side Color")));
+            if let Some(c) = ext.custom_side_color {
+                color_btn.set_rgba(&gtk4::gdk::RGBA::new(c.r, c.g, c.b, c.a));
+            } else {
+                color_btn.set_rgba(&gtk4::gdk::RGBA::new(0.5, 0.5, 0.5, 1.0));
             }
 
-            row_col.append(&lbl_c);
-            row_col.append(&color_palette);
-            body.append(&row_col);
+            row_material.append(&lbl_mat);
+            row_material.append(&combo_mat);
+            row_material.append(&color_btn);
+            container_3d.append(&row_material);
+            container_3d.append(&exp_adv);
 
-            // Row 0: 1-Click 3D Presets Bar
-            let row_presets = gtk4::Box::builder()
-                .orientation(gtk4::Orientation::Horizontal)
-                .spacing(4)
-                .margin_bottom(6)
-                .build();
+            body.append(&container_3d);
 
-            let preset_list = [
-                ("Extrude", 1.0, 0.0, 0.0),
-                ("Pyramid", 0.3, 0.0, 0.0),
-                ("Twist 3D", 1.0, 45.0, 0.0),
-                ("Bevel", 1.0, 0.0, 4.0),
-            ];
+            // GestureDrag on 3D Trackball
+            let drag_tb = gtk4::GestureDrag::new();
+            let start_rot_cell = Rc::new(std::cell::Cell::new((0.0f32, 0.0f32)));
+            let rx_drag_c = rx_cell.clone();
+            let ry_drag_c = ry_cell.clone();
 
-            for (p_name, p_taper, p_twist, p_bevel) in preset_list {
-                let p_btn = gtk4::Button::builder()
-                    .label(p_name)
-                    .css_classes(["flat", "caption"])
-                    .build();
+            let sr_begin = start_rot_cell.clone();
+            let rx_b = rx_drag_c.clone();
+            let ry_b = ry_drag_c.clone();
+            drag_tb.connect_drag_begin(move |_, _x, _y| {
+                sr_begin.set((*rx_b.borrow(), *ry_b.borrow()));
+            });
 
-                let canvas_p = canvas.clone();
-                p_btn.connect_clicked(move |_| {
-                    let mut state = canvas_p.state.borrow_mut();
-                    if let Some(elem) = state.document.find_element_mut(elem_id) {
-                        if let Some(mods) = elem.modifiers_mut() {
-                            if let Some(Modifier::Extrude3D(e)) = mods.get_mut(mod_idx) {
-                                e.taper = p_taper;
-                                e.twist_deg = p_twist;
-                                e.bevel_radius = p_bevel;
-                            }
-                        }
+            // GestureDrag on Light Gizmo
+            let drag_lg = gtk4::GestureDrag::new();
+            let laz_drag_c = light_az_cell.clone();
+            let lel_drag_c = light_el_cell.clone();
+            let da_lg_drag = da_light.clone();
+
+            let update_light_from_coords = {
+                let laz_u = laz_drag_c.clone();
+                let lel_u = lel_drag_c.clone();
+                let da_u = da_lg_drag.clone();
+                move |x: f64, y: f64, w: f64, h: f64| {
+                    let cx = w * 0.5;
+                    let cy = h * 0.5;
+                    let max_r = (w.min(h) * 0.46) - 2.0;
+                    let dx = x - cx;
+                    let dy = -(y - cy);
+                    let dist = (dx * dx + dy * dy).sqrt();
+                    let angle_rad = dy.atan2(dx);
+                    let mut deg = angle_rad.to_degrees() as f32;
+                    if deg < 0.0 {
+                        deg += 360.0;
                     }
-                    state.mark_dirty();
-                    drop(state);
-                    if let Ok(st) = canvas_p.state.try_borrow() {
-                        st.notify_status();
-                    }
-                    canvas_p.queue_draw();
-                });
-                row_presets.append(&p_btn);
-            }
-            body.append(&row_presets);
+                    let el = (1.0 - (dist / (max_r * 0.78)).min(1.0)) * 90.0;
+                    *laz_u.borrow_mut() = deg;
+                    *lel_u.borrow_mut() = el as f32;
+                    da_u.queue_draw();
+                }
+            };
 
-            // Wire Live Responsive Callbacks
+            let ulfc_begin = update_light_from_coords.clone();
+            let da_lg_b = da_light.clone();
+            drag_lg.connect_drag_begin(move |_, x, y| {
+                ulfc_begin(x, y, da_lg_b.width() as f64, da_lg_b.height() as f64);
+            });
+
+            let ulfc_update = update_light_from_coords;
+            let da_lg_u = da_light.clone();
+            drag_lg.connect_drag_update(move |gesture, offset_x, offset_y| {
+                if let Some((start_x, start_y)) = gesture.start_point() {
+                    ulfc_update(start_x + offset_x, start_y + offset_y, da_lg_u.width() as f64, da_lg_u.height() as f64);
+                }
+            });
+            da_light.add_controller(drag_lg);
+
+            // Double-click on Light Gizmo resets light
+            let click_lg = gtk4::GestureClick::new();
+            let laz_click = light_az_cell.clone();
+            let lel_click = light_el_cell.clone();
+            let da_lg_click = da_light.clone();
+            click_lg.connect_pressed(move |_, n_press, _, _| {
+                if n_press >= 2 {
+                    *laz_click.borrow_mut() = 135.0;
+                    *lel_click.borrow_mut() = 45.0;
+                    da_lg_click.queue_draw();
+                }
+            });
+            da_light.add_controller(click_lg);
+
+            // Live Update Callback
             let canvas_cb = canvas.clone();
-            let active_cell_sync = active_color_cell;
-            let update_ext = move |m_idx: u32, d: f32, a: f32, sh: bool| {
-                let sel_m = match m_idx {
-                    1 => Extrude3DMode::Cabinet,
-                    2 => Extrude3DMode::Perspective,
-                    _ => Extrude3DMode::Isometric,
+            let active_cell_sync = active_color_cell.clone();
+            let active_pres_sync = active_preset_cell.clone();
+
+            let s_pers1 = scale_pers.clone();
+            let s_dep1 = scale_dep.clone();
+            let s_c2d1 = scale_c2d.clone();
+            let c_bstyle1 = combo_bstyle.clone();
+            let s_bev1 = scale_bev.clone();
+            let s_tap1 = scale_tap.clone();
+            let s_twist1 = scale_twist.clone();
+            let sw_sh1 = sw_sh.clone();
+            let s_spec1 = scale_spec.clone();
+            let s_metal1 = scale_metal.clone();
+            let s_rough1 = scale_rough.clone();
+            let s_rim1 = scale_rim.clone();
+            let combo_pres_sync = combo_pres.clone();
+            let da_tb1 = da_trackball.clone();
+
+            let rx_c_sync = rx_cell.clone();
+            let ry_c_sync = ry_cell.clone();
+            let rz_c_sync = rz_cell.clone();
+            let laz_c_sync = light_az_cell;
+            let lel_c_sync = light_el_cell;
+
+            let combo_p_closure = combo_pres_sync.clone();
+            let sync_all = move || {
+                let rx = *rx_c_sync.borrow();
+                let ry = *ry_c_sync.borrow();
+                let rz = *rz_c_sync.borrow();
+                let laz = *laz_c_sync.borrow();
+                let lel = *lel_c_sync.borrow();
+
+                let pers = s_pers1.value() as f32;
+                let dep = s_dep1.value() as f32;
+                let c2d = s_c2d1.value() as f32;
+                let bev = s_bev1.value() as f32;
+                let tap = s_tap1.value() as f32;
+                let twist = s_twist1.value() as f32;
+                let sh = sw_sh1.is_active();
+                let spec = (s_spec1.value() / 100.0) as f32;
+                let metal = (s_metal1.value() / 100.0) as f32;
+                let rough = (s_rough1.value() / 100.0) as f32;
+                let rim = (s_rim1.value() / 100.0) as f32;
+
+                let sel_m = match combo_p_closure.selected() {
+                    1 | 2 => Extrude3DMode::Isometric,
+                    8 => Extrude3DMode::Cabinet,
+                    _ => Extrude3DMode::Custom3D,
                 };
+
+                let sel_bstyle = match c_bstyle1.selected() {
+                    1 => Bevel3DStyle::Chamfer,
+                    2 => Bevel3DStyle::Convex,
+                    _ => Bevel3DStyle::Round,
+                };
+
+                da_tb1.queue_draw();
+
                 let side_col = *active_cell_sync.borrow();
+                let pres = *active_pres_sync.borrow();
                 let mut state = canvas_cb.state.borrow_mut();
                 if let Some(elem) = state.document.find_element_mut(elem_id) {
                     if let Some(mods) = elem.modifiers_mut() {
                         if let Some(Modifier::Extrude3D(e)) = mods.get_mut(mod_idx) {
                             e.mode = sel_m;
-                            e.depth = d;
-                            e.angle_deg = a;
-                            e.custom_side_color = side_col;
+                            e.rot_x = rx;
+                            e.rot_y = ry;
+                            e.rot_z = rz;
+                            e.perspective = pers;
+                            e.depth = dep;
+                            e.corner_radius_2d = c2d;
+                            e.bevel_style = sel_bstyle;
+                            e.bevel_radius = bev;
+                            e.taper = tap;
+                            e.twist_deg = twist;
                             e.shading = sh;
+                            e.light_angle_deg = laz;
+                            e.light_elevation_deg = lel;
+                            e.gloss_specular = spec;
+                            e.material_preset = pres;
+                            e.metallic = metal;
+                            e.roughness = rough;
+                            e.rim_light = rim;
+                            e.custom_side_color = side_col;
                         }
                     }
                 }
@@ -1401,94 +1812,147 @@ fn build_modifier_card(
                 canvas_cb.queue_draw();
             };
 
-            let u_e = update_ext;
-            let c_m1 = combo_m.clone();
-            let s_d1 = spin_d.clone();
-            let s_a1 = spin_a.clone();
-            let sw_sh1 = sw_sh.clone();
-            let da_k_draw = da_knob.clone();
-            let angle_cell_sync = angle_cell.clone();
+            let su_rc = Rc::new(sync_all);
 
-            let sync_update = move || {
-                let a = s_a1.value() as f32;
-                *angle_cell_sync.borrow_mut() = a;
-                da_k_draw.queue_draw();
-                u_e(c_m1.selected(), s_d1.value() as f32, a, sw_sh1.is_active());
-            };
-
-            let su1 = Rc::new(sync_update);
-
-            let is_updating = Rc::new(std::cell::Cell::new(false));
-
-            // Drag Gesture on Dimmer Knob Widget with continuous mouse tracking
-            let drag_knob = gtk4::GestureDrag::new();
-            let da_k_drag = da_knob.clone();
-            let spin_a_knob = spin_a.clone();
-            let start_pos_cell = Rc::new(std::cell::Cell::new((0.0f64, 0.0f64)));
-
-            let sp_begin = start_pos_cell.clone();
-            let spin_a_begin = spin_a_knob.clone();
-            let da_k_begin = da_k_drag.clone();
-            drag_knob.connect_drag_begin(move |_, x, y| {
-                sp_begin.set((x, y));
-                let cx = da_k_begin.width() as f64 * 0.5;
-                let cy = da_k_begin.height() as f64 * 0.5;
-                let dx = x - cx;
-                let dy = y - cy;
-                let deg = dy.atan2(dx).to_degrees();
-                spin_a_begin.set_value(deg);
+            let su_drag_tb = su_rc.clone();
+            let sr_update = start_rot_cell;
+            let rx_u = rx_drag_c;
+            let ry_u = ry_drag_c;
+            drag_tb.connect_drag_update(move |_, offset_x, offset_y| {
+                let (orig_rx, orig_ry) = sr_update.get();
+                let new_rx = (orig_rx - offset_y as f32 * 1.5).clamp(-180.0, 180.0);
+                let new_ry = (orig_ry + offset_x as f32 * 1.5).clamp(-180.0, 180.0);
+                *rx_u.borrow_mut() = new_rx;
+                *ry_u.borrow_mut() = new_ry;
+                su_drag_tb();
             });
+            da_trackball.add_controller(drag_tb);
 
-            let sp_update = start_pos_cell;
-            drag_knob.connect_drag_update(move |_, offset_x, offset_y| {
-                let (sx, sy) = sp_update.get();
-                let curr_x = sx + offset_x;
-                let curr_y = sy + offset_y;
-                let cx = da_k_drag.width() as f64 * 0.5;
-                let cy = da_k_drag.height() as f64 * 0.5;
-                let dx = curr_x - cx;
-                let dy = curr_y - cy;
-                let deg = dy.atan2(dx).to_degrees();
-                spin_a_knob.set_value(deg);
+            let su_drag_lg = su_rc.clone();
+            let drag_lg_sync = gtk4::GestureDrag::new();
+            drag_lg_sync.connect_drag_update(move |_, _, _| {
+                su_drag_lg();
             });
-            da_knob.add_controller(drag_knob);
+            da_light.add_controller(drag_lg_sync);
 
-            let su_m = su1.clone();
-            combo_m.connect_selected_notify(move |_| su_m());
-
-            let su_sd = su1.clone();
-            let sc_d2 = scale_d.clone();
-            let is_u1 = is_updating.clone();
-            spin_d.connect_value_changed(move |s| {
-                if is_u1.get() {
-                    return;
+            // Double click on 3D Trackball resets to Front view
+            let click_tb = gtk4::GestureClick::new();
+            let rx_click = rx_cell.clone();
+            let ry_click = ry_cell.clone();
+            let rz_click = rz_cell;
+            let su_click_tb = su_rc.clone();
+            click_tb.connect_pressed(move |_, n_press, _, _| {
+                if n_press >= 2 {
+                    *rx_click.borrow_mut() = 0.0;
+                    *ry_click.borrow_mut() = 0.0;
+                    *rz_click.borrow_mut() = 0.0;
+                    su_click_tb();
                 }
-                is_u1.set(true);
-                sc_d2.set_value(s.value());
-                su_sd();
-                is_u1.set(false);
             });
+            da_trackball.add_controller(click_tb);
 
-            let su_scd = su1.clone();
-            let spin_d2 = spin_d.clone();
-            let is_u2 = is_updating.clone();
-            scale_d.connect_value_changed(move |s| {
-                if is_u2.get() {
-                    return;
+            // Preset Dropdown Selection
+            let rx_p = rx_cell;
+            let ry_p = ry_cell;
+            let s_pers_p = scale_pers.clone();
+            let s_dep_p = scale_dep.clone();
+            let s_tap_p = scale_tap.clone();
+            let combo_pres_c = combo_pres.clone();
+            let su_pres = su_rc.clone();
+            combo_pres.connect_selected_notify(move |_| {
+                match combo_pres_c.selected() {
+                    1 => { *rx_p.borrow_mut() = 35.26; *ry_p.borrow_mut() = -45.0; s_pers_p.set_value(0.0); s_dep_p.set_value(40.0); s_tap_p.set_value(1.0); }
+                    2 => { *rx_p.borrow_mut() = 35.26; *ry_p.borrow_mut() = 45.0; s_pers_p.set_value(0.0); s_dep_p.set_value(40.0); s_tap_p.set_value(1.0); }
+                    3 => { *rx_p.borrow_mut() = 0.0; *ry_p.borrow_mut() = 0.0; s_pers_p.set_value(600.0); s_dep_p.set_value(40.0); s_tap_p.set_value(1.0); }
+                    4 => { *rx_p.borrow_mut() = 90.0; *ry_p.borrow_mut() = 0.0; s_pers_p.set_value(0.0); s_dep_p.set_value(40.0); s_tap_p.set_value(1.0); }
+                    5 => { *rx_p.borrow_mut() = 25.0; *ry_p.borrow_mut() = -35.0; s_pers_p.set_value(600.0); s_dep_p.set_value(45.0); s_tap_p.set_value(1.0); }
+                    6 => { *rx_p.borrow_mut() = -20.0; *ry_p.borrow_mut() = 40.0; s_pers_p.set_value(450.0); s_dep_p.set_value(50.0); s_tap_p.set_value(0.8); }
+                    7 => { *rx_p.borrow_mut() = 15.0; *ry_p.borrow_mut() = 75.0; s_pers_p.set_value(700.0); s_dep_p.set_value(30.0); s_tap_p.set_value(1.0); }
+                    8 => { *rx_p.borrow_mut() = 0.0; *ry_p.borrow_mut() = 0.0; s_pers_p.set_value(0.0); s_dep_p.set_value(40.0); s_tap_p.set_value(1.0); }
+                    _ => {}
                 }
-                is_u2.set(true);
-                spin_d2.set_value(s.value());
-                su_scd();
-                is_u2.set(false);
+                su_pres();
             });
 
-            let su_sa = su1.clone();
-            spin_a.connect_value_changed(move |_| {
-                su_sa();
+            let su1 = su_rc.clone();
+            combo_pres_sync.connect_selected_notify(move |_| su1());
+
+            let su2 = su_rc.clone();
+            sw_sh.connect_active_notify(move |_| su2());
+
+            let su6 = su_rc.clone();
+            scale_dep.connect_value_changed(move |_| su6());
+
+            let su7 = su_rc.clone();
+            scale_pers.connect_value_changed(move |_| su7());
+
+            let su8 = su_rc.clone();
+            scale_c2d.connect_value_changed(move |_| su8());
+
+            let su9 = su_rc.clone();
+            combo_bstyle.connect_selected_notify(move |_| su9());
+
+            let su10 = su_rc.clone();
+            scale_bev.connect_value_changed(move |_| su10());
+
+            let su11 = su_rc.clone();
+            scale_tap.connect_value_changed(move |_| su11());
+
+            let su12 = su_rc.clone();
+            scale_twist.connect_value_changed(move |_| su12());
+
+            let su13 = su_rc.clone();
+            scale_metal.connect_value_changed(move |_| su13());
+
+            let su14 = su_rc.clone();
+            scale_rough.connect_value_changed(move |_| su14());
+
+            let su15 = su_rc.clone();
+            scale_rim.connect_value_changed(move |_| su15());
+
+            let su16 = su_rc.clone();
+            scale_spec.connect_value_changed(move |_| su16());
+
+            let s_metal_p = scale_metal.clone();
+            let s_rough_p = scale_rough.clone();
+            let s_rim_p = scale_rim.clone();
+            let s_spec_p = scale_spec.clone();
+            let act_pres_c = active_preset_cell.clone();
+            let act_col_c = active_color_cell.clone();
+            let col_btn_c = color_btn.clone();
+            let combo_mat_c = combo_mat.clone();
+            let su_mat = su_rc.clone();
+
+            combo_mat.connect_selected_notify(move |_| {
+                let (pres, c_opt, p_metal, p_rough, p_rim, p_gloss) = match combo_mat_c.selected() {
+                    1 => (crate::core::modifier::Material3DPreset::Chrome, Some(crate::core::Color::new(0.20, 0.22, 0.26, 1.0)), 0.95, 0.05, 0.70, 0.95),
+                    2 => (crate::core::modifier::Material3DPreset::Gold, Some(crate::core::Color::new(0.95, 0.76, 0.18, 1.0)), 0.92, 0.12, 0.60, 0.88),
+                    3 => (crate::core::modifier::Material3DPreset::Glass, Some(crate::core::Color::new(0.15, 0.85, 0.95, 1.0)), 0.0, 0.04, 0.95, 0.92),
+                    4 => (crate::core::modifier::Material3DPreset::MatteClay, Some(crate::core::Color::new(0.88, 0.84, 0.80, 1.0)), 0.0, 0.95, 0.08, 0.02),
+                    5 => (crate::core::modifier::Material3DPreset::Neon, Some(crate::core::Color::new(0.95, 0.15, 0.65, 1.0)), 0.15, 0.20, 1.0, 0.75),
+                    6 => (crate::core::modifier::Material3DPreset::Titanium, Some(crate::core::Color::new(0.12, 0.15, 0.19, 1.0)), 0.88, 0.22, 0.55, 0.72),
+                    7 => (crate::core::modifier::Material3DPreset::Velvet, Some(crate::core::Color::new(0.48, 0.12, 0.65, 1.0)), 0.0, 0.85, 0.90, 0.05),
+                    _ => (crate::core::modifier::Material3DPreset::Default, None, 0.0, 0.35, 0.30, 0.40),
+                };
+                *act_pres_c.borrow_mut() = pres;
+                *act_col_c.borrow_mut() = c_opt;
+                if let Some(c) = c_opt {
+                    col_btn_c.set_rgba(&gtk4::gdk::RGBA::new(c.r, c.g, c.b, c.a));
+                }
+                s_metal_p.set_value(p_metal as f64 * 100.0);
+                s_rough_p.set_value(p_rough as f64 * 100.0);
+                s_rim_p.set_value(p_rim as f64 * 100.0);
+                s_spec_p.set_value(p_gloss as f64 * 100.0);
+                su_mat();
             });
 
-            let su_sh = su1;
-            sw_sh.connect_active_notify(move |_| su_sh());
+            let act_col_btn = active_color_cell;
+            let su_col_btn = su_rc;
+            color_btn.connect_rgba_notify(move |btn| {
+                let rgba = btn.rgba();
+                *act_col_btn.borrow_mut() = Some(crate::core::Color::new(rgba.red(), rgba.green(), rgba.blue(), rgba.alpha()));
+                su_col_btn();
+            });
         }
         Modifier::Twist(tw) => {
             let grid = gtk4::Grid::builder()

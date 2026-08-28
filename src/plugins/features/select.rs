@@ -90,8 +90,14 @@ fn hit_modifier_handle(
         match m {
             Modifier::Extrude3D(ext) => {
                 let center = Point::new(bounds.x + bounds.width / 2.0, bounds.y + bounds.height / 2.0);
-                let rad = ext.angle_deg.to_radians();
-                let target = Point::new(center.x + ext.depth * rad.cos(), center.y + ext.depth * rad.sin());
+                let (rot_x, rot_y, rot_z, perspective) = match ext.mode {
+                    crate::core::modifier::Extrude3DMode::Isometric => (35.264, -45.0, 0.0, 0.0),
+                    crate::core::modifier::Extrude3DMode::Cabinet => (0.0, 0.0, 0.0, 0.0),
+                    crate::core::modifier::Extrude3DMode::Perspective => (20.0, -30.0, 0.0, 600.0),
+                    crate::core::modifier::Extrude3DMode::Custom3D => (ext.rot_x, ext.rot_y, ext.rot_z, ext.perspective),
+                };
+                let target_3d = crate::core::modifier::Vec3::new(0.0, 0.0, -ext.depth).rotate_euler(rot_x, rot_y, rot_z);
+                let target = target_3d.project_to_screen(center, perspective);
                 if p.distance_to(target) <= hit_r {
                     return Some((mod_idx, ModifierHandleTarget::Extrude3DHandle, center));
                 }

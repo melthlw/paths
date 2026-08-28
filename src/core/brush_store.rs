@@ -79,7 +79,6 @@ pub fn ensure_user_brushes_dir() -> PathBuf {
     dir
 }
 
-#[allow(dead_code)]
 pub fn load_custom_brush_presets() -> Vec<CustomBrushPreset> {
     let dir = ensure_user_brushes_dir();
     let mut presets = Vec::new();
@@ -107,8 +106,13 @@ pub fn save_custom_brush_preset(preset: &CustomBrushPreset) -> Result<(), String
     let json_str = serde_json::to_string_pretty(preset)
         .map_err(|e| format!("Failed to serialize brush preset: {}", e))?;
 
-    std::fs::write(&file_path, json_str)
-        .map_err(|e| format!("Failed to write brush preset file {}: {}", file_path.display(), e))?;
+    std::fs::write(&file_path, json_str).map_err(|e| {
+        format!(
+            "Failed to write brush preset file {}: {}",
+            file_path.display(),
+            e
+        )
+    })?;
 
     Ok(())
 }

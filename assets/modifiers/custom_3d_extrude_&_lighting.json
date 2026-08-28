@@ -1,17 +1,34 @@
 {
   "id": "custom_3d_extrude_&_lighting",
-  "name": "Custom 3D Extrude",
+  "name": "Custom 3D Extrude & Lighting",
   "description": "Saved user modifier preset",
   "modifier": {
     "Extrude3D": {
       "enabled": true,
-      "depth": 8.767123,
-      "angle_deg": -147.12125,
+      "rot_x": 20.0,
+      "rot_y": -30.0,
+      "rot_z": 0.0,
+      "perspective": 600.0,
+      "depth": 40.0,
+      "taper": 1.0,
+      "twist_deg": 0.0,
+      "corner_radius_2d": 0.0,
+      "bevel_style": "Round",
+      "bevel_radius": 0.0,
+      "bevel_segments": 6,
       "shading": true,
-      "shading_intensity": 0.6,
-      "custom_side_color": null,
+      "shading_intensity": 0.65,
+      "ambient_light": 0.4,
       "light_angle_deg": 135.0,
-      "mode": "Isometric"
+      "light_elevation_deg": 45.0,
+      "gloss_specular": 0.35,
+      "material_preset": "Default",
+      "metallic": 0.0,
+      "roughness": 0.35,
+      "rim_light": 0.3,
+      "custom_side_color": null,
+      "mode": "Custom3D",
+      "angle_deg": 45.0
     }
   }
 }

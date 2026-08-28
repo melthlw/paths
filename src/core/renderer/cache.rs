@@ -1,7 +1,7 @@
-use std::collections::HashMap;
-use skia_safe as skia;
 use crate::core::document::Document;
 use crate::core::element::{Element, ElementId};
+use skia_safe as skia;
+use std::collections::HashMap;
 
 #[derive(Hash, Eq, PartialEq, Clone, Copy, Debug)]
 pub struct PictureCacheKey {
@@ -17,13 +17,17 @@ pub struct PictureCache {
     pictures: HashMap<PictureCacheKey, skia::Picture>,
 }
 
+#[allow(dead_code)]
 impl PictureCache {
-    #[allow(dead_code)]
     pub fn new() -> Self {
         Self::default()
     }
 
-    pub fn get_or_record(&mut self, element: &Element, document: &Document) -> Option<skia::Picture> {
+    pub fn get_or_record(
+        &mut self,
+        element: &Element,
+        document: &Document,
+    ) -> Option<skia::Picture> {
         let bounds = element.bounds().normalize();
         let key = PictureCacheKey {
             id: element.id(),
@@ -56,7 +60,6 @@ impl PictureCache {
         }
     }
 
-    #[allow(dead_code)]
     pub fn invalidate(&mut self, id: ElementId) {
         self.pictures.retain(|k, _| k.id != id);
     }
@@ -76,7 +79,11 @@ mod tests {
     fn test_picture_cache_lifecycle() {
         let mut cache = PictureCache::new();
         let doc = Document::default();
-        let elem = Element::Rect(RectElement::new(Rect::new(0.0, 0.0, 100.0, 100.0), None, None));
+        let elem = Element::Rect(RectElement::new(
+            Rect::new(0.0, 0.0, 100.0, 100.0),
+            None,
+            None,
+        ));
 
         // First query records picture
         let pic1 = cache.get_or_record(&elem, &doc);

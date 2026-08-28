@@ -2,6 +2,7 @@ pub mod brush;
 pub mod gradient;
 pub mod helpers;
 pub mod mesh;
+pub mod paint_bucket;
 pub mod pattern;
 pub mod pen;
 pub mod pen_brush_text;
@@ -15,6 +16,7 @@ use std::rc::Rc;
 use self::brush::{build_brush_controls, BrushControls};
 use self::gradient::{build_gradient_controls, GradientControls};
 use self::mesh::{build_mesh_controls, MeshControls};
+use self::paint_bucket::{build_paint_bucket_controls, PaintBucketControls};
 use self::pattern::{build_pattern_controls, PatternControls};
 use self::pen::{build_pen_controls, PenControls};
 use self::pen_brush_text::build_pen_brush_text_controls;
@@ -101,6 +103,8 @@ pub struct ToolOptionsBar {
     grad_controls: GradientControls,
     pattern_box: gtk4::Box,
     pattern_controls: PatternControls,
+    paint_bucket_box: gtk4::Box,
+    paint_bucket_controls: PaintBucketControls,
     canvas: CanvasWidget,
     is_syncing: Rc<Cell<bool>>,
     is_top: Rc<Cell<bool>>,
@@ -237,6 +241,10 @@ impl ToolOptionsBar {
         let pattern_controls = build_pattern_controls(&canvas, &is_syncing);
         let pattern_box = pattern_controls.pattern_box.clone();
         left_capsule.append(&pattern_box);
+
+        let paint_bucket_controls = build_paint_bucket_controls(&canvas, &is_syncing);
+        let paint_bucket_box = paint_bucket_controls.paint_bucket_box.clone();
+        left_capsule.append(&paint_bucket_box);
 
         container.append(&left_capsule);
         container.append(&text_capsule);
@@ -404,6 +412,8 @@ impl ToolOptionsBar {
             grad_controls,
             pattern_box,
             pattern_controls,
+            paint_bucket_box,
+            paint_bucket_controls,
             canvas,
             is_syncing,
             is_top,
@@ -516,6 +526,7 @@ impl ToolOptionsBar {
             self.mesh_box.set_visible(false);
             self.grad_box.set_visible(false);
             self.pattern_box.set_visible(false);
+            self.paint_bucket_box.set_visible(false);
 
             self.is_syncing.set(true);
             match tool_id {
@@ -680,6 +691,7 @@ impl ToolOptionsBar {
             self.mesh_box.set_visible(false);
             self.grad_box.set_visible(false);
             self.pattern_box.set_visible(false);
+            self.paint_bucket_box.set_visible(false);
             self.path_editor_box.set_visible(true);
         } else if tool_id == "pen" || tool_id == "vector-pen" || tool_id == "vector_pen" {
             self.container.set_visible(true);
@@ -694,6 +706,7 @@ impl ToolOptionsBar {
             self.mesh_box.set_visible(false);
             self.grad_box.set_visible(false);
             self.pattern_box.set_visible(false);
+            self.paint_bucket_box.set_visible(false);
             self.pen_box.set_visible(true);
 
             if let Ok(state_b) = self.canvas.state().try_borrow() {
@@ -728,6 +741,7 @@ impl ToolOptionsBar {
             self.mesh_box.set_visible(false);
             self.grad_box.set_visible(false);
             self.pattern_box.set_visible(false);
+            self.paint_bucket_box.set_visible(false);
             self.brush_box.set_visible(true);
 
             if let Ok(state_b) = self.canvas.state().try_borrow() {
@@ -799,6 +813,8 @@ impl ToolOptionsBar {
             self.pen_box.set_visible(false);
             self.brush_box.set_visible(false);
             self.grad_box.set_visible(false);
+            self.pattern_box.set_visible(false);
+            self.paint_bucket_box.set_visible(false);
             self.mesh_box.set_visible(true);
 
             if let Some((node_idx, rows, cols, color, smooth_curves)) = self.canvas.get_active_mesh_info() {
@@ -827,6 +843,8 @@ impl ToolOptionsBar {
             self.pen_box.set_visible(false);
             self.brush_box.set_visible(false);
             self.mesh_box.set_visible(false);
+            self.pattern_box.set_visible(false);
+            self.paint_bucket_box.set_visible(false);
             self.grad_box.set_visible(true);
 
             if let Some((stop_idx, kind, angle, stops, color)) = self.canvas.get_active_gradient_info() {
@@ -862,6 +880,7 @@ impl ToolOptionsBar {
             self.brush_box.set_visible(false);
             self.mesh_box.set_visible(false);
             self.grad_box.set_visible(false);
+            self.paint_bucket_box.set_visible(false);
             self.pattern_box.set_visible(true);
 
             if let Some((pt, c1, c2, scale, angle, offset, custom_path)) = self.canvas.get_active_pattern_info() {
@@ -900,6 +919,54 @@ impl ToolOptionsBar {
                 self.pattern_controls.offset_y_spin.set_value(offset.y as f64);
                 self.is_syncing.set(false);
             }
+        } else if tool_id == "paint_bucket" {
+            self.container.set_visible(true);
+            self.text_capsule.set_visible(false);
+            self.page_capsule.set_visible(false);
+            self.left_capsule.set_visible(true);
+            self.right_capsule.set_visible(false);
+            self.general_box.set_visible(false);
+            self.shape_options_box.set_visible(false);
+            self.path_editor_box.set_visible(false);
+            self.pen_box.set_visible(false);
+            self.brush_box.set_visible(false);
+            self.mesh_box.set_visible(false);
+            self.grad_box.set_visible(false);
+            self.pattern_box.set_visible(false);
+            self.paint_bucket_box.set_visible(true);
+
+            if let Ok(state_b) = self.canvas.state().try_borrow() {
+                if let Some(feat) = state_b.plugin_manager.feature_by_id("paint_bucket") {
+                    if let Some(bucket) = feat.as_paint_bucket_feature() {
+                        self.is_syncing.set(true);
+                        self.paint_bucket_controls
+                            .btn_mode_create
+                            .set_active(bucket.mode == crate::plugins::features::paint_bucket::PaintBucketMode::CreateNew);
+                        self.paint_bucket_controls
+                            .btn_mode_paint
+                            .set_active(bucket.mode == crate::plugins::features::paint_bucket::PaintBucketMode::PaintExisting);
+                        self.paint_bucket_controls
+                            .btn_target_fill
+                            .set_active(bucket.target == crate::plugins::features::paint_bucket::PaintBucketTarget::Fill);
+                        self.paint_bucket_controls
+                            .btn_target_stroke
+                            .set_active(bucket.target == crate::plugins::features::paint_bucket::PaintBucketTarget::Stroke);
+                        self.paint_bucket_controls
+                            .btn_target_both
+                            .set_active(bucket.target == crate::plugins::features::paint_bucket::PaintBucketTarget::Both);
+                        self.paint_bucket_controls
+                            .btn_detect_intersection
+                            .set_active(bucket.detect_intersection);
+                        self.paint_bucket_controls
+                            .btn_auto_select
+                            .set_active(bucket.auto_select);
+                        self.paint_bucket_controls
+                            .offset_spin
+                            .set_value(bucket.offset as f64);
+                        self.is_syncing.set(false);
+                    }
+                }
+            }
         } else if has_selection {
             self.container.set_visible(true);
             self.text_capsule.set_visible(false);
@@ -914,6 +981,7 @@ impl ToolOptionsBar {
             self.mesh_box.set_visible(false);
             self.grad_box.set_visible(false);
             self.pattern_box.set_visible(false);
+            self.paint_bucket_box.set_visible(false);
 
             self.layer_box.set_visible(selected_count > 0);
             self.transform_modes_box.set_visible(true);
@@ -927,6 +995,7 @@ impl ToolOptionsBar {
             self.page_capsule.set_visible(false);
             self.pen_box.set_visible(false);
             self.brush_box.set_visible(false);
+            self.paint_bucket_box.set_visible(false);
         }
 
         let (icon_res, tool_name) = match tool_id {
