@@ -38,10 +38,12 @@ enum EditTarget {
 pub struct PathEditorFeature {
     active_target: Option<EditTarget>,
     selected_nodes: HashSet<(ElementId, usize)>,
+    initial_selected_nodes: HashSet<(ElementId, usize)>,
     hover_target: Option<EditTarget>,
     last_drag_pos: Option<Point>,
     box_select_start: Option<Point>,
     box_select_current: Option<Point>,
+    line_select_points: Vec<Point>,
     panning_last_screen: Option<Point>,
     is_dragging_segment: bool,
 }
@@ -51,14 +53,62 @@ impl Default for PathEditorFeature {
         Self {
             active_target: None,
             selected_nodes: HashSet::new(),
+            initial_selected_nodes: HashSet::new(),
             hover_target: None,
             last_drag_pos: None,
             box_select_start: None,
             box_select_current: None,
+            line_select_points: Vec::new(),
             panning_last_screen: None,
             is_dragging_segment: false,
         }
     }
+}
+
+/// Helper: Line segment intersection test
+fn segments_intersect(p1: Point, p2: Point, q1: Point, q2: Point) -> bool {
+    fn ccw(a: Point, b: Point, c: Point) -> bool {
+        (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x)
+    }
+    ccw(p1, q1, q2) != ccw(p2, q1, q2) && ccw(p1, p2, q1) != ccw(p1, p2, q2)
+}
+
+/// Helper: Point-in-polygon test (even-odd rule) to check if a point is inside an enclosed lasso loop
+fn point_in_polygon(pt: Point, poly: &[Point]) -> bool {
+    if poly.len() < 3 {
+        return false;
+    }
+    let mut inside = false;
+    let mut j = poly.len() - 1;
+    for i in 0..poly.len() {
+        let pi = poly[i];
+        let pj = poly[j];
+        let dy = pj.y - pi.y;
+        if (pi.y > pt.y) != (pj.y > pt.y) {
+            let dy_safe = if dy.abs() < 1e-6 { 1e-6 } else { dy };
+            if pt.x < (pj.x - pi.x) * (pt.y - pi.y) / dy_safe + pi.x {
+                inside = !inside;
+            }
+        }
+        j = i;
+    }
+    inside
+}
+
+/// Helper: Distance from a point to a polyline stroke
+fn is_node_near_polyline(node_pt: Point, polyline: &[Point], threshold: f32) -> bool {
+    if polyline.is_empty() {
+        return false;
+    }
+    if polyline.len() == 1 {
+        return node_pt.distance_to(polyline[0]) <= threshold;
+    }
+    for window in polyline.windows(2) {
+        if dist_to_segment(node_pt, window[0], window[1]) <= threshold {
+            return true;
+        }
+    }
+    false
 }
 
 /// Computes distance to a cubic Bézier curve segment and returns (min_dist, best_t)
@@ -427,6 +477,36 @@ impl FeaturePlugin for PathEditorFeature {
             return;
         }
 
+        // 1. If Alt is pressed on canvas or shape, activate Alt Selection Line (or handle edit if directly on handle)
+        if event.alt_pressed {
+            if let Some(target) = self.find_hit_target(ctx, event.world_pos) {
+                if matches!(target, EditTarget::HandleIn { .. } | EditTarget::HandleOut { .. }) {
+                    // Handle editing with Alt (breaking symmetry)
+                    self.active_target = Some(target);
+                    self.last_drag_pos = Some(event.world_pos);
+                    ctx.document.snapshot();
+                    ctx.set_cursor("grab");
+                    ctx.request_redraw();
+                    return;
+                }
+            }
+
+            // Start Alt Selection Line (Touch / Knife / Lasso Line)
+            if !event.shift_pressed {
+                self.selected_nodes.clear();
+            }
+            self.initial_selected_nodes = self.selected_nodes.clone();
+            self.line_select_points = vec![event.world_pos];
+            self.box_select_start = None;
+            self.box_select_current = None;
+            self.active_target = None;
+            self.last_drag_pos = None;
+            ctx.set_cursor("crosshair");
+            ctx.request_redraw();
+            return;
+        }
+
+        // 2. Direct hit on Handle, Node, or Segment
         if let Some(target) = self.find_hit_target(ctx, event.world_pos) {
             self.last_drag_pos = Some(event.world_pos);
 
@@ -527,23 +607,27 @@ impl FeaturePlugin for PathEditorFeature {
             return;
         }
 
-        // Element hit test or start box selection
-        if let Some(hit_id) = ctx.document.hit_test(event.world_pos) {
-            ctx.document.select(hit_id, event.shift_pressed);
-            self.selected_nodes.clear();
-            self.active_target = None;
-            self.last_drag_pos = None;
-        } else {
-            if !event.shift_pressed {
+        // 3. Not hitting handle/node/segment: Start Box Selection
+        if !event.shift_pressed {
+            if let Some(hit_id) = ctx.document.hit_test(event.world_pos) {
+                if !ctx.document.is_selected(hit_id) {
+                    ctx.document.select(hit_id, false);
+                }
+            } else {
                 ctx.document.deselect_all();
-                self.selected_nodes.clear();
             }
-            self.box_select_start = Some(event.world_pos);
-            self.box_select_current = Some(event.world_pos);
-            self.active_target = None;
-            self.last_drag_pos = None;
+            self.selected_nodes.clear();
+        } else if let Some(hit_id) = ctx.document.hit_test(event.world_pos) {
+            ctx.document.select(hit_id, true);
         }
 
+        self.initial_selected_nodes = self.selected_nodes.clone();
+        self.box_select_start = Some(event.world_pos);
+        self.box_select_current = Some(event.world_pos);
+        self.line_select_points.clear();
+        self.active_target = None;
+        self.last_drag_pos = None;
+        ctx.set_cursor("crosshair");
         ctx.request_redraw();
     }
 
@@ -558,25 +642,87 @@ impl FeaturePlugin for PathEditorFeature {
             return;
         }
 
-        // Box selecting nodes
-        if let (Some(start), Some(cur)) =
-            (self.box_select_start, &mut self.box_select_current)
-        {
-            *cur = event.world_pos;
-            let marquee = Rect::from_points(start, *cur).normalize();
+        let zoom = ctx.viewport.zoom.max(0.001);
+        let touch_threshold = (ctx.path_editor_config.hit_tolerance * 1.5) / zoom;
+
+        // 1. Alt Line Selecting (Touch Line)
+        if !self.line_select_points.is_empty() {
+            let cur = event.world_pos;
+            if self.line_select_points.last().map_or(true, |last| last.distance_to(cur) >= 2.0 / zoom) {
+                self.line_select_points.push(cur);
+            }
+
+            let mut current_nodes = self.initial_selected_nodes.clone();
+            let mut paths_to_select = Vec::new();
 
             for el in &ctx.document.elements {
                 if let Element::Path(p) = el {
-                    if ctx.document.is_selected(p.id) {
-                        for (i, node) in p.nodes.iter().enumerate() {
-                            if marquee.contains(node.point) {
-                                self.selected_nodes.insert((p.id, i));
-                            }
+                    let mut path_touched = false;
+                    for (i, node) in p.nodes.iter().enumerate() {
+                        let is_inside = point_in_polygon(node.point, &self.line_select_points);
+                        let is_near = is_node_near_polyline(node.point, &self.line_select_points, touch_threshold);
+                        if is_inside || is_near {
+                            current_nodes.insert((p.id, i));
+                            path_touched = true;
                         }
+                    }
+
+                    if path_touched && !ctx.document.is_selected(p.id) {
+                        paths_to_select.push(p.id);
                     }
                 }
             }
 
+            for pid in paths_to_select {
+                ctx.document.select(pid, true);
+            }
+
+            self.selected_nodes = current_nodes;
+            ctx.set_cursor("crosshair");
+            ctx.request_redraw();
+            return;
+        }
+
+        // 2. Box selecting nodes
+        if let (Some(start), Some(cur)) =
+            (self.box_select_start, &mut self.box_select_current)
+        {
+            if event.alt_pressed {
+                // Seamlessly switch to line selection if Alt is pressed mid-drag
+                self.line_select_points = vec![start, event.world_pos];
+                self.box_select_start = None;
+                self.box_select_current = None;
+                ctx.request_redraw();
+                return;
+            }
+
+            *cur = event.world_pos;
+            let marquee = Rect::from_points(start, *cur).normalize();
+
+            let mut current_nodes = self.initial_selected_nodes.clone();
+            let mut paths_to_select = Vec::new();
+
+            for el in &ctx.document.elements {
+                if let Element::Path(p) = el {
+                    let mut path_has_enclosed_nodes = false;
+                    for (i, node) in p.nodes.iter().enumerate() {
+                        if marquee.contains(node.point) {
+                            current_nodes.insert((p.id, i));
+                            path_has_enclosed_nodes = true;
+                        }
+                    }
+
+                    if path_has_enclosed_nodes && !ctx.document.is_selected(p.id) {
+                        paths_to_select.push(p.id);
+                    }
+                }
+            }
+
+            for pid in paths_to_select {
+                ctx.document.select(pid, true);
+            }
+
+            self.selected_nodes = current_nodes;
             ctx.set_cursor("crosshair");
             ctx.request_redraw();
             return;
@@ -723,6 +869,7 @@ impl FeaturePlugin for PathEditorFeature {
         self.last_drag_pos = None;
         self.box_select_start = None;
         self.box_select_current = None;
+        self.line_select_points.clear();
         self.panning_last_screen = None;
         self.is_dragging_segment = false;
         ctx.clear_snap_guides();
@@ -812,10 +959,12 @@ impl FeaturePlugin for PathEditorFeature {
     fn on_cancel(&mut self, ctx: &mut PluginContext) {
         self.active_target = None;
         self.selected_nodes.clear();
+        self.initial_selected_nodes.clear();
         self.hover_target = None;
         self.last_drag_pos = None;
         self.box_select_start = None;
         self.box_select_current = None;
+        self.line_select_points.clear();
         self.panning_last_screen = None;
         self.is_dragging_segment = false;
         ctx.clear_snap_guides();
@@ -1148,20 +1297,347 @@ impl FeaturePlugin for PathEditorFeature {
 
         // 3. Draw Marquee Box for multi-node selection
         if let (Some(start), Some(cur)) = (self.box_select_start, self.box_select_current) {
-            let r = Rect::from_points(start, cur).round();
+            let r = Rect::from_points(start, cur).normalize();
+            let sk_r = skia::Rect::from_xywh(r.x, r.y, r.width, r.height);
+            let corner = 2.5 / zoom;
 
             let mut fill_paint = skia::Paint::default();
-            fill_paint.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.12), None);
+            fill_paint.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.14), None);
             fill_paint.set_style(skia::PaintStyle::Fill);
+            fill_paint.set_anti_alias(true);
 
             let mut stroke_paint = skia::Paint::default();
-            stroke_paint.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.85), None);
+            stroke_paint.set_color4f(skia::Color4f::new(0.208, 0.518, 0.894, 0.90), None);
             stroke_paint.set_style(skia::PaintStyle::Stroke);
-            stroke_paint.set_stroke_width(1.0 / zoom);
+            stroke_paint.set_stroke_width(1.2 / zoom);
             stroke_paint.set_anti_alias(true);
 
-            canvas.draw_rect(r.to_skia(), &fill_paint);
-            canvas.draw_rect(r.to_skia(), &stroke_paint);
+            canvas.draw_round_rect(sk_r, corner, corner, &fill_paint);
+            canvas.draw_round_rect(sk_r, corner, corner, &stroke_paint);
         }
+
+        // 4. Draw Alt Lasso / Pen Selection (Enclosed Region & Laser Stroke)
+        if self.line_select_points.len() >= 2 {
+            let mut line_path = skia::PathBuilder::new();
+            line_path.move_to(self.line_select_points[0].to_skia());
+            for pt in &self.line_select_points[1..] {
+                line_path.line_to(pt.to_skia());
+            }
+            let built_path = line_path.detach();
+
+            // If 3 or more points, render the enclosed translucent lasso fill
+            if self.line_select_points.len() >= 3 {
+                let mut closed_builder = skia::PathBuilder::new();
+                closed_builder.move_to(self.line_select_points[0].to_skia());
+                for pt in &self.line_select_points[1..] {
+                    closed_builder.line_to(pt.to_skia());
+                }
+                closed_builder.close();
+                let closed_path = closed_builder.detach();
+
+                let mut lasso_fill = skia::Paint::default();
+                lasso_fill.set_color4f(skia::Color4f::new(0.98, 0.55, 0.15, 0.14), None);
+                lasso_fill.set_style(skia::PaintStyle::Fill);
+                lasso_fill.set_anti_alias(true);
+                canvas.draw_path(&closed_path, &lasso_fill);
+
+                // Subtle closing guide line between current point and start point
+                if let (Some(first), Some(last)) = (self.line_select_points.first(), self.line_select_points.last()) {
+                    let mut close_guide = skia::Paint::default();
+                    close_guide.set_color4f(skia::Color4f::new(0.98, 0.55, 0.15, 0.50), None);
+                    close_guide.set_style(skia::PaintStyle::Stroke);
+                    close_guide.set_stroke_width(1.0 / zoom);
+                    close_guide.set_anti_alias(true);
+                    let dash_intervals = [4.0 / zoom, 4.0 / zoom];
+                    if let Some(effect) = skia::PathEffect::dash(&dash_intervals, 0.0) {
+                        close_guide.set_path_effect(effect);
+                    }
+                    canvas.draw_line(last.to_skia(), first.to_skia(), &close_guide);
+                }
+            }
+
+            // Vibrant glow underneath the line
+            let mut line_glow = skia::Paint::default();
+            line_glow.set_color4f(skia::Color4f::new(0.98, 0.50, 0.15, 0.45), None);
+            line_glow.set_style(skia::PaintStyle::Stroke);
+            line_glow.set_stroke_width(5.0 / zoom);
+            line_glow.set_anti_alias(true);
+            canvas.draw_path(&built_path, &line_glow);
+
+            // Core laser line
+            let mut line_core = skia::Paint::default();
+            line_core.set_color4f(skia::Color4f::new(1.0, 0.70, 0.20, 0.95), None);
+            line_core.set_style(skia::PaintStyle::Stroke);
+            line_core.set_stroke_width(2.0 / zoom);
+            line_core.set_anti_alias(true);
+            canvas.draw_path(&built_path, &line_core);
+
+            // Start & End handle grips
+            let mut dot_paint = skia::Paint::default();
+            dot_paint.set_color4f(skia::Color4f::new(1.0, 1.0, 1.0, 1.0), None);
+            dot_paint.set_style(skia::PaintStyle::Fill);
+            dot_paint.set_anti_alias(true);
+
+            if let Some(first) = self.line_select_points.first() {
+                canvas.draw_circle(first.to_skia(), 4.0 / zoom, &line_core);
+                canvas.draw_circle(first.to_skia(), 2.2 / zoom, &dot_paint);
+            }
+            if let Some(last) = self.line_select_points.last() {
+                canvas.draw_circle(last.to_skia(), 4.5 / zoom, &line_core);
+                canvas.draw_circle(last.to_skia(), 2.5 / zoom, &dot_paint);
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::core::{
+        Color, Document, GridConfig, PathEditorConfig, PathNode, RulerConfig, SnapConfig,
+        TransformOptions, Viewport,
+    };
+
+    #[test]
+    fn test_segments_intersect_helper() {
+        let p1 = Point::new(0.0, 0.0);
+        let p2 = Point::new(100.0, 100.0);
+        let q1 = Point::new(0.0, 100.0);
+        let q2 = Point::new(100.0, 0.0);
+        assert!(segments_intersect(p1, p2, q1, q2));
+
+        let r1 = Point::new(200.0, 0.0);
+        let r2 = Point::new(200.0, 100.0);
+        assert!(!segments_intersect(p1, p2, r1, r2));
+    }
+
+    #[test]
+    fn test_is_node_near_polyline_helper() {
+        let polyline = vec![Point::new(10.0, 10.0), Point::new(100.0, 10.0)];
+        let close_pt = Point::new(50.0, 12.0);
+        let far_pt = Point::new(50.0, 80.0);
+
+        assert!(is_node_near_polyline(close_pt, &polyline, 5.0));
+        assert!(!is_node_near_polyline(far_pt, &polyline, 5.0));
+    }
+
+    #[test]
+    fn test_path_editor_alt_line_selection() {
+        let mut doc = Document::new();
+        let nodes = vec![
+            PathNode::new(Point::new(50.0, 50.0)),
+            PathNode::new(Point::new(150.0, 50.0)),
+            PathNode::new(Point::new(150.0, 150.0)),
+            PathNode::new(Point::new(50.0, 150.0)),
+        ];
+        let path = PathElement::new(nodes, true, Some(Color::BLACK), None, 1.0);
+        let path_id = path.id;
+        doc.add_element(Element::Path(path));
+
+        let mut feature = PathEditorFeature::new();
+        let mut viewport = Viewport::default();
+        let grid_config = GridConfig::default();
+        let snap_config = SnapConfig::default();
+        let ruler_config = RulerConfig::default();
+        let pe_config = PathEditorConfig::default();
+        let transform_opts = TransformOptions::default();
+        let mut snap_guides = Vec::new();
+
+        let mut ctx = PluginContext {
+            document: &mut doc,
+            viewport: &mut viewport,
+            grid_config: &grid_config,
+            snap_config: &snap_config,
+            ruler_config: &ruler_config,
+            path_editor_config: &pe_config,
+            transform_options: &transform_opts,
+            active_snap_guides: &mut snap_guides,
+            active_fill_color: Color::BLACK,
+            active_stroke_color: None,
+            active_stroke_width: 1.0,
+            widget_size: (800.0, 600.0),
+            needs_redraw: false,
+            cursor_name: None,
+        };
+
+        // 1. Pointer Down with Alt pressed (cuts near node 0 at 50,50)
+        let ev_down = PointerEvent {
+            screen_pos: Point::new(45.0, 45.0),
+            world_pos: Point::new(45.0, 45.0),
+            button: Some(PointerButton::Primary),
+            shift_pressed: false,
+            ctrl_pressed: false,
+            alt_pressed: true,
+        };
+        feature.on_pointer_down(&mut ctx, &ev_down);
+
+        // 2. Pointer Move (draws line across node 0 and node 1)
+        let ev_move = PointerEvent {
+            screen_pos: Point::new(155.0, 52.0),
+            world_pos: Point::new(155.0, 52.0),
+            button: None,
+            shift_pressed: false,
+            ctrl_pressed: false,
+            alt_pressed: true,
+        };
+        feature.on_pointer_move(&mut ctx, &ev_move);
+
+        // Verify that nodes 0 and 1 were selected by the Alt line!
+        let sel_nodes = feature.get_selected_nodes();
+        assert!(sel_nodes.contains(&(path_id, 0)));
+        assert!(sel_nodes.contains(&(path_id, 1)));
+        assert!(ctx.document.is_selected(path_id));
+
+        // 3. Pointer Up ends line selection
+        feature.on_pointer_up(&mut ctx, &ev_move);
+        assert!(feature.get_selected_nodes().contains(&(path_id, 0)));
+    }
+
+    #[test]
+    fn test_path_editor_box_selection() {
+        let mut doc = Document::new();
+        let nodes = vec![
+            PathNode::new(Point::new(20.0, 20.0)),
+            PathNode::new(Point::new(200.0, 200.0)),
+            PathNode::new(Point::new(200.0, 20.0)),
+            PathNode::new(Point::new(20.0, 200.0)),
+        ];
+        let path = PathElement::new(nodes, true, Some(Color::BLACK), None, 1.0);
+        let path_id = path.id;
+        doc.add_element(Element::Path(path));
+
+        let mut feature = PathEditorFeature::new();
+        let mut viewport = Viewport::default();
+        let grid_config = GridConfig::default();
+        let snap_config = SnapConfig::default();
+        let ruler_config = RulerConfig::default();
+        let pe_config = PathEditorConfig::default();
+        let transform_opts = TransformOptions::default();
+        let mut snap_guides = Vec::new();
+
+        let mut ctx = PluginContext {
+            document: &mut doc,
+            viewport: &mut viewport,
+            grid_config: &grid_config,
+            snap_config: &snap_config,
+            ruler_config: &ruler_config,
+            path_editor_config: &pe_config,
+            transform_options: &transform_opts,
+            active_snap_guides: &mut snap_guides,
+            active_fill_color: Color::BLACK,
+            active_stroke_color: None,
+            active_stroke_width: 1.0,
+            widget_size: (800.0, 600.0),
+            needs_redraw: false,
+            cursor_name: None,
+        };
+
+        // Pointer Down starting marquee at (0, 0)
+        let ev_down = PointerEvent {
+            screen_pos: Point::new(0.0, 0.0),
+            world_pos: Point::new(0.0, 0.0),
+            button: Some(PointerButton::Primary),
+            shift_pressed: false,
+            ctrl_pressed: false,
+            alt_pressed: false,
+        };
+        feature.on_pointer_down(&mut ctx, &ev_down);
+
+        // Pointer Move dragging marquee to (100, 100) -> encloses node 0 (20,20)
+        let ev_move = PointerEvent {
+            screen_pos: Point::new(100.0, 100.0),
+            world_pos: Point::new(100.0, 100.0),
+            button: None,
+            shift_pressed: false,
+            ctrl_pressed: false,
+            alt_pressed: false,
+        };
+        feature.on_pointer_move(&mut ctx, &ev_move);
+
+        let sel_nodes = feature.get_selected_nodes();
+        assert_eq!(sel_nodes.len(), 1);
+        assert!(sel_nodes.contains(&(path_id, 0)));
+        assert!(ctx.document.is_selected(path_id));
+    }
+
+    #[test]
+    fn test_point_in_polygon_helper() {
+        let square = vec![
+            Point::new(0.0, 0.0),
+            Point::new(100.0, 0.0),
+            Point::new(100.0, 100.0),
+            Point::new(0.0, 100.0),
+        ];
+        assert!(point_in_polygon(Point::new(50.0, 50.0), &square));
+        assert!(!point_in_polygon(Point::new(150.0, 50.0), &square));
+    }
+
+    #[test]
+    fn test_path_editor_alt_lasso_enclosed_selection() {
+        let mut doc = Document::new();
+        // Path with a node right in the middle at (100, 100)
+        let nodes = vec![
+            PathNode::new(Point::new(100.0, 100.0)),
+            PathNode::new(Point::new(300.0, 300.0)),
+        ];
+        let path = PathElement::new(nodes, false, None, Some(Color::BLACK), 1.0);
+        let path_id = path.id;
+        doc.add_element(Element::Path(path));
+
+        let mut feature = PathEditorFeature::new();
+        let mut viewport = Viewport::default();
+        let grid_config = GridConfig::default();
+        let snap_config = SnapConfig::default();
+        let ruler_config = RulerConfig::default();
+        let pe_config = PathEditorConfig::default();
+        let transform_opts = TransformOptions::default();
+        let mut snap_guides = Vec::new();
+
+        let mut ctx = PluginContext {
+            document: &mut doc,
+            viewport: &mut viewport,
+            grid_config: &grid_config,
+            snap_config: &snap_config,
+            ruler_config: &ruler_config,
+            path_editor_config: &pe_config,
+            transform_options: &transform_opts,
+            active_snap_guides: &mut snap_guides,
+            active_fill_color: Color::BLACK,
+            active_stroke_color: None,
+            active_stroke_width: 1.0,
+            widget_size: (800.0, 600.0),
+            needs_redraw: false,
+            cursor_name: None,
+        };
+
+        // Draw a freehand polygon loop around (100, 100)
+        let ev_down = PointerEvent {
+            screen_pos: Point::new(50.0, 50.0),
+            world_pos: Point::new(50.0, 50.0),
+            button: Some(PointerButton::Primary),
+            shift_pressed: false,
+            ctrl_pressed: false,
+            alt_pressed: true,
+        };
+        feature.on_pointer_down(&mut ctx, &ev_down);
+
+        // Move in a loop surrounding (100, 100): (150, 50) -> (150, 150) -> (50, 150)
+        for pt in [Point::new(150.0, 50.0), Point::new(150.0, 150.0), Point::new(50.0, 150.0)] {
+            let ev_move = PointerEvent {
+                screen_pos: pt,
+                world_pos: pt,
+                button: None,
+                shift_pressed: false,
+                ctrl_pressed: false,
+                alt_pressed: true,
+            };
+            feature.on_pointer_move(&mut ctx, &ev_move);
+        }
+
+        let sel_nodes = feature.get_selected_nodes();
+        // Node 0 at (100, 100) MUST be selected because it is inside the enclosed Alt lasso loop!
+        assert!(sel_nodes.contains(&(path_id, 0)));
+        // Node 1 at (300, 300) is far outside and should NOT be selected
+        assert!(!sel_nodes.contains(&(path_id, 1)));
     }
 }

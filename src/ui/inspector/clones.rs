@@ -38,17 +38,29 @@ pub fn build_clones_section(canvas: &CanvasWidget) -> (gtk4::Widget, Rc<dyn Fn()
     let content_box_c = content_box.clone();
     let tiled_params_cell = Rc::new(RefCell::new(TiledCloneParams::default()));
 
+    let last_clones_state = Rc::new(RefCell::new((usize::MAX, false, false, None::<crate::core::element::ElementId>)));
+
     let update_fn: Rc<dyn Fn()> = {
         let canvas_c = canvas_c.clone();
         let content_box_c = content_box_c.clone();
         let tiled_params_rc = tiled_params_cell.clone();
+        let last_state_c = last_clones_state.clone();
 
         Rc::new(move || {
-            crate::ui::inspector::appearance::clear_box(&content_box_c);
-
             let sel_count = canvas_c.selection_count();
             let has_clones = canvas_c.has_clones_selected();
             let has_masters = canvas_c.has_masters_selected();
+            let first_sel = canvas_c.selected_element_ids().first().copied();
+
+            {
+                let mut cache = last_state_c.borrow_mut();
+                if cache.0 == sel_count && cache.1 == has_clones && cache.2 == has_masters && cache.3 == first_sel {
+                    return; // Fast-path: Skip GTK tree rebuild if selection state has not changed
+                }
+                *cache = (sel_count, has_clones, has_masters, first_sel);
+            }
+
+            crate::ui::inspector::appearance::clear_box(&content_box_c);
 
             // ── Helper to build Tiled Clones Studio Card ──
             let tiled_card = build_tiled_clones_card(

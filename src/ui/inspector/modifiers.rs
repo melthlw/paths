@@ -426,12 +426,20 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
     let header_icon_c = header_icon.clone();
     let canvas_c = canvas.clone();
 
-    let update_fn = Rc::new(move || {
-        crate::ui::inspector::appearance::clear_box(&list_c);
+    let last_state_cache = Rc::new(std::cell::RefCell::new((None::<crate::core::element::ElementId>, Vec::<crate::core::modifier::Modifier>::new())));
+    let last_cache_c = last_state_cache.clone();
 
+    let update_fn = Rc::new(move || {
         let sel_ids = canvas_c.selected_element_ids();
 
         if sel_ids.is_empty() {
+            let mut cache = last_cache_c.borrow_mut();
+            if cache.0.is_none() && cache.1.is_empty() {
+                return;
+            }
+            cache.0 = None;
+            cache.1.clear();
+            crate::ui::inspector::appearance::clear_box(&list_c);
             ctx_sub_c.set_text(&crate::core::gettext("No object selected"));
             header_icon_c.set_icon_name(Some("view-grid-symbolic"));
             return;
@@ -442,6 +450,18 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
         let elem_opt = state_ref.document.find_element(first_id);
 
         if let Some(elem) = elem_opt {
+            let mods = elem.modifiers().to_vec();
+            {
+                let mut cache = last_cache_c.borrow_mut();
+                if cache.0 == Some(first_id) && cache.1 == mods {
+                    return; // Fast-path: Same element & modifiers, skip expensive GTK reconstruction
+                }
+                cache.0 = Some(first_id);
+                cache.1 = mods.clone();
+            }
+
+            crate::ui::inspector::appearance::clear_box(&list_c);
+
             let elem_type_str = match elem {
                 crate::core::Element::Rect(_) => crate::core::gettext("Vector Shape Selected"),
                 crate::core::Element::Path(_) => crate::core::gettext("Vector Path Selected"),
@@ -453,7 +473,6 @@ pub fn build_modifiers_section(canvas: &CanvasWidget) -> ModifiersSection {
             };
             ctx_sub_c.set_text(&elem_type_str);
 
-            let mods = elem.modifiers();
             if mods.is_empty() {
                 let empty_lbl = gtk4::Label::builder()
                     .label(crate::core::gettext("No active modifiers"))

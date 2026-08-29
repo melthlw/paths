@@ -125,17 +125,27 @@ pub fn build_export_tab(
         .build();
 
     let selected_page_indices = Rc::new(RefCell::new(Vec::<usize>::new()));
+    let last_pages_cache = Rc::new(RefCell::new(Vec::<(String, f32, f32)>::new()));
 
     let update_pages_box: Rc<dyn Fn()> = {
         let canvas = canvas.clone();
         let pages_list = pages_list.clone();
         let selected_pages = selected_page_indices.clone();
+        let last_cache_c = last_pages_cache.clone();
         Rc::new(move || {
             let pages = if let Ok(state) = canvas.state().try_borrow() {
-                state.document.pages.clone()
+                state.document.pages.iter().map(|p| (p.name.clone(), p.rect.width, p.rect.height)).collect::<Vec<_>>()
             } else {
                 return;
             };
+
+            {
+                let mut cache = last_cache_c.borrow_mut();
+                if *cache == pages {
+                    return; // Fast-path: Pages unchanged, do not destroy and recreate GTK ActionRows!
+                }
+                *cache = pages.clone();
+            }
 
             while let Some(child) = pages_list.first_child() {
                 pages_list.remove(&child);
@@ -146,14 +156,14 @@ pub fn build_export_tab(
                 sel.push(0);
             }
             for (idx, p) in pages.iter().enumerate() {
-                let name = if p.name.is_empty() {
+                let name = if p.0.is_empty() {
                     crate::i18n!("Page {}", idx + 1)
                 } else {
-                    p.name.clone()
+                    p.0.clone()
                 };
                 let row = adw::ActionRow::builder()
                     .title(glib::markup_escape_text(&name))
-                    .subtitle(format!("{:.0} × {:.0} px", p.rect.width, p.rect.height))
+                    .subtitle(format!("{:.0} × {:.0} px", p.1, p.2))
                     .build();
 
                 let chk = gtk4::CheckButton::builder()

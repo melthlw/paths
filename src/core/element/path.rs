@@ -293,38 +293,34 @@ impl PathElement {
             return Rect::ZERO;
         }
 
-        let mut min_x = f32::MAX;
-        let mut min_y = f32::MAX;
-        let mut max_x = f32::MIN;
-        let mut max_y = f32::MIN;
+        let sk_path = self.to_skia_path();
+        let tight = sk_path.compute_tight_bounds();
 
-        for n in &self.nodes {
-            min_x = min_x.min(n.point.x);
-            min_y = min_y.min(n.point.y);
-            max_x = max_x.max(n.point.x);
-            max_y = max_y.max(n.point.y);
+        let effective_stroke = if !self.strokes.is_empty() {
+            self.strokes
+                .iter()
+                .filter(|s| s.enabled)
+                .map(|s| s.width)
+                .fold(0.0f32, f32::max)
+        } else if self.stroke_color.is_some() {
+            self.stroke_width
+        } else {
+            0.0
+        };
+        let margin = effective_stroke / 2.0;
 
-            if let Some(h) = n.handle_in {
-                min_x = min_x.min(h.x);
-                min_y = min_y.min(h.y);
-                max_x = max_x.max(h.x);
-                max_y = max_y.max(h.y);
-            }
-            if let Some(h) = n.handle_out {
-                min_x = min_x.min(h.x);
-                min_y = min_y.min(h.y);
-                max_x = max_x.max(h.x);
-                max_y = max_y.max(h.y);
-            }
+        if tight.width() > 0.001 || tight.height() > 0.001 {
+            Rect::new(
+                tight.left - margin,
+                tight.top - margin,
+                tight.width() + margin * 2.0,
+                tight.height() + margin * 2.0,
+            )
+        } else {
+            let p = self.nodes[0].point;
+            let m = margin.max(1.0);
+            Rect::new(p.x - m, p.y - m, m * 2.0, m * 2.0)
         }
-
-        let margin = self.stroke_width / 2.0 + 2.0;
-        Rect::new(
-            min_x - margin,
-            min_y - margin,
-            (max_x - min_x) + margin * 2.0,
-            (max_y - min_y) + margin * 2.0,
-        )
     }
 
     pub fn hit_test(&self, p: Point) -> bool {
@@ -1241,5 +1237,20 @@ mod tests {
         let b = compound.bounds();
         assert!(b.width >= 100.0);
         assert!(b.height >= 100.0);
+    }
+
+    #[test]
+    fn test_path_tight_bounds_ignores_distant_handles() {
+        // Curve between (0, 0) and (100, 0) with a control handle far away at (50, 500)
+        let mut n1 = PathNode::new(Point::new(0.0, 0.0));
+        n1.handle_out = Some(Point::new(50.0, 500.0));
+        let n2 = PathNode::new(Point::new(100.0, 0.0));
+
+        let path_elem = PathElement::new(vec![n1, n2], false, None, Some(Color::BLACK), 0.0);
+        let b = path_elem.bounds();
+
+        // The true curve max height for cubic/quad bezier with p0=(0,0), p1=(50,500), p2=(100,0)
+        // is at t=0.5, y = 250, NOT 500. The bounds should tightly match the curve (~250), not the handle (500).
+        assert!(b.height < 400.0, "Bounds height was {} which should be tightly ~250 instead of handle at 500", b.height);
     }
 }
