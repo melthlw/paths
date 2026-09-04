@@ -322,7 +322,7 @@ pub fn render_dock_sections(
                     if let Ok(s) = value.get::<String>() {
                         if let Some(idx_str) = s.strip_prefix("tab:") {
                             if let Ok(idx) = idx_str.parse::<usize>() {
-                                if idx < 8 {
+                                if idx < 9 {
                                     locs_drop_btn.borrow_mut()[idx] = TabLocation::Docked(sec_idx);
 
                                     let mut order = tab_order_drop_btn.borrow().clone();
@@ -560,7 +560,8 @@ pub fn render_dock_sections(
                 let pop_c = popover.clone();
                 btn_close_others.connect_clicked(move |_| {
                     pop_c.popdown();
-                    for k in 0..4 {
+                    let total_tabs = locs_c.borrow().len();
+                    for k in 0..total_tabs {
                         if k != tab_i {
                             locs_c.borrow_mut()[k] = TabLocation::Closed;
                         } else {

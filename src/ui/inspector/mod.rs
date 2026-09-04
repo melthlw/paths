@@ -702,7 +702,7 @@ impl InspectorSidebar {
                         "library-insert-symbolic",
                     ),
                     (
-                        crate::core::gettext("Image"),
+                        crate::core::gettext("Bitmap Image"),
                         None,
                         "tool-image-symbolic",
                     ),

@@ -20,6 +20,8 @@ pub struct SelectionMenuWidgets {
     pub sep_edit: gtk4::Separator,
 
     pub convert_path_btn: gtk4::Button,
+    pub trace_bitmap_btn: gtk4::Button,
+    pub rasterize_btn: gtk4::Button,
     pub attach_path_btn: gtk4::Button,
     pub detach_path_btn: gtk4::Button,
     pub bring_front_btn: gtk4::Button,
@@ -113,6 +115,16 @@ pub fn build_selection_menu(
     let (convert_path_btn, _) = create_item(
         "/io/gitlab/lewisHeart/GnomePaths/icons/object-to-path.svg",
         &crate::core::gettext("Convert to Path"),
+        None,
+    );
+    let (trace_bitmap_btn, _) = create_item(
+        "/io/gitlab/lewisHeart/GnomePaths/icons/object-to-path.svg",
+        &crate::core::gettext("Trace Bitmap..."),
+        None,
+    );
+    let (rasterize_btn, _) = create_item(
+        "tool-image-symbolic",
+        &crate::core::gettext("Rasterize to Bitmap"),
         None,
     );
     let (attach_path_btn, _) = create_item(
@@ -356,6 +368,22 @@ pub fn build_selection_menu(
     {
         let canvas = canvas.clone();
         let popover = popover.clone();
+        trace_bitmap_btn.connect_clicked(move |btn| {
+            crate::ui::dialogs::show_trace_bitmap_dialog(btn, canvas.clone());
+            popover.popdown();
+        });
+    }
+    {
+        let canvas = canvas.clone();
+        let popover = popover.clone();
+        rasterize_btn.connect_clicked(move |_| {
+            canvas.rasterize_selected_to_image();
+            popover.popdown();
+        });
+    }
+    {
+        let canvas = canvas.clone();
+        let popover = popover.clone();
         attach_path_btn.connect_clicked(move |_| {
             canvas.attach_selected_text_to_path();
             popover.popdown();
@@ -489,6 +517,8 @@ pub fn build_selection_menu(
         delete_btn,
         sep_edit,
         convert_path_btn,
+        trace_bitmap_btn,
+        rasterize_btn,
         attach_path_btn,
         detach_path_btn,
         bring_front_btn,

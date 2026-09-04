@@ -22,6 +22,7 @@ pub mod snap;
 pub mod spatial_index;
 pub mod svg_export;
 pub mod svg_import;
+pub mod trace;
 pub mod units;
 
 pub use color::Color;
@@ -61,4 +62,6 @@ pub use snap::{SnapConfig, SnapEngine, SnapGuide};
 pub use svg_export::export_document_to_svg;
 
 pub use svg_import::parse_svg;
+#[allow(unused_imports)]
+pub use trace::{TraceConfig, TraceMode, trace_image_element};
 pub use units::{Unit, eval_math_expression};

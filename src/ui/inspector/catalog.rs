@@ -26,7 +26,7 @@ pub fn build_catalog_popover(
         .margin_bottom(8)
         .margin_start(8)
         .margin_end(8)
-        .width_request(240)
+        .width_request(260)
         .build();
 
     let search_entry = gtk4::SearchEntry::builder()
@@ -178,7 +178,7 @@ pub fn build_catalog_popover(
     let scroll = gtk4::ScrolledWindow::builder()
         .hscrollbar_policy(gtk4::PolicyType::Never)
         .vscrollbar_policy(gtk4::PolicyType::Automatic)
-        .max_content_height(280)
+        .max_content_height(380)
         .propagate_natural_height(true)
         .child(&list_box)
         .build();

@@ -1396,6 +1396,147 @@ impl CanvasWidget {
     pub fn reset_selected_image_adjustments(&self) {
         self.set_selected_image_adjustments(ImageAdjustments::default(), true);
     }
+
+    pub fn get_selected_image_element(&self) -> Option<crate::core::ImageElement> {
+        let state = self.state.try_borrow().ok()?;
+        if state.document.selected_ids.len() != 1 {
+            return None;
+        }
+        let sel_id = *state.document.selected_ids.iter().next()?;
+        if let Some(crate::core::Element::Image(img)) = state.document.find_element(sel_id) {
+            Some(img.clone())
+        } else {
+            None
+        }
+    }
+
+    pub fn can_trace_bitmap(&self) -> bool {
+        let Ok(state) = self.state.try_borrow() else {
+            return false;
+        };
+        if state.document.selected_ids.len() != 1 {
+            return false;
+        }
+        let sel_id = *state.document.selected_ids.iter().next().unwrap();
+        matches!(
+            state.document.find_element(sel_id),
+            Some(crate::core::Element::Image(img)) if !img.image_data.is_empty()
+        )
+    }
+
+    pub fn apply_traced_elements(
+        &self,
+        target_img_id: crate::core::ElementId,
+        traced: crate::core::Element,
+        keep_original: bool,
+    ) {
+        let mut state = self.state.borrow_mut();
+        state.document.snapshot();
+        let traced_id = traced.id();
+        if let Some(pos) = state
+            .document
+            .elements
+            .iter()
+            .position(|el| el.id() == target_img_id)
+        {
+            if keep_original {
+                state.document.elements.insert(pos + 1, traced);
+            } else {
+                state.document.elements[pos] = traced;
+            }
+        } else {
+            state.document.elements.push(traced);
+        }
+        state.document.selected_ids.clear();
+        state.document.selected_ids.insert(traced_id);
+        state.is_dirty = true;
+        state.notify_status();
+        drop(state);
+        self.queue_draw();
+    }
+
+    pub fn rasterize_selected_to_image(&self) -> bool {
+        let (sel_ids, bounds, temp_doc) = {
+            let state = match self.state.try_borrow() {
+                Ok(s) => s,
+                Err(_) => return false,
+            };
+            let sel_ids = state.document.selected_ids.clone();
+            if sel_ids.is_empty() {
+                return false;
+            }
+
+            let mut union_bounds: Option<crate::core::Rect> = None;
+            for el in &state.document.elements {
+                if sel_ids.contains(&el.id()) {
+                    let b = el.bounds();
+                    union_bounds = Some(match union_bounds {
+                        Some(cur) => cur.union(b),
+                        None => b,
+                    });
+                }
+            }
+            let bounds = match union_bounds {
+                Some(b) if b.width >= 1.0 && b.height >= 1.0 => b,
+                _ => return false,
+            };
+
+            let mut temp_doc = state.document.clone();
+            temp_doc.elements.retain(|el| sel_ids.contains(&el.id()));
+            (sel_ids, bounds, temp_doc)
+        };
+
+        // Render selected elements to a raster Skia surface with transparent background
+        let mut surface = match crate::core::renderer::export::render_rect_to_skia_surface(
+            &temp_doc,
+            bounds,
+            1.0,
+            true,
+            true,
+        ) {
+            Some(s) => s,
+            None => return false,
+        };
+
+        let sk_img = surface.image_snapshot();
+        let data = match sk_img.encode(None, skia_safe::EncodedImageFormat::PNG, 100) {
+            Some(d) => d,
+            None => return false,
+        };
+        let png_bytes = data.as_bytes().to_vec();
+
+        let mut state = self.state.borrow_mut();
+        state.document.snapshot();
+
+        let new_img = crate::core::ImageElement::new(
+            bounds,
+            png_bytes,
+            Some("Rasterized Bitmap".to_string()),
+        );
+        let new_id = new_img.id;
+
+        let first_idx = state
+            .document
+            .elements
+            .iter()
+            .position(|el| sel_ids.contains(&el.id()))
+            .unwrap_or(state.document.elements.len());
+
+        state.document.elements.retain(|el| !sel_ids.contains(&el.id()));
+        let insert_idx = first_idx.min(state.document.elements.len());
+        state
+            .document
+            .elements
+            .insert(insert_idx, crate::core::Element::Image(new_img));
+
+        state.document.selected_ids.clear();
+        state.document.selected_ids.insert(new_id);
+        state.is_dirty = true;
+        state.notify_status();
+        drop(state);
+        self.queue_draw();
+        true
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

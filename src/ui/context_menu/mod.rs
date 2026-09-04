@@ -97,6 +97,8 @@ impl ObjectContextMenu {
         root_box.append(&selection_menu.sep_edit);
 
         root_box.append(&selection_menu.convert_path_btn);
+        root_box.append(&selection_menu.trace_bitmap_btn);
+        root_box.append(&selection_menu.rasterize_btn);
         root_box.append(&selection_menu.attach_path_btn);
         root_box.append(&selection_menu.detach_path_btn);
         root_box.append(&selection_menu.bring_front_btn);
@@ -203,6 +205,8 @@ impl ObjectContextMenu {
             self.selection_menu.sep_edit.set_visible(false);
 
             self.selection_menu.convert_path_btn.set_visible(false);
+            self.selection_menu.trace_bitmap_btn.set_visible(false);
+            self.selection_menu.rasterize_btn.set_visible(false);
             self.selection_menu.attach_path_btn.set_visible(false);
             self.selection_menu.detach_path_btn.set_visible(false);
             self.selection_menu.bring_front_btn.set_visible(false);
@@ -266,9 +270,17 @@ impl ObjectContextMenu {
             self.selection_menu.delete_btn.set_visible(true);
             self.selection_menu.sep_edit.set_visible(true);
 
+            let can_trace = self.canvas.can_trace_bitmap();
+            let can_rasterize = has_sel && !can_trace;
             self.selection_menu
                 .convert_path_btn
                 .set_visible(can_convert);
+            self.selection_menu
+                .trace_bitmap_btn
+                .set_visible(can_trace);
+            self.selection_menu
+                .rasterize_btn
+                .set_visible(can_rasterize);
             let can_attach = self.canvas.can_attach_text_to_path();
             let can_detach = self.canvas.can_detach_text_from_path();
             self.selection_menu.attach_path_btn.set_visible(can_attach);

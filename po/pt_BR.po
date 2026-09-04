@@ -2856,7 +2856,119 @@ msgstr "Copiar Estilo"
 msgid "Paste Style"
 msgstr "Colar Estilo"
 
+msgid "Bitmap Image"
+msgstr "Imagem Bitmap"
 
+msgid "Trace Bitmap"
+msgstr "Vetorizar Bitmap"
 
+msgid "Trace Bitmap..."
+msgstr "Vetorizar Bitmap..."
 
+msgid "Bitmap Vectorization"
+msgstr "Vetorização de Bitmap"
 
+msgid "Vectorize raster image into editable paths"
+msgstr "Vetorizar imagem rasterizada em caminhos editáveis"
+
+msgid "Trace to Vector Paths"
+msgstr "Vetorizar para Caminhos"
+
+msgid "Rasterize to Bitmap"
+msgstr "Rasterizar para Bitmap"
+
+msgid "Rasterize Selection to Bitmap"
+msgstr "Rasterizar Seleção para Bitmap"
+
+msgid "Advanced Preview..."
+msgstr "Pré-visualização Avançada..."
+
+msgid "Curve Smoothness"
+msgstr "Suavidade de Curvas"
+
+msgid "Noise Filter"
+msgstr "Filtro de Ruído"
+
+msgid "Color Layers"
+msgstr "Camadas de Cores"
+
+msgid "Tracing Mode"
+msgstr "Modo de Vetorização"
+
+msgid "Monochrome"
+msgstr "Monocromático"
+
+msgid "Colors"
+msgstr "Cores"
+
+msgid "Outlines"
+msgstr "Contornos"
+
+msgid "Simplification"
+msgstr "Simplificação"
+
+msgid "Detail (RDP)"
+msgstr "Detalhe (RDP)"
+
+msgid "Keep Original"
+msgstr "Manter Original"
+
+msgid "Keep bitmap image and place vector paths above"
+msgstr "Manter a imagem bitmap e posicionar os caminhos vetoriais acima"
+
+msgid "Place vector paths on top of the image"
+msgstr "Posicionar os caminhos vetoriais sobre a imagem"
+
+msgid "Invert vector cutout logic"
+msgstr "Inverter lógica de corte vetorial"
+
+msgid "Current File"
+msgstr "Arquivo Atual"
+
+msgid "Color Adjustments"
+msgstr "Ajustes de Cor"
+
+msgid "Vectorize"
+msgstr "Vetorização"
+
+msgid "All"
+msgstr "Ambos"
+
+msgid "Name"
+msgstr "Nome"
+
+msgid "Replace"
+msgstr "Substituir"
+
+msgid "Ratio"
+msgstr "Aspecto"
+
+msgid "Rotation & Flip"
+msgstr "Rotação e Espelhamento"
+
+msgid "Rotate -90° counter-clockwise"
+msgstr "Girar 90° no sentido anti-horário (-90°)"
+
+msgid "Rotate +90° clockwise"
+msgstr "Girar 90° no sentido horário (+90°)"
+
+msgid "Flip horizontally"
+msgstr "Espelhar horizontalmente"
+
+msgid "Flip vertically"
+msgstr "Espelhar verticalmente"
+
+msgid "Trace to Paths"
+msgstr "Vetorizar para Caminhos"
+
+msgid "Preview"
+msgstr "Pré-visualizar"
+
+msgid "Keep Original Image"
+msgstr "Manter Imagem Original"
+
+msgid "Invert Selection"
+msgstr "Inverter Seleção"
+
+msgid "Orig"
+msgstr "Orig"

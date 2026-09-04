@@ -250,8 +250,11 @@ This project adheres to **Semantic Versioning (SemVer 2.0.0)** (`MAJOR.MINOR.PAT
   - [x] Skia non-destructive GPU-accelerated adjustments: brightness, contrast, saturation, hue rotation, Gaussian blur, and color spectrum inversion.
   - [x] Monochrome grayscale and vintage sepia tone filters with 1-click quick presets (Normal, Vibrant, B&W High, Vintage, Warm, Cool).
   - [x] Automatic contextual switching in the Studio Inspector for active image selections.
-- [ ] **Trace Bitmap (Image Vectorization)**:
-  - [ ] Auto-trace raster images (PNG, JPEG) into editable vector paths with threshold, detail, and color quantization controls.
+- [x] **Trace Bitmap (Image Vectorization & Rasterization)**:
+  - [x] Auto-trace raster images (PNG, JPEG, WebP) into editable vector paths with threshold, detail, curve smoothness, and color quantization controls.
+  - [x] In-inspector Bitmap Vectorization & Adjustments panel with real-time parameters and direct vector tracing.
+  - [x] Full-featured interactive preview dialog with side-by-side zoomable canvas and node statistics.
+  - [x] Vector-to-bitmap rasterization action for converting active selections into bitmap layers.
 
 #### Parametric Modifiers
 - [x] **Live Modifiers Panel (Live Path Effects)**:

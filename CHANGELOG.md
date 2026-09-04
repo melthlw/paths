@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Bitmap Image Vectorization & Tracing Engine (`src/core/trace.rs`)**:
+  - High-performance Marching Squares contour extraction with 16-state cellular topological tracking and EvenOdd signed area orientation.
+  - Three vectorization modes:
+    - *Monochrome / Brightness Cutoff*: Precision luminance thresholding with hole cutout support.
+    - *Color Quantization*: K-means color clustering generating grouped, stacked colored vector paths.
+    - *Edge Detection*: Sobel gradient magnitude filtering for outline vector tracing.
+  - Ramer-Douglas-Peucker (RDP) polygon simplification with configurable tolerance.
+  - Boundary padding (1-pixel false envelope) guaranteeing full topological loop closure for shapes that touch or bleed off image borders.
+  - Smooth cubic Bézier handle fitting with automatic corner angle detection (`NodeType::Corner` vs `NodeType::Smooth`).
+- **Dedicated Bitmap Image Inspector Panel (`src/ui/inspector/image.rs`)**:
+  - High-density modern layout with top segmented view switcher (`[ Adjustments ] [ Vectorize ] [ All ]`).
+  - Distinct varied control types matching GNOME HIG: circular steppers (`[-] [+]`) for discrete parameters (Color Layers, Noise Filter), compact inline sliders with right-aligned numeric badges, segmented pill buttons for Mode selection (`[ Monochrome ] [ Colors ] [ Outlines ]`), and quick preset chips.
+  - "Current File" metadata card with uppercase captions, bold values, replace button (`📁`), dimensions readout, and quick transform toolbar (`[ ↶ ] [ ↷ ] [ ⇄ ] [ ⇅ ]`).
+  - Bottom action bar with prominent primary pill button ("Trace to Paths") and live preview action.
+  - Full non-destructive image adjustments (Brightness, Contrast, Saturation, Hue, Blur, Invert, Grayscale, Sepia, Presets).
+  - Empty-state actions: "Rasterize Selection to Bitmap", "Import Image File...", and "Create Image Frame".
+- **Interactive Libadwaita Trace Dialog (`src/ui/dialogs/trace_bitmap.rs`)**:
+  - Side-by-side interactive split preview with Cairo checkerboard rendering, zoom fit, and path/node count statistics.
+  - Debounced real-time recalculation (50ms) for responsive slider dragging.
+- **Bidirectional Vector & Raster Workflow (`src/ui/canvas/ops_document.rs`)**:
+  - `CanvasWidget::rasterize_selected_to_image()`: Rasterizes active vector selections directly into a transparent PNG bitmap image element with full Undo/Redo (`Ctrl+Z`).
+  - `CanvasWidget::apply_traced_elements()`: In-place replacement or stacked overlay of traced vector paths over original bitmap elements.
+- **Canvas Context Menu Integration (`src/ui/context_menu/`)**:
+  - Right-click on raster image objects provides "Trace Bitmap...".
+  - Right-click on vector selections provides "Rasterize to Bitmap".
+- **Studio Inspector Catalog & Dock Improvements (`src/ui/inspector/`)**:
+  - Enhanced catalog popover scrolling (`max_content_height(380)` and width 260px) in `catalog.rs` for clear access to all panels.
+  - Fixed tab index bounds in `dock.rs` ensuring seamless docking, reordering, and closing for all 9 inspector panels.
+- **Localization**:
+  - Complete Brazilian Portuguese (`pt_BR`) translations for all new bitmap adjustments, tracing, and rasterization features.
+
 ## [0.4.0] - 2026-08-28
 
 ### Added
