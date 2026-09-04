@@ -1,5 +1,7 @@
 use gtk4::gio;
 use gtk4::prelude::*;
+use libadwaita as adw;
+use libadwaita::prelude::*;
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -10,7 +12,7 @@ use crate::ui::canvas::CanvasWidget;
 pub struct ImageSection {
     pub container: gtk4::Box,
     pub content_box: gtk4::Box,
-    pub empty_state_box: gtk4::Box,
+    pub empty_state_box: gtk4::Widget,
     pub name_label: gtk4::Label,
     pub dim_label: gtk4::Label,
     pub brightness_scale: gtk4::Scale,
@@ -18,216 +20,61 @@ pub struct ImageSection {
     pub saturation_scale: gtk4::Scale,
     pub hue_scale: gtk4::Scale,
     pub blur_scale: gtk4::Scale,
-    pub invert_switch: gtk4::Switch,
-    pub grayscale_switch: gtk4::Switch,
-    pub sepia_switch: gtk4::Switch,
+    pub invert_switch_row: adw::SwitchRow,
+    pub grayscale_switch_row: adw::SwitchRow,
+    pub sepia_switch_row: adw::SwitchRow,
     pub btn_reset_adjustments: gtk4::Button,
     pub btn_reset_aspect: gtk4::Button,
     pub is_updating: Rc<Cell<bool>>,
     pub update_fn: Rc<dyn Fn(Option<(String, crate::core::Rect, Option<(f32, f32)>, f32)>, Option<ImageAdjustments>)>,
 }
 
-/// Create a sleek inline compact slider row: Label on left, compact slider + value badge on right
-fn create_compact_slider_row(
+/// Create a sleek Libadwaita ActionRow with an expansive slider and a numeric readout badge
+fn create_adw_slider_row(
     icon_name: &str,
-    label_text: &str,
+    title: &str,
     min: f64,
     max: f64,
     step: f64,
     default_val: f64,
     suffix: &str,
-) -> (gtk4::Box, gtk4::Scale, gtk4::Label) {
-    let row = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(8)
-        .margin_start(10)
-        .margin_end(10)
-        .margin_top(3)
-        .margin_bottom(3)
-        .valign(gtk4::Align::Center)
-        .build();
-
-    let left_box = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(6)
-        .halign(gtk4::Align::Start)
-        .hexpand(true)
-        .valign(gtk4::Align::Center)
+) -> (adw::ActionRow, gtk4::Scale, gtk4::Label) {
+    let row = adw::ActionRow::builder()
+        .title(title)
         .build();
 
     let icon = crate::ui::icons::make_symbolic_image(icon_name, 14);
-    icon.add_css_class("dim-label");
-    left_box.append(&icon);
+    row.add_prefix(&icon);
 
-    let lbl = gtk4::Label::builder()
-        .label(label_text)
-        .css_classes(["body"])
-        .halign(gtk4::Align::Start)
+    let suffix_box = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Horizontal)
+        .spacing(8)
+        .hexpand(true)
+        .valign(gtk4::Align::Center)
         .build();
-    left_box.append(&lbl);
-    row.append(&left_box);
 
     let scale = gtk4::Scale::builder()
         .orientation(gtk4::Orientation::Horizontal)
         .adjustment(&gtk4::Adjustment::new(default_val, min, max, step, step * 5.0, 0.0))
         .draw_value(false)
-        .width_request(100)
-        .css_classes(["fine-tune"])
+        .hexpand(true)
+        .width_request(110)
         .valign(gtk4::Align::Center)
         .build();
-    row.append(&scale);
+    suffix_box.append(&scale);
 
     let val_lbl = gtk4::Label::builder()
         .label(&format!("{:.0}{}", default_val, suffix))
-        .css_classes(["caption", "numeric", "dim-label"])
-        .width_request(38)
+        .css_classes(["numeric", "dim-label"])
+        .width_request(42)
         .halign(gtk4::Align::End)
         .valign(gtk4::Align::Center)
         .build();
-    row.append(&val_lbl);
+    suffix_box.append(&val_lbl);
+
+    row.add_suffix(&suffix_box);
 
     (row, scale, val_lbl)
-}
-
-/// Create a circular stepper row (like Padding 10 [-] [+] in modern HIG design)
-fn create_stepper_row<F: Fn(i64) + 'static>(
-    icon_name: &str,
-    label_text: &str,
-    init_val: i64,
-    min_val: i64,
-    max_val: i64,
-    step: i64,
-    suffix: &str,
-    on_change: F,
-) -> (gtk4::Box, gtk4::Label, Rc<Cell<i64>>) {
-    let row = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(8)
-        .margin_start(10)
-        .margin_end(10)
-        .margin_top(3)
-        .margin_bottom(3)
-        .valign(gtk4::Align::Center)
-        .build();
-
-    let left_box = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(6)
-        .halign(gtk4::Align::Start)
-        .hexpand(true)
-        .valign(gtk4::Align::Center)
-        .build();
-
-    let icon = crate::ui::icons::make_symbolic_image(icon_name, 14);
-    icon.add_css_class("dim-label");
-    left_box.append(&icon);
-
-    let lbl = gtk4::Label::builder()
-        .label(label_text)
-        .css_classes(["body"])
-        .halign(gtk4::Align::Start)
-        .build();
-    left_box.append(&lbl);
-    row.append(&left_box);
-
-    let val_cell = Rc::new(Cell::new(init_val));
-    let val_lbl = gtk4::Label::builder()
-        .label(&format!("{}{}", init_val, suffix))
-        .css_classes(["image-stepper-val", "numeric"])
-        .halign(gtk4::Align::End)
-        .valign(gtk4::Align::Center)
-        .build();
-    row.append(&val_lbl);
-
-    let stepper_box = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(3)
-        .valign(gtk4::Align::Center)
-        .build();
-
-    let btn_minus = gtk4::Button::builder()
-        .icon_name("list-remove-symbolic")
-        .css_classes(["flat", "circular"])
-        .valign(gtk4::Align::Center)
-        .build();
-
-    let btn_plus = gtk4::Button::builder()
-        .icon_name("list-add-symbolic")
-        .css_classes(["flat", "circular"])
-        .valign(gtk4::Align::Center)
-        .build();
-
-    stepper_box.append(&btn_minus);
-    stepper_box.append(&btn_plus);
-    row.append(&stepper_box);
-
-    let on_ch_rc = Rc::new(on_change);
-
-    {
-        let vc = val_cell.clone();
-        let vl = val_lbl.clone();
-        let suf = suffix.to_string();
-        let oc = on_ch_rc.clone();
-        btn_minus.connect_clicked(move |_| {
-            let cur = vc.get();
-            if cur > min_val {
-                let next = (cur - step).max(min_val);
-                vc.set(next);
-                vl.set_text(&format!("{}{}", next, suf));
-                oc(next);
-            }
-        });
-    }
-
-    {
-        let vc = val_cell.clone();
-        let vl = val_lbl.clone();
-        let suf = suffix.to_string();
-        let oc = on_ch_rc;
-        btn_plus.connect_clicked(move |_| {
-            let cur = vc.get();
-            if cur < max_val {
-                let next = (cur + step).min(max_val);
-                vc.set(next);
-                vl.set_text(&format!("{}{}", next, suf));
-                oc(next);
-            }
-        });
-    }
-
-    (row, val_lbl, val_cell)
-}
-
-/// Create a clean switch row
-fn create_switch_row(
-    label_text: &str,
-    tooltip: &str,
-) -> (gtk4::Box, gtk4::Switch) {
-    let row = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(8)
-        .margin_start(10)
-        .margin_end(10)
-        .margin_top(3)
-        .margin_bottom(3)
-        .tooltip_text(tooltip)
-        .valign(gtk4::Align::Center)
-        .build();
-
-    let lbl = gtk4::Label::builder()
-        .label(label_text)
-        .css_classes(["body"])
-        .halign(gtk4::Align::Start)
-        .hexpand(true)
-        .build();
-    row.append(&lbl);
-
-    let sw = gtk4::Switch::builder()
-        .valign(gtk4::Align::Center)
-        .build();
-    row.append(&sw);
-
-    (row, sw)
 }
 
 pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
@@ -243,44 +90,27 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     // ─────────────────────────────────────────────────────────────
     // Empty State (when no image element is selected)
     // ─────────────────────────────────────────────────────────────
-    let empty_state_box = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Vertical)
-        .spacing(12)
-        .margin_top(40)
-        .margin_bottom(40)
-        .margin_start(20)
-        .margin_end(20)
-        .valign(gtk4::Align::Center)
-        .halign(gtk4::Align::Center)
-        .build();
-
-    let empty_icon = crate::ui::icons::make_symbolic_image("tool-image-symbolic", 48);
-    empty_icon.add_css_class("dim-label");
-    empty_state_box.append(&empty_icon);
-
-    let empty_title = gtk4::Label::builder()
-        .label(&crate::core::gettext("No Image Selected"))
-        .css_classes(["title-4"])
-        .halign(gtk4::Align::Center)
-        .build();
-    empty_state_box.append(&empty_title);
-
-    let empty_subtitle = gtk4::Label::builder()
-        .label(&crate::core::gettext(
+    let empty_status = adw::StatusPage::builder()
+        .icon_name("tool-image-symbolic")
+        .title(&crate::core::gettext("No Image Selected"))
+        .description(&crate::core::gettext(
             "Select a bitmap image to adjust colors or vectorize to paths, or rasterize selected vectors into an image.",
         ))
-        .css_classes(["body", "dim-label"])
-        .wrap(true)
-        .justify(gtk4::Justification::Center)
-        .halign(gtk4::Align::Center)
+        .hexpand(true)
+        .vexpand(true)
         .build();
-    empty_state_box.append(&empty_subtitle);
+
+    let empty_actions_box = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Vertical)
+        .spacing(8)
+        .halign(gtk4::Align::Center)
+        .margin_top(4)
+        .build();
 
     let btn_activate_tool = gtk4::Button::builder()
         .label(&crate::core::gettext("Create Image Frame"))
         .css_classes(["suggested-action", "pill"])
         .halign(gtk4::Align::Center)
-        .margin_top(8)
         .build();
     {
         let cv = canvas.clone();
@@ -288,13 +118,12 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
             cv.set_active_tool("image");
         });
     }
-    empty_state_box.append(&btn_activate_tool);
+    empty_actions_box.append(&btn_activate_tool);
 
     let btn_rasterize = gtk4::Button::builder()
         .label(&crate::core::gettext("Rasterize Selection to Bitmap"))
         .css_classes(["pill"])
         .halign(gtk4::Align::Center)
-        .margin_top(4)
         .build();
     let btn_rasterize_c = btn_rasterize.clone();
     {
@@ -303,13 +132,12 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
             cv.rasterize_selected_to_image();
         });
     }
-    empty_state_box.append(&btn_rasterize);
+    empty_actions_box.append(&btn_rasterize);
 
     let btn_import = gtk4::Button::builder()
         .label(&crate::core::gettext("Import Image File..."))
         .css_classes(["flat", "pill"])
         .halign(gtk4::Align::Center)
-        .margin_top(2)
         .build();
     {
         let cv = canvas.clone();
@@ -345,30 +173,33 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
             });
         });
     }
-    empty_state_box.append(&btn_import);
+    empty_actions_box.append(&btn_import);
+    empty_status.set_child(Some(&empty_actions_box));
+
+    let empty_state_box: gtk4::Widget = empty_status.upcast();
     container.append(&empty_state_box);
 
     // ─────────────────────────────────────────────────────────────
-    // Active Content Box
+    // Active Content Box (with standard 12px inspector margins)
     // ─────────────────────────────────────────────────────────────
     let content_box = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Vertical)
-        .spacing(10)
-        .margin_start(10)
-        .margin_end(10)
+        .spacing(12)
+        .margin_start(12)
+        .margin_end(12)
         .margin_top(8)
         .margin_bottom(16)
         .visible(false)
         .build();
 
     // ─────────────────────────────────────────────────────────────
-    // TOP SEGMENTED VIEW SWITCHER: [ 🎨 Ajustes ] [ ⚡ Vetorização ] [ ☰ Ambos ]
+    // TOP SEGMENTED VIEW SWITCHER: [ Ajustes ] [ Vetorização ] [ Ambos ]
     // ─────────────────────────────────────────────────────────────
     let view_switch_box = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Horizontal)
         .spacing(0)
         .homogeneous(true)
-        .css_classes(["linked", "image-segmented-pills"])
+        .css_classes(["linked"])
         .margin_bottom(2)
         .build();
 
@@ -380,7 +211,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         .label(&crate::core::gettext("Vectorize"))
         .build();
     let tab_all_btn = gtk4::ToggleButton::builder()
-        .label(&crate::core::gettext("All"))
+        .label(&crate::core::gettext("Both"))
         .build();
 
     view_switch_box.append(&tab_adj_btn);
@@ -389,48 +220,25 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     content_box.append(&view_switch_box);
 
     // ─────────────────────────────────────────────────────────────
-    // 1. Arquivo Atual Card (Metadata, Replace & Quick Transforms)
+    // 1. Image Information & Actions (Libadwaita PreferencesGroup)
     // ─────────────────────────────────────────────────────────────
-    let meta_card = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Vertical)
-        .spacing(0)
-        .css_classes(["card", "image-meta-card"])
+    let img_group = adw::PreferencesGroup::builder()
+        .title(&crate::core::gettext("Image"))
         .build();
 
-    // Header: Icon + "Arquivo Atual" + Replace Image button
-    let meta_header = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(6)
-        .css_classes(["card-header-bar"])
-        .valign(gtk4::Align::Center)
+    // Row: File Name + Replace Button
+    let file_row = adw::ActionRow::builder()
+        .title(&crate::core::gettext("File"))
+        .subtitle("—")
         .build();
-
-    let img_icon = crate::ui::icons::make_symbolic_image("tool-image-symbolic", 16);
-    meta_header.append(&img_icon);
-
-    let meta_title = gtk4::Label::builder()
-        .label(&crate::core::gettext("Current File"))
-        .css_classes(["heading", "caption"])
-        .halign(gtk4::Align::Start)
-        .build();
-    meta_header.append(&meta_title);
-
-    let meta_spacer = gtk4::Box::builder().hexpand(true).build();
-    meta_header.append(&meta_spacer);
+    file_row.add_prefix(&gtk4::Image::from_icon_name("tool-image-symbolic"));
 
     let btn_replace = gtk4::Button::builder()
-        .css_classes(["flat", "pill"])
-        .tooltip_text(crate::core::gettext("Replace image file..."))
+        .icon_name("document-open-symbolic")
+        .tooltip_text(&crate::core::gettext("Replace Image File..."))
+        .css_classes(["flat"])
         .valign(gtk4::Align::Center)
         .build();
-    let replace_box = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(4)
-        .build();
-    replace_box.append(&crate::ui::icons::make_symbolic_image("document-open-symbolic", 13));
-    replace_box.append(&gtk4::Label::builder().label(&crate::core::gettext("Replace")).css_classes(["caption"]).build());
-    btn_replace.set_child(Some(&replace_box));
-
     {
         let cv = canvas.clone();
         btn_replace.connect_clicked(move |btn| {
@@ -469,104 +277,41 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
             });
         });
     }
-    meta_header.append(&btn_replace);
-    meta_card.append(&meta_header);
+    file_row.add_suffix(&btn_replace);
+    img_group.add(&file_row);
 
-    meta_card.append(&gtk4::Separator::builder().orientation(gtk4::Orientation::Horizontal).build());
-
-    // Row 1: File Name
-    let name_row = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Vertical)
-        .spacing(1)
-        .css_classes(["image-meta-row"])
+    // Row: Dimensions + Reset Aspect Ratio Button
+    let dim_row = adw::ActionRow::builder()
+        .title(&crate::core::gettext("Dimensions"))
+        .subtitle("—")
         .build();
-    let name_cap = gtk4::Label::builder()
-        .label(&crate::core::gettext("Name"))
-        .css_classes(["image-meta-caption"])
-        .halign(gtk4::Align::Start)
-        .build();
-    name_row.append(&name_cap);
-    let name_label = gtk4::Label::builder()
-        .label(&crate::core::gettext("Image"))
-        .css_classes(["image-meta-val"])
-        .ellipsize(gtk4::pango::EllipsizeMode::End)
-        .halign(gtk4::Align::Start)
-        .build();
-    name_row.append(&name_label);
-    meta_card.append(&name_row);
-
-    meta_card.append(&gtk4::Separator::builder().orientation(gtk4::Orientation::Horizontal).build());
-
-    // Row 2: Dimensions & Aspect Ratio
-    let dim_row = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(8)
-        .css_classes(["image-meta-row"])
-        .valign(gtk4::Align::Center)
-        .build();
-
-    let dim_info_box = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Vertical)
-        .spacing(1)
-        .hexpand(true)
-        .halign(gtk4::Align::Start)
-        .build();
-    let dim_cap = gtk4::Label::builder()
-        .label(&crate::core::gettext("Dimensions"))
-        .css_classes(["image-meta-caption"])
-        .halign(gtk4::Align::Start)
-        .build();
-    dim_info_box.append(&dim_cap);
-    let dim_label = gtk4::Label::builder()
-        .label("—")
-        .css_classes(["image-meta-val"])
-        .halign(gtk4::Align::Start)
-        .build();
-    dim_info_box.append(&dim_label);
-    dim_row.append(&dim_info_box);
+    dim_row.add_prefix(&gtk4::Image::from_icon_name("view-grid-symbolic"));
 
     let btn_reset_aspect = gtk4::Button::builder()
-        .css_classes(["flat", "pill"])
-        .tooltip_text(crate::core::gettext("Restore original aspect ratio"))
+        .icon_name("lock-aspect-ratio-symbolic")
+        .tooltip_text(&crate::core::gettext("Restore original aspect ratio"))
+        .css_classes(["flat"])
         .valign(gtk4::Align::Center)
         .build();
-    let aspect_box = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(4)
-        .build();
-    aspect_box.append(&crate::ui::icons::make_symbolic_image("lock-aspect-ratio-symbolic", 13));
-    aspect_box.append(&gtk4::Label::builder().label(&crate::core::gettext("Ratio")).css_classes(["caption"]).build());
-    btn_reset_aspect.set_child(Some(&aspect_box));
     {
         let cv = canvas.clone();
         btn_reset_aspect.connect_clicked(move |_| {
             cv.reset_selected_image_aspect_ratio();
         });
     }
-    dim_row.append(&btn_reset_aspect);
-    meta_card.append(&dim_row);
+    dim_row.add_suffix(&btn_reset_aspect);
+    img_group.add(&dim_row);
 
-    meta_card.append(&gtk4::Separator::builder().orientation(gtk4::Orientation::Horizontal).build());
-
-    // Row 3: Rotation and Flip Controls (Matching reference: Rotation [ ↶ ] [ ↷ ])
-    let transform_row = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(8)
-        .css_classes(["image-meta-row"])
-        .valign(gtk4::Align::Center)
+    // Row: Rotation & Flip Quick Actions
+    let trans_row = adw::ActionRow::builder()
+        .title(&crate::core::gettext("Transform"))
+        .subtitle(&crate::core::gettext("Rotation & Flip"))
         .build();
-
-    let trans_lbl = gtk4::Label::builder()
-        .label(&crate::core::gettext("Rotation & Flip"))
-        .css_classes(["body"])
-        .halign(gtk4::Align::Start)
-        .hexpand(true)
-        .build();
-    transform_row.append(&trans_lbl);
+    trans_row.add_prefix(&gtk4::Image::from_icon_name("object-rotate-right-symbolic"));
 
     let trans_actions = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Horizontal)
-        .spacing(2)
+        .spacing(0)
         .css_classes(["linked"])
         .valign(gtk4::Align::Center)
         .build();
@@ -574,7 +319,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     let btn_rot_l = gtk4::Button::builder()
         .icon_name("object-rotate-left-symbolic")
         .css_classes(["flat"])
-        .tooltip_text(crate::core::gettext("Rotate -90° counter-clockwise"))
+        .tooltip_text(&crate::core::gettext("Rotate -90° counter-clockwise"))
         .build();
     {
         let cv = canvas.clone();
@@ -587,7 +332,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     let btn_rot_r = gtk4::Button::builder()
         .icon_name("object-rotate-right-symbolic")
         .css_classes(["flat"])
-        .tooltip_text(crate::core::gettext("Rotate +90° clockwise"))
+        .tooltip_text(&crate::core::gettext("Rotate +90° clockwise"))
         .build();
     {
         let cv = canvas.clone();
@@ -600,7 +345,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     let btn_flip_h = gtk4::Button::builder()
         .icon_name("object-flip-horizontal-symbolic")
         .css_classes(["flat"])
-        .tooltip_text(crate::core::gettext("Flip horizontally"))
+        .tooltip_text(&crate::core::gettext("Flip horizontally"))
         .build();
     {
         let cv = canvas.clone();
@@ -613,7 +358,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     let btn_flip_v = gtk4::Button::builder()
         .icon_name("object-flip-vertical-symbolic")
         .css_classes(["flat"])
-        .tooltip_text(crate::core::gettext("Flip vertically"))
+        .tooltip_text(&crate::core::gettext("Flip vertically"))
         .build();
     {
         let cv = canvas.clone();
@@ -623,44 +368,26 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     }
     trans_actions.append(&btn_flip_v);
 
-    transform_row.append(&trans_actions);
-    meta_card.append(&transform_row);
+    trans_row.add_suffix(&trans_actions);
+    img_group.add(&trans_row);
 
-    content_box.append(&meta_card);
+    content_box.append(&img_group);
+
+    // Dummy labels for ImageSection struct compatibility if needed
+    let name_label = gtk4::Label::new(None);
+    let dim_label = gtk4::Label::new(None);
 
     // ─────────────────────────────────────────────────────────────
-    // 2. Ajustes de Cor Card (Compact sliders, presets & switches)
+    // 2. Color Adjustments Group (Libadwaita PreferencesGroup)
     // ─────────────────────────────────────────────────────────────
-    let adj_card = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Vertical)
-        .spacing(0)
-        .css_classes(["card"])
+    let adj_group = adw::PreferencesGroup::builder()
+        .title(&crate::core::gettext("Color Adjustments"))
         .build();
-
-    let adj_header = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(6)
-        .css_classes(["card-header-bar"])
-        .valign(gtk4::Align::Center)
-        .build();
-
-    let adj_icon = crate::ui::icons::make_symbolic_image("applications-graphics-symbolic", 15);
-    adj_header.append(&adj_icon);
-
-    let adj_title = gtk4::Label::builder()
-        .label(&crate::core::gettext("Color Adjustments"))
-        .css_classes(["heading", "caption"])
-        .halign(gtk4::Align::Start)
-        .build();
-    adj_header.append(&adj_title);
-
-    let adj_spacer = gtk4::Box::builder().hexpand(true).build();
-    adj_header.append(&adj_spacer);
 
     let btn_reset_adjustments = gtk4::Button::builder()
         .icon_name("view-refresh-symbolic")
         .css_classes(["flat", "circular"])
-        .tooltip_text(crate::core::gettext("Reset all adjustments"))
+        .tooltip_text(&crate::core::gettext("Reset all adjustments"))
         .valign(gtk4::Align::Center)
         .build();
     {
@@ -669,38 +396,116 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
             cv.reset_selected_image_adjustments();
         });
     }
-    adj_header.append(&btn_reset_adjustments);
-    adj_card.append(&adj_header);
+    adj_group.set_header_suffix(Some(&btn_reset_adjustments));
 
-    adj_card.append(&gtk4::Separator::builder().orientation(gtk4::Orientation::Horizontal).build());
-
-    // ── Presets Chips Flow Bar ──
-    let presets_row = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(4)
-        .margin_start(8)
-        .margin_end(8)
-        .margin_top(6)
-        .margin_bottom(6)
-        .halign(gtk4::Align::Center)
+    // Preset DropDown Row
+    let preset_row = adw::ActionRow::builder()
+        .title(&crate::core::gettext("Preset"))
         .build();
+    preset_row.add_prefix(&gtk4::Image::from_icon_name("applications-graphics-symbolic"));
 
-    let preset_chips = [
-        ("Normal", 0.0, 1.0, 1.0, 0.0, 0.0, false, false, false),
-        ("Vibrant", 0.04, 1.18, 1.45, 0.0, 0.0, false, false, false),
-        ("B&W", -0.02, 1.35, 0.0, 0.0, 0.0, false, true, false),
-        ("Vintage", -0.04, 1.12, 0.85, 0.0, 0.0, false, false, true),
-        ("Warm", 0.03, 1.05, 1.15, 15.0, 0.0, false, false, false),
-        ("Cool", 0.02, 1.08, 1.10, -15.0, 0.0, false, false, false),
+    let preset_names = [
+        crate::core::gettext("Normal"),
+        crate::core::gettext("Vibrant"),
+        crate::core::gettext("B&W"),
+        crate::core::gettext("Vintage"),
+        crate::core::gettext("Warm"),
+        crate::core::gettext("Cool"),
     ];
+    let preset_dropdown = gtk4::DropDown::from_strings(&preset_names.iter().map(|s| s.as_str()).collect::<Vec<_>>());
+    preset_dropdown.set_valign(gtk4::Align::Center);
+    preset_row.add_suffix(&preset_dropdown);
+    adj_group.add(&preset_row);
 
-    for (p_name, br, ct, st, hr, bl, inv, gs, sp) in preset_chips {
-        let chip = gtk4::Button::builder()
-            .label(&crate::core::gettext(p_name))
-            .css_classes(["image-preset-chip", "flat"])
-            .build();
+    // High Density Sliders (using expansive tracks that fill the card)
+    let (b_row, brightness_scale, b_val_lbl) = create_adw_slider_row(
+        "weather-clear-symbolic",
+        &crate::core::gettext("Brightness"),
+        -100.0,
+        100.0,
+        1.0,
+        0.0,
+        "%",
+    );
+    adj_group.add(&b_row);
+
+    let (c_row, contrast_scale, c_val_lbl) = create_adw_slider_row(
+        "contrast-symbolic",
+        &crate::core::gettext("Contrast"),
+        -100.0,
+        100.0,
+        1.0,
+        0.0,
+        "%",
+    );
+    adj_group.add(&c_row);
+
+    let (s_row, saturation_scale, s_val_lbl) = create_adw_slider_row(
+        "color-select-symbolic",
+        &crate::core::gettext("Saturation"),
+        -100.0,
+        100.0,
+        1.0,
+        0.0,
+        "%",
+    );
+    adj_group.add(&s_row);
+
+    let (h_row, hue_scale, h_val_lbl) = create_adw_slider_row(
+        "rotate-right-symbolic",
+        &crate::core::gettext("Hue Rotate"),
+        -180.0,
+        180.0,
+        1.0,
+        0.0,
+        "°",
+    );
+    adj_group.add(&h_row);
+
+    let (blur_row, blur_scale, blur_val_lbl) = create_adw_slider_row(
+        "edit-find-symbolic",
+        &crate::core::gettext("Blur"),
+        0.0,
+        50.0,
+        0.5,
+        0.0,
+        " px",
+    );
+    adj_group.add(&blur_row);
+
+    // Native Libadwaita SwitchRows
+    let invert_switch_row = adw::SwitchRow::builder()
+        .title(&crate::core::gettext("Invert Colors"))
+        .subtitle(&crate::core::gettext("Inverts the RGB color spectrum"))
+        .build();
+    adj_group.add(&invert_switch_row);
+
+    let grayscale_switch_row = adw::SwitchRow::builder()
+        .title(&crate::core::gettext("Black & White (Grayscale)"))
+        .subtitle(&crate::core::gettext("Converts image to monochrome grayscale"))
+        .build();
+    adj_group.add(&grayscale_switch_row);
+
+    let sepia_switch_row = adw::SwitchRow::builder()
+        .title(&crate::core::gettext("Sepia Tone"))
+        .subtitle(&crate::core::gettext("Applies classic warm photographic tint"))
+        .build();
+    adj_group.add(&sepia_switch_row);
+
+    content_box.append(&adj_group);
+
+    // Preset selection logic
+    {
         let cv = canvas.clone();
-        chip.connect_clicked(move |_| {
+        preset_dropdown.connect_selected_notify(move |dd| {
+            let (br, ct, st, hr, bl, inv, gs, sp) = match dd.selected() {
+                1 => (0.04, 1.18, 1.45, 0.0, 0.0, false, false, false), // Vibrant
+                2 => (-0.02, 1.35, 0.0, 0.0, 0.0, false, true, false),  // B&W
+                3 => (-0.04, 1.12, 0.85, 0.0, 0.0, false, false, true), // Vintage
+                4 => (0.03, 1.05, 1.15, 15.0, 0.0, false, false, false),// Warm
+                5 => (0.02, 1.08, 1.10, -15.0, 0.0, false, false, false),// Cool
+                _ => (0.0, 1.0, 1.0, 0.0, 0.0, false, false, false),    // Normal
+            };
             cv.set_selected_image_adjustments(
                 ImageAdjustments {
                     brightness: br,
@@ -715,155 +520,34 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
                 true,
             );
         });
-        presets_row.append(&chip);
     }
-    adj_card.append(&presets_row);
-
-    adj_card.append(&gtk4::Separator::builder().orientation(gtk4::Orientation::Horizontal).build());
-
-    // ── High Density Compact Sliders ──
-    let (b_row, brightness_scale, b_val_lbl) = create_compact_slider_row(
-        "weather-clear-symbolic",
-        &crate::core::gettext("Brightness"),
-        -100.0,
-        100.0,
-        1.0,
-        0.0,
-        "%",
-    );
-    adj_card.append(&b_row);
-
-    let (c_row, contrast_scale, c_val_lbl) = create_compact_slider_row(
-        "contrast-symbolic",
-        &crate::core::gettext("Contrast"),
-        -100.0,
-        100.0,
-        1.0,
-        0.0,
-        "%",
-    );
-    adj_card.append(&c_row);
-
-    let (s_row, saturation_scale, s_val_lbl) = create_compact_slider_row(
-        "color-select-symbolic",
-        &crate::core::gettext("Saturation"),
-        -100.0,
-        100.0,
-        1.0,
-        0.0,
-        "%",
-    );
-    adj_card.append(&s_row);
-
-    let (h_row, hue_scale, h_val_lbl) = create_compact_slider_row(
-        "rotate-right-symbolic",
-        &crate::core::gettext("Hue Rotate"),
-        -180.0,
-        180.0,
-        1.0,
-        0.0,
-        "°",
-    );
-    adj_card.append(&h_row);
-
-    let (blur_row, blur_scale, blur_val_lbl) = create_compact_slider_row(
-        "edit-find-symbolic",
-        &crate::core::gettext("Blur"),
-        0.0,
-        50.0,
-        0.5,
-        0.0,
-        " px",
-    );
-    adj_card.append(&blur_row);
-
-    adj_card.append(&gtk4::Separator::builder().orientation(gtk4::Orientation::Horizontal).build());
-
-    // ── Switches ──
-    let (inv_row, invert_switch) = create_switch_row(
-        &crate::core::gettext("Invert Colors"),
-        &crate::core::gettext("Inverts the RGB color spectrum"),
-    );
-    adj_card.append(&inv_row);
-
-    let (gray_row, grayscale_switch) = create_switch_row(
-        &crate::core::gettext("Black & White (Grayscale)"),
-        &crate::core::gettext("Converts image to monochrome grayscale"),
-    );
-    adj_card.append(&gray_row);
-
-    let (sepia_row, sepia_switch) = create_switch_row(
-        &crate::core::gettext("Sepia Tone"),
-        &crate::core::gettext("Applies classic warm photographic tint"),
-    );
-    adj_card.append(&sepia_row);
-
-    content_box.append(&adj_card);
 
     // ─────────────────────────────────────────────────────────────
-    // 3. Vetorização de Bitmap Card (Trace Engine, Steppers, Mode Pills)
+    // 3. Bitmap Vectorization Group (Libadwaita PreferencesGroup)
     // ─────────────────────────────────────────────────────────────
-    let trace_card = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Vertical)
-        .spacing(0)
-        .css_classes(["card"])
+    let trace_group = adw::PreferencesGroup::builder()
+        .title(&crate::core::gettext("Bitmap Vectorization"))
         .build();
 
-    let trace_header = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(6)
-        .css_classes(["card-header-bar"])
-        .valign(gtk4::Align::Center)
+    // Mode Row
+    let mode_row = adw::ActionRow::builder()
+        .title(&crate::core::gettext("Mode"))
+        .subtitle(&crate::core::gettext("Vectorization algorithm"))
         .build();
+    mode_row.add_prefix(&gtk4::Image::from_icon_name("object-to-path-symbolic"));
 
-    let trace_icon = crate::ui::icons::make_symbolic_image("object-to-path-symbolic", 15);
-    trace_header.append(&trace_icon);
-
-    let trace_title = gtk4::Label::builder()
-        .label(&crate::core::gettext("Bitmap Vectorization"))
-        .css_classes(["heading", "caption"])
-        .halign(gtk4::Align::Start)
-        .hexpand(true)
-        .build();
-    trace_header.append(&trace_title);
-    trace_card.append(&trace_header);
-
-    trace_card.append(&gtk4::Separator::builder().orientation(gtk4::Orientation::Horizontal).build());
-
-    // Mode Segmented Pill Bar: [ Monocromático ] [ Cores ] [ Contornos ]
-    let mode_pill_bar = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(0)
-        .homogeneous(true)
-        .css_classes(["linked", "image-segmented-pills"])
-        .margin_start(10)
-        .margin_end(10)
-        .margin_top(8)
-        .margin_bottom(6)
-        .build();
-
-    let btn_mode_mono = gtk4::ToggleButton::builder()
-        .label(&crate::core::gettext("Monochrome"))
-        .active(true)
-        .build();
-    let btn_mode_color = gtk4::ToggleButton::builder()
-        .label(&crate::core::gettext("Colors"))
-        .build();
-    let btn_mode_edge = gtk4::ToggleButton::builder()
-        .label(&crate::core::gettext("Outlines"))
-        .build();
-
-    mode_pill_bar.append(&btn_mode_mono);
-    mode_pill_bar.append(&btn_mode_color);
-    mode_pill_bar.append(&btn_mode_edge);
-    trace_card.append(&mode_pill_bar);
-
-    let current_trace_mode = Rc::new(Cell::new(0usize)); // 0: Mono, 1: Color, 2: Outlines
-
-    trace_card.append(&gtk4::Separator::builder().orientation(gtk4::Orientation::Horizontal).build());
+    let trace_mode_names = [
+        crate::core::gettext("Monochrome"),
+        crate::core::gettext("Colors"),
+        crate::core::gettext("Outlines"),
+    ];
+    let trace_mode_dd = gtk4::DropDown::from_strings(&trace_mode_names.iter().map(|s| s.as_str()).collect::<Vec<_>>());
+    trace_mode_dd.set_valign(gtk4::Align::Center);
+    mode_row.add_suffix(&trace_mode_dd);
+    trace_group.add(&mode_row);
 
     // Parameter: Threshold Slider (Monochrome / Outlines)
-    let (thresh_row, thresh_scale, thresh_lbl) = create_compact_slider_row(
+    let (thresh_row, thresh_scale, thresh_lbl) = create_adw_slider_row(
         "weather-clear-night-symbolic",
         &crate::core::gettext("Threshold"),
         1.0,
@@ -872,49 +556,29 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         50.0,
         "%",
     );
-    trace_card.append(&thresh_row);
+    trace_group.add(&thresh_row);
 
-    // Parameter: Color Layers (Stepper Control: 4 [-] [+])
-    let colors_val_cell = Rc::new(Cell::new(4i64));
-    let (colors_row, _colors_lbl, colors_val_ref) = create_stepper_row(
-        "color-select-symbolic",
-        &crate::core::gettext("Color Layers"),
-        4,
-        2,
-        16,
-        1,
-        "",
-        {
-            let cv_c = colors_val_cell.clone();
-            move |v| {
-                cv_c.set(v);
-            }
-        },
-    );
+    // Parameter: Color Layers (SpinRow)
+    let colors_adj = gtk4::Adjustment::new(4.0, 2.0, 16.0, 1.0, 2.0, 0.0);
+    let colors_row = adw::SpinRow::builder()
+        .title(&crate::core::gettext("Color Layers"))
+        .subtitle(&crate::core::gettext("Number of quantized color paths"))
+        .adjustment(&colors_adj)
+        .build();
     colors_row.set_visible(false);
-    trace_card.append(&colors_row);
+    trace_group.add(&colors_row);
 
-    // Parameter: Noise Filter (Stepper Control: 8 px [-] [+])
-    let noise_val_cell = Rc::new(Cell::new(8i64));
-    let (noise_row, _noise_lbl, noise_val_ref) = create_stepper_row(
-        "view-grid-symbolic",
-        &crate::core::gettext("Noise Filter"),
-        8,
-        0,
-        50,
-        1,
-        " px",
-        {
-            let nv_c = noise_val_cell.clone();
-            move |v| {
-                nv_c.set(v);
-            }
-        },
-    );
-    trace_card.append(&noise_row);
+    // Parameter: Noise Filter (SpinRow)
+    let noise_adj = gtk4::Adjustment::new(8.0, 0.0, 50.0, 1.0, 5.0, 0.0);
+    let noise_row = adw::SpinRow::builder()
+        .title(&crate::core::gettext("Noise Filter (px)"))
+        .subtitle(&crate::core::gettext("Filter out small speckled artifacts"))
+        .adjustment(&noise_adj)
+        .build();
+    trace_group.add(&noise_row);
 
     // Parameter: Detail / RDP Simplification
-    let (detail_row, detail_scale, detail_lbl) = create_compact_slider_row(
+    let (detail_row, detail_scale, detail_lbl) = create_adw_slider_row(
         "pen-simplify-symbolic",
         &crate::core::gettext("Detail (RDP)"),
         0.2,
@@ -923,10 +587,10 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         1.0,
         "",
     );
-    trace_card.append(&detail_row);
+    trace_group.add(&detail_row);
 
     // Parameter: Curve Smoothness
-    let (smooth_row, smooth_scale, smooth_lbl) = create_compact_slider_row(
+    let (smooth_row, smooth_scale, smooth_lbl) = create_adw_slider_row(
         "node-smooth-symbolic",
         &crate::core::gettext("Smoothness"),
         0.0,
@@ -935,64 +599,36 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         65.0,
         "%",
     );
-    trace_card.append(&smooth_row);
+    trace_group.add(&smooth_row);
 
-    // Connect mode pill toggles with radio behavior
+    // Options: SwitchRows
+    let inv_trace_sw = adw::SwitchRow::builder()
+        .title(&crate::core::gettext("Invert Selection"))
+        .subtitle(&crate::core::gettext("Invert foreground/background vector cutout"))
+        .build();
+    trace_group.add(&inv_trace_sw);
+
+    let keep_trace_sw = adw::SwitchRow::builder()
+        .title(&crate::core::gettext("Keep Original Image"))
+        .subtitle(&crate::core::gettext("Keep bitmap image and place vector paths on top"))
+        .build();
+    trace_group.add(&keep_trace_sw);
+
+    // Mode dropdown listener to toggle threshold vs colors row
     {
-        let m_cell = current_trace_mode.clone();
-        let b_mono = btn_mode_mono.clone();
-        let b_color = btn_mode_color.clone();
-        let b_edge = btn_mode_edge.clone();
         let r_thresh = thresh_row.clone();
         let r_colors = colors_row.clone();
-
-        b_mono.connect_toggled({
-            let m_c = m_cell.clone();
-            let b_col = b_color.clone();
-            let b_ed = b_edge.clone();
-            let r_th = r_thresh.clone();
-            let r_co = r_colors.clone();
-            move |b| {
-                if b.is_active() {
-                    m_c.set(0);
-                    b_col.set_active(false);
-                    b_ed.set_active(false);
-                    r_th.set_visible(true);
-                    r_co.set_visible(false);
+        trace_mode_dd.connect_selected_notify(move |dd| {
+            match dd.selected() {
+                1 => {
+                    // Color Quantization
+                    r_thresh.set_visible(false);
+                    r_colors.set_visible(true);
                 }
-            }
-        });
-
-        b_color.connect_toggled({
-            let m_c = m_cell.clone();
-            let b_mo = b_mono.clone();
-            let b_ed = b_edge.clone();
-            let r_th = r_thresh.clone();
-            let r_co = r_colors.clone();
-            move |b| {
-                if b.is_active() {
-                    m_c.set(1);
-                    b_mo.set_active(false);
-                    b_ed.set_active(false);
-                    r_th.set_visible(false);
-                    r_co.set_visible(true);
-                }
-            }
-        });
-
-        b_edge.connect_toggled({
-            let m_c = m_cell;
-            let b_mo = b_mono;
-            let b_col = b_color;
-            let r_th = r_thresh;
-            let r_co = r_colors;
-            move |b| {
-                if b.is_active() {
-                    m_c.set(2);
-                    b_mo.set_active(false);
-                    b_col.set_active(false);
-                    r_th.set_visible(true);
-                    r_co.set_visible(false);
+                _ => {
+                    // Monochrome / Outlines
+                    r_thresh.set_visible(true);
+                    r_colors.set_visible(false);
                 }
             }
         });
@@ -1018,61 +654,33 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         });
     }
 
-    trace_card.append(&gtk4::Separator::builder().orientation(gtk4::Orientation::Horizontal).build());
-
-    // Switches
-    let (inv_trace_row, inv_trace_sw) = create_switch_row(
-        &crate::core::gettext("Invert Selection"),
-        &crate::core::gettext("Invert foreground/background vector cutout"),
-    );
-    trace_card.append(&inv_trace_row);
-
-    let (keep_trace_row, keep_trace_sw) = create_switch_row(
-        &crate::core::gettext("Keep Original Image"),
-        &crate::core::gettext("Keep bitmap image and place vector paths on top"),
-    );
-    trace_card.append(&keep_trace_row);
-
-    trace_card.append(&gtk4::Separator::builder().orientation(gtk4::Orientation::Horizontal).build());
-
-    // Trace Card Action Row (Primary Direct Action + Preview Button)
-    let card_action_row = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(6)
-        .margin_start(10)
-        .margin_end(10)
-        .margin_top(8)
-        .margin_bottom(8)
+    // Action Buttons Row inside Trace Group
+    let trace_action_row = adw::ActionRow::builder()
+        .title(&crate::core::gettext("Vectorization Actions"))
         .build();
 
     let btn_trace_direct = gtk4::Button::builder()
+        .label(&crate::core::gettext("Trace to Paths"))
+        .icon_name("object-to-path-symbolic")
         .css_classes(["suggested-action", "pill"])
-        .hexpand(true)
+        .valign(gtk4::Align::Center)
         .build();
-    let trace_btn_content = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(6)
-        .halign(gtk4::Align::Center)
-        .build();
-    trace_btn_content.append(&crate::ui::icons::make_symbolic_image("object-to-path-symbolic", 14));
-    trace_btn_content.append(&gtk4::Label::builder().label(&crate::core::gettext("Trace to Paths")).css_classes(["heading"]).build());
-    btn_trace_direct.set_child(Some(&trace_btn_content));
 
     {
         let cv = canvas.clone();
-        let m_ref = current_trace_mode.clone();
+        let m_dd = trace_mode_dd.clone();
         let sc_th = thresh_scale.clone();
-        let cv_ref = colors_val_ref.clone();
+        let row_col = colors_row.clone();
         let sc_de = detail_scale.clone();
         let sc_sm = smooth_scale.clone();
-        let nv_ref = noise_val_ref.clone();
+        let row_noi = noise_row.clone();
         let sw_in = inv_trace_sw.clone();
         let sw_ke = keep_trace_sw.clone();
         btn_trace_direct.connect_clicked(move |_| {
             let Some(img) = cv.get_selected_image_element() else {
                 return;
             };
-            let mode = match m_ref.get() {
+            let mode = match m_dd.selected() {
                 1 => crate::core::trace::TraceMode::ColorQuantization,
                 2 => crate::core::trace::TraceMode::EdgeDetection,
                 _ => crate::core::trace::TraceMode::BrightnessCutoff,
@@ -1080,10 +688,10 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
             let config = crate::core::trace::TraceConfig {
                 mode,
                 threshold: (sc_th.value() / 100.0) as f32,
-                num_colors: cv_ref.get() as usize,
+                num_colors: row_col.value() as usize,
                 detail: sc_de.value() as f32,
                 smoothness: (sc_sm.value() / 100.0) as f32,
-                despeckle: nv_ref.get() as usize,
+                despeckle: row_noi.value() as usize,
                 corner_threshold: 1.25,
                 invert: sw_in.is_active(),
                 keep_original: sw_ke.is_active(),
@@ -1094,85 +702,79 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
             }
         });
     }
-    card_action_row.append(&btn_trace_direct);
+    trace_action_row.add_suffix(&btn_trace_direct);
 
     let btn_trace_dialog = gtk4::Button::builder()
-        .css_classes(["pill"])
-        .tooltip_text(crate::core::gettext("Open advanced interactive live preview dialog"))
+        .icon_name("zoom-fit-selection-symbolic")
+        .tooltip_text(&crate::core::gettext("Open advanced interactive live preview dialog"))
+        .css_classes(["flat"])
+        .valign(gtk4::Align::Center)
         .build();
-    let dialog_btn_box = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(4)
-        .halign(gtk4::Align::Center)
-        .build();
-    dialog_btn_box.append(&crate::ui::icons::make_symbolic_image("zoom-fit-selection-symbolic", 14));
-    dialog_btn_box.append(&gtk4::Label::new(Some(&crate::core::gettext("Preview"))));
-    btn_trace_dialog.set_child(Some(&dialog_btn_box));
     {
         let cv = canvas.clone();
         btn_trace_dialog.connect_clicked(move |btn| {
             crate::ui::dialogs::show_trace_bitmap_dialog(btn, cv.clone());
         });
     }
-    card_action_row.append(&btn_trace_dialog);
+    trace_action_row.add_suffix(&btn_trace_dialog);
 
-    trace_card.append(&card_action_row);
-    content_box.append(&trace_card);
+    trace_group.add(&trace_action_row);
+    content_box.append(&trace_group);
 
     // ─────────────────────────────────────────────────────────────
     // Wire Top View Switcher Filter
     // ─────────────────────────────────────────────────────────────
     {
-        let a_card = adj_card.clone();
-        let t_card = trace_card.clone();
+        let a_grp = adj_group.clone();
+        let t_grp = trace_group.clone();
         let b_adj = tab_adj_btn.clone();
         let b_trace = tab_trace_btn.clone();
         let b_all = tab_all_btn.clone();
 
         // Default: Adjustments active, Trace hidden unless user switches
-        t_card.set_visible(false);
+        t_grp.set_visible(false);
 
         b_adj.connect_toggled({
-            let ac = a_card.clone();
-            let tc = t_card.clone();
+            let ag = a_grp.clone();
+            let tg = t_grp.clone();
             let bt = b_trace.clone();
             let ba = b_all.clone();
             move |btn| {
                 if btn.is_active() {
                     bt.set_active(false);
                     ba.set_active(false);
-                    ac.set_visible(true);
-                    tc.set_visible(false);
+                    ag.set_visible(true);
+                    tg.set_visible(false);
                 }
             }
         });
 
         b_trace.connect_toggled({
-            let ac = a_card.clone();
-            let tc = t_card.clone();
+            let ag = a_grp.clone();
+            let tg = t_grp.clone();
             let ba = b_adj.clone();
             let ball = b_all.clone();
             move |btn| {
                 if btn.is_active() {
                     ba.set_active(false);
                     ball.set_active(false);
-                    ac.set_visible(false);
-                    tc.set_visible(true);
+                    ag.set_visible(false);
+                    tg.set_visible(true);
                 }
             }
         });
 
         b_all.connect_toggled({
-            let ac = a_card;
-            let tc = t_card;
+            let ag = a_grp;
+            let tg = t_grp;
             let ba = b_adj;
             let bt = b_trace;
             move |btn| {
                 if btn.is_active() {
                     ba.set_active(false);
                     bt.set_active(false);
-                    ac.set_visible(true);
-                    tc.set_visible(true);
+                    ag.set_visible(true);
+                    tg.set_visible(true);
                 }
             }
         });
@@ -1187,9 +789,9 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         let s_s = saturation_scale.clone();
         let h_s = hue_scale.clone();
         let bl_s = blur_scale.clone();
-        let inv_s = invert_switch.clone();
-        let gray_s = grayscale_switch.clone();
-        let sep_s = sepia_switch.clone();
+        let inv_s = invert_switch_row.clone();
+        let gray_s = grayscale_switch_row.clone();
+        let sep_s = sepia_switch_row.clone();
 
         Rc::new(move || {
             let b_pct = b_s.value();
@@ -1310,7 +912,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         let cv = canvas.clone();
         let get_adj = build_current_adj.clone();
         let upd = is_updating.clone();
-        invert_switch.connect_active_notify(move |_| {
+        invert_switch_row.connect_active_notify(move |_| {
             if upd.get() {
                 return;
             }
@@ -1321,7 +923,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         let cv = canvas.clone();
         let get_adj = build_current_adj.clone();
         let upd = is_updating.clone();
-        grayscale_switch.connect_active_notify(move |_| {
+        grayscale_switch_row.connect_active_notify(move |_| {
             if upd.get() {
                 return;
             }
@@ -1332,7 +934,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         let cv = canvas.clone();
         let get_adj = build_current_adj;
         let upd = is_updating.clone();
-        sepia_switch.connect_active_notify(move |_| {
+        sepia_switch_row.connect_active_notify(move |_| {
             if upd.get() {
                 return;
             }
@@ -1346,17 +948,17 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     // update_fn
     // ─────────────────────────────────────────────────────────────
     let cv_for_upd = canvas.clone();
-    let name_lbl_c = name_label.clone();
-    let dim_lbl_c = dim_label.clone();
+    let file_row_c = file_row.clone();
+    let dim_row_c = dim_row.clone();
     let reset_aspect_c = btn_reset_aspect.clone();
     let bright_scale_c = brightness_scale.clone();
     let cont_scale_c = contrast_scale.clone();
     let sat_scale_c = saturation_scale.clone();
     let hue_scale_c = hue_scale.clone();
     let blur_scale_c = blur_scale.clone();
-    let inv_sw_c = invert_switch.clone();
-    let gray_sw_c = grayscale_switch.clone();
-    let sep_sw_c = sepia_switch.clone();
+    let inv_sw_c = invert_switch_row.clone();
+    let gray_sw_c = grayscale_switch_row.clone();
+    let sep_sw_c = sepia_switch_row.clone();
     let content_b_c = content_box.clone();
     let empty_b_c = empty_state_box.clone();
     let is_upd_c = is_updating.clone();
@@ -1368,7 +970,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
             content_b_c.set_visible(true);
             is_upd_c.set(true);
 
-            name_lbl_c.set_text(&name);
+            file_row_c.set_subtitle(&name);
 
             let dim_str = if let Some((iw, ih)) = intrinsic {
                 format!(
@@ -1378,7 +980,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
             } else {
                 format!("{:.0} × {:.0} px ({})", rect.width, rect.height, crate::core::gettext("Empty Frame"))
             };
-            dim_lbl_c.set_text(&dim_str);
+            dim_row_c.set_subtitle(&dim_str);
             reset_aspect_c.set_sensitive(intrinsic.is_some());
 
             let adj_opt = passed_adj.or_else(|| cv_for_upd.get_selected_image_adjustments());
@@ -1427,9 +1029,9 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         saturation_scale,
         hue_scale,
         blur_scale,
-        invert_switch,
-        grayscale_switch,
-        sepia_switch,
+        invert_switch_row,
+        grayscale_switch_row,
+        sepia_switch_row,
         btn_reset_adjustments,
         btn_reset_aspect,
         is_updating,
