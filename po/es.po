@@ -3001,3 +3001,6 @@ msgstr "Arrastra para posicionar fuente de luz en 3D\nDoble clic para restablece
 msgid "Advanced 3D & Materials"
 msgstr "3D avanzado y materiales"
 
+msgid "Replace Image..."
+msgstr "Reemplazar imagen..."
+

@@ -90,6 +90,8 @@ impl CanvasWidget {
                         state.notify_status();
                         area_menu.queue_draw();
                     }
+                } else if state.document.selection_bounds().map_or(false, |b| b.contains(world_pt)) {
+                    // Right-clicked inside current selection bounds: preserve selection
                 } else {
                     // Right-clicked outside on empty canvas: deselect all objects
                     if !state.document.selected_ids.is_empty() {
@@ -104,7 +106,7 @@ impl CanvasWidget {
         ));
         area.add_controller(gesture_right_click);
 
-        // 1. Gesture Drag (Click, Drag, Release on any button: left, middle, right)
+        // 1. Gesture Drag (Click, Drag, Release on any button: left, middle; ignore right-click)
         let gesture_drag = gtk4::GestureDrag::new();
         gesture_drag.set_button(0);
         let state_drag = self.state.clone();
@@ -115,6 +117,9 @@ impl CanvasWidget {
             #[weak]
             area_drag,
             move |gesture, x, y| {
+                if gesture.current_button() == 3 {
+                    return;
+                }
                 area_drag.grab_focus();
                 let current_btn = match gesture.current_button() {
                     1 => PointerButton::Primary,
@@ -165,6 +170,9 @@ impl CanvasWidget {
             #[weak]
             area_update,
             move |gesture, offset_x, offset_y| {
+                if gesture.current_button() == 3 {
+                    return;
+                }
                 if let Some((start_x, start_y)) = gesture.start_point() {
                     let cur_x = start_x + offset_x;
                     let cur_y = start_y + offset_y;
@@ -207,6 +215,9 @@ impl CanvasWidget {
             #[weak]
             area_end,
             move |gesture, offset_x, offset_y| {
+                if gesture.current_button() == 3 {
+                    return;
+                }
                 if let Some((start_x, start_y)) = gesture.start_point() {
                     let cur_x = start_x + offset_x;
                     let cur_y = start_y + offset_y;
@@ -1007,4 +1018,32 @@ mod tests {
         let b = elem.bounds();
         assert!(b.width > 0.0 && b.height > 0.0);
     }
+
+    #[test]
+    fn test_bitmap_image_selection_and_right_click_bounds() {
+        let mut doc = crate::core::Document::new();
+        let img = crate::core::ImageElement::new(
+            Rect::new(100.0, 100.0, 200.0, 150.0),
+            vec![1, 2, 3, 4],
+            Some("Chicken".to_string()),
+        );
+        let id = img.id;
+        doc.add_element(Element::Image(img));
+
+        // Hit testing directly
+        assert_eq!(doc.hit_test(Point::new(150.0, 150.0)), Some(id));
+        assert_eq!(doc.hit_test(Point::new(50.0, 50.0)), None);
+
+        // Select the image
+        doc.select(id, false);
+        assert!(doc.selected_ids.contains(&id));
+
+        // When selected, selection_bounds contains points inside the image
+        let bounds = doc.selection_bounds().expect("bounds should exist");
+        assert!(bounds.contains(Point::new(150.0, 150.0)));
+        assert!(bounds.contains(Point::new(100.0, 100.0)));
+        assert!(bounds.contains(Point::new(300.0, 250.0)));
+        assert!(!bounds.contains(Point::new(50.0, 50.0)));
+    }
 }
+

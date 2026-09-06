@@ -298,6 +298,9 @@ impl FeaturePlugin for ImageFeature {
     }
 
     fn on_pointer_up(&mut self, ctx: &mut PluginContext, event: &PointerEvent) {
+        if event.button != Some(PointerButton::Primary) {
+            return;
+        }
         match self.state {
             ImageToolState::Creating { .. } => {
                 if let Some(rect) = self.current_rect() {

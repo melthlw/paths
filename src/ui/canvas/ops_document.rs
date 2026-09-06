@@ -1253,7 +1253,7 @@ impl CanvasWidget {
             style,
             state.active_stroke_width,
             smoothing,
-        );
+        )
     }
 
     pub fn is_image_selected(&self) -> bool {

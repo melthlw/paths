@@ -98,6 +98,13 @@ impl ObjectContextMenu {
 
         root_box.append(&selection_menu.convert_path_btn);
         root_box.append(&selection_menu.trace_bitmap_btn);
+        root_box.append(&selection_menu.replace_image_btn);
+        root_box.append(&selection_menu.reset_aspect_btn);
+        root_box.append(&selection_menu.rotate_cw_btn);
+        root_box.append(&selection_menu.rotate_ccw_btn);
+        root_box.append(&selection_menu.flip_h_btn);
+        root_box.append(&selection_menu.flip_v_btn);
+        root_box.append(&selection_menu.sep_image);
         root_box.append(&selection_menu.rasterize_btn);
         root_box.append(&selection_menu.attach_path_btn);
         root_box.append(&selection_menu.detach_path_btn);
@@ -206,6 +213,13 @@ impl ObjectContextMenu {
 
             self.selection_menu.convert_path_btn.set_visible(false);
             self.selection_menu.trace_bitmap_btn.set_visible(false);
+            self.selection_menu.replace_image_btn.set_visible(false);
+            self.selection_menu.reset_aspect_btn.set_visible(false);
+            self.selection_menu.rotate_cw_btn.set_visible(false);
+            self.selection_menu.rotate_ccw_btn.set_visible(false);
+            self.selection_menu.flip_h_btn.set_visible(false);
+            self.selection_menu.flip_v_btn.set_visible(false);
+            self.selection_menu.sep_image.set_visible(false);
             self.selection_menu.rasterize_btn.set_visible(false);
             self.selection_menu.attach_path_btn.set_visible(false);
             self.selection_menu.detach_path_btn.set_visible(false);
@@ -247,11 +261,13 @@ impl ObjectContextMenu {
 
             self.canvas_menu.add_page_btn.set_visible(false);
 
+            let is_image = self.canvas.is_image_selected();
+
             self.selection_menu.copy_btn.set_visible(true);
             self.selection_menu.cut_btn.set_visible(true);
             self.selection_menu.paste_btn.set_visible(has_clip);
-            self.selection_menu.copy_style_btn.set_visible(true);
-            self.selection_menu.paste_style_btn.set_visible(true);
+            self.selection_menu.copy_style_btn.set_visible(!is_image);
+            self.selection_menu.paste_style_btn.set_visible(!is_image);
             self.selection_menu.sep_clip.set_visible(true);
 
             let has_clones = self.canvas.has_clones_selected();
@@ -271,13 +287,34 @@ impl ObjectContextMenu {
             self.selection_menu.sep_edit.set_visible(true);
 
             let can_trace = self.canvas.can_trace_bitmap();
-            let can_rasterize = has_sel && !can_trace;
+            let can_rasterize = has_sel && !can_trace && !is_image;
             self.selection_menu
                 .convert_path_btn
-                .set_visible(can_convert);
+                .set_visible(can_convert && !is_image);
             self.selection_menu
                 .trace_bitmap_btn
                 .set_visible(can_trace);
+            self.selection_menu
+                .replace_image_btn
+                .set_visible(is_image && sel_count == 1);
+            self.selection_menu
+                .reset_aspect_btn
+                .set_visible(is_image && sel_count == 1);
+            self.selection_menu
+                .rotate_cw_btn
+                .set_visible(true);
+            self.selection_menu
+                .rotate_ccw_btn
+                .set_visible(true);
+            self.selection_menu
+                .flip_h_btn
+                .set_visible(true);
+            self.selection_menu
+                .flip_v_btn
+                .set_visible(true);
+            self.selection_menu
+                .sep_image
+                .set_visible(true);
             self.selection_menu
                 .rasterize_btn
                 .set_visible(can_rasterize);
@@ -314,15 +351,14 @@ impl ObjectContextMenu {
             }
             self.selection_menu.sep_group.set_visible(show_group_section);
 
-            self.selection_menu.select_same_btn.set_visible(true);
-            self.selection_menu.sep_select_same.set_visible(true);
+            self.selection_menu.select_same_btn.set_visible(!is_image);
+            self.selection_menu.sep_select_same.set_visible(!is_image);
 
             self.selection_menu.hide_btn.set_visible(true);
             self.selection_menu.lock_btn.set_visible(true);
         }
 
-        let menu_width = 240;
-        let rect = gdk::Rectangle::new((pos.x as i32) + (menu_width / 2), pos.y as i32, 1, 1);
+        let rect = gdk::Rectangle::new(pos.x as i32, pos.y as i32, 1, 1);
         self.popover.set_pointing_to(Some(&rect));
         self.popover.popup();
     }

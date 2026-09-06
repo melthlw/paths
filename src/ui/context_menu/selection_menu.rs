@@ -21,6 +21,13 @@ pub struct SelectionMenuWidgets {
 
     pub convert_path_btn: gtk4::Button,
     pub trace_bitmap_btn: gtk4::Button,
+    pub replace_image_btn: gtk4::Button,
+    pub reset_aspect_btn: gtk4::Button,
+    pub rotate_cw_btn: gtk4::Button,
+    pub rotate_ccw_btn: gtk4::Button,
+    pub flip_h_btn: gtk4::Button,
+    pub flip_v_btn: gtk4::Button,
+    pub sep_image: gtk4::Separator,
     pub rasterize_btn: gtk4::Button,
     pub attach_path_btn: gtk4::Button,
     pub detach_path_btn: gtk4::Button,
@@ -122,6 +129,37 @@ pub fn build_selection_menu(
         &crate::core::gettext("Trace Bitmap..."),
         None,
     );
+    let (replace_image_btn, _) = create_item(
+        "document-open-symbolic",
+        &crate::core::gettext("Replace Image..."),
+        None,
+    );
+    let (reset_aspect_btn, _) = create_item(
+        "lock-aspect-ratio-symbolic",
+        &crate::core::gettext("Restore original aspect ratio"),
+        None,
+    );
+    let (rotate_cw_btn, _) = create_item(
+        "object-rotate-right-symbolic",
+        &crate::core::gettext("Rotate 90° CW"),
+        None,
+    );
+    let (rotate_ccw_btn, _) = create_item(
+        "object-rotate-left-symbolic",
+        &crate::core::gettext("Rotate 90° CCW"),
+        None,
+    );
+    let (flip_h_btn, _) = create_item(
+        "object-flip-horizontal-symbolic",
+        &crate::core::gettext("Flip horizontally"),
+        None,
+    );
+    let (flip_v_btn, _) = create_item(
+        "object-flip-vertical-symbolic",
+        &crate::core::gettext("Flip vertically"),
+        None,
+    );
+    let sep_image = gtk4::Separator::new(gtk4::Orientation::Horizontal);
     let (rasterize_btn, _) = create_item(
         "tool-image-symbolic",
         &crate::core::gettext("Rasterize to Bitmap"),
@@ -376,6 +414,92 @@ pub fn build_selection_menu(
     {
         let canvas = canvas.clone();
         let popover = popover.clone();
+        replace_image_btn.connect_clicked(move |btn| {
+            popover.popdown();
+            let file_dialog = gtk4::FileDialog::builder()
+                .title(&crate::core::gettext("Replace Image..."))
+                .modal(true)
+                .build();
+            let filter = gtk4::FileFilter::new();
+            filter.set_name(Some(&crate::core::gettext("Images")));
+            filter.add_pixbuf_formats();
+            filter.add_mime_type("image/png");
+            filter.add_mime_type("image/jpeg");
+            filter.add_mime_type("image/webp");
+            filter.add_mime_type("image/svg+xml");
+            filter.add_mime_type("image/gif");
+            filter.add_pattern("*.png");
+            filter.add_pattern("*.PNG");
+            filter.add_pattern("*.jpg");
+            filter.add_pattern("*.JPG");
+            filter.add_pattern("*.jpeg");
+            filter.add_pattern("*.JPEG");
+            filter.add_pattern("*.webp");
+            filter.add_pattern("*.WEBP");
+            filter.add_pattern("*.svg");
+            filter.add_pattern("*.SVG");
+            filter.add_pattern("*.gif");
+            filter.add_pattern("*.GIF");
+            let filters = gio::ListStore::new::<gtk4::FileFilter>();
+            filters.append(&filter);
+            file_dialog.set_filters(Some(&filters));
+
+            let root_win = btn.root().and_then(|r| r.downcast::<gtk4::Window>().ok());
+            let cv_inner = canvas.clone();
+            file_dialog.open(root_win.as_ref(), gio::Cancellable::NONE, move |res| {
+                if let Ok(file) = res {
+                    if let Some(path) = file.path() {
+                        if let Some(path_str) = path.to_str() {
+                            let _ = cv_inner.replace_selected_image(path_str);
+                        }
+                    }
+                }
+            });
+        });
+    }
+    {
+        let canvas = canvas.clone();
+        let popover = popover.clone();
+        reset_aspect_btn.connect_clicked(move |_| {
+            canvas.reset_selected_image_aspect_ratio();
+            popover.popdown();
+        });
+    }
+    {
+        let canvas = canvas.clone();
+        let popover = popover.clone();
+        rotate_cw_btn.connect_clicked(move |_| {
+            canvas.rotate_selected_deg(90.0);
+            popover.popdown();
+        });
+    }
+    {
+        let canvas = canvas.clone();
+        let popover = popover.clone();
+        rotate_ccw_btn.connect_clicked(move |_| {
+            canvas.rotate_selected_deg(-90.0);
+            popover.popdown();
+        });
+    }
+    {
+        let canvas = canvas.clone();
+        let popover = popover.clone();
+        flip_h_btn.connect_clicked(move |_| {
+            canvas.flip_horizontal();
+            popover.popdown();
+        });
+    }
+    {
+        let canvas = canvas.clone();
+        let popover = popover.clone();
+        flip_v_btn.connect_clicked(move |_| {
+            canvas.flip_vertical();
+            popover.popdown();
+        });
+    }
+    {
+        let canvas = canvas.clone();
+        let popover = popover.clone();
         rasterize_btn.connect_clicked(move |_| {
             canvas.rasterize_selected_to_image();
             popover.popdown();
@@ -518,6 +642,13 @@ pub fn build_selection_menu(
         sep_edit,
         convert_path_btn,
         trace_bitmap_btn,
+        replace_image_btn,
+        reset_aspect_btn,
+        rotate_cw_btn,
+        rotate_ccw_btn,
+        flip_h_btn,
+        flip_v_btn,
+        sep_image,
         rasterize_btn,
         attach_path_btn,
         detach_path_btn,
