@@ -1741,7 +1741,6 @@ struct Face3D {
     normal: Vec3,
     avg_z: f32,
     base_color: crate::core::Color,
-    is_front_cap: bool,
 }
 
 /// Renders a full 3D extruded solid with true topological quad mesh faces,
@@ -2092,7 +2091,6 @@ pub fn apply_extrude_3d_to_canvas(
                             normal,
                             avg_z,
                             base_color: side_base,
-                            is_front_cap: false,
                         });
                     }
                 }

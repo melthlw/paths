@@ -22,7 +22,7 @@
     "env": {
       "CARGO_HOME": "/run/build/paths/cargo",
       "RUST_BACKTRACE": "1",
-      "SKIA_BINARIES_URL": "file:///run/build/paths/skia-binaries-a25a0fdb7d90429aa2d1-x86_64-unknown-linux-gnu-jpegd-jpege-pdf.tar.gz"
+      "SKIA_BINARIES_URL": "file:///run/build/paths/skia-binaries-b7f043e0b1e2a850e702-x86_64-unknown-linux-gnu-jpegd-jpege-pdf.tar.gz"
     }
   },
   "cleanup": [
@@ -48,9 +48,9 @@
         },
         {
           "type": "file",
-          "url": "https://github.com/rust-skia/skia-binaries/releases/download/0.99.0/skia-binaries-a25a0fdb7d90429aa2d1-x86_64-unknown-linux-gnu-jpegd-jpege-pdf.tar.gz",
-          "sha256": "5b776571b11194a9ed3a4c41824b7a4b35a83117aef99eb16a2ad3315db13b5d",
-          "dest-filename": "skia-binaries-a25a0fdb7d90429aa2d1-x86_64-unknown-linux-gnu-jpegd-jpege-pdf.tar.gz"
+          "url": "https://github.com/rust-skia/skia-binaries/releases/download/0.153.3/skia-binaries-b7f043e0b1e2a850e702-x86_64-unknown-linux-gnu-jpegd-jpege-pdf.tar.gz",
+          "sha256": "ef9ce238ee4e2939b1743f036f120d07405ecdbc0329857d554cc371ec8cd0b2",
+          "dest-filename": "skia-binaries-b7f043e0b1e2a850e702-x86_64-unknown-linux-gnu-jpegd-jpege-pdf.tar.gz"
         },
         "cargo-sources.json"
       ]
