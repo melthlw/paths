@@ -604,13 +604,13 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     // Options: SwitchRows
     let inv_trace_sw = adw::SwitchRow::builder()
         .title(&crate::core::gettext("Invert Selection"))
-        .subtitle(&crate::core::gettext("Invert foreground/background vector cutout"))
+        .subtitle(&crate::core::gettext("Invert vector cutout logic"))
         .build();
     trace_group.add(&inv_trace_sw);
 
     let keep_trace_sw = adw::SwitchRow::builder()
         .title(&crate::core::gettext("Keep Original Image"))
-        .subtitle(&crate::core::gettext("Keep bitmap image and place vector paths on top"))
+        .subtitle(&crate::core::gettext("Keep bitmap image and place vector paths above"))
         .build();
     trace_group.add(&keep_trace_sw);
 
@@ -637,33 +637,41 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     // Connect slider readout labels
     {
         let lbl = thresh_lbl;
-        thresh_scale.connect_value_changed(move |sc| {
-            lbl.set_text(&format!("{:.0}%", sc.value()));
+        thresh_scale.adjustment().connect_value_changed(move |adj| {
+            lbl.set_text(&format!("{:.0}%", adj.value()));
         });
     }
     {
         let lbl = detail_lbl;
-        detail_scale.connect_value_changed(move |sc| {
-            lbl.set_text(&format!("{:.1}", sc.value()));
+        detail_scale.adjustment().connect_value_changed(move |adj| {
+            lbl.set_text(&format!("{:.1}", adj.value()));
         });
     }
     {
         let lbl = smooth_lbl;
-        smooth_scale.connect_value_changed(move |sc| {
-            lbl.set_text(&format!("{:.0}%", sc.value()));
+        smooth_scale.adjustment().connect_value_changed(move |adj| {
+            lbl.set_text(&format!("{:.0}%", adj.value()));
         });
     }
 
-    // Action Buttons Row inside Trace Group
-    let trace_action_row = adw::ActionRow::builder()
-        .title(&crate::core::gettext("Vectorization Actions"))
+    // ─────────────────────────────────────────────────────────────
+    // Action Buttons: Clear, prominent, fully labeled actions
+    // ─────────────────────────────────────────────────────────────
+    let action_box = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Vertical)
+        .spacing(8)
+        .margin_top(12)
+        .margin_bottom(6)
+        .margin_start(4)
+        .margin_end(4)
         .build();
 
     let btn_trace_direct = gtk4::Button::builder()
         .label(&crate::core::gettext("Trace to Paths"))
         .icon_name("object-to-path-symbolic")
+        .tooltip_text(&crate::core::gettext("Vectorize raster image into editable paths"))
         .css_classes(["suggested-action", "pill"])
-        .valign(gtk4::Align::Center)
+        .halign(gtk4::Align::Fill)
         .build();
 
     {
@@ -702,13 +710,13 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
             }
         });
     }
-    trace_action_row.add_suffix(&btn_trace_direct);
 
     let btn_trace_dialog = gtk4::Button::builder()
+        .label(&crate::core::gettext("Advanced Preview..."))
         .icon_name("zoom-fit-selection-symbolic")
         .tooltip_text(&crate::core::gettext("Open advanced interactive live preview dialog"))
-        .css_classes(["flat"])
-        .valign(gtk4::Align::Center)
+        .css_classes(["pill"])
+        .halign(gtk4::Align::Fill)
         .build();
     {
         let cv = canvas.clone();
@@ -716,9 +724,11 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
             crate::ui::dialogs::show_trace_bitmap_dialog(btn, cv.clone());
         });
     }
-    trace_action_row.add_suffix(&btn_trace_dialog);
 
-    trace_group.add(&trace_action_row);
+    action_box.append(&btn_trace_direct);
+    action_box.append(&btn_trace_dialog);
+
+    trace_group.add(&action_box);
     content_box.append(&trace_group);
 
     // ─────────────────────────────────────────────────────────────
@@ -833,8 +843,8 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         let get_adj = build_current_adj.clone();
         let upd = is_updating.clone();
         let val_lbl = b_val_lbl;
-        brightness_scale.connect_value_changed(move |s| {
-            let v = s.value();
+        brightness_scale.adjustment().connect_value_changed(move |adj| {
+            let v = adj.value();
             val_lbl.set_text(&format!("{:+0.0}%", v));
             if upd.get() {
                 return;
@@ -849,8 +859,8 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         let get_adj = build_current_adj.clone();
         let upd = is_updating.clone();
         let val_lbl = c_val_lbl;
-        contrast_scale.connect_value_changed(move |s| {
-            let v = s.value();
+        contrast_scale.adjustment().connect_value_changed(move |adj| {
+            let v = adj.value();
             val_lbl.set_text(&format!("{:+0.0}%", v));
             if upd.get() {
                 return;
@@ -865,8 +875,8 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         let get_adj = build_current_adj.clone();
         let upd = is_updating.clone();
         let val_lbl = s_val_lbl;
-        saturation_scale.connect_value_changed(move |s| {
-            let v = s.value();
+        saturation_scale.adjustment().connect_value_changed(move |adj| {
+            let v = adj.value();
             val_lbl.set_text(&format!("{:+0.0}%", v));
             if upd.get() {
                 return;
@@ -881,8 +891,8 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         let get_adj = build_current_adj.clone();
         let upd = is_updating.clone();
         let val_lbl = h_val_lbl;
-        hue_scale.connect_value_changed(move |s| {
-            let v = s.value();
+        hue_scale.adjustment().connect_value_changed(move |adj| {
+            let v = adj.value();
             val_lbl.set_text(&format!("{:.0}°", v));
             if upd.get() {
                 return;
@@ -897,8 +907,8 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         let get_adj = build_current_adj.clone();
         let upd = is_updating.clone();
         let val_lbl = blur_val_lbl;
-        blur_scale.connect_value_changed(move |s| {
-            let v = s.value();
+        blur_scale.adjustment().connect_value_changed(move |adj| {
+            let v = adj.value();
             val_lbl.set_text(&format!("{:.1} px", v));
             if upd.get() {
                 return;

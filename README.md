@@ -89,6 +89,16 @@
       <p>Dynamic native shared library architecture (<code>.so</code>) enabling custom tools, new geometric primitives, and deep editor integrations.</p>
     </td>
   </tr>
+  <tr>
+    <td width="50%">
+      <h3>Image Vectorization and Rasterization Engine</h3>
+      <p>Bidirectional bitmap-to-vector workflows. Intelligent <b>Trace Bitmap</b> system featuring multiple tracing modes (Monochrome Threshold, Color Quantization, and Edge Detection), real-time interactive preview dialog with live zoom/pan and node statistics, and high-resolution vector-to-bitmap rasterization.</p>
+    </td>
+    <td width="50%">
+      <h3>Parametric 3D Vector Engine and Lighting</h3>
+      <p>Real-time native 3D extrusion for paths, text, and geometric shapes with Isometric, Cabinet 45°, and Perspective projections. Dynamic controls for Taper, Twist swirl, Bevel edge radius, Ambient Occlusion shading, Specular Gloss reflections, and canvas-interactive 3D gizmos.</p>
+    </td>
+  </tr>
 </table>
 
 ---

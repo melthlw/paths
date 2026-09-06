@@ -2972,3 +2972,7 @@ msgstr "Inverter Seleção"
 
 msgid "Orig"
 msgstr "Orig"
+
+msgid "Open advanced interactive live preview dialog"
+msgstr "Abrir diálogo interativo com pré-visualização ao vivo"
+

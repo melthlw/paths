@@ -89,6 +89,16 @@
       <p>Arquitetura modular para carregamento dinâmico de bibliotecas nativas (<code>.so</code>), permitindo a extensão de ferramentas, novas primitivas e integrações com o editor.</p>
     </td>
   </tr>
+  <tr>
+    <td width="50%">
+      <h3>Sistema de Vetorização e Rasterização</h3>
+      <p>Conversão bidirecional entre bitmaps e vetores. Motor <b>Trace Bitmap</b> inteligente com múltiplos modos (Monocromático, Quantização de Cores e Detecção de Bordas), diálogo com pré-visualização interativa em tempo real com zoom/pan e estatísticas de nós, além de rasterização de seleções vetoriais em alta resolução.</p>
+    </td>
+    <td width="50%">
+      <h3>Motor Vetorial 3D e Iluminação Paramétrica</h3>
+      <p>Extrusão 3D nativa e em tempo real para caminhos, textos e formas com projeções Isométrica, Cavaleira e Perspectiva. Parâmetros dinâmicos de Taper (afunilamento), Twist (torção espiral), Chanfro 3D (Bevel), sombreamento com Ambient Occlusion, reflexos especulares e gizmo interativo no canvas.</p>
+    </td>
+  </tr>
 </table>
 
 ---

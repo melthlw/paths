@@ -155,9 +155,10 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
         .build();
 
     // Threshold Slider
+    let threshold_adj = gtk4::Adjustment::new(50.0, 1.0, 99.0, 1.0, 5.0, 0.0);
     let threshold_scale = gtk4::Scale::builder()
         .orientation(gtk4::Orientation::Horizontal)
-        .adjustment(&gtk4::Adjustment::new(50.0, 1.0, 99.0, 1.0, 5.0, 0.0))
+        .adjustment(&threshold_adj)
         .draw_value(false)
         .width_request(140)
         .css_classes(["fine-tune"])
@@ -181,9 +182,10 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
     param_group.add(&thresh_row);
 
     // Number of Colors Slider (for Colors mode)
+    let colors_adj = gtk4::Adjustment::new(4.0, 2.0, 16.0, 1.0, 2.0, 0.0);
     let colors_scale = gtk4::Scale::builder()
         .orientation(gtk4::Orientation::Horizontal)
-        .adjustment(&gtk4::Adjustment::new(4.0, 2.0, 16.0, 1.0, 2.0, 0.0))
+        .adjustment(&colors_adj)
         .draw_value(false)
         .width_request(140)
         .css_classes(["fine-tune"])
@@ -208,9 +210,10 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
     param_group.add(&colors_row);
 
     // Detail / Tolerance Slider
+    let detail_adj = gtk4::Adjustment::new(1.0, 0.2, 4.0, 0.1, 0.5, 0.0);
     let detail_scale = gtk4::Scale::builder()
         .orientation(gtk4::Orientation::Horizontal)
-        .adjustment(&gtk4::Adjustment::new(1.0, 0.2, 4.0, 0.1, 0.5, 0.0))
+        .adjustment(&detail_adj)
         .draw_value(false)
         .width_request(140)
         .css_classes(["fine-tune"])
@@ -234,9 +237,10 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
     param_group.add(&detail_row);
 
     // Smoothness Slider
+    let smooth_adj = gtk4::Adjustment::new(65.0, 0.0, 100.0, 5.0, 10.0, 0.0);
     let smooth_scale = gtk4::Scale::builder()
         .orientation(gtk4::Orientation::Horizontal)
-        .adjustment(&gtk4::Adjustment::new(65.0, 0.0, 100.0, 5.0, 10.0, 0.0))
+        .adjustment(&smooth_adj)
         .draw_value(false)
         .width_request(140)
         .css_classes(["fine-tune"])
@@ -260,9 +264,10 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
     param_group.add(&smooth_row);
 
     // Noise Reduction / Despeckle Slider
+    let noise_adj = gtk4::Adjustment::new(8.0, 1.0, 60.0, 1.0, 5.0, 0.0);
     let noise_scale = gtk4::Scale::builder()
         .orientation(gtk4::Orientation::Horizontal)
-        .adjustment(&gtk4::Adjustment::new(8.0, 1.0, 60.0, 1.0, 5.0, 0.0))
+        .adjustment(&noise_adj)
         .draw_value(false)
         .width_request(140)
         .css_classes(["fine-tune"])
@@ -339,10 +344,14 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
             let latest_inner = latest_traced_calc.clone();
             let cfg_inner = config_calc.clone();
             let img_inner = target_img_calc.clone();
+            let pending_inner = pending.clone();
 
             let source_id = glib::timeout_add_local_once(
                 std::time::Duration::from_millis(50),
                 move || {
+                    if let Ok(mut p) = pending_inner.try_borrow_mut() {
+                        *p = None;
+                    }
                     let cfg = match cfg_inner.try_borrow() {
                         Ok(b) => b.clone(),
                         Err(_) => return,
@@ -495,8 +504,8 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
         let cfg = config_rc.clone();
         let trig = trigger_update.clone();
         let lbl = threshold_val_lbl.clone();
-        threshold_scale.connect_value_changed(move |sc| {
-            let val = sc.value();
+        threshold_adj.connect_value_changed(move |adj| {
+            let val = adj.value();
             lbl.set_text(&format!("{:.0}%", val));
             if let Ok(mut c) = cfg.try_borrow_mut() {
                 c.threshold = (val / 100.0) as f32;
@@ -509,8 +518,8 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
         let cfg = config_rc.clone();
         let trig = trigger_update.clone();
         let lbl = colors_val_lbl.clone();
-        colors_scale.connect_value_changed(move |sc| {
-            let val = sc.value().round() as usize;
+        colors_adj.connect_value_changed(move |adj| {
+            let val = adj.value().round() as usize;
             lbl.set_text(&format!("{}", val));
             if let Ok(mut c) = cfg.try_borrow_mut() {
                 c.num_colors = val;
@@ -523,8 +532,8 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
         let cfg = config_rc.clone();
         let trig = trigger_update.clone();
         let lbl = detail_val_lbl.clone();
-        detail_scale.connect_value_changed(move |sc| {
-            let val = sc.value();
+        detail_adj.connect_value_changed(move |adj| {
+            let val = adj.value();
             lbl.set_text(&format!("{:.1}", val));
             if let Ok(mut c) = cfg.try_borrow_mut() {
                 c.detail = val as f32;
@@ -537,8 +546,8 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
         let cfg = config_rc.clone();
         let trig = trigger_update.clone();
         let lbl = smooth_val_lbl.clone();
-        smooth_scale.connect_value_changed(move |sc| {
-            let val = sc.value();
+        smooth_adj.connect_value_changed(move |adj| {
+            let val = adj.value();
             lbl.set_text(&format!("{:.0}%", val));
             if let Ok(mut c) = cfg.try_borrow_mut() {
                 c.smoothness = (val / 100.0) as f32;
@@ -551,8 +560,8 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
         let cfg = config_rc.clone();
         let trig = trigger_update.clone();
         let lbl = noise_val_lbl.clone();
-        noise_scale.connect_value_changed(move |sc| {
-            let val = sc.value().round() as usize;
+        noise_adj.connect_value_changed(move |adj| {
+            let val = adj.value().round() as usize;
             lbl.set_text(&format!("{} px", val));
             if let Ok(mut c) = cfg.try_borrow_mut() {
                 c.despeckle = val;
@@ -581,6 +590,19 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
         });
     }
 
+    // Cancel any pending debounce timers if dialog closes
+    {
+        let pending = pending_source_id.clone();
+        window.connect_close_request(move |_| {
+            if let Ok(mut p) = pending.try_borrow_mut() {
+                if let Some(id) = p.take() {
+                    id.remove();
+                }
+            }
+            glib::Propagation::Proceed
+        });
+    }
+
     // Apply Button
     {
         let canvas_app = canvas.clone();
@@ -588,9 +610,19 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
         let latest_app = latest_traced.clone();
         let cfg_app = config_rc.clone();
         let win_app = window.clone();
+        let img_app = target_img_rc.clone();
         btn_apply.connect_clicked(move |_| {
             let keep_orig = cfg_app.try_borrow().map(|c| c.keep_original).unwrap_or(false);
-            let elem_opt = latest_app.try_borrow_mut().ok().and_then(|mut l| l.take());
+            let elem_opt = latest_app
+                .try_borrow_mut()
+                .ok()
+                .and_then(|mut l| l.take())
+                .or_else(|| {
+                    cfg_app
+                        .try_borrow()
+                        .ok()
+                        .and_then(|c| trace_image_element(&img_app, &c).ok())
+                });
             if let Some(traced) = elem_opt {
                 canvas_app.apply_traced_elements(target_id, traced, keep_orig);
                 win_app.close();
@@ -598,10 +630,10 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
         });
     }
 
-    // Initial update trigger
-    trigger_update();
-
     window.present();
+
+    // Initial update trigger after window presentation
+    trigger_update();
 }
 
 /// Helper function to draw vector `Element` to Cairo context for the preview area
@@ -699,4 +731,32 @@ fn render_path_cairo(cr: &cairo::Context, p: &crate::core::PathElement) {
     }
 
     let _ = cr.fill();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_trace_config_defaults() {
+        let config = TraceConfig::default();
+        assert_eq!(config.threshold, 0.5);
+        assert_eq!(config.num_colors, 4);
+        assert_eq!(config.despeckle, 8);
+        assert_eq!(config.smoothness, 0.65);
+        assert_eq!(config.detail, 1.0);
+        assert!(!config.invert);
+        assert!(!config.keep_original);
+    }
+
+    #[test]
+    fn test_trace_image_element_empty() {
+        let empty_img = crate::core::ImageElement::new(
+            crate::core::Rect::new(0.0, 0.0, 100.0, 100.0),
+            Vec::new(),
+            Some("test.png".to_string()),
+        );
+        let cfg = TraceConfig::default();
+        assert!(trace_image_element(&empty_img, &cfg).is_err());
+    }
 }

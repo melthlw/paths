@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Alt-Based Freeform Lasso & Slicing Node Selection (`src/plugins/features/path_editor.rs`)**:
+  - Hold `Alt` in Path/Node editor while dragging on canvas to draw a continuous freeform lasso selection.
+  - Closed lasso loop detection via point-in-polygon ray casting (even-odd winding) to select enclosed anchor points.
+  - Open polyline crossing detection (line segment intersection and proximity threshold) to slice-select nodes along the drawn stroke.
+  - Real-time on-canvas dashed accent preview line for visual feedback during lasso drawing.
+- **Analytical Tight Bounding Box Calculation (`src/core/element/path.rs`)**:
+  - Analytical 1st-derivative root-solving (`PathElement::tight_bounds()`) for exact quadratic and cubic Bézier curve extremum extents.
+  - Computes the exact geometric bounding box of curved paths rather than inflated control handle envelopes.
+  - Seamlessly integrated into object selection bounds, clone offset calculations, modifier geometry, and export framing.
+- **High-Performance Spatial Indexing & Frustum Culling (`src/core/spatial_index.rs`)**:
+  - 2D R-Tree spatial indexing powered by `rstar` crate (`SpatialIndex`), organizing document elements for logarithmic geometric queries.
+  - Viewport frustum culling: culls off-canvas elements during real-time panning, zooming, and high-frequency redraws, dramatically reducing draw overhead.
+- **Skia Picture Recording Cache (`src/core/renderer/cache.rs`)**:
+  - Per-element `skia::Picture` recording and caching (`skia::PictureRecorder`), reusing pre-recorded display lists and skipping redundant curve tessellations, shader evaluations, and modifier pipelines on static elements.
+- **Welcome Window & Template Launcher (`src/ui/welcome.rs`)**:
+  - Standalone Libadwaita dialog (`PathsWelcomeDialog`) with fixed 860x580 dimensions conforming to GNOME HIG standards.
+  - Document preset templates organized by category: Standard Print (A4, A3, Letter), Screen & Web (1080p, 4K, Mobile), Social Media (Instagram, Twitter/X banner, YouTube thumbnail), and Iconography (GNOME 128x128, App Icon 512x512).
+  - Recent files tracking with thumbnail cards, file path indicators, last opened timestamps, and quick removal.
+  - Direct shortcuts: New from Preset, Open File..., and Browse Templates.
 - **Bitmap Image Vectorization & Tracing Engine (`src/core/trace.rs`)**:
   - High-performance Marching Squares contour extraction with 16-state cellular topological tracking and EvenOdd signed area orientation.
   - Three vectorization modes:
@@ -17,13 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Ramer-Douglas-Peucker (RDP) polygon simplification with configurable tolerance.
   - Boundary padding (1-pixel false envelope) guaranteeing full topological loop closure for shapes that touch or bleed off image borders.
   - Smooth cubic Bézier handle fitting with automatic corner angle detection (`NodeType::Corner` vs `NodeType::Smooth`).
-- **Dedicated Bitmap Image Inspector Panel (`src/ui/inspector/image.rs`)**:
-  - High-density modern layout with top segmented view switcher (`[ Adjustments ] [ Vectorize ] [ All ]`).
-  - Distinct varied control types matching GNOME HIG: circular steppers (`[-] [+]`) for discrete parameters (Color Layers, Noise Filter), compact inline sliders with right-aligned numeric badges, segmented pill buttons for Mode selection (`[ Monochrome ] [ Colors ] [ Outlines ]`), and quick preset chips.
-  - "Current File" metadata card with uppercase captions, bold values, replace button (`📁`), dimensions readout, and quick transform toolbar (`[ ↶ ] [ ↷ ] [ ⇄ ] [ ⇅ ]`).
-  - Bottom action bar with prominent primary pill button ("Trace to Paths") and live preview action.
-  - Full non-destructive image adjustments (Brightness, Contrast, Saturation, Hue, Blur, Invert, Grayscale, Sepia, Presets).
-  - Empty-state actions: "Rasterize Selection to Bitmap", "Import Image File...", and "Create Image Frame".
 - **Interactive Libadwaita Trace Dialog (`src/ui/dialogs/trace_bitmap.rs`)**:
   - Side-by-side interactive split preview with Cairo checkerboard rendering, zoom fit, and path/node count statistics.
   - Debounced real-time recalculation (50ms) for responsive slider dragging.
@@ -33,11 +45,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Canvas Context Menu Integration (`src/ui/context_menu/`)**:
   - Right-click on raster image objects provides "Trace Bitmap...".
   - Right-click on vector selections provides "Rasterize to Bitmap".
+- **3D Projection Rendering & Perspective Engine (`src/core/modifier.rs`)**:
+  - Added Perspective projection mode with focal depth and perspective vanishing distortion to `Extrude3DModifier`.
+  - Back-face cap rendering and silhouette contour lines ensuring solid, topologically clean 3D meshes.
+- **Style Copy/Paste & Enhanced Clipboard (`src/core/clipboard.rs` / `src/ui/canvas/ops_document.rs`)**:
+  - Copy Style (`Ctrl+Alt+C`) and Paste Style (`Ctrl+Alt+V`) transferring fill layers, strokes, and opacity across vector elements.
+  - Drag-and-drop file import support on the canvas for instant placement of SVG, PNG, JPG, and WebP files.
 - **Studio Inspector Catalog & Dock Improvements (`src/ui/inspector/`)**:
   - Enhanced catalog popover scrolling (`max_content_height(380)` and width 260px) in `catalog.rs` for clear access to all panels.
   - Fixed tab index bounds in `dock.rs` ensuring seamless docking, reordering, and closing for all 9 inspector panels.
 - **Localization**:
-  - Complete Brazilian Portuguese (`pt_BR`) translations for all new bitmap adjustments, tracing, and rasterization features.
+  - Complete Brazilian Portuguese (`pt_BR`) translations for all new bitmap adjustments, tracing, rasterization, and welcome dialog features.
+
+### Changed
+- **Modernized Libadwaita Image Inspector (`src/ui/inspector/image.rs`)**:
+  - Refactored UI utilizing Libadwaita `adw::StatusPage` for clean, HIG-compliant empty states with quick action buttons ("Rasterize Selection to Bitmap", "Import Image File...", "Create Image Frame").
+  - Replaced standard switches with `adw::SwitchRow` for Invert, Grayscale, and Sepia non-destructive filters.
+  - Modernized slider controls (`create_adw_slider_row`) utilizing Libadwaita `adw::ActionRow` with inline expansive sliders and numeric value readout badges.
+  - Removed redundant custom CSS overrides from `style.css` in favor of standard Libadwaita styling tokens and spacing.
+- **Unified Canvas Status Architecture (`src/ui/canvas/state.rs`)**:
+  - Replaced verbose status callback parameters across canvas events with a unified `CanvasStatusSnapshot` struct consolidating zoom level, pan offsets, active tool, selection bounds, and node counts.
+- **3D Extrude Geometry Parameters (`src/core/modifier.rs`)**:
+  - Refined bevel edge radius scaling and ring level geometry calculations for extruded shapes.
+
 
 ## [0.4.0] - 2026-08-28
 

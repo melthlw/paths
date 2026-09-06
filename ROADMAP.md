@@ -18,6 +18,87 @@ This project adheres to **Semantic Versioning (SemVer 2.0.0)** (`MAJOR.MINOR.PAT
 
 ---
 
+## 🎯 Core Features & Capabilities (Recursos e Funcionalidades)
+
+A high-level architectural overview of the primary creative systems and graphics engines integrated into **Paths**:
+
+<table>
+  <tr>
+    <td width="50%">
+      <h3>🧊 Motor Vetorial 3D e Iluminação Paramétrica<br/><sub>3D Vector Extrusion & Lighting Engine</sub></h3>
+      <p>Extrusão vetorial paramétrica em tempo real para caminhos, formas geométricas e tipografia vetorial:</p>
+      <ul>
+        <li><b>Projeções 3D</b>: Projeções Isométrica, Cavaleira 45° (Cabinet) e Perspectiva com profundidade focal configurável.</li>
+        <li><b>Modelagem Paramétrica</b>: Taper (afunilamento cônico/piramidal), Twist (torção espiral 3D contínua) e Chanfro 3D (Bevel edge radius).</li>
+        <li><b>Iluminação e Materiais</b>: Sombreamento com Ambient Occlusion, paletas de cores automáticas/metálicas (Dark Metal, Gold, Ruby, Cyan) e reflexos especulares (Specular Gloss).</li>
+        <li><b>Manipulação Direta</b>: Gizmo 3D interativo no canvas com vetor direcional ciano e widget dimmer circular de 360° no inspetor GTK.</li>
+        <li><b>Renderização de Alta Fidelidade</b>: Varredura sub-pixel zoom-adaptativa (anti-aliasing perfeito mesmo a 10.000% de zoom) e fusão de volume em um único <code>skia::Path</code> para 144+ FPS.</li>
+      </ul>
+    </td>
+    <td width="50%">
+      <h3>⚡ Sistema de Vetorização e Rasterização<br/><sub>Trace Bitmap & Rasterization Engine</sub></h3>
+      <p>Fluxo de trabalho bidirecional inteligente entre imagens matriciais (bitmaps) e gráficos vetoriais:</p>
+      <ul>
+        <li><b>Múltiplos Algoritmos de Vetorização</b>:
+          <ul>
+            <li><i>Monocromático (Monochrome Threshold)</i>: Separação por limiar de luminância para silhuetas e ilustrações P&B de alto contraste.</li>
+            <li><i>Quantização de Cores (Color Steps)</i>: Segmentação estratificada em múltiplas camadas vetoriais coloridas para pôsteres e ilustrações.</li>
+            <li><i>Detecção de Bordas (Sobel Edge Detection)</i>: Extração precisa de contornos e traçados estruturais para esboços e esquemas técnicos.</li>
+          </ul>
+        </li>
+        <li><b>Diálogo com Pré-visualização Interativa</b>: Janela modal com zoom e pan em tempo real, visualização lado a lado e métricas dinâmicas (contagem de nós e caminhos).</li>
+        <li><b>Ajustes Não-Destrutivos</b>: Controles de limiar, filtro de ruído (speckles), suavização de curvas Bézier e tolerância de simplificação.</li>
+        <li><b>Rasterização de Seleções</b>: Ação <code>rasterize_selected_to_image</code> para converter seleções vetoriais em camadas bitmap em alta resolução.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>📐 Edição Avançada de Nós e Curvas Bézier<br/><sub>Advanced Bezier & Node Editing</sub></h3>
+      <p>Manipulação vetorial cirúrgica com nós Cúspides, Suaves e Simétricos:</p>
+      <ul>
+        <li>Destaque visual de alto contraste com anéis brilhantes e halos de contraste.</li>
+        <li>Manipulação direta de segmentos de curva com algoritmo De Casteljau.</li>
+        <li>Quebra de simetria com <code>Alt + Arrastar</code> e snap angular a 45° com <code>Shift + Arrastar</code>.</li>
+        <li>Seleção livre por laço poligonal (Ray Casting) e linha fatiadora com <code>Alt + Lasso</code>.</li>
+        <li>Cálculo analítico de Bounding Box exata (Tight Bounding Box) via raízes de 1ª derivada.</li>
+      </ul>
+    </td>
+    <td width="50%">
+      <h3>🎨 Preenchimentos, Malhas e Padrões Geométricos<br/><sub>Gradients, Meshes & Authentic Patterns</sub></h3>
+      <p>Suíte completa de renderização de superfícies e preenchimentos expressivos:</p>
+      <ul>
+        <li><b>Gradientes Multi-Stop</b>: Gradientes lineares, radiais e sweep com gizmos interativos no canvas.</li>
+        <li><b>Gradientes em Malha (Mesh)</b>: Deformação livre de malhas de patch e atribuição de cor por vértice.</li>
+        <li><b>Padrões Autênticos</b>: Favo de mel 120° (Honeycomb contínuo), Tijolos com juntas intercaladas e Escamas Seigaiha com sincronização SVG/Skia.</li>
+        <li><b>Biblioteca de Padrões</b>: Carregamento de ativos de usuário (SVG/PNG) com ajuste interativo de rotação e escala.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>📄 Pranchetas Multipáginas e Clones Vinculados<br/><sub>Multi-Page Artboards & Linked Clones</sub></h3>
+      <p>Estrutura profissional de documentos para ilustrações e projetos complexos:</p>
+      <ul>
+        <li><b>Multipáginas</b>: Pranchetas independentes em um único documento com dimensões customizadas, reordenação e exportação em lote.</li>
+        <li><b>Clones Vinculados</b>: Instanciação com sincronização em tempo real de geometria e estilo do mestre, mantendo transformações espaciais desacopladas.</li>
+        <li><b>Painel de Clones</b>: Gestão, listagem de instâncias e desvinculação não-destrutiva individual ou em lote.</li>
+      </ul>
+    </td>
+    <td width="50%">
+      <h3>🧩 Modificadores Paramétricos, Operações Booleanas e Plugins<br/><sub>Modifiers, Booleans & Native Plugin ABI</sub></h3>
+      <p>Poderoso mecanismo procedural e extensível:</p>
+      <ul>
+        <li><b>Operações Booleanas</b>: União, Diferença, Interseção, Exclusão, Divisão e Fatiamento de curvas.</li>
+        <li><b>Efeitos de Caminho Vivos (LPE)</b>: Modificadores dinâmicos de Array (Linear, Radial, Grade), Torção (Twist), Deformação de Envelope e Arredondamento Dinâmico de Cantos.</li>
+        <li><b>Plugins Nativos Dinâmicos</b>: Arquitetura segura via C/Rust FFI (<code>.so</code>) com gerenciador integrado nas preferências.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## 🚀 Released Milestones
 
 ### v0.2.0 — Session, Clones & UX Core `[Released]`
@@ -250,11 +331,34 @@ This project adheres to **Semantic Versioning (SemVer 2.0.0)** (`MAJOR.MINOR.PAT
   - [x] Skia non-destructive GPU-accelerated adjustments: brightness, contrast, saturation, hue rotation, Gaussian blur, and color spectrum inversion.
   - [x] Monochrome grayscale and vintage sepia tone filters with 1-click quick presets (Normal, Vibrant, B&W High, Vintage, Warm, Cool).
   - [x] Automatic contextual switching in the Studio Inspector for active image selections.
-- [x] **Trace Bitmap (Image Vectorization & Rasterization)**:
-  - [x] Auto-trace raster images (PNG, JPEG, WebP) into editable vector paths with threshold, detail, curve smoothness, and color quantization controls.
-  - [x] In-inspector Bitmap Vectorization & Adjustments panel with real-time parameters and direct vector tracing.
-  - [x] Full-featured interactive preview dialog with side-by-side zoomable canvas and node statistics.
-  - [x] Vector-to-bitmap rasterization action for converting active selections into bitmap layers.
+- [x] **Trace Bitmap (Image Vectorization & Rasterization Engine)**:
+  - [x] Auto-trace raster images (PNG, JPEG, WebP) into clean, editable vector paths (`skia::Path` / `Element::Path`).
+  - [x] **Three Specialized Tracing Algorithms**:
+    - [x] *Monochrome (Luminance Threshold)*: High-contrast binarization ideal for logos, stamps, silhouettes, and black-and-white artwork.
+    - [x] *Color Quantization (Multi-Layer Bands)*: Stratified color clustering creating layered vector shapes with customizable color count (2 to 64 color steps).
+    - [x] *Edge Detection (Sobel Filter Contours)*: Precise edge gradient extraction generating vector stroke outlines for sketches, architectural schematics, and line art.
+  - [x] **Dedicated Vectorization Parameters & Fine-Tuning**:
+    - [x] Dynamic threshold slider (0.0 to 1.0) with real-time contrast response.
+    - [x] Noise reduction / speckle size filter (1 to 64 px) to eliminate image artifacts and dust.
+    - [x] Curve smoothing and corner tolerance controls for smooth Bézier fitting.
+    - [x] Invert tracing polarity toggle for dark-on-light or light-on-dark source imagery.
+  - [x] **Full-Featured Interactive Preview Dialog (`TraceBitmapDialog`)**:
+    - [x] Side-by-side dual-view interactive canvas (Source Bitmap vs. Live Vectorized Result).
+    - [x] Real-time zoom and pan controls (Zoom In, Zoom Out, 1:1 Reset, Zoom to Fit) with wheel navigation.
+    - [x] Live vector telemetry readouts: generated path count, total node count, and calculation execution latency in milliseconds.
+    - [x] Non-destructive workflow: "Trace on New Layer" or replace source image directly.
+  - [x] **Vector-to-Bitmap Rasterization Engine (`rasterize_selected_to_image`)**:
+    - [x] One-click conversion of active vector selections into crisp, high-DPI bitmap image layers on canvas.
+
+#### Vector Node & Selection Precision
+- [x] **Alt-Based Freeform Lasso & Slicing Selection**:
+  - [x] Hold `Alt` in Path / Node editor while dragging on canvas to draw freeform lasso selection lines.
+  - [x] Enclosed polygon lasso selection via ray casting point-in-polygon (even-odd winding) algorithm.
+  - [x] Slicing line selection detecting nodes intersected by or within threshold proximity of open polyline paths.
+  - [x] Smooth on-canvas dashed accent preview rendering during lasso interaction.
+- [x] **Analytical Tight Bounding Box Calculation**:
+  - [x] Analytical 1st-derivative root-solving (`PathElement::tight_bounds()`) for exact quadratic and cubic Bézier curve extremum extents.
+  - [x] Replaces loose control point envelopes with precise geometric extents in the inspector, alignment, clone offsets, and export bounds.
 
 #### Parametric Modifiers
 - [x] **Live Modifiers Panel (Live Path Effects)**:
@@ -263,8 +367,18 @@ This project adheres to **Semantic Versioning (SemVer 2.0.0)** (`MAJOR.MINOR.PAT
   - [x] *Twist & Swirl Modifier*: Rotational Bézier node deformation.
   - [x] *Envelope Warp Modifier*: 4-point mesh distortion applied dynamically over vector objects.
   - [x] *Dynamic Chamfer & Rounding*: Real-time corner rounding without destructive edits to the underlying path geometry.
+  - [x] *3D Perspective & Silhouette Engine*: Perspective projection mode with customizable focal depth, back-face caps, and silhouette contour lines.
 
 #### Interface & System
+- [x] **Welcome Window & Template Launcher**:
+  - [x] Modern Libadwaita dialog (`PathsWelcomeDialog`, fixed 860x580 geometry) conforming to GNOME HIG standards.
+  - [x] Multi-category document preset picker: Standard Print (A4, A3, Letter), Screen & Web (1080p, 4K, Mobile), Social Media (Instagram, Twitter/X banner, YouTube thumbnail), and Iconography (GNOME 128x128, App Icon 512x512).
+  - [x] Recent files tracking with thumbnail preview cards, file paths, last opened timestamps, and quick removal.
+- [x] **Clipboard & Asset Placement**:
+  - [x] Style Copy & Paste (`Ctrl+Alt+C` / `Ctrl+Alt+V`) transferring fills, strokes, and opacity across vector elements.
+  - [x] Drag-and-drop file import support for placing SVG, PNG, JPG, and WebP assets directly onto the canvas.
+- [x] **Canvas Status Architecture**:
+  - [x] Unified `CanvasStatusSnapshot` consolidating viewport zoom, pan coordinates, active tool, selection bounds, and node counts into a clean single message pipeline.
 - [ ] **Tabbed Document System**:
   - [ ] Tab bar supporting multiple files open simultaneously.
   - [ ] Individual close buttons, unsaved changes detection with confirmation dialogs.
@@ -276,9 +390,9 @@ This project adheres to **Semantic Versioning (SemVer 2.0.0)** (`MAJOR.MINOR.PAT
 > **Focus**: Extensibility ABI, professional printing color management, and multi-format export.
 
 #### Plugin Ecosystem & ABI
-- [ ] **Dynamic Plugin Architecture**:
-  - [ ] Safe C/Rust FFI bindings for dynamic shared library (`.so`) plugins.
-  - [ ] Plugin Manager panel in Studio preferences for enabling/disabling user plugins.
+- [x] **Dynamic Plugin Architecture**:
+  - [x] Safe C/Rust FFI bindings for dynamic shared library (`.so`) plugins using `libloading`.
+  - [x] Plugin Manager panel in Studio preferences for installing, enabling, disabling, and managing user plugins from `~/.local/share/paths/plugins/`.
 - [ ] **Color Management (CMYK & ICC Profiles)**:
   - [ ] Support for ICC color profiles and CMYK soft-proofing for print design workflows.
 
@@ -294,6 +408,8 @@ This project adheres to **Semantic Versioning (SemVer 2.0.0)** (`MAJOR.MINOR.PAT
 > **Focus**: Skia GPU acceleration, multi-core rendering pipeline, and stress optimization.
 
 - [x] **Skia Hardware Acceleration**: Vulkan / OpenGL backend initialization for ultra-smooth 120 FPS panning/zooming on complex illustrations.
+- [x] **Spatial Indexing & Frustum Culling**: 2D R-Tree spatial indexing (`rstar`) for real-time viewport frustum culling, eliminating off-screen element render overhead during high-speed pan and zoom.
+- [x] **Skia Picture Recording Cache**: Per-element `skia::Picture` caching to avoid redundant path tessellation, shader evaluations, and modifier pipelines on static vector objects.
 - [ ] **Tiled Parallel Canvas Renderer**: Multi-threaded scene rendering for complex artwork with over 100,000 nodes.
 - [ ] **Async Undo/Redo Engine**: Zero-lag history tree management for large document undo stacks.
 
