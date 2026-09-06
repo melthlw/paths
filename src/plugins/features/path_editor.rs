@@ -66,6 +66,7 @@ impl Default for PathEditorFeature {
 }
 
 /// Helper: Line segment intersection test
+#[allow(dead_code)]
 fn segments_intersect(p1: Point, p2: Point, q1: Point, q2: Point) -> bool {
     fn ccw(a: Point, b: Point, c: Point) -> bool {
         (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x)

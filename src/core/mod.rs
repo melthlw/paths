@@ -42,8 +42,10 @@ pub use geometry::{
 };
 pub use grid::{GridConfig, GridStyle};
 
+#[allow(unused_imports)]
 pub use i18n::{
-    Language, get_language, gettext, init as init_i18n, on_language_change_local, set_language,
+    Language, get_language, gettext, init as init_i18n, ngettext, on_language_change_local,
+    pgettext, set_language,
 };
 pub use io::{load_document_from_file, save_document_to_file};
 pub use page::PageId;

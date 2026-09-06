@@ -1477,7 +1477,7 @@ fn build_modifier_card(
 
             // Depth Slider
             let row_depth = gtk4::Box::builder().spacing(6).build();
-            let lbl_d = gtk4::Label::builder().label("Depth:").css_classes(["caption", "dim-label"]).width_request(45).xalign(0.0).build();
+            let lbl_d = gtk4::Label::builder().label(&crate::core::gettext("Depth:")).css_classes(["caption", "dim-label"]).width_request(45).xalign(0.0).build();
             let adj_dep = gtk4::Adjustment::new(ext.depth as f64, 0.0, 300.0, 2.0, 10.0, 0.0);
             let scale_dep = gtk4::Scale::builder()
                 .adjustment(&adj_dep)
@@ -1503,7 +1503,7 @@ fn build_modifier_card(
 
             // Bevel / Corner Rounding Slider & Style
             let row_bevel = gtk4::Box::builder().spacing(4).build();
-            let lbl_b = gtk4::Label::builder().label("Bevel:").css_classes(["caption", "dim-label"]).width_request(45).xalign(0.0).build();
+            let lbl_b = gtk4::Label::builder().label(&crate::core::gettext("Bevel:")).css_classes(["caption", "dim-label"]).width_request(45).xalign(0.0).build();
             let combo_bstyle = gtk4::DropDown::from_strings(&[
                 &crate::core::gettext("Round"),
                 &crate::core::gettext("Chamfer"),
@@ -1558,16 +1558,16 @@ fn build_modifier_card(
 
             let (row_pers, scale_pers, _lbl_pers_v) = {
                 let row = gtk4::Box::builder().spacing(6).build();
-                let lbl = gtk4::Label::builder().label("Camera:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let lbl = gtk4::Label::builder().label(&crate::core::gettext("Camera:")).css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
                 let adj = gtk4::Adjustment::new(ext.perspective as f64, 0.0, 1500.0, 10.0, 50.0, 0.0);
                 let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
-                let init_str = if ext.perspective > 0.0 { format!("{:.0}", ext.perspective) } else { "Ortho".to_string() };
+                let init_str = if ext.perspective > 0.0 { format!("{:.0}", ext.perspective) } else { crate::core::gettext("Ortho") };
                 let lbl_val = gtk4::Label::builder().label(&init_str).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();
                 let lbl_v_c = lbl_val.clone();
                 scale.connect_value_changed(move |s| {
                     let v = s.value();
                     if v <= 5.0 {
-                        lbl_v_c.set_label("Ortho");
+                        lbl_v_c.set_label(&crate::core::gettext("Ortho"));
                     } else {
                         lbl_v_c.set_label(&format!("{:.0}", v));
                     }
@@ -1580,7 +1580,7 @@ fn build_modifier_card(
 
             let (row_metal, scale_metal, _lbl_metal_v) = {
                 let row = gtk4::Box::builder().spacing(6).build();
-                let lbl = gtk4::Label::builder().label("Metallic:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let lbl = gtk4::Label::builder().label(&crate::core::gettext("Metallic:")).css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
                 let adj = gtk4::Adjustment::new(ext.metallic as f64 * 100.0, 0.0, 100.0, 1.0, 10.0, 0.0);
                 let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
                 let lbl_val = gtk4::Label::builder().label(&format!("{:.0}%", ext.metallic * 100.0)).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();
@@ -1596,7 +1596,7 @@ fn build_modifier_card(
 
             let (row_rough, scale_rough, _lbl_rough_v) = {
                 let row = gtk4::Box::builder().spacing(6).build();
-                let lbl = gtk4::Label::builder().label("Roughness:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let lbl = gtk4::Label::builder().label(&crate::core::gettext("Roughness:")).css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
                 let adj = gtk4::Adjustment::new(ext.roughness as f64 * 100.0, 0.0, 100.0, 1.0, 10.0, 0.0);
                 let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
                 let lbl_val = gtk4::Label::builder().label(&format!("{:.0}%", ext.roughness * 100.0)).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();
@@ -1612,7 +1612,7 @@ fn build_modifier_card(
 
             let (row_rim, scale_rim, _lbl_rim_v) = {
                 let row = gtk4::Box::builder().spacing(6).build();
-                let lbl = gtk4::Label::builder().label("Rim Light:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let lbl = gtk4::Label::builder().label(&crate::core::gettext("Rim Light:")).css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
                 let adj = gtk4::Adjustment::new(ext.rim_light as f64 * 100.0, 0.0, 100.0, 1.0, 10.0, 0.0);
                 let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
                 let lbl_val = gtk4::Label::builder().label(&format!("{:.0}%", ext.rim_light * 100.0)).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();
@@ -1628,7 +1628,7 @@ fn build_modifier_card(
 
             let (row_spec, scale_spec, _lbl_spec_v) = {
                 let row = gtk4::Box::builder().spacing(6).build();
-                let lbl = gtk4::Label::builder().label("Gloss:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let lbl = gtk4::Label::builder().label(&crate::core::gettext("Gloss:")).css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
                 let adj = gtk4::Adjustment::new(ext.gloss_specular as f64 * 100.0, 0.0, 100.0, 1.0, 10.0, 0.0);
                 let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
                 let lbl_val = gtk4::Label::builder().label(&format!("{:.0}%", ext.gloss_specular * 100.0)).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();
@@ -1644,7 +1644,7 @@ fn build_modifier_card(
 
             let (row_tap, scale_tap, _lbl_tap_v) = {
                 let row = gtk4::Box::builder().spacing(6).build();
-                let lbl = gtk4::Label::builder().label("Taper:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let lbl = gtk4::Label::builder().label(&crate::core::gettext("Taper:")).css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
                 let adj = gtk4::Adjustment::new(ext.taper as f64, 0.2, 2.5, 0.05, 0.2, 0.0);
                 let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
                 let lbl_val = gtk4::Label::builder().label(&format!("{:.2}x", ext.taper)).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();
@@ -1660,7 +1660,7 @@ fn build_modifier_card(
 
             let (row_twist, scale_twist, _lbl_twist_v) = {
                 let row = gtk4::Box::builder().spacing(6).build();
-                let lbl = gtk4::Label::builder().label("Twist:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let lbl = gtk4::Label::builder().label(&crate::core::gettext("Twist:")).css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
                 let adj = gtk4::Adjustment::new(ext.twist_deg as f64, -180.0, 180.0, 2.0, 15.0, 0.0);
                 let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
                 let lbl_val = gtk4::Label::builder().label(&format!("{:.0}°", ext.twist_deg)).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();
@@ -1676,7 +1676,7 @@ fn build_modifier_card(
 
             let (row_c2d, scale_c2d, _lbl_c2d_v) = {
                 let row = gtk4::Box::builder().spacing(6).build();
-                let lbl = gtk4::Label::builder().label("Corner 2D:").css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
+                let lbl = gtk4::Label::builder().label(&crate::core::gettext("Corner 2D:")).css_classes(["caption", "dim-label"]).width_request(65).xalign(0.0).build();
                 let adj = gtk4::Adjustment::new(ext.corner_radius_2d as f64, 0.0, 60.0, 1.0, 5.0, 0.0);
                 let scale = gtk4::Scale::builder().adjustment(&adj).hexpand(true).draw_value(false).valign(gtk4::Align::Center).build();
                 let lbl_val = gtk4::Label::builder().label(&format!("{:.0}px", ext.corner_radius_2d)).css_classes(["caption", "numeric"]).width_request(45).xalign(1.0).build();

@@ -158,9 +158,14 @@ impl I18nManager {
         // Load embedded PO files compiled directly into binary
         let pt_br_po = include_str!("../../po/pt_BR.po");
         let en_po = include_str!("../../po/en.po");
+        let es_po = include_str!("../../po/es.po");
 
         catalogs.insert("pt_BR".to_string(), parse_po_catalog(pt_br_po));
         catalogs.insert("en".to_string(), parse_po_catalog(en_po));
+        catalogs.insert("es".to_string(), parse_po_catalog(es_po));
+
+        // Load any external locale catalogs installed on system or in workspace
+        Self::load_external_catalogs(&mut catalogs);
 
         let configured = Self::load_preference();
         let effective = if configured == Language::System {
@@ -173,6 +178,54 @@ impl I18nManager {
             configured_language: configured,
             effective_language: effective,
             catalogs,
+        }
+    }
+
+    fn load_external_catalogs(catalogs: &mut HashMap<String, HashMap<String, String>>) {
+        let mut paths_to_check = Vec::new();
+
+        if let Ok(data_dirs) = std::env::var("XDG_DATA_DIRS") {
+            for dir in data_dirs.split(':') {
+                paths_to_check.push(std::path::PathBuf::from(dir).join("locale"));
+            }
+        } else {
+            paths_to_check.push(std::path::PathBuf::from("/app/share/locale"));
+            paths_to_check.push(std::path::PathBuf::from("/usr/share/locale"));
+            paths_to_check.push(std::path::PathBuf::from("/usr/local/share/locale"));
+        }
+
+        if let Some(data_dir) = dirs::data_dir() {
+            paths_to_check.push(data_dir.join("locale"));
+        }
+        paths_to_check.push(std::path::PathBuf::from("po"));
+
+        for base in paths_to_check {
+            if !base.exists() {
+                continue;
+            }
+
+            for info in Language::all_info() {
+                if info.lang == Language::System {
+                    continue;
+                }
+                let code = info.code;
+                let candidates = [
+                    base.join(format!("{}.po", code)),
+                    base.join(code).join("LC_MESSAGES").join("paths.po"),
+                    base.join(code).join("LC_MESSAGES").join("gnome-paths.po"),
+                ];
+
+                for candidate in &candidates {
+                    if candidate.is_file() {
+                        if let Ok(content) = std::fs::read_to_string(candidate) {
+                            let parsed = parse_po_catalog(&content);
+                            if !parsed.is_empty() {
+                                catalogs.entry(code.to_string()).or_default().extend(parsed);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -238,13 +291,31 @@ impl I18nManager {
     }
 }
 
-/// Parses a GNU gettext PO file into a Key-Value translation map
+/// Parses a GNU gettext PO file into a Key-Value translation map, supporting msgctxt
 pub fn parse_po_catalog(content: &str) -> HashMap<String, String> {
     let mut catalog = HashMap::new();
+    let mut current_ctxt: Option<String> = None;
     let mut current_msgid: Option<String> = None;
     let mut current_msgstr: Option<String> = None;
+    let mut in_ctxt = false;
     let mut in_msgid = false;
     let mut in_msgstr = false;
+
+    let commit_entry = |ctxt: &mut Option<String>,
+                        id: &mut Option<String>,
+                        s: &mut Option<String>,
+                        cat: &mut HashMap<String, String>| {
+        if let (Some(id_val), Some(s_val)) = (id.take(), s.take()) {
+            if !id_val.is_empty() && !s_val.is_empty() {
+                if let Some(c) = ctxt.take() {
+                    cat.insert(format!("{}\x04{}", c, id_val), s_val.clone());
+                    cat.entry(id_val).or_insert(s_val);
+                } else {
+                    cat.insert(id_val, s_val);
+                }
+            }
+        }
+    };
 
     for line in content.lines() {
         let trimmed = line.trim();
@@ -252,25 +323,42 @@ pub fn parse_po_catalog(content: &str) -> HashMap<String, String> {
             continue;
         }
 
-        if trimmed.starts_with("msgid ") {
-            // Save previous entry
-            if let (Some(id), Some(s)) = (current_msgid.take(), current_msgstr.take()) {
-                if !id.is_empty() && !s.is_empty() {
-                    catalog.insert(id, s);
-                }
+        if trimmed.starts_with("msgctxt ") {
+            commit_entry(
+                &mut current_ctxt,
+                &mut current_msgid,
+                &mut current_msgstr,
+                &mut catalog,
+            );
+            in_ctxt = true;
+            in_msgid = false;
+            in_msgstr = false;
+            current_ctxt = Some(extract_string_literal(&trimmed[8..]));
+        } else if trimmed.starts_with("msgid ") {
+            if !in_ctxt {
+                commit_entry(
+                    &mut current_ctxt,
+                    &mut current_msgid,
+                    &mut current_msgstr,
+                    &mut catalog,
+                );
             }
+            in_ctxt = false;
             in_msgid = true;
             in_msgstr = false;
-            let raw = extract_string_literal(&trimmed[6..]);
-            current_msgid = Some(raw);
+            current_msgid = Some(extract_string_literal(&trimmed[6..]));
         } else if trimmed.starts_with("msgstr ") {
+            in_ctxt = false;
             in_msgid = false;
             in_msgstr = true;
-            let raw = extract_string_literal(&trimmed[7..]);
-            current_msgstr = Some(raw);
+            current_msgstr = Some(extract_string_literal(&trimmed[7..]));
         } else if trimmed.starts_with('"') && trimmed.ends_with('"') {
             let chunk = extract_string_literal(trimmed);
-            if in_msgid {
+            if in_ctxt {
+                if let Some(ref mut c) = current_ctxt {
+                    c.push_str(&chunk);
+                }
+            } else if in_msgid {
                 if let Some(ref mut id) = current_msgid {
                     id.push_str(&chunk);
                 }
@@ -280,21 +368,24 @@ pub fn parse_po_catalog(content: &str) -> HashMap<String, String> {
                 }
             }
         } else if trimmed.is_empty() {
-            if let (Some(id), Some(s)) = (current_msgid.take(), current_msgstr.take()) {
-                if !id.is_empty() && !s.is_empty() {
-                    catalog.insert(id, s);
-                }
-            }
+            commit_entry(
+                &mut current_ctxt,
+                &mut current_msgid,
+                &mut current_msgstr,
+                &mut catalog,
+            );
+            in_ctxt = false;
             in_msgid = false;
             in_msgstr = false;
         }
     }
 
-    if let (Some(id), Some(s)) = (current_msgid.take(), current_msgstr.take()) {
-        if !id.is_empty() && !s.is_empty() {
-            catalog.insert(id, s);
-        }
-    }
+    commit_entry(
+        &mut current_ctxt,
+        &mut current_msgid,
+        &mut current_msgstr,
+        &mut catalog,
+    );
 
     catalog
 }
@@ -353,6 +444,50 @@ pub fn gettext(msgid: &str) -> String {
 
     // Fallback to msgid itself
     msgid.to_string()
+}
+
+/// Translate a message id with context into the currently active language
+#[allow(dead_code)]
+pub fn pgettext(context: &str, msgid: &str) -> String {
+    let mut lock = I18N.write().unwrap();
+    let mgr = lock.get_or_insert_with(I18nManager::new);
+
+    let lang_code = mgr.effective_language.code();
+    if let Some(cat) = mgr.catalogs.get(lang_code) {
+        let key = format!("{}\x04{}", context, msgid);
+        if let Some(translated) = cat.get(&key) {
+            if !translated.is_empty() {
+                return translated.clone();
+            }
+        }
+        if let Some(translated) = cat.get(msgid) {
+            if !translated.is_empty() {
+                return translated.clone();
+            }
+        }
+    }
+
+    msgid.to_string()
+}
+
+/// Translate a singular or plural message based on count into the currently active language
+#[allow(dead_code)]
+pub fn ngettext(singular: &str, plural: &str, n: usize) -> String {
+    let mut lock = I18N.write().unwrap();
+    let mgr = lock.get_or_insert_with(I18nManager::new);
+
+    let lang_code = mgr.effective_language.code();
+    let target_msgid = if n == 1 { singular } else { plural };
+
+    if let Some(cat) = mgr.catalogs.get(lang_code) {
+        if let Some(translated) = cat.get(target_msgid) {
+            if !translated.is_empty() {
+                return translated.clone();
+            }
+        }
+    }
+
+    target_msgid.to_string()
 }
 
 type LanguageChangeCallback = Box<dyn Fn(Language) + Send + Sync + 'static>;
@@ -488,5 +623,47 @@ msgstr "Multi "
         init();
         let unknown = "Some completely unknown string 12345";
         assert_eq!(gettext(unknown), unknown);
+    }
+
+    #[test]
+    fn test_pgettext_and_context() {
+        let po = r#"
+msgid ""
+msgstr ""
+"Project-Id-Version: test\n"
+
+msgid "Open"
+msgstr "Abrir"
+
+msgctxt "Path Status"
+msgid "Open"
+msgstr "Aberto"
+"#;
+        let map = parse_po_catalog(po);
+        assert_eq!(map.get("Open").unwrap(), "Abrir");
+        assert_eq!(map.get("Path Status\x04Open").unwrap(), "Aberto");
+    }
+
+    #[test]
+    fn test_ngettext() {
+        init();
+        set_language(Language::PtBr);
+        assert_eq!(ngettext("Save", "Save", 1), "Salvar");
+        assert_eq!(ngettext("Save", "Save", 2), "Salvar");
+    }
+
+    #[test]
+    fn test_spanish_catalog() {
+        init();
+        set_language(Language::Es);
+        assert_eq!(gettext("File"), "Archivo");
+        assert_eq!(gettext("Edit"), "Editar");
+        assert_eq!(gettext("Save"), "Guardar");
+        assert_eq!(gettext("Undo"), "Deshacer");
+        assert_eq!(gettext("Trace Bitmap"), "Vectorizar mapa de bits");
+        assert_eq!(gettext("Advanced Preview..."), "Vista previa avanzada...");
+
+        // Reset to PtBr
+        set_language(Language::PtBr);
     }
 }

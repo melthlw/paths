@@ -210,13 +210,9 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     let tab_trace_btn = gtk4::ToggleButton::builder()
         .label(&crate::core::gettext("Vectorize"))
         .build();
-    let tab_all_btn = gtk4::ToggleButton::builder()
-        .label(&crate::core::gettext("Both"))
-        .build();
 
     view_switch_box.append(&tab_adj_btn);
     view_switch_box.append(&tab_trace_btn);
-    view_switch_box.append(&tab_all_btn);
     content_box.append(&view_switch_box);
 
     // ─────────────────────────────────────────────────────────────
@@ -667,12 +663,18 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         .build();
 
     let btn_trace_direct = gtk4::Button::builder()
-        .label(&crate::core::gettext("Trace to Paths"))
-        .icon_name("object-to-path-symbolic")
         .tooltip_text(&crate::core::gettext("Vectorize raster image into editable paths"))
         .css_classes(["suggested-action", "pill"])
         .halign(gtk4::Align::Fill)
         .build();
+    let direct_box = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Horizontal)
+        .spacing(8)
+        .halign(gtk4::Align::Center)
+        .build();
+    direct_box.append(&gtk4::Image::from_icon_name("object-to-path-symbolic"));
+    direct_box.append(&gtk4::Label::builder().label(&crate::core::gettext("Trace to Paths")).build());
+    btn_trace_direct.set_child(Some(&direct_box));
 
     {
         let cv = canvas.clone();
@@ -712,12 +714,18 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     }
 
     let btn_trace_dialog = gtk4::Button::builder()
-        .label(&crate::core::gettext("Advanced Preview..."))
-        .icon_name("zoom-fit-selection-symbolic")
         .tooltip_text(&crate::core::gettext("Open advanced interactive live preview dialog"))
         .css_classes(["pill"])
         .halign(gtk4::Align::Fill)
         .build();
+    let dialog_box = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Horizontal)
+        .spacing(8)
+        .halign(gtk4::Align::Center)
+        .build();
+    dialog_box.append(&gtk4::Image::from_icon_name("zoom-fit-selection-symbolic"));
+    dialog_box.append(&gtk4::Label::builder().label(&crate::core::gettext("Advanced Preview...")).build());
+    btn_trace_dialog.set_child(Some(&dialog_box));
     {
         let cv = canvas.clone();
         btn_trace_dialog.connect_clicked(move |btn| {
@@ -739,7 +747,6 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         let t_grp = trace_group.clone();
         let b_adj = tab_adj_btn.clone();
         let b_trace = tab_trace_btn.clone();
-        let b_all = tab_all_btn.clone();
 
         // Default: Adjustments active, Trace hidden unless user switches
         t_grp.set_visible(false);
@@ -748,43 +755,28 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
             let ag = a_grp.clone();
             let tg = t_grp.clone();
             let bt = b_trace.clone();
-            let ba = b_all.clone();
             move |btn| {
                 if btn.is_active() {
                     bt.set_active(false);
-                    ba.set_active(false);
                     ag.set_visible(true);
                     tg.set_visible(false);
+                } else if !bt.is_active() {
+                    btn.set_active(true);
                 }
             }
         });
 
         b_trace.connect_toggled({
-            let ag = a_grp.clone();
-            let tg = t_grp.clone();
-            let ba = b_adj.clone();
-            let ball = b_all.clone();
-            move |btn| {
-                if btn.is_active() {
-                    ba.set_active(false);
-                    ball.set_active(false);
-                    ag.set_visible(false);
-                    tg.set_visible(true);
-                }
-            }
-        });
-
-        b_all.connect_toggled({
             let ag = a_grp;
             let tg = t_grp;
             let ba = b_adj;
-            let bt = b_trace;
             move |btn| {
                 if btn.is_active() {
                     ba.set_active(false);
-                    bt.set_active(false);
-                    ag.set_visible(true);
+                    ag.set_visible(false);
                     tg.set_visible(true);
+                } else if !ba.is_active() {
+                    btn.set_active(true);
                 }
             }
         });
