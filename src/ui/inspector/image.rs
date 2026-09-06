@@ -94,7 +94,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         .icon_name("tool-image-symbolic")
         .title(&crate::core::gettext("No Image Selected"))
         .description(&crate::core::gettext(
-            "Select a bitmap image to adjust colors or vectorize to paths, or rasterize selected vectors into an image.",
+            "Select a bitmap image to adjust colors or vectorize to paths.",
         ))
         .hexpand(true)
         .vexpand(true)
@@ -119,19 +119,6 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         });
     }
     empty_actions_box.append(&btn_activate_tool);
-
-    let btn_rasterize = gtk4::Button::builder()
-        .label(&crate::core::gettext("Rasterize Selection to Bitmap"))
-        .halign(gtk4::Align::Center)
-        .build();
-    let btn_rasterize_c = btn_rasterize.clone();
-    {
-        let cv = canvas.clone();
-        btn_rasterize.connect_clicked(move |_| {
-            cv.rasterize_selected_to_image();
-        });
-    }
-    empty_actions_box.append(&btn_rasterize);
 
     let btn_import = gtk4::Button::builder()
         .label(&crate::core::gettext("Import Image File..."))
@@ -1011,7 +998,6 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         } else {
             content_b_c.set_visible(false);
             empty_b_c.set_visible(true);
-            btn_rasterize_c.set_sensitive(!cv_for_upd.selected_element_ids().is_empty());
         }
     });
 

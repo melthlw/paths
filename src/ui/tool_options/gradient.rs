@@ -37,12 +37,12 @@ pub fn build_gradient_controls(canvas: &CanvasWidget, is_syncing: &Rc<Cell<bool>
         .build();
 
     let btn_type_linear = create_resource_toggle_btn(
-        "media-playlist-consecutive-symbolic",
+        "tool-gradient-symbolic",
         &crate::core::gettext("Linear Gradient"),
         true,
     );
     let btn_type_radial = create_resource_toggle_btn(
-        "media-record-symbolic",
+        "tool-gradient-radial-symbolic",
         &crate::core::gettext("Radial Gradient"),
         false,
     );

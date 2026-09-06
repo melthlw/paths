@@ -227,13 +227,13 @@ impl ColorPickerPopover {
             .build();
 
         let mode_labels = [
-            (crate::core::gettext("Solid"), "media-record-symbolic"),
+            (crate::core::gettext("Solid"), "tool-paint-bucket-symbolic"),
             (
                 crate::core::gettext("Gradient"),
-                "media-playlist-consecutive-symbolic",
+                "tool-gradient-symbolic",
             ),
-            (crate::core::gettext("Mesh"), "action-unavailable-symbolic"),
-            (crate::core::gettext("Pattern"), "view-grid-symbolic"),
+            (crate::core::gettext("Mesh"), "tool-mesh-symbolic"),
+            (crate::core::gettext("Pattern"), "tool-pattern-symbolic"),
         ];
 
         let mode_buttons: Vec<gtk4::Button> = mode_labels
@@ -394,13 +394,13 @@ impl ColorPickerPopover {
 
         let lin_btn = gtk4::Button::builder()
             .label(&crate::core::gettext("Linear"))
-            .icon_name("media-playlist-consecutive-symbolic")
+            .icon_name("tool-gradient-symbolic")
             .css_classes(["flat", "pill-btn", "active"])
             .hexpand(true)
             .build();
         let rad_btn = gtk4::Button::builder()
             .label(&crate::core::gettext("Radial"))
-            .icon_name("media-record-symbolic")
+            .icon_name("tool-gradient-radial-symbolic")
             .css_classes(["flat", "pill-btn"])
             .hexpand(true)
             .build();

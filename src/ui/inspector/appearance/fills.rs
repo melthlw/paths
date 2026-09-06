@@ -77,27 +77,27 @@ impl FillRow {
             (
                 FillStyle::Solid,
                 crate::core::gettext("Solid"),
-                "media-record-symbolic",
+                "tool-paint-bucket-symbolic",
             ),
             (
                 FillStyle::LinearGradient,
                 crate::core::gettext("Linear Gradient"),
-                "media-playlist-consecutive-symbolic",
+                "tool-gradient-symbolic",
             ),
             (
                 FillStyle::RadialGradient,
                 crate::core::gettext("Radial Gradient"),
-                "media-record-symbolic",
+                "tool-gradient-radial-symbolic",
             ),
             (
                 FillStyle::Mesh,
                 crate::core::gettext("Mesh Gradient"),
-                "action-unavailable-symbolic",
+                "tool-mesh-symbolic",
             ),
             (
                 FillStyle::Pattern,
                 crate::core::gettext("Geometric Pattern"),
-                "view-grid-symbolic",
+                "tool-pattern-symbolic",
             ),
         ];
 
@@ -112,7 +112,7 @@ impl FillRow {
                 .margin_bottom(4)
                 .valign(gtk4::Align::Center)
                 .build();
-            let item_img = gtk4::Image::from_icon_name(st_icon);
+            let item_img = crate::ui::icons::make_symbolic_image(st_icon, 18);
             let item_label = gtk4::Label::builder()
                 .label(st_lbl)
                 .halign(gtk4::Align::Start)
@@ -609,7 +609,7 @@ impl FillRow {
             FillStyle::Mesh => {
                 let mesh_tool_btn = gtk4::Button::builder()
                     .label(crate::core::gettext("Mesh Tool"))
-                    .icon_name("action-unavailable-symbolic")
+                    .icon_name("tool-mesh-symbolic")
                     .css_classes(["pill-btn"])
                     .valign(gtk4::Align::Center)
                     .tooltip_text(crate::core::gettext("Edit Mesh Nodes on Canvas (Mesh Tool)"))

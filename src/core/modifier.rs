@@ -229,10 +229,10 @@ impl Default for Extrude3DModifier {
             depth: 40.0,
             taper: 1.0,
             twist_deg: 0.0,
-            corner_radius_2d: 12.0,
+            corner_radius_2d: 0.0,
             bevel_style: Bevel3DStyle::Round,
-            bevel_radius: 6.0,
-            bevel_segments: 6,
+            bevel_radius: 0.0,
+            bevel_segments: 4,
             shading: true,
             shading_intensity: 0.65,
             ambient_light: 0.4,
@@ -887,6 +887,41 @@ pub fn transform_skia_path_3d(
     result_builder.detach()
 }
 
+/// Simplifies a dense polygon contour by removing redundant near-collinear points
+fn simplify_polygon_loop(pts: &[skia::Point], tolerance: f32) -> Vec<skia::Point> {
+    if pts.len() <= 16 {
+        return pts.to_vec();
+    }
+    let tol_sq = tolerance * tolerance;
+    let mut simplified = Vec::with_capacity(pts.len());
+    let n = pts.len();
+    for i in 0..n {
+        let prev = pts[(i + n - 1) % n];
+        let curr = pts[i];
+        let next = pts[(i + 1) % n];
+
+        let dx = next.x - prev.x;
+        let dy = next.y - prev.y;
+        let seg_len_sq = dx * dx + dy * dy;
+
+        if seg_len_sq < 0.0001 {
+            continue;
+        }
+
+        let num = (next.y - prev.y) * curr.x - (next.x - prev.x) * curr.y + next.x * prev.y - next.y * prev.x;
+        let dist_sq = (num * num) / seg_len_sq;
+
+        if dist_sq >= tol_sq {
+            simplified.push(curr);
+        }
+    }
+    if simplified.len() >= 3 {
+        simplified
+    } else {
+        pts.to_vec()
+    }
+}
+
 /// Extracts distinct subpath polygon loops from a Skia Path with adaptive curve subdivision
 pub fn extract_subpath_polygon_loops(path: &skia::Path) -> Vec<Vec<skia::Point>> {
     let mut loops = Vec::new();
@@ -918,7 +953,8 @@ pub fn extract_subpath_polygon_loops(path: &skia::Path) -> Vec<Vec<skia::Point>>
                     };
                     let p1 = points[1];
                     let p2 = points[2];
-                    let steps = 6usize;
+                    let chord = (p2.x - p0.x).hypot(p2.y - p0.y).max(1.0);
+                    let steps = ((chord / 5.0).ceil() as usize).clamp(1, 6);
                     for s in 1..=steps {
                         let t = s as f32 / steps as f32;
                         let inv_t = 1.0 - t;
@@ -937,7 +973,8 @@ pub fn extract_subpath_polygon_loops(path: &skia::Path) -> Vec<Vec<skia::Point>>
                     };
                     let p1 = points[1];
                     let p2 = points[2];
-                    let steps = 6usize;
+                    let chord = (p2.x - p0.x).hypot(p2.y - p0.y).max(1.0);
+                    let steps = ((chord / 5.0).ceil() as usize).clamp(1, 6);
                     for s in 1..=steps {
                         let t = s as f32 / steps as f32;
                         let inv_t = 1.0 - t;
@@ -957,7 +994,8 @@ pub fn extract_subpath_polygon_loops(path: &skia::Path) -> Vec<Vec<skia::Point>>
                     let p1 = points[1];
                     let p2 = points[2];
                     let p3 = points[3];
-                    let steps = 8usize;
+                    let chord = (p3.x - p0.x).hypot(p3.y - p0.y).max(1.0);
+                    let steps = ((chord / 5.0).ceil() as usize).clamp(1, 8);
                     for s in 1..=steps {
                         let t = s as f32 / steps as f32;
                         let inv_t = 1.0 - t;
@@ -996,7 +1034,7 @@ pub fn extract_subpath_polygon_loops(path: &skia::Path) -> Vec<Vec<skia::Point>>
             if let Some(last) = cl.last() {
                 let dx = p.x - last.x;
                 let dy = p.y - last.y;
-                if (dx * dx + dy * dy) < 0.05 {
+                if (dx * dx + dy * dy) < 0.25 {
                     continue;
                 }
             }
@@ -1006,10 +1044,13 @@ pub fn extract_subpath_polygon_loops(path: &skia::Path) -> Vec<Vec<skia::Point>>
             if let (Some(first), Some(last)) = (cl.first(), cl.last()) {
                 let dx = first.x - last.x;
                 let dy = first.y - last.y;
-                if (dx * dx + dy * dy) < 0.05 {
+                if (dx * dx + dy * dy) < 0.25 {
                     cl.pop();
                 }
             }
+        }
+        if cl.len() > 80 {
+            cl = simplify_polygon_loop(&cl, 0.75);
         }
         if cl.len() >= 3 {
             clean_loops.push(cl);
@@ -1310,13 +1351,8 @@ pub fn bake_extrude_3d_faces(
     } else {
         0.0
     };
-    let rounding_r = ext.corner_radius_2d.max(if bevel_r > 0.5 && ext.bevel_style == Bevel3DStyle::Round {
-        bevel_r.max(12.0)
-    } else {
-        0.0
-    });
-    let rounded_path = if rounding_r > 0.1 {
-        apply_chamfer_rounding_to_path(path, rounding_r, CornerStyle::Round)
+    let rounded_path = if ext.corner_radius_2d > 0.1 {
+        apply_chamfer_rounding_to_path(path, ext.corner_radius_2d, CornerStyle::Round)
     } else {
         path.clone()
     };
@@ -1425,7 +1461,7 @@ pub fn bake_extrude_3d_faces(
 
     if has_bevel {
         let bevel_steps = ext.bevel_segments.clamp(3, 8);
-        let bevel_scale_inset = (bevel_r / (max_dim * 0.5)).min(0.25);
+        let bevel_scale_inset = (bevel_r / (max_dim * 0.5)).min(0.08);
 
         // Front shoulder fillet
         for k in 0..=bevel_steps {
@@ -1541,10 +1577,8 @@ pub fn bake_extrude_3d_faces(
         path: skia::Path,
         color: crate::core::Color,
         avg_z: f32,
-        is_front_cap: bool,
     }
 
-    let mut face_candidates: Vec<FaceCandidate> = Vec::new();
     let mut all_rings: Vec<Vec<Vec<(Vec3, skia::Point)>>> = Vec::with_capacity(loops.len());
 
     for loop_pts in &loops {
@@ -1561,9 +1595,88 @@ pub fn bake_extrude_3d_faces(
         all_rings.push(rings);
     }
 
-    // Per-glyph Front Caps (with counter-hole cutouts via EvenOdd)
-    if n_front.dot(&view_dir) > -0.001 {
-        for (outer_idx, holes) in &glyphs {
+    let glyph_center_z = |outer_idx: usize| -> f32 {
+        let outer_first_ring = &all_rings[outer_idx][0];
+        outer_first_ring.iter().map(|p| p.0.z).sum::<f32>() / outer_first_ring.len().max(1) as f32
+    };
+
+    let mut sorted_glyphs = glyphs.clone();
+    sorted_glyphs.sort_by(|a, b| {
+        glyph_center_z(a.0)
+            .partial_cmp(&glyph_center_z(b.0))
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+
+    let mut result_elements: Vec<ExtrudedFaceElement> = Vec::new();
+
+    for (outer_idx, holes) in &sorted_glyphs {
+        let mut glyph_side_faces: Vec<FaceCandidate> = Vec::new();
+        let loop_indices = std::iter::once(*outer_idx).chain(holes.iter().copied());
+
+        for l_idx in loop_indices {
+            let is_hole = holes.contains(&l_idx);
+            let rings = &all_rings[l_idx];
+            let n_pts = loops[l_idx].len();
+            if rings.len() >= 2 {
+                for r in 0..(rings.len() - 1) {
+                    let ring_a = &rings[r];
+                    let ring_b = &rings[r + 1];
+
+                    for i in 0..n_pts {
+                        let next_i = (i + 1) % n_pts;
+                        let p0 = ring_a[i];
+                        let p1 = ring_a[next_i];
+                        let p2 = ring_b[next_i];
+                        let p3 = ring_b[i];
+
+                        let e1 = p1.0 - p0.0;
+                        let e2 = p3.0 - p0.0;
+                        let normal = if !is_hole {
+                            e2.cross(&e1).normalize()
+                        } else {
+                            e1.cross(&e2).normalize()
+                        };
+
+                        // Back-face culling: skip faces pointing away from camera
+                        if normal.dot(&view_dir) <= 0.001 {
+                            continue;
+                        }
+
+                        let avg_z = (p0.0.z + p1.0.z + p2.0.z + p3.0.z) * 0.25;
+
+                        let mut quad_builder = skia::PathBuilder::new();
+                        quad_builder.move_to(p0.1);
+                        quad_builder.line_to(p1.1);
+                        quad_builder.line_to(p2.1);
+                        quad_builder.line_to(p3.1);
+                        quad_builder.close();
+
+                        let col = compute_color(side_base, normal);
+                        glyph_side_faces.push(FaceCandidate {
+                            path: quad_builder.detach(),
+                            color: col,
+                            avg_z,
+                        });
+                    }
+                }
+            }
+        }
+
+        glyph_side_faces.sort_by(|a, b| {
+            a.avg_z
+                .partial_cmp(&b.avg_z)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+
+        for f in glyph_side_faces {
+            result_elements.push(ExtrudedFaceElement {
+                path: f.path,
+                color: f.color,
+                is_front_cap: false,
+            });
+        }
+
+        if n_front.dot(&view_dir) > 0.001 {
             let mut cap_b = skia::PathBuilder::new();
             let outer_first_ring = &all_rings[*outer_idx][0];
             if let Some(p_start) = outer_first_ring.first() {
@@ -1585,19 +1698,12 @@ pub fn bake_extrude_3d_faces(
             }
             let mut cap_path = cap_b.detach();
             cap_path.set_fill_type(skia::PathFillType::EvenOdd);
-            let cap_z = outer_first_ring.iter().map(|p| p.0.z).sum::<f32>() / outer_first_ring.len().max(1) as f32;
-            face_candidates.push(FaceCandidate {
+            result_elements.push(ExtrudedFaceElement {
                 path: cap_path,
                 color: compute_color(base_fill, n_front),
-                avg_z: cap_z + 0.05,
                 is_front_cap: true,
             });
-        }
-    }
-
-    // Per-glyph Back Caps (only if facing viewer)
-    if n_back.dot(&view_dir) > 0.001 {
-        for (outer_idx, holes) in &glyphs {
+        } else if n_back.dot(&view_dir) > 0.001 {
             let mut cap_b = skia::PathBuilder::new();
             let outer_last_ring = all_rings[*outer_idx].last().unwrap();
             if let Some(p_start) = outer_last_ring.first() {
@@ -1619,81 +1725,15 @@ pub fn bake_extrude_3d_faces(
             }
             let mut cap_path = cap_b.detach();
             cap_path.set_fill_type(skia::PathFillType::EvenOdd);
-            let cap_z = outer_last_ring.iter().map(|p| p.0.z).sum::<f32>() / outer_last_ring.len().max(1) as f32;
-            face_candidates.push(FaceCandidate {
+            result_elements.push(ExtrudedFaceElement {
                 path: cap_path,
                 color: compute_color(side_base, n_back),
-                avg_z: cap_z - 0.05,
                 is_front_cap: false,
             });
         }
     }
 
-    // Side Wall Quads with Back-Face Culling
-    for (l_idx, loop_pts) in loops.iter().enumerate() {
-        let is_hole = glyphs.iter().any(|(_, holes)| holes.contains(&l_idx));
-        let rings = &all_rings[l_idx];
-        let n_pts = loop_pts.len();
-        if rings.len() >= 2 {
-            for r in 0..(rings.len() - 1) {
-                let ring_a = &rings[r];
-                let ring_b = &rings[r + 1];
-
-                for i in 0..n_pts {
-                    let next_i = (i + 1) % n_pts;
-                    let p0 = ring_a[i];
-                    let p1 = ring_a[next_i];
-                    let p2 = ring_b[next_i];
-                    let p3 = ring_b[i];
-
-                    let e1 = p1.0 - p0.0;
-                    let e2 = p3.0 - p0.0;
-                    let normal = if !is_hole {
-                        e2.cross(&e1).normalize()
-                    } else {
-                        e1.cross(&e2).normalize()
-                    };
-
-                    // Back-face culling: skip faces pointing away from camera
-                    if normal.dot(&view_dir) <= 0.001 {
-                        continue;
-                    }
-
-                    let avg_z = (p0.0.z + p1.0.z + p2.0.z + p3.0.z) * 0.25;
-
-                    let mut quad_builder = skia::PathBuilder::new();
-                    quad_builder.move_to(p0.1);
-                    quad_builder.line_to(p1.1);
-                    quad_builder.line_to(p2.1);
-                    quad_builder.line_to(p3.1);
-                    quad_builder.close();
-
-                    let col = compute_color(side_base, normal);
-                    face_candidates.push(FaceCandidate {
-                        path: quad_builder.detach(),
-                        color: col,
-                        avg_z,
-                        is_front_cap: false,
-                    });
-                }
-            }
-        }
-    }
-
-    face_candidates.sort_by(|a, b| {
-        a.avg_z
-            .partial_cmp(&b.avg_z)
-            .unwrap_or(std::cmp::Ordering::Equal)
-    });
-
-    face_candidates
-        .into_iter()
-        .map(|f| ExtrudedFaceElement {
-            path: f.path,
-            color: f.color,
-            is_front_cap: f.is_front_cap,
-        })
-        .collect()
+    result_elements
 }
 
 struct Face3D {
@@ -1748,13 +1788,8 @@ pub fn apply_extrude_3d_to_canvas(
     } else {
         0.0
     };
-    let rounding_r = ext.corner_radius_2d.max(if bevel_r > 0.5 && ext.bevel_style == Bevel3DStyle::Round {
-        bevel_r.max(12.0)
-    } else {
-        0.0
-    });
-    let rounded_path = if rounding_r > 0.1 {
-        apply_chamfer_rounding_to_path(path, rounding_r, CornerStyle::Round)
+    let rounded_path = if ext.corner_radius_2d > 0.1 {
+        apply_chamfer_rounding_to_path(path, ext.corner_radius_2d, CornerStyle::Round)
     } else {
         path.clone()
     };
@@ -1870,7 +1905,7 @@ pub fn apply_extrude_3d_to_canvas(
 
     if has_bevel {
         let bevel_steps = ext.bevel_segments.clamp(3, 8);
-        let bevel_scale_inset = (bevel_r / (max_dim * 0.5)).min(0.25);
+        let bevel_scale_inset = (bevel_r / (max_dim * 0.5)).min(0.08);
 
         // Front shoulder fillet
         for k in 0..=bevel_steps {
@@ -1982,7 +2017,6 @@ pub fn apply_extrude_3d_to_canvas(
         });
     }
 
-    let mut faces: Vec<Face3D> = Vec::new();
     let mut all_rings: Vec<Vec<Vec<(Vec3, skia::Point)>>> = Vec::with_capacity(loops.len());
 
     for loop_pts in &loops {
@@ -1999,9 +2033,93 @@ pub fn apply_extrude_3d_to_canvas(
         all_rings.push(rings);
     }
 
-    // Per-glyph Front Caps (with counter-hole cutouts via EvenOdd)
-    if n_front.dot(&view_dir) > -0.001 {
-        for (outer_idx, holes) in &glyphs {
+    let glyph_center_z = |outer_idx: usize| -> f32 {
+        let outer_first_ring = &all_rings[outer_idx][0];
+        outer_first_ring.iter().map(|p| p.0.z).sum::<f32>() / outer_first_ring.len().max(1) as f32
+    };
+
+    let mut sorted_glyphs = glyphs.clone();
+    sorted_glyphs.sort_by(|a, b| {
+        glyph_center_z(a.0)
+            .partial_cmp(&glyph_center_z(b.0))
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+
+    for (outer_idx, holes) in &sorted_glyphs {
+        let mut glyph_side_faces: Vec<Face3D> = Vec::new();
+        let loop_indices = std::iter::once(*outer_idx).chain(holes.iter().copied());
+
+        for l_idx in loop_indices {
+            let is_hole = holes.contains(&l_idx);
+            let rings = &all_rings[l_idx];
+            let n_pts = loops[l_idx].len();
+            if rings.len() >= 2 {
+                for r in 0..(rings.len() - 1) {
+                    let ring_a = &rings[r];
+                    let ring_b = &rings[r + 1];
+
+                    for i in 0..n_pts {
+                        let next_i = (i + 1) % n_pts;
+                        let p0 = ring_a[i];
+                        let p1 = ring_a[next_i];
+                        let p2 = ring_b[next_i];
+                        let p3 = ring_b[i];
+
+                        let e1 = p1.0 - p0.0;
+                        let e2 = p3.0 - p0.0;
+                        let normal = if !is_hole {
+                            e2.cross(&e1).normalize()
+                        } else {
+                            e1.cross(&e2).normalize()
+                        };
+
+                        // Back-face culling: skip faces pointing away from camera
+                        if normal.dot(&view_dir) <= 0.001 {
+                            continue;
+                        }
+
+                        let avg_z = (p0.0.z + p1.0.z + p2.0.z + p3.0.z) * 0.25;
+
+                        let mut quad_builder = skia::PathBuilder::new();
+                        quad_builder.move_to(p0.1);
+                        quad_builder.line_to(p1.1);
+                        quad_builder.line_to(p2.1);
+                        quad_builder.line_to(p3.1);
+                        quad_builder.close();
+
+                        glyph_side_faces.push(Face3D {
+                            polygon_2d: quad_builder.detach(),
+                            normal,
+                            avg_z,
+                            base_color: side_base,
+                            is_front_cap: false,
+                        });
+                    }
+                }
+            }
+        }
+
+        glyph_side_faces.sort_by(|a, b| {
+            a.avg_z
+                .partial_cmp(&b.avg_z)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+
+        // 1. Draw side walls
+        for face in glyph_side_faces {
+            let paint = compute_face_paint(face.base_color, face.normal);
+            canvas.draw_path(&face.polygon_2d, &paint);
+
+            // Seam-seal: eliminate subpixel AA background bleeding
+            let mut seam_paint = paint.clone();
+            seam_paint.set_style(skia::PaintStyle::Stroke);
+            seam_paint.set_stroke_width(0.75);
+            seam_paint.set_anti_alias(true);
+            canvas.draw_path(&face.polygon_2d, &seam_paint);
+        }
+
+        // 2. Draw cap on top of side walls
+        if n_front.dot(&view_dir) > 0.001 {
             let mut cap_b = skia::PathBuilder::new();
             let outer_first_ring = &all_rings[*outer_idx][0];
             if let Some(p_start) = outer_first_ring.first() {
@@ -2023,20 +2141,27 @@ pub fn apply_extrude_3d_to_canvas(
             }
             let mut cap_path = cap_b.detach();
             cap_path.set_fill_type(skia::PathFillType::EvenOdd);
-            let cap_z = outer_first_ring.iter().map(|p| p.0.z).sum::<f32>() / outer_first_ring.len().max(1) as f32;
-            faces.push(Face3D {
-                polygon_2d: cap_path,
-                normal: n_front,
-                avg_z: cap_z + 0.05,
-                base_color: base_fill,
-                is_front_cap: true,
-            });
-        }
-    }
 
-    // Per-glyph Back Caps (only if facing viewer)
-    if n_back.dot(&view_dir) > 0.001 {
-        for (outer_idx, holes) in &glyphs {
+            let paint = compute_face_paint(base_fill, n_front);
+            canvas.draw_path(&cap_path, &paint);
+
+            let mut seam_paint = paint.clone();
+            seam_paint.set_style(skia::PaintStyle::Stroke);
+            seam_paint.set_stroke_width(0.75);
+            seam_paint.set_anti_alias(true);
+            canvas.draw_path(&cap_path, &seam_paint);
+
+            if let Some(sc) = stroke_color {
+                if stroke_width > 0.05 {
+                    let mut stroke_paint = skia::Paint::default();
+                    stroke_paint.set_style(skia::PaintStyle::Stroke);
+                    stroke_paint.set_stroke_width(stroke_width);
+                    stroke_paint.set_anti_alias(true);
+                    stroke_paint.set_color4f(sc.to_skia(), None);
+                    canvas.draw_path(&cap_path, &stroke_paint);
+                }
+            }
+        } else if n_back.dot(&view_dir) > 0.001 {
             let mut cap_b = skia::PathBuilder::new();
             let outer_last_ring = all_rings[*outer_idx].last().unwrap();
             if let Some(p_start) = outer_last_ring.first() {
@@ -2058,94 +2183,15 @@ pub fn apply_extrude_3d_to_canvas(
             }
             let mut cap_path = cap_b.detach();
             cap_path.set_fill_type(skia::PathFillType::EvenOdd);
-            let cap_z = outer_last_ring.iter().map(|p| p.0.z).sum::<f32>() / outer_last_ring.len().max(1) as f32;
-            faces.push(Face3D {
-                polygon_2d: cap_path,
-                normal: n_back,
-                avg_z: cap_z - 0.05,
-                base_color: side_base,
-                is_front_cap: false,
-            });
-        }
-    }
 
-    // Side Wall Quads with Back-Face Culling
-    for (l_idx, loop_pts) in loops.iter().enumerate() {
-        let is_hole = glyphs.iter().any(|(_, holes)| holes.contains(&l_idx));
-        let rings = &all_rings[l_idx];
-        let n_pts = loop_pts.len();
-        if rings.len() >= 2 {
-            for r in 0..(rings.len() - 1) {
-                let ring_a = &rings[r];
-                let ring_b = &rings[r + 1];
+            let paint = compute_face_paint(side_base, n_back);
+            canvas.draw_path(&cap_path, &paint);
 
-                for i in 0..n_pts {
-                    let next_i = (i + 1) % n_pts;
-                    let p0 = ring_a[i];
-                    let p1 = ring_a[next_i];
-                    let p2 = ring_b[next_i];
-                    let p3 = ring_b[i];
-
-                    let e1 = p1.0 - p0.0;
-                    let e2 = p3.0 - p0.0;
-                    let normal = if !is_hole {
-                        e2.cross(&e1).normalize()
-                    } else {
-                        e1.cross(&e2).normalize()
-                    };
-
-                    // Back-face culling: skip faces pointing away from camera
-                    if normal.dot(&view_dir) <= 0.001 {
-                        continue;
-                    }
-
-                    let avg_z = (p0.0.z + p1.0.z + p2.0.z + p3.0.z) * 0.25;
-
-                    let mut quad_builder = skia::PathBuilder::new();
-                    quad_builder.move_to(p0.1);
-                    quad_builder.line_to(p1.1);
-                    quad_builder.line_to(p2.1);
-                    quad_builder.line_to(p3.1);
-                    quad_builder.close();
-
-                    faces.push(Face3D {
-                        polygon_2d: quad_builder.detach(),
-                        normal,
-                        avg_z,
-                        base_color: side_base,
-                        is_front_cap: false,
-                    });
-                }
-            }
-        }
-    }
-
-    faces.sort_by(|a, b| {
-        a.avg_z
-            .partial_cmp(&b.avg_z)
-            .unwrap_or(std::cmp::Ordering::Equal)
-    });
-
-    for face in faces {
-        let paint = compute_face_paint(face.base_color, face.normal);
-        canvas.draw_path(&face.polygon_2d, &paint);
-
-        // Seam-seal: eliminate subpixel AA background bleeding / wireframe lines between adjacent 3D faces
-        let mut seam_paint = paint.clone();
-        seam_paint.set_style(skia::PaintStyle::Stroke);
-        seam_paint.set_stroke_width(0.75);
-        seam_paint.set_anti_alias(true);
-        canvas.draw_path(&face.polygon_2d, &seam_paint);
-
-        if face.is_front_cap && stroke_color.is_some() && stroke_width > 0.05 {
-            if let Some(sc) = stroke_color {
-                let mut stroke_paint = skia::Paint::default();
-                stroke_paint.set_style(skia::PaintStyle::Stroke);
-                stroke_paint.set_stroke_width(stroke_width);
-                stroke_paint.set_anti_alias(true);
-                stroke_paint.set_color4f(sc.to_skia(), None);
-                canvas.draw_path(&face.polygon_2d, &stroke_paint);
-            }
+            let mut seam_paint = paint.clone();
+            seam_paint.set_style(skia::PaintStyle::Stroke);
+            seam_paint.set_stroke_width(0.75);
+            seam_paint.set_anti_alias(true);
+            canvas.draw_path(&cap_path, &seam_paint);
         }
     }
 
@@ -2328,5 +2374,47 @@ mod tests {
 
         let chamfered = apply_chamfer_rounding_to_path(&sharp_poly, 15.0, CornerStyle::Chamfer);
         assert!(chamfered.count_points() > sharp_poly.count_points());
+    }
+
+    #[test]
+    fn test_detailed_path_3d_extrusion_no_distortion() {
+        // Construct a complex starburst path with 120 points (simulating detailed traced artwork)
+        let mut builder = skia::PathBuilder::new();
+        let center = (100.0, 100.0);
+        let n_points = 120;
+        for i in 0..n_points {
+            let angle = (i as f32 / n_points as f32) * std::f32::consts::TAU;
+            let radius = if i % 2 == 0 { 60.0 } else { 40.0 + (i % 5) as f32 * 2.0 };
+            let pt = skia::Point::new(center.0 + angle.cos() * radius, center.1 + angle.sin() * radius);
+            if i == 0 {
+                builder.move_to(pt);
+            } else {
+                builder.line_to(pt);
+            }
+        }
+        builder.close();
+        let complex_path = builder.detach();
+
+        let ext = Extrude3DModifier::default();
+        assert_eq!(ext.corner_radius_2d, 0.0);
+        assert_eq!(ext.bevel_radius, 0.0);
+
+        // Bake faces
+        let baked = bake_extrude_3d_faces(&complex_path, &ext, crate::core::Color::BLACK);
+        assert!(!baked.is_empty());
+        // Verify front cap is present and placed on top (last element)
+        let last_face = baked.last().unwrap();
+        assert!(last_face.is_front_cap);
+
+        // Canvas rendering
+        let mut surface = skia::surfaces::raster_n32_premul((300, 300)).unwrap();
+        apply_extrude_3d_to_canvas(
+            &complex_path,
+            Some(crate::core::Color::BLACK),
+            Some(crate::core::Color::WHITE),
+            1.5,
+            &ext,
+            surface.canvas(),
+        );
     }
 }

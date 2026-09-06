@@ -46,7 +46,12 @@ pub fn get_tool_meta(
         "brush" => (crate::core::gettext("Brush"), Some("B")),
         "text" => (crate::core::gettext("Text"), Some("T")),
         "image" => (crate::core::gettext("Image Frame"), Some("Shift+I")),
-        "boolean-union" => (crate::core::gettext("Arrange & Order"), Some("Ctrl++")),
+        "boolean-union" => (crate::core::gettext("Union"), Some("Ctrl++")),
+        "boolean-difference" => (crate::core::gettext("Difference"), Some("Ctrl+-")),
+        "boolean-intersection" => (crate::core::gettext("Intersection"), Some("Ctrl+*")),
+        "boolean-exclusion" => (crate::core::gettext("Exclusion"), Some("Ctrl+^")),
+        "boolean-division" => (crate::core::gettext("Division"), Some("Ctrl+/")),
+        "boolean-cut" => (crate::core::gettext("Cut / Slice"), Some("Ctrl+Alt+/")),
         "paint_bucket" => (crate::core::gettext("Paint Bucket"), Some("K")),
         "eyedropper" => (crate::core::gettext("Eyedropper"), Some("I")),
         "measure" => (crate::core::gettext("Measure"), Some("M")),
@@ -176,10 +181,26 @@ pub fn generate_default_items(groups: &[ToolbarGroup]) -> Vec<ToolItem> {
             }
         }
 
+        let group_title = if is_grouped {
+            if primary.tool_id.starts_with("bool") {
+                crate::core::gettext("Boolean")
+            } else if primary.tool_id == "rectangle" {
+                crate::core::gettext("Shapes")
+            } else if primary.tool_id == "pen" {
+                crate::core::gettext("Pen / Brush")
+            } else if primary.tool_id == "gradient" {
+                crate::core::gettext("Fill Tools")
+            } else {
+                p_name.clone()
+            }
+        } else {
+            p_name.clone()
+        };
+
         items.push(ToolItem {
             id: primary.tool_id,
-            name: p_name.to_string(),
-            shortcut: p_sc.map(|s| s.to_string()),
+            name: group_title,
+            shortcut: if is_grouped { None } else { p_sc.map(|s| s.to_string()) },
             icon_resource: primary.icon_resource,
             icon_name: primary.icon_name,
             tooltip: primary.tooltip,
@@ -228,10 +249,40 @@ pub fn rebuild_toolbar_items(
 
         let is_grouped = !item.sub_tools.is_empty();
 
-        let icon_img = if let Some(res) = item.icon_resource {
+        let active_sub = if is_grouped {
+            item.sub_tools.iter().find(|s| s.id == active_tool)
+        } else {
+            None
+        };
+
+        let initial_tool_id = if let Some(sub) = active_sub {
+            sub.id
+        } else {
+            item.id
+        };
+
+        let initial_icon_res = if let Some(sub) = active_sub {
+            sub.icon_resource
+        } else {
+            item.icon_resource
+        };
+
+        let initial_icon_name = if let Some(sub) = active_sub {
+            sub.icon_name
+        } else {
+            item.icon_name
+        };
+
+        let initial_tooltip = if let Some(sub) = active_sub {
+            sub.tooltip
+        } else {
+            item.tooltip
+        };
+
+        let icon_img = if let Some(res) = initial_icon_res {
             crate::ui::icons::make_symbolic_image(res, 22)
         } else {
-            crate::ui::icons::make_symbolic_image(item.icon_name, 22)
+            crate::ui::icons::make_symbolic_image(initial_icon_name, 22)
         };
 
         let button_child: gtk4::Widget = if is_grouped {
@@ -275,14 +326,14 @@ pub fn rebuild_toolbar_items(
         };
 
         let is_active = if is_grouped {
-            item.sub_tools.iter().any(|s| s.id == active_tool)
+            active_sub.is_some()
         } else {
             item.id == active_tool
         };
 
         let btn = gtk4::ToggleButton::builder()
             .child(&button_child)
-            .tooltip_text(&crate::core::gettext(item.tooltip))
+            .tooltip_text(&crate::core::gettext(initial_tooltip))
             .active(is_active)
             .css_classes(["flat"])
             .focus_on_click(false)
@@ -296,7 +347,7 @@ pub fn rebuild_toolbar_items(
             first_toggle = Some(btn.clone());
         }
 
-        let current_tool_id = Rc::new(Cell::new(item.id));
+        let current_tool_id = Rc::new(Cell::new(initial_tool_id));
 
         if is_grouped {
             let popover = gtk4::Popover::builder()
@@ -334,6 +385,8 @@ pub fn rebuild_toolbar_items(
                 let sub_icon_res = sub.icon_resource;
                 let sub_icon_name = sub.icon_name;
                 let sub_tool_id = sub.id;
+                let sub_tooltip = sub.tooltip;
+                let main_btn_setter = btn.clone();
                 let setter = Box::new(move || {
                     let sym_name = if let Some(r) = sub_icon_res {
                         crate::ui::icons::symbolic_icon_name(r)
@@ -342,6 +395,7 @@ pub fn rebuild_toolbar_items(
                     };
                     main_icon_img.set_icon_name(Some(&sym_name));
                     cur_tool_sub.set(sub_tool_id);
+                    main_btn_setter.set_tooltip_text(Some(&crate::core::gettext(sub_tooltip)));
                 });
                 tool_icon_setters.borrow_mut().insert(sub.id, setter);
 
@@ -364,6 +418,7 @@ pub fn rebuild_toolbar_items(
                 let popover_close = popover.clone();
                 let is_updating_sub = is_updating.clone();
                 let cur_tool_sub_c = current_tool_id.clone();
+                let sub_tooltip_click = sub.tooltip;
 
                 sub_btn.connect_clicked(move |_| {
                     let sym_name = if let Some(r) = sub_icon_res {
@@ -373,6 +428,7 @@ pub fn rebuild_toolbar_items(
                     };
                     main_icon_img_c.set_icon_name(Some(&sym_name));
                     cur_tool_sub_c.set(sub_tool_id);
+                    main_btn.set_tooltip_text(Some(&crate::core::gettext(sub_tooltip_click)));
                     is_updating_sub.set(true);
                     main_btn.set_active(true);
                     canvas_sub.set_active_tool(sub_tool_id);
@@ -422,3 +478,24 @@ pub fn rebuild_toolbar_items(
         items_box.append(&btn);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_tool_meta_boolean_tools() {
+        let (union_name, union_sc) = get_tool_meta("boolean-union", "");
+        assert_eq!(union_name, crate::core::gettext("Union"));
+        assert_eq!(union_sc, Some("Ctrl++"));
+
+        let (diff_name, diff_sc) = get_tool_meta("boolean-difference", "");
+        assert_eq!(diff_name, crate::core::gettext("Difference"));
+        assert_eq!(diff_sc, Some("Ctrl+-"));
+
+        let (inter_name, inter_sc) = get_tool_meta("boolean-intersection", "");
+        assert_eq!(inter_name, crate::core::gettext("Intersection"));
+        assert_eq!(inter_sc, Some("Ctrl+*"));
+    }
+}
+

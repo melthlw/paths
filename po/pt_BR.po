@@ -3114,3 +3114,15 @@ msgstr "Alternar Fundo Claro / Escuro da Pré-visualização"
 msgid "Rotate"
 msgstr "Girar"
 
+msgid "No Image Selected"
+msgstr "Nenhuma Imagem Selecionada"
+
+msgid "Select a bitmap image to adjust colors or vectorize to paths."
+msgstr "Selecione uma imagem bitmap para ajustar cores ou vetorizar para caminhos."
+
+msgid "Create Image Frame"
+msgstr "Criar Quadro de Imagem"
+
+msgid "Import Image File..."
+msgstr "Importar Arquivo de Imagem..."
+

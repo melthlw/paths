@@ -521,6 +521,9 @@
     <file>icons/tool-gradient-symbolic.svg</file>
     <file alias="icons/hicolor/scalable/actions/tool-gradient-symbolic.svg">icons/tool-gradient-symbolic.svg</file>
     <file alias="icons/hicolor/symbolic/actions/tool-gradient-symbolic.svg">icons/tool-gradient-symbolic.svg</file>
+    <file>icons/tool-gradient-radial-symbolic.svg</file>
+    <file alias="icons/hicolor/scalable/actions/tool-gradient-radial-symbolic.svg">icons/tool-gradient-radial-symbolic.svg</file>
+    <file alias="icons/hicolor/symbolic/actions/tool-gradient-radial-symbolic.svg">icons/tool-gradient-radial-symbolic.svg</file>
     <file>icons/tool-measure-symbolic.svg</file>
     <file alias="icons/hicolor/scalable/actions/tool-measure-symbolic.svg">icons/tool-measure-symbolic.svg</file>
     <file alias="icons/hicolor/symbolic/actions/tool-measure-symbolic.svg">icons/tool-measure-symbolic.svg</file>
