@@ -1,0 +1,4450 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-06 01:56-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: src/application.rs:143 src/ui/window/menu.rs:242
+msgid ""
+"Modern vector design editor accelerated by Skia GPU, built with GTK4, "
+"Libadwaita and Rust."
+msgstr ""
+
+#: src/core/i18n.rs:599 src/core/i18n.rs:609 src/core/shortcuts.rs:836
+#: src/ui/welcome.rs:295 src/ui/welcome.rs:672 src/ui/window/menu.rs:73
+msgid "New Document"
+msgstr ""
+
+#: src/core/i18n.rs:600 src/core/i18n.rs:610 src/core/i18n.rs:651
+#: src/core/i18n.rs:652 src/core/i18n.rs:661 src/ui/window/file_ops.rs:293
+#: src/ui/window/menu.rs:99
+msgid "Save"
+msgid_plural "Save"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/core/i18n.rs:601 src/core/i18n.rs:611 src/core/shortcuts.rs:832
+#: src/ui/welcome.rs:271 src/ui/window/file_ops.rs:120
+msgid "Open Document"
+msgstr ""
+
+#: src/core/i18n.rs:602 src/ui/window/header.rs:135
+msgid "Grid (Ctrl+G)"
+msgstr ""
+
+#: src/core/i18n.rs:603 src/core/i18n.rs:612
+msgid "Path & Node Editor"
+msgstr ""
+
+#: src/core/i18n.rs:604 src/core/i18n.rs:613
+msgid "Corner Node"
+msgstr ""
+
+#: src/core/i18n.rs:605 src/core/i18n.rs:614
+#: src/ui/tool_options/pen_brush_text.rs:58
+msgid "Smooth Node"
+msgstr ""
+
+#: src/core/i18n.rs:606 src/core/i18n.rs:615
+#: src/ui/preferences/node_editor.rs:182
+msgid "Direct Curve Dragging"
+msgstr ""
+
+#: src/core/i18n.rs:659 src/ui/inspector/export.rs:20
+#: src/ui/inspector/image.rs:226
+msgid "File"
+msgstr ""
+
+#: src/core/i18n.rs:660
+msgid "Edit"
+msgstr ""
+
+#: src/core/i18n.rs:662 src/core/shortcuts.rs:841
+msgid "Undo"
+msgstr ""
+
+#: src/core/i18n.rs:663 src/ui/dialogs/trace_bitmap.rs:17
+#: src/ui/dialogs/trace_bitmap.rs:37
+msgid "Trace Bitmap"
+msgstr ""
+
+#: src/core/i18n.rs:664 src/ui/inspector/image.rs:722
+msgid "Advanced Preview..."
+msgstr ""
+
+#: src/core/shortcuts.rs:735
+msgid "Select and Transform"
+msgstr ""
+
+#: src/core/shortcuts.rs:739
+msgid "Path Node Editing"
+msgstr ""
+
+#: src/core/shortcuts.rs:743 src/ui/context_menu/canvas_menu.rs:149
+#: src/ui/toolbar/items.rs:40 src/ui/tool_options/mod.rs:1095
+msgid "Rectangle"
+msgstr ""
+
+#: src/core/shortcuts.rs:746 src/ui/context_menu/canvas_menu.rs:154
+msgid "Circle / Ellipse"
+msgstr ""
+
+#: src/core/shortcuts.rs:749 src/ui/context_menu/canvas_menu.rs:159
+#: src/ui/toolbar/items.rs:42 src/ui/tool_options/mod.rs:1103
+msgid "Star"
+msgstr ""
+
+#: src/core/shortcuts.rs:751
+msgid "Polygon / Triangle"
+msgstr ""
+
+#: src/core/shortcuts.rs:754 src/ui/context_menu/canvas_menu.rs:169
+#: src/ui/toolbar/items.rs:44 src/ui/tool_options/mod.rs:1111
+msgid "Spiral"
+msgstr ""
+
+#: src/core/shortcuts.rs:755
+msgid "Pen Tool"
+msgstr ""
+
+#: src/core/shortcuts.rs:757
+msgid "Brush Tool"
+msgstr ""
+
+#: src/core/shortcuts.rs:760
+msgid "Typography Text"
+msgstr ""
+
+#: src/core/shortcuts.rs:764
+msgid "Image Frame Tool"
+msgstr ""
+
+#: src/core/shortcuts.rs:768 src/ui/toolbar/items.rs:50
+#: src/ui/tool_options/mod.rs:1135
+msgid "Paint Bucket"
+msgstr ""
+
+#: src/core/shortcuts.rs:772 src/ui/color_picker.rs:1415
+#: src/ui/toolbar/items.rs:51 src/ui/tool_options/mod.rs:1151
+msgid "Eyedropper"
+msgstr ""
+
+#: src/core/shortcuts.rs:775
+msgid "Linear/Radial Gradient"
+msgstr ""
+
+#: src/core/shortcuts.rs:779 src/ui/color_picker.rs:292
+#: src/ui/color_picker.rs:1691 src/ui/color_picker.rs:2111
+#: src/ui/inspector/appearance/fills.rs:94 src/ui/toolbar/items.rs:56
+#: src/ui/tool_options/mod.rs:1143
+msgid "Mesh Gradient"
+msgstr ""
+
+#: src/core/shortcuts.rs:783
+msgid "Measurement Ruler"
+msgstr ""
+
+#: src/core/shortcuts.rs:787
+msgid "Zoom Tool"
+msgstr ""
+
+#: src/core/shortcuts.rs:790 src/ui/toolbar/items.rs:54
+msgid "Artboard / Page"
+msgstr ""
+
+#: src/core/shortcuts.rs:795
+msgid "Zoom 100% (1:1)"
+msgstr ""
+
+#: src/core/shortcuts.rs:799
+msgid "Zoom to Page"
+msgstr ""
+
+#: src/core/shortcuts.rs:802
+msgid "Zoom to Selection"
+msgstr ""
+
+#: src/core/shortcuts.rs:806
+msgid "Zoom to All Objects"
+msgstr ""
+
+#: src/core/shortcuts.rs:810
+msgid "Show/Hide Rulers"
+msgstr ""
+
+#: src/core/shortcuts.rs:814
+msgid "Show/Hide Guides"
+msgstr ""
+
+#: src/core/shortcuts.rs:818
+msgid "Show/Hide Grid"
+msgstr ""
+
+#: src/core/shortcuts.rs:822
+msgid "Toggle Magnetic Snapping"
+msgstr ""
+
+#: src/core/shortcuts.rs:827
+msgid "Save Document"
+msgstr ""
+
+#: src/core/shortcuts.rs:830 src/ui/window/file_ops.rs:33
+#: src/ui/window/file_ops.rs:312 src/ui/window/menu.rs:112
+msgid "Save As..."
+msgstr ""
+
+#: src/core/shortcuts.rs:839 src/ui/window/file_ops.rs:243
+#: src/ui/window/header.rs:246
+msgid "Quick Export"
+msgstr ""
+
+#: src/core/shortcuts.rs:842
+msgid "Redo"
+msgstr ""
+
+#: src/core/shortcuts.rs:843 src/ui/context_menu/selection_menu.rs:63
+msgid "Copy"
+msgstr ""
+
+#: src/core/shortcuts.rs:844 src/ui/context_menu/selection_menu.rs:68
+msgid "Cut"
+msgstr ""
+
+#: src/core/shortcuts.rs:845 src/ui/context_menu/canvas_menu.rs:53
+#: src/ui/context_menu/selection_menu.rs:73
+msgid "Paste"
+msgstr ""
+
+#: src/core/shortcuts.rs:847 src/ui/context_menu/selection_menu.rs:91
+msgid "Duplicate"
+msgstr ""
+
+#: src/core/shortcuts.rs:850
+msgid "Delete Selected"
+msgstr ""
+
+#: src/core/shortcuts.rs:854 src/ui/context_menu/canvas_menu.rs:66
+msgid "Select All"
+msgstr ""
+
+#: src/core/shortcuts.rs:856
+msgid "Deselect"
+msgstr ""
+
+#: src/core/shortcuts.rs:858
+msgid "Group Elements"
+msgstr ""
+
+#: src/core/shortcuts.rs:861 src/ui/context_menu/selection_menu.rs:213
+msgid "Ungroup"
+msgstr ""
+
+#: src/core/shortcuts.rs:863
+msgid "Convert to Vector Path"
+msgstr ""
+
+#: src/core/shortcuts.rs:867 src/ui/context_menu/selection_menu.rs:185
+#: src/ui/inspector/transform.rs:333 src/ui/tool_options/select.rs:68
+msgid "Bring Forward"
+msgstr ""
+
+#: src/core/shortcuts.rs:871 src/ui/context_menu/selection_menu.rs:180
+#: src/ui/inspector/transform.rs:321 src/ui/tool_options/select.rs:58
+msgid "Bring to Front"
+msgstr ""
+
+#: src/core/shortcuts.rs:875 src/ui/context_menu/selection_menu.rs:190
+#: src/ui/inspector/transform.rs:345 src/ui/tool_options/select.rs:78
+msgid "Send Backward"
+msgstr ""
+
+#: src/core/shortcuts.rs:879 src/ui/context_menu/selection_menu.rs:195
+#: src/ui/inspector/transform.rs:357 src/ui/tool_options/select.rs:88
+msgid "Send to Back"
+msgstr ""
+
+#: src/core/shortcuts.rs:882
+msgid "Lock / Unlock Selected"
+msgstr ""
+
+#: src/core/shortcuts.rs:886
+msgid "Hide / Show Selected"
+msgstr ""
+
+#: src/core/shortcuts.rs:890
+msgid "Create Linked Clone"
+msgstr ""
+
+#: src/core/shortcuts.rs:894 src/ui/context_menu/selection_menu.rs:101
+#: src/ui/inspector/clones.rs:391
+msgid "Unlink Clone"
+msgstr ""
+
+#: src/core/shortcuts.rs:898 src/ui/context_menu/selection_menu.rs:106
+msgid "Select Original"
+msgstr ""
+
+#: src/core/element/text.rs:815
+msgid "Currency & Symbols"
+msgstr ""
+
+#: src/core/element/text.rs:819
+msgid "Math & Logic"
+msgstr ""
+
+#: src/core/element/text.rs:823
+msgid "Arrows & Pointers"
+msgstr ""
+
+#: src/core/element/text.rs:827
+msgid "Punctuation & Quotes"
+msgstr ""
+
+#: src/core/element/text.rs:831
+msgid "Ligatures & Special"
+msgstr ""
+
+#: src/core/element/text.rs:835
+msgid "Shapes & Icons"
+msgstr ""
+
+#: src/core/element/brush.rs:65 src/ui/inspector/export.rs:112
+#: src/ui/tool_options/brush.rs:593
+msgid "None"
+msgstr ""
+
+#: src/core/element/brush.rs:66 src/ui/tool_options/brush.rs:594
+msgid "Arrow"
+msgstr ""
+
+#: src/core/element/brush.rs:67 src/ui/tool_options/brush.rs:595
+msgid "Stealth Arrow"
+msgstr ""
+
+#: src/core/element/brush.rs:68 src/ui/tool_options/brush.rs:596
+msgid "Circle Cap"
+msgstr ""
+
+#: src/core/element/brush.rs:69 src/ui/tool_options/brush.rs:597
+msgid "Diamond"
+msgstr ""
+
+#: src/core/element/brush.rs:70 src/ui/tool_options/brush.rs:598
+msgid "Square Block"
+msgstr ""
+
+#: src/core/element/brush.rs:71 src/ui/tool_options/brush.rs:599
+msgid "Triangle Point"
+msgstr ""
+
+#: src/core/element/brush.rs:72 src/ui/tool_options/brush.rs:600
+msgid "Star Motif"
+msgstr ""
+
+#: src/core/element/brush.rs:73
+msgid "Custom Path"
+msgstr ""
+
+#: src/core/element/brush.rs:101 src/ui/tool_options/brush.rs:118
+msgid "Solid Round"
+msgstr ""
+
+#: src/core/element/brush.rs:102 src/ui/tool_options/brush.rs:119
+msgid "Pencil Graphite"
+msgstr ""
+
+#: src/core/element/brush.rs:103 src/ui/tool_options/brush.rs:120
+msgid "Calligraphy Ribbon"
+msgstr ""
+
+#: src/core/element/brush.rs:104 src/ui/tool_options/brush.rs:121
+msgid "Ink Pen"
+msgstr ""
+
+#: src/core/element/brush.rs:105 src/ui/tool_options/brush.rs:122
+msgid "Highlighter Marker"
+msgstr ""
+
+#: src/core/element/brush.rs:106 src/ui/tool_options/brush.rs:123
+msgid "Airbrush Soft"
+msgstr ""
+
+#: src/core/element/brush.rs:107 src/ui/tool_options/brush.rs:124
+msgid "Charcoal Sketch"
+msgstr ""
+
+#: src/core/element/brush.rs:108 src/ui/tool_options/brush.rs:125
+msgid "Watercolor Wash"
+msgstr ""
+
+#: src/core/element/brush.rs:109 src/ui/tool_options/brush.rs:126
+msgid "Neon Glow Ribbon"
+msgstr ""
+
+#: src/core/element/brush.rs:110 src/ui/tool_options/brush.rs:127
+msgid "Grainy Chalk"
+msgstr ""
+
+#: src/core/element/brush.rs:111 src/ui/tool_options/brush.rs:128
+msgid "Spray Splatter"
+msgstr ""
+
+#: src/core/element/brush.rs:112 src/ui/tool_options/brush.rs:129
+msgid "Star Trail"
+msgstr ""
+
+#: src/core/element/brush.rs:113 src/ui/tool_options/brush.rs:130
+msgid "Pearl Bead Chain"
+msgstr ""
+
+#: src/core/element/brush.rs:114 src/ui/tool_options/brush.rs:131
+msgid "Vector Arrow Trail"
+msgstr ""
+
+#: src/core/element/brush.rs:120
+msgid "Smooth uniform solid vector stroke"
+msgstr ""
+
+#: src/core/element/brush.rs:121
+msgid "Fine textured graphite pencil line"
+msgstr ""
+
+#: src/core/element/brush.rs:122
+msgid "45° chisel nib calligraphy ribbon"
+msgstr ""
+
+#: src/core/element/brush.rs:123
+msgid "Tapered fluid inking pen"
+msgstr ""
+
+#: src/core/element/brush.rs:125
+msgid "Semi-transparent multiplicative highlighter"
+msgstr ""
+
+#: src/core/element/brush.rs:127
+msgid "Soft radial blur spray wash"
+msgstr ""
+
+#: src/core/element/brush.rs:128
+msgid "Rough grainy sketching charcoal"
+msgstr ""
+
+#: src/core/element/brush.rs:129
+msgid "Soft blended wet paint wash"
+msgstr ""
+
+#: src/core/element/brush.rs:130
+msgid "Vibrant glowing light ribbon"
+msgstr ""
+
+#: src/core/element/brush.rs:131
+msgid "Textured pastel chalk line"
+msgstr ""
+
+#: src/core/element/brush.rs:132
+msgid "Multi-particle spray splatter"
+msgstr ""
+
+#: src/core/element/brush.rs:133
+msgid "Repeated star motif contour"
+msgstr ""
+
+#: src/core/element/brush.rs:134
+msgid "Connected pearl bead chain"
+msgstr ""
+
+#: src/core/element/brush.rs:135
+msgid "Sequential vector arrow trail"
+msgstr ""
+
+#: src/core/element/style.rs:142 src/ui/inspector/appearance/fills.rs:385
+#: src/ui/tool_options/mod.rs:922 src/ui/tool_options/pattern.rs:139
+msgid "Technical Grid"
+msgstr ""
+
+#: src/core/element/style.rs:143 src/ui/tool_options/mod.rs:923
+#: src/ui/tool_options/pattern.rs:140
+msgid "Halftone Dots"
+msgstr ""
+
+#: src/core/element/style.rs:144 src/ui/tool_options/mod.rs:924
+#: src/ui/tool_options/pattern.rs:141
+msgid "Diagonal Stripes"
+msgstr ""
+
+#: src/core/element/style.rs:145 src/ui/color_picker.rs:1016
+#: src/ui/inspector/appearance/fills.rs:382 src/ui/tool_options/mod.rs:925
+#: src/ui/tool_options/pattern.rs:70 src/ui/tool_options/pattern.rs:142
+msgid "Checkerboard"
+msgstr ""
+
+#: src/core/element/style.rs:146 src/ui/color_picker.rs:1020
+#: src/ui/inspector/appearance/fills.rs:386 src/ui/tool_options/mod.rs:926
+#: src/ui/tool_options/pattern.rs:143
+msgid "Honeycomb"
+msgstr ""
+
+#: src/core/element/style.rs:147 src/ui/color_picker.rs:1021
+#: src/ui/inspector/appearance/fills.rs:387 src/ui/tool_options/mod.rs:927
+#: src/ui/tool_options/pattern.rs:144
+msgid "Crosshatch"
+msgstr ""
+
+#: src/core/element/style.rs:148 src/ui/color_picker.rs:1022
+#: src/ui/inspector/appearance/fills.rs:388 src/ui/tool_options/mod.rs:928
+#: src/ui/tool_options/pattern.rs:145
+msgid "Brick Wall"
+msgstr ""
+
+#: src/core/element/style.rs:149 src/ui/inspector/appearance/fills.rs:389
+#: src/ui/tool_options/mod.rs:929 src/ui/tool_options/pattern.rs:146
+msgid "Seigaiha Scales"
+msgstr ""
+
+#: src/core/element/style.rs:150 src/ui/color_picker.rs:1024
+#: src/ui/inspector/appearance/fills.rs:390 src/ui/tool_options/mod.rs:930
+#: src/ui/tool_options/pattern.rs:147
+msgid "Houndstooth"
+msgstr ""
+
+#: src/core/element/style.rs:151 src/ui/color_picker.rs:1025
+#: src/ui/inspector/appearance/fills.rs:391 src/ui/tool_options/mod.rs:931
+#: src/ui/tool_options/pattern.rs:148
+msgid "Basketweave"
+msgstr ""
+
+#: src/core/element/style.rs:152 src/ui/tool_options/mod.rs:937
+msgid "Custom Pattern"
+msgstr ""
+
+#: src/core/io.rs:59 src/core/io.rs:92
+#: src/ui/tool_options/pen_brush_text.rs:779
+msgid "Page 1"
+msgstr ""
+
+#: src/ui/color_bar.rs:111
+msgid "Fill (Click to choose, drag onto object)"
+msgstr ""
+
+#: src/ui/color_bar.rs:233
+msgid "Stroke (Click to choose, drag onto object)"
+msgstr ""
+
+#: src/ui/color_picker.rs:230 src/ui/inspector/appearance/fills.rs:49
+#: src/ui/inspector/appearance/fills.rs:79
+#: src/ui/inspector/appearance/strokes.rs:235
+msgid "Solid"
+msgstr ""
+
+#: src/ui/color_picker.rs:232 src/ui/color_picker.rs:291
+#: src/ui/color_picker.rs:1663 src/ui/color_picker.rs:2108
+#: src/ui/toolbar/items.rs:55 src/ui/tool_options/mod.rs:1139
+msgid "Gradient"
+msgstr ""
+
+#: src/ui/color_picker.rs:235 src/ui/inspector/appearance/fills.rs:52
+msgid "Mesh"
+msgstr ""
+
+#: src/ui/color_picker.rs:236 src/ui/color_picker.rs:1102
+#: src/ui/inspector/appearance/fills.rs:53
+msgid "Pattern"
+msgstr ""
+
+#: src/ui/color_picker.rs:288
+msgid "Stroke Color"
+msgstr ""
+
+#: src/ui/color_picker.rs:290 src/ui/color_picker.rs:294
+#: src/ui/color_picker.rs:296 src/ui/color_picker.rs:1647
+#: src/ui/color_picker.rs:2105
+msgid "Flat Color"
+msgstr ""
+
+#: src/ui/color_picker.rs:293 src/ui/color_picker.rs:1702
+#: src/ui/color_picker.rs:2114 src/ui/inspector/libraries.rs:241
+#: src/ui/tool_options/pattern.rs:115
+msgid "Patterns"
+msgstr ""
+
+#: src/ui/color_picker.rs:396 src/ui/inspector/modifiers.rs:889
+#: src/ui/inspector/appearance/fills.rs:50
+msgid "Linear"
+msgstr ""
+
+#: src/ui/color_picker.rs:402 src/ui/inspector/modifiers.rs:890
+#: src/ui/inspector/appearance/fills.rs:51
+msgid "Radial"
+msgstr ""
+
+#: src/ui/color_picker.rs:567
+msgid "Invert Gradient"
+msgstr ""
+
+#: src/ui/color_picker.rs:573
+msgid "Add Color Stop"
+msgstr ""
+
+#: src/ui/color_picker.rs:579
+msgid "Delete Selected Stop"
+msgstr ""
+
+#: src/ui/color_picker.rs:862 src/ui/inspector/appearance/fills.rs:284
+#: src/ui/inspector/appearance/fills.rs:548
+msgid "Angle"
+msgstr ""
+
+#: src/ui/color_picker.rs:1017 src/ui/inspector/appearance/fills.rs:383
+msgid "Dots"
+msgstr ""
+
+#: src/ui/color_picker.rs:1018 src/ui/inspector/appearance/fills.rs:384
+msgid "Stripes"
+msgstr ""
+
+#: src/ui/color_picker.rs:1019 src/ui/inspector/alignment.rs:301
+#: src/ui/inspector/modifiers.rs:891
+msgid "Grid"
+msgstr ""
+
+#: src/ui/color_picker.rs:1023
+msgid "Scales"
+msgstr ""
+
+#: src/ui/color_picker.rs:1115
+msgid "Background"
+msgstr ""
+
+#: src/ui/color_picker.rs:1121
+msgid "Swap Colors"
+msgstr ""
+
+#: src/ui/color_picker.rs:1190 src/ui/inspector/export.rs:248
+msgid "Scale"
+msgstr ""
+
+#: src/ui/palette_bar.rs:246
+msgid "Palette Options"
+msgstr ""
+
+#: src/ui/palette_bar.rs:269
+msgid "Color Presets"
+msgstr ""
+
+#: src/ui/palette_bar.rs:276
+msgid "GNOME Adwaita"
+msgstr ""
+
+#: src/ui/palette_bar.rs:277 src/ui/inspector/libraries.rs:533
+msgid "Document Colors"
+msgstr ""
+
+#: src/ui/palette_bar.rs:278
+msgid "Custom Palette"
+msgstr ""
+
+#: src/ui/palette_bar.rs:279
+msgid "Pastel Soft"
+msgstr ""
+
+#: src/ui/palette_bar.rs:280
+msgid "Vibrant Neon"
+msgstr ""
+
+#: src/ui/palette_bar.rs:281 src/ui/dialogs/trace_bitmap.rs:139
+#: src/ui/inspector/image.rs:527
+msgid "Monochrome"
+msgstr ""
+
+#: src/ui/palette_bar.rs:282
+msgid "Material 500"
+msgstr ""
+
+#: src/ui/palette_bar.rs:310
+msgid "Target Mode"
+msgstr ""
+
+#: src/ui/palette_bar.rs:323 src/ui/inspector/mod.rs:214
+msgid "Fill"
+msgstr ""
+
+#: src/ui/palette_bar.rs:328 src/ui/inspector/mod.rs:291
+msgid "Stroke"
+msgstr ""
+
+#: src/ui/palette_bar.rs:367
+msgid "Color Picker..."
+msgstr ""
+
+#: src/ui/palette_bar.rs:409
+msgid "Add Active Color"
+msgstr ""
+
+#: src/ui/palette_bar.rs:447
+msgid "Reset / Clear Palette"
+msgstr ""
+
+#: src/ui/palette_bar.rs:480
+msgid "Position"
+msgstr ""
+
+#: src/ui/palette_bar.rs:494 src/ui/toolbar/mod.rs:127
+msgid "Left"
+msgstr ""
+
+#: src/ui/palette_bar.rs:499 src/ui/toolbar/mod.rs:132
+msgid "Right"
+msgstr ""
+
+#: src/ui/palette_bar.rs:504 src/ui/toolbar/mod.rs:117
+#: src/ui/tool_options/mod.rs:316
+msgid "Bottom"
+msgstr ""
+
+#: src/ui/palette_bar.rs:509 src/ui/toolbar/mod.rs:122
+msgid "Top"
+msgstr ""
+
+#: src/ui/palette_bar.rs:770
+msgid "Transparent / None"
+msgstr ""
+
+#: src/ui/palette_bar.rs:822
+msgid "Copy Hex"
+msgstr ""
+
+#: src/ui/palette_bar.rs:843
+msgid "Delete Color"
+msgstr ""
+
+#: src/ui/palette_bar.rs:889
+msgid "Add Color to Palette (+)"
+msgstr ""
+
+#: src/ui/palette_bar.rs:921
+msgid "Add to Palette"
+msgstr ""
+
+#: src/ui/layers.rs:51
+msgid "Layers"
+msgstr ""
+
+#: src/ui/layers.rs:66
+msgid "Group Selected (Ctrl+G)"
+msgstr ""
+
+#: src/ui/layers.rs:75
+msgid "Ungroup (Shift+Ctrl+G)"
+msgstr ""
+
+#: src/ui/layers.rs:84
+msgid "Move Layer Up"
+msgstr ""
+
+#: src/ui/layers.rs:92
+msgid "Move Layer Down"
+msgstr ""
+
+#: src/ui/layers.rs:100
+msgid "Delete Layer"
+msgstr ""
+
+#: src/ui/layers.rs:195
+msgid "No layers"
+msgstr ""
+
+#: src/ui/layers.rs:201
+msgid ""
+"Draw shapes or text on canvas\n"
+"to create layers."
+msgstr ""
+
+#: src/ui/layers.rs:607
+msgid "Unlock"
+msgstr ""
+
+#: src/ui/layers.rs:609
+msgid "Lock"
+msgstr ""
+
+#: src/ui/layers.rs:637
+msgid "Hide"
+msgstr ""
+
+#: src/ui/layers.rs:639
+msgid "Show"
+msgstr ""
+
+#: src/ui/welcome.rs:186
+msgid "Welcome to Paths"
+msgstr ""
+
+#: src/ui/welcome.rs:260
+msgid "Open ▾"
+msgstr ""
+
+#: src/ui/welcome.rs:275
+msgid "Supported Formats (*.svg)"
+msgstr ""
+
+#: src/ui/welcome.rs:324
+msgid "Time to draw"
+msgstr ""
+
+#: src/ui/welcome.rs:326 src/ui/welcome.rs:870
+msgid "Quick Start"
+msgstr ""
+
+#: src/ui/welcome.rs:343 src/ui/welcome.rs:941
+msgid "Quick Setup"
+msgstr ""
+
+#: src/ui/welcome.rs:345
+msgid "About and Get Involved"
+msgstr ""
+
+#: src/ui/welcome.rs:355
+msgid "Navigation"
+msgstr ""
+
+#: src/ui/welcome.rs:368
+msgid "Search all designs, files, and presets..."
+msgstr ""
+
+#: src/ui/welcome.rs:510
+msgid "Create vector illustrations, social posts, stories and wallpapers"
+msgstr ""
+
+#: src/ui/welcome.rs:541
+msgid "Recent Files"
+msgstr ""
+
+#: src/ui/welcome.rs:567
+msgid "Favorite quick start"
+msgstr ""
+
+#: src/ui/welcome.rs:814
+msgid "Toggle Favorite"
+msgstr ""
+
+#: src/ui/welcome.rs:878
+msgid "Social Post"
+msgstr ""
+
+#: src/ui/welcome.rs:879
+msgid "Standard dimensions for social media feeds &amp; graphics"
+msgstr ""
+
+#: src/ui/welcome.rs:888
+msgid "Wallpaper"
+msgstr ""
+
+#: src/ui/welcome.rs:889
+msgid "High-resolution desktop and mobile display wallpapers"
+msgstr ""
+
+#: src/ui/welcome.rs:898
+msgid "Stories"
+msgstr ""
+
+#: src/ui/welcome.rs:899
+msgid "9:16 Vertical Portrait layouts for Instagram, TikTok &amp; Snapchat"
+msgstr ""
+
+#: src/ui/welcome.rs:945
+msgid "Workspace Preferences"
+msgstr ""
+
+#: src/ui/welcome.rs:946
+msgid "Configure theme, units, grid, and shortcut presets"
+msgstr ""
+
+#: src/ui/welcome.rs:951
+msgid "System"
+msgstr ""
+
+#: src/ui/welcome.rs:952 src/ui/preferences/appearance.rs:83
+msgid "Light"
+msgstr ""
+
+#: src/ui/welcome.rs:953 src/ui/preferences/appearance.rs:90
+msgid "Dark"
+msgstr ""
+
+#: src/ui/welcome.rs:978 src/ui/preferences/appearance.rs:17
+msgid "Color Scheme"
+msgstr ""
+
+#: src/ui/welcome.rs:979
+msgid "Choose system, light, or dark mode"
+msgstr ""
+
+#: src/ui/welcome.rs:1012
+msgid "Canvas Unit"
+msgstr ""
+
+#: src/ui/welcome.rs:1013
+msgid "Default measurement unit for canvas and rulers"
+msgstr ""
+
+#: src/ui/welcome.rs:1034 src/ui/context_menu/canvas_menu.rs:226
+#: src/ui/preferences/canvas.rs:152
+msgid "Show Grid"
+msgstr ""
+
+#: src/ui/welcome.rs:1035
+msgid "Toggle grid overlay on the canvas"
+msgstr ""
+
+#: src/ui/welcome.rs:1072
+msgid "Shortcut Preset"
+msgstr ""
+
+#: src/ui/welcome.rs:1073
+msgid "Choose keybinding layout preset"
+msgstr ""
+
+#: src/ui/welcome.rs:1088
+msgid "About and get Involved"
+msgstr ""
+
+#: src/ui/welcome.rs:1092 src/ui/window/menu.rs:165
+msgid "About Paths"
+msgstr ""
+
+#: src/ui/welcome.rs:1093
+msgid "Paths v0.3.1 - Modern vector design editor accelerated by Skia GPU"
+msgstr ""
+
+#: src/ui/welcome.rs:1098
+msgid "Built with GTK4, Libadwaita, Skia GPU Acceleration &amp; Rust"
+msgstr ""
+
+#: src/ui/welcome.rs:1108
+msgid "Community &amp; Source"
+msgstr ""
+
+#: src/ui/welcome.rs:1109
+msgid "Get involved, report bugs, or contribute code"
+msgstr ""
+
+#: src/ui/welcome.rs:1113
+msgid "GitLab Repository"
+msgstr ""
+
+#: src/ui/welcome.rs:1129
+msgid "Report an Issue"
+msgstr ""
+
+#: src/ui/context_menu/mod.rs:346 src/ui/context_menu/selection_menu.rs:218
+msgid "Enter Group"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:48
+msgid "Paste Here"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:58
+msgid "Paste in Place"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:74 src/ui/context_menu/canvas_menu.rs:136
+msgid "Insert Object"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:79 src/ui/context_menu/canvas_menu.rs:213
+msgid "Guides & Grid"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:87
+msgid "Fit to Window"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:92
+msgid "Actual Size (100%)"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:97
+msgid "Zoom In"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:102
+msgid "Zoom Out"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:110
+msgid "Add New Page"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:164
+msgid "Triangle / Polygon"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:174 src/ui/toolbar/items.rs:47
+#: src/ui/tool_options/mod.rs:1127
+msgid "Text"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:179
+msgid "Bézier Pen"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:231
+msgid "Snap to Grid"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:241
+msgid "Show Guides"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:246
+msgid "Snap to Guides"
+msgstr ""
+
+#: src/ui/context_menu/canvas_menu.rs:256
+msgid "Clear All Guides"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:78
+msgid "Copy Style"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:83
+msgid "Paste Style"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:96
+msgid "Clone"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:111
+msgid "Select Linked Clones"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:116
+msgid "Delete"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:124 src/ui/inspector/transform.rs:372
+msgid "Convert to Path"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:129
+msgid "Trace Bitmap..."
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:134
+#: src/ui/context_menu/selection_menu.rs:420
+msgid "Replace Image..."
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:139 src/ui/inspector/image.rs:287
+msgid "Restore original aspect ratio"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:144 src/ui/tool_options/select.rs:41
+msgid "Rotate 90° CW"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:149 src/ui/tool_options/select.rs:30
+msgid "Rotate 90° CCW"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:154 src/ui/inspector/image.rs:343
+msgid "Flip horizontally"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:159 src/ui/inspector/image.rs:356
+msgid "Flip vertically"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:165
+msgid "Rasterize to Bitmap"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:170
+msgid "Attach Text to Path"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:175 src/ui/inspector/typography.rs:705
+msgid "Detach Text from Path"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:203
+msgid "Group"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:208
+msgid "Create Clipping Mask"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:226
+#: src/ui/context_menu/selection_menu.rs:265
+msgid "Select Same"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:234
+msgid "Hide Selection"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:239
+msgid "Lock Selection"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:278
+msgid "Same Fill Color"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:283
+msgid "Same Stroke Color"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:288
+msgid "Same Object Type"
+msgstr ""
+
+#: src/ui/context_menu/selection_menu.rs:424
+msgid "Images"
+msgstr ""
+
+#: src/ui/dialogs/glyph_map.rs:30 src/ui/inspector/typography.rs:47
+msgid "Glyph & Symbol Catalog"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:38 src/ui/inspector/image.rs:661
+msgid "Vectorize raster image into editable paths"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:45 src/ui/preferences/shortcuts.rs:459
+#: src/ui/window/file_ops.rs:291
+msgid "Cancel"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:54 src/ui/inspector/image.rs:210
+msgid "Vectorize"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:108
+msgid "Generating preview..."
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:135
+msgid "Tracing Mode"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:140 src/ui/inspector/image.rs:528
+#: src/ui/inspector/libraries.rs:235
+msgid "Colors"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:141 src/ui/inspector/image.rs:529
+msgid "Outlines"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:145 src/ui/inspector/image.rs:533
+#: src/ui/inspector/modifiers.rs:885
+msgid "Mode"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:146 src/ui/inspector/image.rs:534
+msgid "Vectorization algorithm"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:154
+msgid "Parameters"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:178 src/ui/inspector/image.rs:543
+msgid "Threshold"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:179
+msgid "Luminance cutoff level"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:205 src/ui/inspector/image.rs:555
+msgid "Color Layers"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:206
+msgid "Number of quantized colors"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:233
+msgid "Simplification"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:234
+msgid "Polygon node reduction (RDP)"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:260
+msgid "Curve Smoothness"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:261
+msgid "Bézier handle curve tension"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:287
+msgid "Noise Filter"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:288
+msgid "Minimum speck area to ignore"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:297
+msgid "Options"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:302
+msgid "Invert"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:303
+msgid "Invert foreground/background selection"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:310
+msgid "Keep Original"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:311
+msgid "Place vector paths on top of the image"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:385 src/ui/window/header.rs:195
+#: src/ui/window/header.rs:211
+msgid "Paths"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:387
+msgid "Nodes"
+msgstr ""
+
+#: src/ui/dialogs/trace_bitmap.rs:395
+msgid "Notice"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:103 src/ui/window/header.rs:327
+msgid "Panels"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:112 src/ui/inspector/dock.rs:603
+msgid "Add Panel"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:157
+msgid "Drop to Dock at Top"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:174
+msgid "Drop to Create New Section Below"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:225 src/ui/inspector/mod.rs:301
+msgid "Eyedropper (I)"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:266
+msgid "Add Fill"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:342
+msgid "Add Stroke"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:371
+msgid "Blend Mode"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:376 src/ui/inspector/image.rs:398
+msgid "Normal"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:377
+msgid "Multiply"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:378
+msgid "Screen"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:379
+msgid "Overlay"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:380
+msgid "Darken"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:381
+msgid "Lighten"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:382
+msgid "Color Dodge"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:383
+msgid "Color Burn"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:384
+msgid "Hard Light"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:385
+msgid "Soft Light"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:386
+msgid "Difference"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:387
+msgid "Exclusion"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:388
+msgid "Hue"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:389 src/ui/inspector/image.rs:438
+msgid "Saturation"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:390
+msgid "Color"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:391
+msgid "Luminosity"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:413 src/ui/inspector/image.rs:460
+msgid "Blur"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:417 src/ui/inspector/appearance/fills.rs:633
+#: src/ui/tool_options/image.rs:127
+msgid "Opacity"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:665 src/ui/preferences/mod.rs:86
+msgid "Appearance"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:670 src/ui/inspector/modifiers.rs:50
+msgid "Modifiers"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:675 src/ui/inspector/alignment.rs:185
+msgid "Alignment"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:680 src/ui/inspector/image.rs:302
+msgid "Transform"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:685 src/ui/inspector/libraries.rs:265
+msgid "Typography"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:690
+msgid "Clones"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:695 src/ui/inspector/export.rs:322
+msgid "Export"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:700
+msgid "Libraries"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:705
+msgid "Bitmap Image"
+msgstr ""
+
+#: src/ui/inspector/mod.rs:793
+msgid "Properties"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:58
+msgid "Arrange"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:69
+msgid "Last Selected"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:70
+msgid "First Selected"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:71
+msgid "Biggest Object"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:72
+msgid "Smallest Object"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:73
+msgid "Artboard"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:105
+msgid "Align left"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:110
+msgid "Center horizontally"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:115
+msgid "Align right"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:120
+msgid "Align top"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:125
+msgid "Center vertically"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:130
+msgid "Align bottom"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:158
+msgid "Distribute horizontally"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:163
+msgid "Distribute vertically"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:212
+msgid "Align in Grid"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:228
+msgid "Rows:"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:240
+msgid "Columns:"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:252
+msgid "X Spacing (px):"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:264
+msgid "Y Spacing (px):"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:277
+msgid "Arrange in Grid"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:327
+msgid "Align in Circle"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:342
+msgid "Radius (px):"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:351
+msgid "Start Angle:"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:367
+msgid "Arrange in Circle"
+msgstr ""
+
+#: src/ui/inspector/alignment.rs:387
+msgid "Circular"
+msgstr ""
+
+#: src/ui/inspector/catalog.rs:33
+msgid "Search panels..."
+msgstr ""
+
+#: src/ui/inspector/catalog.rs:45
+msgid "Core Panels"
+msgstr ""
+
+#: src/ui/inspector/catalog.rs:123
+msgid "Plugins & Tools"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:127
+msgid "Master Object"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:130 src/ui/inspector/clones.rs:475
+msgid "linked instance"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:132 src/ui/inspector/clones.rs:477
+msgid "linked instances"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:144
+msgid "MASTER"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:163
+msgid "New Clone"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:166
+msgid "Create a single linked clone (Alt+D)"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:177
+msgid "Select Clones"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:180
+msgid "Select all instances linked to this master"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:191 src/ui/inspector/clones.rs:1028
+msgid "Unlink All"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:194
+msgid "Convert all instances to independent shapes"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:213
+msgid "Linked Instances"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:215
+msgid "Clones share master path & styling with independent spatial transform"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:245
+msgid "Focus & Select on Canvas"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:259
+msgid "Unlink instance into independent object"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:346
+msgid "Instance of"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:358
+msgid "INSTANCE"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:377
+msgid "Go to Master"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:380
+msgid "Select and edit the master element"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:394
+msgid "Convert this clone into an independent vector shape"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:412
+msgid "Spatial Transformations"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:414
+msgid "Independent position, scale, and rotation applied to this instance"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:419
+msgid "Local Offset"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:425
+msgid "Instance Scale"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:431
+msgid "Instance Rotation"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:451
+msgid "Document Clones Overview"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:453
+msgid "Overview of all master objects and linked instances in the project"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:486
+msgid "Select Master on Canvas"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:587 src/ui/inspector/clones.rs:988
+msgid "Create Tiled Clones"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:594
+msgid "Generate symmetrical tile matrices & radial arrays"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:596
+msgid "Select any object on canvas to generate tiled clones"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:610
+msgid "Reset Tiling Settings to Default"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:627
+msgid "Symmetry"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:697
+msgid "Rows"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:709
+msgid "Cols"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:724 src/ui/inspector/clones.rs:741
+#: src/ui/inspector/clones.rs:752
+msgid "tiles"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:764
+msgid "Shift &amp; Spacing"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:765
+msgid "Offset percentage per row / column"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:770
+msgid "Shift X (% width)"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:786
+msgid "Shift Y (% height)"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:802
+msgid "Random Jitter (%)"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:823
+msgid "Scale &amp; Progression"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:824
+msgid "Scale growth or reduction per step"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:829
+msgid "Scale X Delta (% / col)"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:845
+msgid "Scale Y Delta (% / row)"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:861
+msgid "Random Scale (%)"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:880
+msgid "Rotation &amp; Angle"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:881
+msgid "Angle increments per row / column"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:886
+msgid "Angle / Col (°)"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:902
+msgid "Angle / Row (°)"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:918
+msgid "Random Angle (°)"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:937
+msgid "Opacity &amp; Radial"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:938
+msgid "Fade gradients and ring distribution"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:943
+msgid "Fade / Step (%)"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:959
+msgid "Radial Radius (px)"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:960
+msgid "0 px = auto-calculate based on shape size"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:992
+msgid "Generate tiled clone matrix on canvas"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:1011
+msgid "Clear Clones"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:1015
+msgid "Remove all clone instances for this master"
+msgstr ""
+
+#: src/ui/inspector/clones.rs:1032
+msgid "Convert clones to independent vector paths"
+msgstr ""
+
+#: src/ui/inspector/dock.rs:92
+msgid "Tabs in Floating Windows"
+msgstr ""
+
+#: src/ui/inspector/dock.rs:94
+msgid "No Panels Open"
+msgstr ""
+
+#: src/ui/inspector/dock.rs:102
+msgid ""
+"Drag a floating tab here\n"
+"to dock it back."
+msgstr ""
+
+#: src/ui/inspector/dock.rs:105
+msgid ""
+"Click '+' in the title above to open panels like\n"
+"Appearance, Alignment, Transform or Export."
+msgstr ""
+
+#: src/ui/inspector/dock.rs:249 src/ui/inspector/dock.rs:424
+#: src/ui/inspector/floating.rs:47 src/ui/inspector/floating.rs:203
+msgid "Close Panel"
+msgstr ""
+
+#: src/ui/inspector/dock.rs:438
+msgid "Detach into Floating Window"
+msgstr ""
+
+#: src/ui/inspector/dock.rs:453
+msgid "Move to New Section Below"
+msgstr ""
+
+#: src/ui/inspector/dock.rs:484
+msgid "Move to Section Above"
+msgstr ""
+
+#: src/ui/inspector/dock.rs:509
+msgid "Move Tab Left"
+msgstr ""
+
+#: src/ui/inspector/dock.rs:531
+msgid "Move Tab Right"
+msgstr ""
+
+#: src/ui/inspector/dock.rs:555
+msgid "Close Other Panels"
+msgstr ""
+
+#: src/ui/inspector/export.rs:24
+msgid "Base Name"
+msgstr ""
+
+#: src/ui/inspector/export.rs:45
+msgid "Format"
+msgstr ""
+
+#: src/ui/inspector/export.rs:54
+msgid "Scope"
+msgstr ""
+
+#: src/ui/inspector/export.rs:58
+msgid "Current Page"
+msgstr ""
+
+#: src/ui/inspector/export.rs:59
+msgid "All Pages"
+msgstr ""
+
+#: src/ui/inspector/export.rs:60
+msgid "Selected Pages"
+msgstr ""
+
+#: src/ui/inspector/export.rs:61
+msgid "Complete Document"
+msgstr ""
+
+#: src/ui/inspector/export.rs:62
+msgid "Selection Only"
+msgstr ""
+
+#: src/ui/inspector/export.rs:71
+msgid "Area to Export"
+msgstr ""
+
+#: src/ui/inspector/export.rs:77
+msgid "Export Separate Files"
+msgstr ""
+
+#: src/ui/inspector/export.rs:78
+msgid "Create a file for each page"
+msgstr ""
+
+#: src/ui/inspector/export.rs:91
+msgid "Pages to Export"
+msgstr ""
+
+#: src/ui/inspector/export.rs:93
+msgid "Select which pages to include in final file"
+msgstr ""
+
+#: src/ui/inspector/export.rs:105
+msgid "All"
+msgstr ""
+
+#: src/ui/inspector/export.rs:106
+msgid "Select all pages"
+msgstr ""
+
+#: src/ui/inspector/export.rs:113
+msgid "Deselect all pages"
+msgstr ""
+
+#: src/ui/inspector/export.rs:238
+msgid "Settings"
+msgstr ""
+
+#: src/ui/inspector/export.rs:254
+msgid "72 DPI (Screen / Web)"
+msgstr ""
+
+#: src/ui/inspector/export.rs:255
+msgid "150 DPI (Medium)"
+msgstr ""
+
+#: src/ui/inspector/export.rs:256
+msgid "300 DPI (Print)"
+msgstr ""
+
+#: src/ui/inspector/export.rs:257
+msgid "600 DPI (High Resolution)"
+msgstr ""
+
+#: src/ui/inspector/export.rs:265
+msgid "Resolution (DPI)"
+msgstr ""
+
+#: src/ui/inspector/export.rs:271
+msgid "Quality"
+msgstr ""
+
+#: src/ui/inspector/export.rs:295
+msgid "Transparent Background"
+msgstr ""
+
+#: src/ui/inspector/export.rs:296
+msgid "Preserve alpha transparency"
+msgstr ""
+
+#: src/ui/inspector/export.rs:307 src/ui/preferences/general.rs:103
+msgid "Antialiasing"
+msgstr ""
+
+#: src/ui/inspector/export.rs:308
+msgid "Smooth edge rendering"
+msgstr ""
+
+#: src/ui/inspector/export.rs:452
+msgid "Select Folder to Export Files"
+msgstr ""
+
+#: src/ui/inspector/export.rs:474
+msgid "Save Exported File"
+msgstr ""
+
+#: src/ui/inspector/floating.rs:30
+msgid "Dock to sidebar"
+msgstr ""
+
+#: src/ui/inspector/floating.rs:65
+msgid "Drag to sidebar or right click to dock/close"
+msgstr ""
+
+#: src/ui/inspector/floating.rs:154
+msgid "Dock into Top Bar"
+msgstr ""
+
+#: src/ui/inspector/floating.rs:172
+msgid "Dock into New Section Below"
+msgstr ""
+
+#: src/ui/inspector/image.rs:95
+msgid "No Image Selected"
+msgstr ""
+
+#: src/ui/inspector/image.rs:97
+msgid ""
+"Select a bitmap image to adjust colors or vectorize to paths, or rasterize "
+"selected vectors into an image."
+msgstr ""
+
+#: src/ui/inspector/image.rs:111
+msgid "Create Image Frame"
+msgstr ""
+
+#: src/ui/inspector/image.rs:124
+msgid "Rasterize Selection to Bitmap"
+msgstr ""
+
+#: src/ui/inspector/image.rs:137
+msgid "Import Image File..."
+msgstr ""
+
+#: src/ui/inspector/image.rs:145 src/ui/inspector/image.rs:241
+#: src/ui/tool_options/image.rs:53
+msgid "Choose Image File"
+msgstr ""
+
+#: src/ui/inspector/image.rs:149
+msgid "Image Files (*.png, *.jpg, *.webp)"
+msgstr ""
+
+#: src/ui/inspector/image.rs:206
+msgid "Adjustments"
+msgstr ""
+
+#: src/ui/inspector/image.rs:221
+msgid "Image"
+msgstr ""
+
+#: src/ui/inspector/image.rs:233
+msgid "Replace Image File..."
+msgstr ""
+
+#: src/ui/inspector/image.rs:245
+msgid "Image Files (*.png, *.jpg, *.webp, *.svg, *.gif)"
+msgstr ""
+
+#: src/ui/inspector/image.rs:280
+msgid "Dimensions"
+msgstr ""
+
+#: src/ui/inspector/image.rs:303
+msgid "Rotation & Flip"
+msgstr ""
+
+#: src/ui/inspector/image.rs:317
+msgid "Rotate -90° counter-clockwise"
+msgstr ""
+
+#: src/ui/inspector/image.rs:330
+msgid "Rotate +90° clockwise"
+msgstr ""
+
+#: src/ui/inspector/image.rs:379
+msgid "Color Adjustments"
+msgstr ""
+
+#: src/ui/inspector/image.rs:385
+msgid "Reset all adjustments"
+msgstr ""
+
+#: src/ui/inspector/image.rs:399
+msgid "Vibrant"
+msgstr ""
+
+#: src/ui/inspector/image.rs:400
+msgid "B&W"
+msgstr ""
+
+#: src/ui/inspector/image.rs:401
+msgid "Vintage"
+msgstr ""
+
+#: src/ui/inspector/image.rs:402
+msgid "Warm"
+msgstr ""
+
+#: src/ui/inspector/image.rs:403
+msgid "Cool"
+msgstr ""
+
+#: src/ui/inspector/image.rs:407
+msgid "Preset"
+msgstr ""
+
+#: src/ui/inspector/image.rs:416
+msgid "Brightness"
+msgstr ""
+
+#: src/ui/inspector/image.rs:427
+msgid "Contrast"
+msgstr ""
+
+#: src/ui/inspector/image.rs:449
+msgid "Hue Rotate"
+msgstr ""
+
+#: src/ui/inspector/image.rs:471
+msgid "Invert Colors"
+msgstr ""
+
+#: src/ui/inspector/image.rs:472
+msgid "Inverts the RGB color spectrum"
+msgstr ""
+
+#: src/ui/inspector/image.rs:477
+msgid "Black & White (Grayscale)"
+msgstr ""
+
+#: src/ui/inspector/image.rs:478
+msgid "Converts image to monochrome grayscale"
+msgstr ""
+
+#: src/ui/inspector/image.rs:483
+msgid "Sepia Tone"
+msgstr ""
+
+#: src/ui/inspector/image.rs:484
+msgid "Applies classic warm photographic tint"
+msgstr ""
+
+#: src/ui/inspector/image.rs:522
+msgid "Bitmap Vectorization"
+msgstr ""
+
+#: src/ui/inspector/image.rs:556
+msgid "Number of quantized color paths"
+msgstr ""
+
+#: src/ui/inspector/image.rs:565
+msgid "Noise Filter (px)"
+msgstr ""
+
+#: src/ui/inspector/image.rs:566
+msgid "Filter out small speckled artifacts"
+msgstr ""
+
+#: src/ui/inspector/image.rs:574
+msgid "Detail (RDP)"
+msgstr ""
+
+#: src/ui/inspector/image.rs:586
+msgid "Smoothness"
+msgstr ""
+
+#: src/ui/inspector/image.rs:597
+msgid "Invert Selection"
+msgstr ""
+
+#: src/ui/inspector/image.rs:598
+msgid "Invert vector cutout logic"
+msgstr ""
+
+#: src/ui/inspector/image.rs:603
+msgid "Keep Original Image"
+msgstr ""
+
+#: src/ui/inspector/image.rs:604
+msgid "Keep bitmap image and place vector paths above"
+msgstr ""
+
+#: src/ui/inspector/image.rs:671
+msgid "Trace to Paths"
+msgstr ""
+
+#: src/ui/inspector/image.rs:712
+msgid "Open advanced interactive live preview dialog"
+msgstr ""
+
+#: src/ui/inspector/image.rs:975
+msgid "Orig"
+msgstr ""
+
+#: src/ui/inspector/image.rs:978
+msgid "Empty Frame"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:174
+msgid "Open Libraries Folder in .config"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:184
+msgid "Reload Libraries from disk"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:194
+msgid "Search assets and presets..."
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:247
+msgid "Icons"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:253
+msgid "Shapes"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:259
+msgid "Strokes"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:353
+msgid "Click or drag to apply fill color"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:446
+msgid "Copy HEX"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:462
+msgid "Remove from Palette"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:557 src/ui/inspector/libraries.rs:788
+msgid "colors"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:567
+msgid "Colors used on the canvas will appear here automatically."
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:607
+msgid "My Custom Palette"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:608
+msgid "Right-click custom swatch for options."
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:615
+msgid "Add Active Color to My Palette"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:622
+msgid "Pick New Color from Dialog"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:722
+msgid "Pick Custom Color"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:765
+msgid "Project Colors"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:826
+msgid "Preset Palettes"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:868
+msgid "Click or drag to apply vector pattern"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:1258
+msgid "Click or drag to insert GNOME icon"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:1365
+msgid "Click or drag to insert vector shape"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:1453
+msgid "Click or drag to apply stroke to object"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:1492
+msgid "Apply Stroke Style"
+msgstr ""
+
+#: src/ui/inspector/libraries.rs:1566
+msgid "Click to insert text or drag to position on canvas"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:59
+msgid "Add Modifier"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:85
+msgid "Search Modifiers & Assets..."
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:105
+msgid "Generate & duplicate"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:117
+msgid "Array Modifier"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:118
+msgid "Linear, Radial & Grid Duplication"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:124
+msgid "Deform & warp"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:137
+msgid "3D Extrude"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:138
+msgid "3D Extrusion & Shaded Projection"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:142
+msgid "Twist & Swirl"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:143
+msgid "Rotational Swirl Distortion"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:147
+msgid "Envelope Warp"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:148
+msgid "4-Point Mesh Distortion"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:152
+msgid "Sine Wave Ripple"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:153
+msgid "Parametric Wave Distortion"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:157
+msgid "ZigZag Distortion"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:158
+msgid "Serrated Sawtooth Contour"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:168
+msgid "Path & corners"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:181
+msgid "Dynamic Chamfer"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:182
+msgid "Corner Rounding & Bevels"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:186
+msgid "Offset Path / Outline"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:187
+msgid "Expand / Contract Vector Contour"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:194
+msgid "Local assets (assets/modifiers/)"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:405 src/ui/inspector/modifiers.rs:443
+msgid "No object selected"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:466
+msgid "Vector Shape Selected"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:467
+msgid "Vector Path Selected"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:468
+msgid "Freehand Brush Selected"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:469
+msgid "Text Element Selected"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:470
+msgid "Bitmap Image Selected"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:471
+msgid "Group Selected"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:472
+msgid "Linked Clone Selected"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:478
+msgid "No active modifiers"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:710
+msgid "Hide Modifier"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:712
+msgid "Show Modifier"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:721
+msgid "Bake / Apply Geometry"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:729
+msgid "Save Preset Asset"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:737
+msgid "Move Up"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:746
+msgid "Move Down"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:755
+msgid "Delete Modifier"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:959 src/ui/inspector/modifiers.rs:1077
+msgid "Count"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:967
+msgid "Offset X/Y"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:980
+msgid "Rotate (°)"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1085 src/ui/tool_options/shapes.rs:259
+msgid "Radius"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1141
+msgid "Rows / Cols"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1154
+msgid "Spacing X/Y"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1255
+msgid "Custom 3D"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1256
+msgid "Isometric Top"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1257
+msgid "Isometric Left"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1258
+msgid "Front View"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1259
+msgid "Top View"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1260
+msgid "Tilt 3D"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1261
+msgid "Dramatic 3D"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1262
+msgid "Coin Spin"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1263
+msgid "Cabinet 45°"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1277
+msgid "Toggle 3D Lighting"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1303
+msgid ""
+"Drag to rotate 3D object\n"
+"Double-click to reset"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1307
+msgid "Rotation 3D"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1401
+msgid ""
+"Drag to position Light source in 3D\n"
+"Double-click to reset"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1405
+msgid "Lighting Gizmo"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1480
+msgid "Depth:"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1506
+msgid "Bevel:"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1508 src/ui/inspector/modifiers.rs:2309
+#: src/ui/tool_options/shapes.rs:124
+msgid "Round"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1509 src/ui/inspector/modifiers.rs:2310
+#: src/ui/tool_options/shapes.rs:125
+msgid "Chamfer"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1510 src/ui/inspector/modifiers.rs:2311
+#: src/ui/tool_options/shapes.rs:126
+msgid "Concave"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1548
+msgid "Advanced 3D & Materials"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1561
+msgid "Camera:"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1564 src/ui/inspector/modifiers.rs:1570
+msgid "Ortho"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1583
+msgid "Metallic:"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1599
+msgid "Roughness:"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1615
+msgid "Rim Light:"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1631
+msgid "Gloss:"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1647
+msgid "Taper:"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1663
+msgid "Twist:"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1679
+msgid "Corner 2D:"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1707
+msgid "Material:"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1714
+msgid "Default Plastic"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1715
+msgid "Chrome Mirror"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1716
+msgid "Polished Gold"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1717
+msgid "Crystal Glass"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1718
+msgid "Matte Clay"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1719
+msgid "Neon Glow"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1720
+msgid "Titanium Dark"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1721
+msgid "Royal Velvet"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:1739
+msgid "Custom Side Color"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:2067
+msgid "Twist Angle (°)"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:2075
+msgid "Effect Radius (px)"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:2121
+msgid "Offset Distance"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:2155
+msgid "Ridges per Segment"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:2163 src/ui/inspector/modifiers.rs:2209
+msgid "Amplitude"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:2217
+msgid "Wavelength"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:2263
+msgid "Top-Left Offset"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:2271
+msgid "Top-Right Offset"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:2304
+msgid "Corner Style"
+msgstr ""
+
+#: src/ui/inspector/modifiers.rs:2321
+msgid "Radius (px)"
+msgstr ""
+
+#: src/ui/inspector/swatch.rs:191
+msgid "stops"
+msgstr ""
+
+#: src/ui/inspector/transform.rs:77
+msgid "Position and Dimensions"
+msgstr ""
+
+#: src/ui/inspector/transform.rs:90
+msgid "Document Unit"
+msgstr ""
+
+#: src/ui/inspector/transform.rs:122 src/ui/tool_options/pattern.rs:438
+msgid "X:"
+msgstr ""
+
+#: src/ui/inspector/transform.rs:152 src/ui/tool_options/pattern.rs:470
+msgid "Y:"
+msgstr ""
+
+#: src/ui/inspector/transform.rs:190
+msgid "W:"
+msgstr ""
+
+#: src/ui/inspector/transform.rs:202
+msgid "Lock aspect ratio"
+msgstr ""
+
+#: src/ui/inspector/transform.rs:230
+msgid "H:"
+msgstr ""
+
+#: src/ui/inspector/transform.rs:272
+msgid "Mirror and Layers"
+msgstr ""
+
+#: src/ui/inspector/transform.rs:290 src/ui/tool_options/select.rs:219
+msgid "Flip Horizontal"
+msgstr ""
+
+#: src/ui/inspector/transform.rs:301 src/ui/tool_options/select.rs:230
+msgid "Flip Vertical"
+msgstr ""
+
+#: src/ui/inspector/transform.rs:374
+msgid "Object to nodes and Bézier curves (Ctrl+Shift+C)"
+msgstr ""
+
+#: src/ui/inspector/transform.rs:386
+msgid "Convert (Ctrl+Shift+C)"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:40
+msgid "Typography & Font"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:125
+msgid "Font Family"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:146
+msgid "Family"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:166 src/ui/tool_options/pen_brush_text.rs:398
+msgid "Font Weight"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:183 src/ui/tool_options/pen_brush_text.rs:433
+msgid "Font Size (pt)"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:212
+msgid "Line Height (Leading)"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:238
+msgid "Tracking / Letter Spacing"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:264
+msgid "Kerning Offset"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:298 src/ui/tool_options/pen_brush_text.rs:499
+msgid "Align Left"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:307 src/ui/inspector/typography.rs:774
+#: src/ui/tool_options/pen_brush_text.rs:509
+msgid "Center"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:316 src/ui/tool_options/pen_brush_text.rs:519
+msgid "Align Right"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:325 src/ui/tool_options/pen_brush_text.rs:529
+msgid "Justify"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:391
+msgid "Underline"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:405
+msgid "Strikethrough"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:419
+msgid "Subscript"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:426
+msgid "Superscript"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:486
+msgid "OpenType Features"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:528
+msgid "Ligatures (liga, clig)"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:529
+msgid "Stylistic Alternates (salt)"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:530
+msgid "Fractions (frac)"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:531
+msgid "Tabular Numerals (tnum)"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:532
+msgid "Auto Kerning (kern)"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:596
+msgid "Text Capitalization"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:616
+msgid "Normal (As Typed)"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:617
+msgid "UPPERCASE"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:618
+msgid "lowercase"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:619
+msgid "Title Case"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:620
+msgid "SMALL CAPS"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:666
+msgid "Text on Path"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:692
+msgid "Attach to Path"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:694
+msgid "Attach selected Text element to selected Path element"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:723 src/ui/tool_options/paint_bucket.rs:283
+msgid "Offset:"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:739 src/ui/tool_options/brush.rs:779
+msgid "Spacing:"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:767
+msgid "V-Align:"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:771
+msgid "Baseline"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:772
+msgid "Ascender (Top)"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:773
+msgid "Descender (Bottom)"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:804
+msgid "Orient:"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:808
+msgid "Follow Curve (Tangent)"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:809
+msgid "Keep Upright (Vertical)"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:810
+msgid "Perpendicular"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:835
+msgid "Invert Path Side"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:846
+msgid "Follow Path Tangent"
+msgstr ""
+
+#: src/ui/inspector/typography.rs:857
+msgid "Repeat Along Path"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:59
+msgid "Fill Style"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:84 src/ui/tool_options/gradient.rs:41
+msgid "Linear Gradient"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:89 src/ui/tool_options/gradient.rs:46
+msgid "Radial Gradient"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:99
+msgid "Geometric Pattern"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:300
+#: src/ui/inspector/appearance/fills.rs:564
+msgid "0° (Horizontal →)"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:301
+#: src/ui/inspector/appearance/fills.rs:565
+msgid "45° (Diagonal ↘)"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:302
+#: src/ui/inspector/appearance/fills.rs:566
+msgid "90° (Vertical ↓)"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:303
+#: src/ui/inspector/appearance/fills.rs:567
+msgid "135° (Diagonal ↙)"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:304
+#: src/ui/inspector/appearance/fills.rs:568
+msgid "180° (Horizontal ←)"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:305
+#: src/ui/inspector/appearance/fills.rs:569
+msgid "270° (Vertical ↑)"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:357
+msgid "Pattern Type"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:395
+msgid "Built-in Patterns"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:447
+msgid "Custom Patterns"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:509
+msgid "Gizmo Tool"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:513
+msgid "Edit Pattern Handles on Canvas"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:537
+msgid "Edit Pattern Gizmo on Canvas"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:611
+msgid "Mesh Tool"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:615
+msgid "Edit Mesh Nodes on Canvas (Mesh Tool)"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:644
+msgid "Hide fill"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:646
+msgid "Show fill"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:676
+msgid "Remove fill"
+msgstr ""
+
+#: src/ui/inspector/appearance/fills.rs:885
+msgid "Mesh Gradient Palette"
+msgstr ""
+
+#: src/ui/inspector/appearance/strokes.rs:76
+msgid "Width"
+msgstr ""
+
+#: src/ui/inspector/appearance/strokes.rs:98
+msgid "Hide stroke"
+msgstr ""
+
+#: src/ui/inspector/appearance/strokes.rs:100
+msgid "Show stroke"
+msgstr ""
+
+#: src/ui/inspector/appearance/strokes.rs:130
+msgid "Remove stroke"
+msgstr ""
+
+#: src/ui/inspector/appearance/strokes.rs:236
+msgid "Dashed"
+msgstr ""
+
+#: src/ui/inspector/appearance/strokes.rs:237
+msgid "Dotted"
+msgstr ""
+
+#: src/ui/preferences/mod.rs:28 src/ui/preferences/mod.rs:48
+#: src/ui/preferences/mod.rs:243 src/ui/window/menu.rs:144
+msgid "Preferences"
+msgstr ""
+
+#: src/ui/preferences/mod.rs:80 src/ui/preferences/mod.rs:178
+msgid "General and System"
+msgstr ""
+
+#: src/ui/preferences/mod.rs:92
+msgid "Canvas and Grid"
+msgstr ""
+
+#: src/ui/preferences/mod.rs:98
+msgid "Path and Node Editor"
+msgstr ""
+
+#: src/ui/preferences/mod.rs:104
+msgid "Toolbars"
+msgstr ""
+
+#: src/ui/preferences/mod.rs:110 src/ui/window/menu.rs:151
+msgid "Keyboard Shortcuts"
+msgstr ""
+
+#: src/ui/preferences/mod.rs:116
+msgid "Plugins"
+msgstr ""
+
+#: src/ui/preferences/mod.rs:122
+msgid "About"
+msgstr ""
+
+#: src/ui/preferences/mod.rs:249
+msgid "Content"
+msgstr ""
+
+#: src/ui/preferences/about.rs:11
+msgid "Vector graphics and illustration editor for the GNOME desktop."
+msgstr ""
+
+#: src/ui/preferences/about.rs:32
+msgid ""
+"Lightweight, vector design tool built with GTK4, Libadwaita, Rust, and the "
+"Skia 2D engine."
+msgstr ""
+
+#: src/ui/preferences/about.rs:50
+msgid "Version"
+msgstr ""
+
+#: src/ui/preferences/about.rs:56
+msgid "License"
+msgstr ""
+
+#: src/ui/preferences/about.rs:62
+msgid "Technologies"
+msgstr ""
+
+#: src/ui/preferences/about.rs:68
+msgid "Source Code"
+msgstr ""
+
+#: src/ui/preferences/about.rs:89
+msgid "Support Development"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:19
+msgid "Choose light, dark, or automatic system synchronization"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:76 src/ui/preferences/general.rs:19
+#: src/ui/preferences/widgets.rs:176 src/ui/preferences/widgets.rs:247
+msgid "System Default"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:77
+msgid "Follows GNOME"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:84
+msgid "Bright interface"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:91
+msgid "Low brightness"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:149
+msgid "Visual Themes and Palettes"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:151
+msgid ""
+"Color schemes inspired by GNOME Builder, Text Editor, and modern developer "
+"aesthetics"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:307
+msgid "Interface and Ergonomics"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:309
+msgid "Adjust icon sizing, interface density, and overall scale"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:370
+msgid "Interface Scale"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:371
+msgid "Scale controls, fonts, and panel proportions"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:379
+msgid "Small (16px)"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:380
+msgid "Medium (20px)"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:381
+msgid "Large (24px)"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:394
+msgid "Toolbar Icon Size"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:396
+msgid "Change the pixel size of tools and HUD buttons"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:406
+msgid "Accent Color"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:408
+msgid "Choose the highlight color for selectors and active elements"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:450
+msgid "Interface Icons"
+msgstr ""
+
+#: src/ui/preferences/appearance.rs:452
+msgid "Customize the color of toolbar, tool options and inspector icons"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:9
+msgid "Workspace Background"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:11
+msgid "Customize workspace canvas background color and pattern"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:21
+msgid "Workspace Color"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:22
+msgid "Background color behind pages and artboards"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:52
+msgid "Infinite Dot Pattern"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:53
+msgid "Show subtle ambient dot pattern across workspace"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:68
+msgid "Page and Artboard"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:70
+msgid "Visual styling for artboard paper color, drop shadow, and borders"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:81
+msgid "Page Background Color"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:82
+msgid "Default paper color for active document artboards"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:112
+msgid "Page Drop Shadow"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:113
+msgid "Realistic elevation shadow around page boundaries"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:127
+msgid "Page Outline"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:128
+msgid "Fine boundary outline highlighting page dimensions"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:143
+msgid "Grid and Alignment"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:145
+msgid "Visual configuration of precision grid and points"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:153
+msgid "Display precision grid across the canvas"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:167
+msgid "Grid Style"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:168
+msgid "Graphic pattern displayed for grid subdivisions"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:200
+msgid "Grid Spacing (px)"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:201
+msgid "Pixel distance between primary grid lines"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:216
+msgid "Grid Subdivisions"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:217
+msgid "Number of fine divisions in each cell"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:231
+msgid "Grid Opacity"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:232
+msgid "Controls how visible the grid overlay appears"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:266
+msgid "Grid Color"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:267
+msgid "Hue tint used for major and minor grid lines"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:294
+msgid "Units and Measurements"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:296
+msgid "Define coordinate system and default studio unit"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:301
+msgid "Default measurement unit"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:303
+msgid "Used in dimension inspector, rulers, and transformations"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:332
+msgid "Magnetic Snapping and Guides"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:334
+msgid "Snapping rules and precision visual guides"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:342
+msgid "Snap to grid"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:344
+msgid "Snaps points and objects to nearest grid"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:359
+msgid "Snap to other objects"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:361
+msgid "Displays smart alignment guides between elements"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:376
+msgid "Snap to page"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:378
+msgid "Snaps objects to artboard margins and center"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:393
+msgid "Show rulers and guides"
+msgstr ""
+
+#: src/ui/preferences/canvas.rs:395
+msgid "Shows alignment guides and measurement rulers"
+msgstr ""
+
+#: src/ui/preferences/general.rs:10
+msgid "Language"
+msgstr ""
+
+#: src/ui/preferences/general.rs:12
+msgid "Change application interface language and number formatting"
+msgstr ""
+
+#: src/ui/preferences/general.rs:25
+msgid "Application Language"
+msgstr ""
+
+#: src/ui/preferences/general.rs:27
+msgid "Change user interface language and regional translation"
+msgstr ""
+
+#: src/ui/preferences/general.rs:64
+msgid "Select language..."
+msgstr ""
+
+#: src/ui/preferences/general.rs:84
+msgid "Performance"
+msgstr ""
+
+#: src/ui/preferences/general.rs:88
+msgid "Hardware Acceleration"
+msgstr ""
+
+#: src/ui/preferences/general.rs:89
+msgid "Render canvas using GPU"
+msgstr ""
+
+#: src/ui/preferences/general.rs:104
+msgid "Smooth vector paths and curves"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:9
+msgid "Node and Handle Appearance"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:11
+msgid "Configure the visual sizing, shapes, and handles for vector editing"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:19
+msgid "Anchor Node Size"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:20
+msgid "Visual size of anchor points on canvas"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:54
+msgid "Handle Visibility"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:55
+msgid "When to show Bézier control arms and handles"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:88
+msgid "Control Handle Size"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:89
+msgid "Size of Bézier handle endpoints"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:120
+msgid "Differentiate Node Shapes"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:122
+msgid ""
+"Show Squares for Corners, Diamonds for Smooth, and Circles for Symmetric/Auto"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:138
+msgid "Show Path Direction Arrows"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:140
+msgid "Display tangent direction arrows along vector segments"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:156
+msgid "Highlight Hovered Segments"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:158
+msgid "Show dynamic add-point cross and segment highlight under cursor"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:174
+msgid "Interaction and Manipulation"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:176
+msgid "Configure behavior and sensitivities for vector path editing"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:184
+msgid "Click and drag anywhere on a curve to reshape Bézier curvature directly"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:200
+msgid "Click Grab Sensitivity"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:201
+msgid "Tolerance distance for selecting nodes and handles"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:234
+msgid "Handle Angle Snapping (Shift)"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:236
+msgid "Constrain handle rotation angle when holding Shift"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:273
+msgid "Default Type for New Nodes"
+msgstr ""
+
+#: src/ui/preferences/node_editor.rs:275
+msgid "Node type assigned when creating or inserting new anchor points"
+msgstr ""
+
+#: src/ui/preferences/plugins.rs:10
+msgid "Installed Plugins"
+msgstr ""
+
+#: src/ui/preferences/plugins.rs:12
+msgid "Manage external extensions added to the studio"
+msgstr ""
+
+#: src/ui/preferences/plugins.rs:24
+msgid "No external plugins installed"
+msgstr ""
+
+#: src/ui/preferences/plugins.rs:25
+msgid "Add a new plugin to manage."
+msgstr ""
+
+#: src/ui/preferences/plugins.rs:34
+msgid "Identifier"
+msgstr ""
+
+#: src/ui/preferences/plugins.rs:36
+msgid "External extension"
+msgstr ""
+
+#: src/ui/preferences/plugins.rs:53
+msgid "Extension Management"
+msgstr ""
+
+#: src/ui/preferences/plugins.rs:57
+msgid "Install plugin"
+msgstr ""
+
+#: src/ui/preferences/plugins.rs:58
+msgid "Import plugins (.so)"
+msgstr ""
+
+#: src/ui/preferences/plugins.rs:73
+msgid "Select Native Plugin (.so)"
+msgstr ""
+
+#: src/ui/preferences/plugins.rs:78
+msgid "Shared Library (*.so)"
+msgstr ""
+
+#: src/ui/preferences/plugins.rs:116
+msgid "Open plugins folder"
+msgstr ""
+
+#: src/ui/preferences/plugins.rs:118
+msgid "Opens local extension folder in file manager"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:14
+msgid "Shortcut Scheme"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:16
+msgid "Keyboard compatibility presets — click any shortcut to customize it"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:35
+msgid "Keyboard scheme"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:37
+msgid "Adapts shortcut keys to your preferred software"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:75
+msgid "Search shortcuts..."
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:85
+msgid "Creation and Selection Tools"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:86 src/ui/preferences/shortcuts.rs:146
+#: src/ui/preferences/shortcuts.rs:206
+msgid "Click row to customize shortcut"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:99 src/ui/preferences/shortcuts.rs:159
+#: src/ui/preferences/shortcuts.rs:219
+msgid "Edit shortcut"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:145
+msgid "Editing, Organization and History"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:205
+msgid "View and Zoom"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:281
+msgid "Restore Default"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:285
+msgid "Restore all shortcuts"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:287
+msgid "Reverts all keys to the default Paths scheme"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:293
+msgid "Restore"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:355
+msgid "Edit Shortcut"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:372
+msgid "Shortcut"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:392
+msgid ""
+"Press the new key or combination on your keyboard (e.g. <b>Ctrl</b>, "
+"<b>Shift</b>, <b>Alt</b> + Key):"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:411
+msgid "Waiting for keys..."
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:444
+msgid "New key captured successfully!"
+msgstr ""
+
+#: src/ui/preferences/shortcuts.rs:467
+msgid "Save Shortcut"
+msgstr ""
+
+#: src/ui/preferences/toolbars.rs:10
+msgid "Toolbar Customization"
+msgstr ""
+
+#: src/ui/preferences/toolbars.rs:12
+msgid "Manage on-screen tools, folders, and layout arrangement"
+msgstr ""
+
+#: src/ui/preferences/toolbars.rs:17
+msgid "Customize Tools and Groups"
+msgstr ""
+
+#: src/ui/preferences/toolbars.rs:19
+msgid "Add, remove, reorder tools, or organize them into folders"
+msgstr ""
+
+#: src/ui/preferences/toolbars.rs:24
+msgid "Customize..."
+msgstr ""
+
+#: src/ui/preferences/toolbars.rs:43
+msgid "Quick Repositioning Tip"
+msgstr ""
+
+#: src/ui/preferences/toolbars.rs:45
+msgid ""
+"You can drag the toolbar handle on the canvas or right-click it to quickly "
+"dock it to the top, bottom, left, or right edges."
+msgstr ""
+
+#: src/ui/preferences/widgets.rs:125 src/ui/preferences/widgets.rs:140
+msgid "Select Language"
+msgstr ""
+
+#: src/ui/preferences/widgets.rs:141
+msgid "Choose application interface language"
+msgstr ""
+
+#: src/ui/preferences/widgets.rs:158
+msgid "Search language or country..."
+msgstr ""
+
+#: src/ui/toolbar/mod.rs:83
+msgid "Toolbar Options and Customization"
+msgstr ""
+
+#: src/ui/toolbar/mod.rs:104
+msgid "Toolbar Position"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:54
+msgid "Customize Toolbar"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:75
+msgid "Restore Factory Default"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:83
+msgid "Create Tool Folder"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:197
+msgid "Flat Mode (No Folders)"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:199
+msgid "Display all tools loose on the toolbar without submenus"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:219
+msgid "Tools"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:221
+msgid "Drag to reorder, manage folders and tools"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:241
+msgid "Move up / before"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:248
+msgid "Move down / after"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:359
+msgid "Add this tool to a group"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:391
+msgid "Move to group:"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:408
+msgid ""
+"No existing groups.\n"
+"Use the '+' button at the top to create a group."
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:481
+msgid "Ungroup and separate all tools"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:544
+msgid "Remove from group (Move outside)"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:645
+msgid "Create New Tool Group"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:666
+msgid "Group Name"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:667 src/ui/toolbar/customizer.rs:773
+msgid "New Group"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:672
+msgid "Select Tools to Group"
+msgstr ""
+
+#: src/ui/toolbar/customizer.rs:719
+msgid "Create Group"
+msgstr ""
+
+#: src/ui/toolbar/items.rs:38
+msgid "Select"
+msgstr ""
+
+#: src/ui/toolbar/items.rs:39
+msgid "Path Editor"
+msgstr ""
+
+#: src/ui/toolbar/items.rs:41 src/ui/tool_options/mod.rs:1099
+msgid "Circle"
+msgstr ""
+
+#: src/ui/toolbar/items.rs:43
+msgid "Triangle"
+msgstr ""
+
+#: src/ui/toolbar/items.rs:45 src/ui/tool_options/mod.rs:1119
+msgid "Pen"
+msgstr ""
+
+#: src/ui/toolbar/items.rs:46 src/ui/tool_options/mod.rs:1123
+#: src/ui/tool_options/brush.rs:41
+msgid "Brush"
+msgstr ""
+
+#: src/ui/toolbar/items.rs:48 src/ui/tool_options/mod.rs:1131
+msgid "Image Frame"
+msgstr ""
+
+#: src/ui/toolbar/items.rs:49
+msgid "Arrange & Order"
+msgstr ""
+
+#: src/ui/toolbar/items.rs:52
+msgid "Measure"
+msgstr ""
+
+#: src/ui/toolbar/items.rs:53 src/ui/tool_options/mod.rs:1159
+msgid "Zoom"
+msgstr ""
+
+#: src/ui/toolbar/items.rs:57 src/ui/tool_options/mod.rs:1147
+msgid "Pattern Tool"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:147
+msgid "Active Tool: Selection"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:276
+msgid "Tool Options Position"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:312
+msgid "Top (Default)"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:859 src/ui/tool_options/mesh.rs:123
+msgid "Selected Mesh Node Color"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:895 src/ui/tool_options/gradient.rs:245
+msgid "Selected Gradient Stop Color"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:1083 src/ui/tool_options/mod.rs:1183
+msgid "Selection"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:1087
+msgid "Node Editor"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:1091
+msgid "Page Tool"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:1107
+msgid "Polygon"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:1115
+msgid "Vector Pen"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:1155
+msgid "Ruler / Measure"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:1163
+msgid "Zoom Selection"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:1167
+msgid "Zoom All"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:1171
+msgid "Zoom 100%"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:1175
+msgid "Zoom Page"
+msgstr ""
+
+#: src/ui/tool_options/mod.rs:1179
+msgid "Pan Canvas"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:43
+msgid "Brush Mode (Freehand variable-width styled strokes)"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:50
+msgid "Pencil"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:52
+msgid "Pencil Mode (Auto-fits smooth vector Bézier curve paths)"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:112
+msgid "Brush Preset / Style"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:154 src/ui/tool_options/gradient.rs:107
+#: src/ui/tool_options/pattern.rs:402
+msgid "Angle:"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:161
+msgid "Calligraphy Chisel Nib Angle (degrees)"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:285
+msgid "Size:"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:292
+msgid "Brush Size / Stroke Width (px)"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:333
+msgid "Smooth:"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:340
+msgid "Stroke Smoothing & Stabilizer (0% to 100%) - prevents jitter"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:377
+msgid "Contour & Stroke Options (Markers, Caps, Taper)"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:397
+msgid "Stroke Dynamics"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:414
+msgid "Pressure Dynamics"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:420
+msgid "Taper In"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:421
+msgid "Taper Start"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:427
+msgid "Taper Out"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:428
+msgid "Taper End"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:437
+msgid "Auto-Close Path"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:535
+msgid "Cap Style:"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:540
+msgid "Round Cap"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:541
+msgid "Square Cap"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:542
+msgid "Flat Cap"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:586
+msgid "Contour Markers"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:624
+msgid "Start:"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:662
+msgid "Middle:"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:700
+msgid "End:"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:742 src/ui/tool_options/pattern.rs:370
+msgid "Scale:"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:826
+msgid "To Path"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:828
+msgid "Convert selected brush stroke to editable Bézier path nodes"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:846
+msgid "Clipboard to Brush (Create custom brush preset from clipboard path)"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:906 src/ui/tool_options/brush.rs:944
+msgid "Brush saved to ~/.config/paths/brushes/"
+msgstr ""
+
+#: src/ui/tool_options/brush.rs:924
+msgid ""
+"Selection to Brush (Create custom brush preset from active vector selection)"
+msgstr ""
+
+#: src/ui/tool_options/gradient.rs:121
+msgid "Gradient Angle (0° - 360°)"
+msgstr ""
+
+#: src/ui/tool_options/gradient.rs:140
+msgid "Reverse Stops (Swap start, middle, and end colors)"
+msgstr ""
+
+#: src/ui/tool_options/gradient.rs:158
+msgid "Add Intermediate Color Stop"
+msgstr ""
+
+#: src/ui/tool_options/gradient.rs:169
+msgid "Delete Selected Color Stop"
+msgstr ""
+
+#: src/ui/tool_options/gradient.rs:191
+msgid "Pos:"
+msgstr ""
+
+#: src/ui/tool_options/gradient.rs:205
+msgid "Selected Stop Position (0% - 100%)"
+msgstr ""
+
+#: src/ui/tool_options/image.rs:38
+msgid "Choose Image..."
+msgstr ""
+
+#: src/ui/tool_options/image.rs:45
+msgid "Open and place image into frame (PNG, JPEG, WebP, SVG, GIF)"
+msgstr ""
+
+#: src/ui/tool_options/image.rs:58
+msgid "Image Files (*.png, *.jpg, *.jpeg, *.webp, *.svg, *.gif, *.bmp)"
+msgstr ""
+
+#: src/ui/tool_options/image.rs:103
+msgid "Restore Original Image Aspect Ratio"
+msgstr ""
+
+#: src/ui/tool_options/image.rs:139
+msgid "Image Opacity (%)"
+msgstr ""
+
+#: src/ui/tool_options/mesh.rs:31
+msgid "Split Row (Add horizontal line across mesh)"
+msgstr ""
+
+#: src/ui/tool_options/mesh.rs:42
+msgid "Split Column (Add vertical line across mesh)"
+msgstr ""
+
+#: src/ui/tool_options/mesh.rs:60
+msgid "Smooth Organic Curves (Toggle curved mesh interpolation)"
+msgstr ""
+
+#: src/ui/tool_options/mesh.rs:76
+msgid "Relax & Distribute (Evenly space mesh lines)"
+msgstr ""
+
+#: src/ui/tool_options/mesh.rs:87
+msgid "Reset Mesh Grid (Restore clean rectangular grid to shape bounds)"
+msgstr ""
+
+#: src/ui/tool_options/mesh.rs:105
+msgid "Delete Selected Node / Row / Column"
+msgstr ""
+
+#: src/ui/tool_options/paint_bucket.rs:40
+msgid "New Object"
+msgstr ""
+
+#: src/ui/tool_options/paint_bucket.rs:42
+msgid "Create New Object (Fill bounded area as a new shape)"
+msgstr ""
+
+#: src/ui/tool_options/paint_bucket.rs:49
+msgid "Paint Object"
+msgstr ""
+
+#: src/ui/tool_options/paint_bucket.rs:51
+msgid "Paint Existing Object (Apply color to clicked shape)"
+msgstr ""
+
+#: src/ui/tool_options/paint_bucket.rs:117
+msgid "Fill Only (Preenchimento)"
+msgstr ""
+
+#: src/ui/tool_options/paint_bucket.rs:124
+msgid "Stroke Only (Contorno)"
+msgstr ""
+
+#: src/ui/tool_options/paint_bucket.rs:131
+msgid "Both Fill & Stroke (Ambos)"
+msgstr ""
+
+#: src/ui/tool_options/paint_bucket.rs:212
+msgid "Detect Intersecting Regions (Create shape from bounded sub-areas)"
+msgstr ""
+
+#: src/ui/tool_options/paint_bucket.rs:242
+msgid "Auto-select Created Shape (Selecionar automaticamente novo objeto)"
+msgstr ""
+
+#: src/ui/tool_options/paint_bucket.rs:285
+#: src/ui/tool_options/paint_bucket.rs:296
+msgid "Area Inset / Outset Offset (Grow or shrink filled area in px)"
+msgstr ""
+
+#: src/ui/tool_options/pattern.rs:83
+msgid "Choose Pattern Style & Preset"
+msgstr ""
+
+#: src/ui/tool_options/pattern.rs:250
+msgid "Pattern Foreground Color"
+msgstr ""
+
+#: src/ui/tool_options/pattern.rs:301
+msgid "Pattern Background Color"
+msgstr ""
+
+#: src/ui/tool_options/pattern.rs:335
+msgid "Swap Pattern Colors"
+msgstr ""
+
+#: src/ui/tool_options/pattern.rs:378
+msgid "Pattern Tile Scale / Size in Pixels"
+msgstr ""
+
+#: src/ui/tool_options/pattern.rs:410
+msgid "Pattern Rotation Angle in Degrees"
+msgstr ""
+
+#: src/ui/tool_options/pattern.rs:446
+msgid "Pattern Horizontal Offset"
+msgstr ""
+
+#: src/ui/tool_options/pattern.rs:478
+msgid "Pattern Vertical Offset"
+msgstr ""
+
+#: src/ui/tool_options/pattern.rs:499
+msgid "Reset Pattern Transform & Alignment"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:48
+msgid "Corner Node (Cusp)"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:68
+msgid "Symmetric Node"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:78
+msgid "Auto-Smooth Node"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:96
+msgid "Make Segment Straight"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:106
+msgid "Make Segment Curve"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:124
+msgid "Insert Node into Segment"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:134
+msgid "Delete Selected Node(s) (Delete/Backspace)"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:144
+msgid "Close / Open Path"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:154
+msgid "Reverse Path Direction"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:172
+msgid "Align Nodes Horizontally"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:182
+msgid "Align Nodes Vertically"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:192
+msgid "Distribute Nodes Horizontally"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:202
+msgid "Distribute Nodes Vertically"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:225
+msgid "Active Tool: Text"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:287
+msgid "Font Family (Search or use ↑ / ↓)"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:467
+msgid "Line Height"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:604
+msgid "Text Box Width (0 = Auto)"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:653
+msgid "Letter Spacing (Tracking / px)"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:681
+msgid "Word Spacing (px)"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:705
+msgid "Attach Text to Path / Detach"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:759
+msgid "Active Tool: Artboard / Page"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:775
+msgid "Name:"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:814
+msgid "Custom"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:847
+msgid "Toggle Orientation (Portrait / Landscape)"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:871
+msgid "W"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:888
+msgid "H"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:928
+msgid "Create New Page"
+msgstr ""
+
+#: src/ui/tool_options/pen_brush_text.rs:940
+msgid "Delete Current Page"
+msgstr ""
+
+#: src/ui/tool_options/pen.rs:35
+msgid "Bézier Mode (Smooth Curves & Angles)"
+msgstr ""
+
+#: src/ui/tool_options/pen.rs:43
+msgid "Polygon Mode (Straight Lines)"
+msgstr ""
+
+#: src/ui/tool_options/pen.rs:103
+msgid "Delete / Undo Last Placed Node (Backspace)"
+msgstr ""
+
+#: src/ui/tool_options/pen.rs:120
+msgid "Close Path & Connect to Start (C)"
+msgstr ""
+
+#: src/ui/tool_options/pen.rs:136
+msgid "Finish Path (Enter / Esc)"
+msgstr ""
+
+#: src/ui/tool_options/pen.rs:160
+msgid "Continue / Resume Selected Open Path"
+msgstr ""
+
+#: src/ui/tool_options/select.rs:101
+msgid "Convert to Path (Ctrl+Shift+C)"
+msgstr ""
+
+#: src/ui/tool_options/select.rs:122
+msgid "When scaling objects, scale the stroke width in the same proportion"
+msgstr ""
+
+#: src/ui/tool_options/select.rs:134
+msgid ""
+"When scaling rectangles, scale the radii of rounded corners in the same "
+"proportion"
+msgstr ""
+
+#: src/ui/tool_options/select.rs:146
+msgid "Move gradients (in fill or stroke) along with the objects"
+msgstr ""
+
+#: src/ui/tool_options/select.rs:158
+msgid "Move patterns (in fill or stroke) along with the objects"
+msgstr ""
+
+#: src/ui/tool_options/select.rs:247
+msgid "Lock Aspect Ratio"
+msgstr ""
+
+#: src/ui/tool_options/select.rs:305
+msgid "Document Unit (px, mm, cm, m, in, pt, pc)"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:71
+msgid "Corner Radius"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:76
+msgid "Edit corners individually"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:91
+msgid "Top-Left Radius"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:96
+msgid "Top-Right Radius"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:101
+msgid "Bottom-Right Radius"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:106
+msgid "Bottom-Left Radius"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:131
+msgid "Corner Type"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:236 src/ui/tool_options/shapes.rs:241
+msgid "Points"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:247
+msgid "Ratio"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:253
+msgid "Radius Ratio"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:264 src/ui/tool_options/shapes.rs:324
+msgid "Corner Rounding"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:313
+msgid "Sides"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:368
+msgid "Full"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:369
+msgid "Full Circle"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:374 src/ui/tool_options/shapes.rs:375
+msgid "Arc"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:380 src/ui/tool_options/shapes.rs:381
+msgid "Slice"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:386 src/ui/tool_options/shapes.rs:387
+msgid "Chord"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:403
+msgid "Start Angle (°)"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:414
+msgid "End Angle (°)"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:490
+msgid "Turns"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:496
+msgid "Number of Turns"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:502
+msgid "Divergence"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:508
+msgid "Divergence Factor"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:514 src/ui/tool_options/shapes.rs:520
+msgid "Inner Radius"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:572
+msgid "Union (Ctrl++)"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:583
+msgid "Difference (Ctrl+-)"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:595
+msgid "Intersection (Ctrl+*)"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:607
+msgid "Exclusion (Ctrl+^)"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:618
+msgid "Division (Ctrl+/)"
+msgstr ""
+
+#: src/ui/tool_options/shapes.rs:629
+msgid "Cut / Slice (Ctrl+Alt+/)"
+msgstr ""
+
+#: src/ui/window/mod.rs:387
+msgid "Zoom Out (-)"
+msgstr ""
+
+#: src/ui/window/mod.rs:405
+msgid "Zoom In (+)"
+msgstr ""
+
+#: src/ui/window/mod.rs:416
+msgid "Reset Zoom (1:1)"
+msgstr ""
+
+#: src/ui/window/file_ops.rs:44 src/ui/window/file_ops.rs:326
+msgid "SVG Vector Graphics (*.svg)"
+msgstr ""
+
+#: src/ui/window/file_ops.rs:64
+#, rust-format
+msgid "Error saving: {}"
+msgstr ""
+
+#: src/ui/window/file_ops.rs:126
+msgid "Supported Formats (*.svg, *.png, *.jpg, *.jpeg, *.webp)"
+msgstr ""
+
+#: src/ui/window/file_ops.rs:180
+msgid "New document created"
+msgstr ""
+
+#: src/ui/window/file_ops.rs:192
+msgid "Import Image or Vector"
+msgstr ""
+
+#: src/ui/window/file_ops.rs:198
+msgid "Image Formats (*.png, *.jpg, *.jpeg, *.webp, *.svg, *.pdf)"
+msgstr ""
+
+#: src/ui/window/file_ops.rs:285
+msgid "Save Changes?"
+msgstr ""
+
+#: src/ui/window/file_ops.rs:287
+msgid ""
+"Open document contains unsaved changes. If you don't save, changes will be "
+"permanently lost."
+msgstr ""
+
+#: src/ui/window/file_ops.rs:292
+msgid "Discard Changes"
+msgstr ""
+
+#: src/ui/window/header.rs:45
+msgid "Layers Panel"
+msgstr ""
+
+#: src/ui/window/header.rs:61
+msgid "New Document (Ctrl+N)"
+msgstr ""
+
+#: src/ui/window/header.rs:73
+msgid "Open Document (Ctrl+O)"
+msgstr ""
+
+#: src/ui/window/header.rs:85
+msgid "Save (Ctrl+S)"
+msgstr ""
+
+#: src/ui/window/header.rs:104
+msgid "Undo (Ctrl+Z)"
+msgstr ""
+
+#: src/ui/window/header.rs:116
+msgid "Redo (Ctrl+Y)"
+msgstr ""
+
+#: src/ui/window/header.rs:154
+msgid "Rulers (Ctrl+R)"
+msgstr ""
+
+#: src/ui/window/header.rs:173
+msgid "Magnetic Snapping (Ctrl+Shift+')"
+msgstr ""
+
+#: src/ui/window/header.rs:194 src/ui/window/header.rs:201
+msgid "Untitled"
+msgstr ""
+
+#: src/ui/window/header.rs:208
+msgid "Unsaved changes — Paths"
+msgstr ""
+
+#: src/ui/window/header.rs:226 src/ui/window/header.rs:256
+msgid "Export PNG"
+msgstr ""
+
+#: src/ui/window/header.rs:254
+msgid "PNG (Raster Image)"
+msgstr ""
+
+#: src/ui/window/header.rs:259
+msgid "JPG / JPEG (Photography)"
+msgstr ""
+
+#: src/ui/window/header.rs:261
+msgid "Export JPG"
+msgstr ""
+
+#: src/ui/window/header.rs:264
+msgid "SVG (Scalable Vector)"
+msgstr ""
+
+#: src/ui/window/header.rs:266
+msgid "Export SVG"
+msgstr ""
+
+#: src/ui/window/header.rs:269
+msgid "PDF (Portable Document)"
+msgstr ""
+
+#: src/ui/window/header.rs:271
+msgid "Export PDF"
+msgstr ""
+
+#: src/ui/window/header.rs:274
+msgid "WebP (Compact Web)"
+msgstr ""
+
+#: src/ui/window/header.rs:276
+msgid "Export WebP"
+msgstr ""
+
+#: src/ui/window/menu.rs:51
+msgid "Main Menu"
+msgstr ""
+
+#: src/ui/window/menu.rs:86
+msgid "Open Document..."
+msgstr ""
+
+#: src/ui/window/menu.rs:125
+msgid "Import..."
+msgstr ""
+
+#: src/ui/window/menu.rs:172
+msgid "Start Screen..."
+msgstr ""

@@ -24,7 +24,7 @@ pub struct HeaderBarComponents {
 pub fn build_header_bar(
     canvas: &CanvasWidget,
     file_ops: &WindowFileOps,
-    main_win_holder: &Rc<RefCell<Option<adw::ApplicationWindow>>>,
+    _main_win_holder: &Rc<RefCell<Option<adw::ApplicationWindow>>>,
     menu_btn: &gtk4::MenuButton,
 ) -> HeaderBarComponents {
     let header_bar = adw::HeaderBar::builder()

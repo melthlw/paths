@@ -290,7 +290,7 @@ pub fn build_canvas_menu(
         let popover = popover.clone();
         let last_pos = last_click_pos.clone();
         paste_here_btn.connect_clicked(move |_| {
-            canvas.paste_at_screen_pos(last_pos.get());
+            canvas.paste_from_clipboard_at(Some(last_pos.get()));
             popover.popdown();
         });
     }
@@ -298,7 +298,7 @@ pub fn build_canvas_menu(
         let canvas = canvas.clone();
         let popover = popover.clone();
         paste_canvas_btn.connect_clicked(move |_| {
-            canvas.paste(None);
+            canvas.paste_from_clipboard_at(None);
             popover.popdown();
         });
     }
@@ -306,7 +306,11 @@ pub fn build_canvas_menu(
         let canvas = canvas.clone();
         let popover = popover.clone();
         paste_in_place_btn.connect_clicked(move |_| {
-            canvas.paste_in_place();
+            if canvas.has_internal_clipboard() {
+                canvas.paste_in_place();
+            } else {
+                canvas.paste_from_clipboard_at(None);
+            }
             popover.popdown();
         });
     }

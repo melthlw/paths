@@ -781,6 +781,13 @@ impl CanvasWidget {
     }
 
     // Clipboard & Clones
+    pub fn has_internal_clipboard(&self) -> bool {
+        self.state
+            .try_borrow()
+            .map(|s| !s.document.clipboard.is_empty())
+            .unwrap_or(false)
+    }
+
     pub fn has_clipboard(&self) -> bool {
         if let Ok(state) = self.state.try_borrow() {
             if !state.document.clipboard.is_empty() {
@@ -862,6 +869,10 @@ impl CanvasWidget {
     }
 
     pub fn paste_from_clipboard(&self) {
+        self.paste_from_clipboard_at(None);
+    }
+
+    pub fn paste_from_clipboard_at(&self, target_screen_pos: Option<Point>) {
         if let Some(display) = gdk::Display::default() {
             let clipboard = display.clipboard();
             let canvas = self.clone();
@@ -882,8 +893,11 @@ impl CanvasWidget {
                     let h = (ih * scale).max(10.0);
 
                     let mut state = canvas.state.borrow_mut();
+                    let screen_pt = target_screen_pos.unwrap_or_else(|| {
+                        Point::new(state.widget_size.0 / 2.0, state.widget_size.1 / 2.0)
+                    });
                     let center = state.viewport.screen_to_world(
-                        Point::new(state.widget_size.0 / 2.0, state.widget_size.1 / 2.0),
+                        screen_pt,
                         state.widget_size,
                     );
                     let rect = crate::core::Rect::new(center.x - w / 2.0, center.y - h / 2.0, w, h);
@@ -942,8 +956,11 @@ impl CanvasWidget {
                                         });
                                     }
                                     let total_b = b_opt.unwrap_or(crate::core::Rect::new(0.0, 0.0, 100.0, 100.0));
+                                    let screen_pt = target_screen_pos.unwrap_or_else(|| {
+                                        Point::new(state.widget_size.0 / 2.0, state.widget_size.1 / 2.0)
+                                    });
                                     let center = state.viewport.screen_to_world(
-                                        Point::new(state.widget_size.0 / 2.0, state.widget_size.1 / 2.0),
+                                        screen_pt,
                                         state.widget_size,
                                     );
                                     let dx = center.x - (total_b.x + total_b.width * 0.5);
@@ -974,11 +991,19 @@ impl CanvasWidget {
                     }
 
                     // 3. Fallback to internal document clipboard
-                    canvas_text.paste(None);
+                    if let Some(pos) = target_screen_pos {
+                        canvas_text.paste_at_screen_pos(pos);
+                    } else {
+                        canvas_text.paste(None);
+                    }
                 });
             });
         } else {
-            self.paste(None);
+            if let Some(pos) = target_screen_pos {
+                self.paste_at_screen_pos(pos);
+            } else {
+                self.paste(None);
+            }
         }
     }
 

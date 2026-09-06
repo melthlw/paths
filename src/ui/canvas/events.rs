@@ -1045,5 +1045,27 @@ mod tests {
         assert!(bounds.contains(Point::new(300.0, 250.0)));
         assert!(!bounds.contains(Point::new(50.0, 50.0)));
     }
+
+    #[test]
+    fn test_internal_clipboard_and_paste_logic() {
+        let mut doc = crate::core::Document::new();
+        let img = crate::core::ImageElement::new(
+            Rect::new(10.0, 10.0, 100.0, 100.0),
+            vec![10, 20, 30],
+            Some("Photo".to_string()),
+        );
+        let id = img.id;
+        doc.add_element(Element::Image(img));
+        doc.select(id, false);
+
+        assert!(doc.clipboard.is_empty());
+        doc.copy_selected();
+        assert_eq!(doc.clipboard.len(), 1);
+
+        let pasted = doc.paste(Some(Point::new(50.0, 50.0)));
+        assert_eq!(pasted.len(), 1);
+        assert_eq!(doc.elements.len(), 2);
+    }
 }
+
 
