@@ -3006,3 +3006,54 @@ msgstr "Torção:"
 msgid "Corner 2D:"
 msgstr "Canto 2D:"
 
+msgid "Modifiers"
+msgstr "Modificadores"
+
+msgid "Libraries"
+msgstr "Bibliotecas"
+
+msgid "Add Modifier"
+msgstr "Adicionar Modificador"
+
+msgid "Search Modifiers & Assets..."
+msgstr "Pesquisar Modificadores e Recursos..."
+
+msgid "Generate & duplicate"
+msgstr "Gerar e duplicar"
+
+msgid "Deform & warp"
+msgstr "Deformar e distorcer"
+
+msgid "Path & corners"
+msgstr "Caminho e cantos"
+
+msgid "3D Extrude"
+msgstr "Extrusão 3D"
+
+msgid "3D Extrusion & Shaded Projection"
+msgstr "Extrusão 3D e Projeção Sombreada"
+
+msgid "Custom 3D"
+msgstr "3D Personalizado"
+
+msgid "Tilt 3D"
+msgstr "Inclinação 3D"
+
+msgid "Dramatic 3D"
+msgstr "3D Dramático"
+
+msgid "Toggle 3D Lighting"
+msgstr "Alternar Iluminação 3D"
+
+msgid "Rotation 3D"
+msgstr "Rotação 3D"
+
+msgid "Drag to rotate 3D object\nDouble-click to reset"
+msgstr "Arraste para rotacionar objeto 3D\nClique duplo para redefinir"
+
+msgid "Drag to position Light source in 3D\nDouble-click to reset"
+msgstr "Arraste para posicionar fonte de luz em 3D\nClique duplo para redefinir"
+
+msgid "Advanced 3D & Materials"
+msgstr "3D Avançado e Materiais"
+

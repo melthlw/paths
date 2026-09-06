@@ -19,6 +19,7 @@ pub struct LayersSidebar {
     is_syncing: Rc<Cell<bool>>,
     current_layers: Rc<std::cell::RefCell<Vec<LayerItemInfo>>>,
     expanded_groups: Rc<std::cell::RefCell<HashSet<ElementId>>>,
+    last_click: Rc<std::cell::RefCell<Option<(ElementId, std::time::Instant)>>>,
     btn_group: gtk4::Button,
     btn_ungroup: gtk4::Button,
     btn_up: gtk4::Button,
@@ -114,6 +115,7 @@ impl LayersSidebar {
 
         let cur_layers = Rc::new(std::cell::RefCell::new(Vec::<LayerItemInfo>::new()));
         let expanded_groups = Rc::new(std::cell::RefCell::new(HashSet::<ElementId>::new()));
+        let last_click = Rc::new(std::cell::RefCell::new(None));
 
         let canvas_up = canvas.clone();
         let cur_layers_up_c = cur_layers.clone();
@@ -223,6 +225,7 @@ impl LayersSidebar {
             is_syncing,
             current_layers: cur_layers,
             expanded_groups,
+            last_click,
             btn_group,
             btn_ungroup,
             btn_up,
@@ -422,7 +425,7 @@ impl LayersSidebar {
         icon_img.add_css_class("layer-icon");
         content_box.append(&icon_img);
 
-        // 2b. Name Label (Clean text without event swallowing)
+        // 2b. Name Label & Editable Entry (for inline renaming)
         let name_label = gtk4::Label::builder()
             .label(&layer.name)
             .hexpand(true)
@@ -431,6 +434,15 @@ impl LayersSidebar {
             .valign(gtk4::Align::Center)
             .build();
         content_box.append(&name_label);
+
+        let name_entry = gtk4::Entry::builder()
+            .text(&layer.name)
+            .hexpand(true)
+            .css_classes(["layer-name-entry", "layer-name-edit"])
+            .valign(gtk4::Align::Center)
+            .visible(false)
+            .build();
+        content_box.append(&name_entry);
 
         // 2c. Count badge for groups
         if layer.is_group {
@@ -442,17 +454,117 @@ impl LayersSidebar {
             content_box.append(&badge);
         }
 
-        // Selection Gesture on content box (Primary click selects layer)
+        let is_editing = Rc::new(Cell::new(false));
+
+        let finish_edit = {
+            let is_editing = is_editing.clone();
+            let name_label = name_label.clone();
+            let name_entry = name_entry.clone();
+            let canvas = self.canvas.clone();
+            let current_name = layer.name.clone();
+            let target_id = layer.id;
+            Rc::new(move |commit: bool| {
+                if !is_editing.get() {
+                    return;
+                }
+                is_editing.set(false);
+                name_entry.set_visible(false);
+                name_label.set_visible(true);
+
+                if commit {
+                    let text = name_entry.text().to_string();
+                    let trimmed = text.trim();
+                    if trimmed != current_name {
+                        canvas.rename_element(target_id, trimmed.to_string());
+                    }
+                } else {
+                    name_entry.set_text(&current_name);
+                }
+            })
+        };
+
+        let start_edit = {
+            let is_editing = is_editing.clone();
+            let name_label = name_label.clone();
+            let name_entry = name_entry.clone();
+            let current_name = layer.name.clone();
+            Rc::new(move || {
+                if is_editing.get() {
+                    return;
+                }
+                is_editing.set(true);
+                name_entry.set_text(&current_name);
+                name_label.set_visible(false);
+                name_entry.set_visible(true);
+
+                let entry_c = name_entry.clone();
+                gtk4::glib::idle_add_local_once(move || {
+                    entry_c.grab_focus();
+                    entry_c.select_region(0, -1);
+                });
+            })
+        };
+
+        // Activate on Enter key
+        let finish_act = finish_edit.clone();
+        name_entry.connect_activate(move |_| {
+            finish_act(true);
+        });
+
+        // Cancel on Escape key
+        let key_controller = gtk4::EventControllerKey::new();
+        let finish_esc = finish_edit.clone();
+        key_controller.connect_key_pressed(move |_, keyval, _, _| {
+            if keyval == gdk::Key::Escape {
+                finish_esc(false);
+                gtk4::glib::Propagation::Stop
+            } else {
+                gtk4::glib::Propagation::Proceed
+            }
+        });
+        name_entry.add_controller(key_controller);
+
+        // Commit on focus lost
+        let focus_controller = gtk4::EventControllerFocus::new();
+        let finish_focus = finish_edit.clone();
+        focus_controller.connect_leave(move |_| {
+            finish_focus(true);
+        });
+        name_entry.add_controller(focus_controller);
+
+        // Selection & Double-click Rename Gesture on content box
         let gesture_left = gtk4::GestureClick::builder()
             .button(gdk::BUTTON_PRIMARY)
             .build();
         let canvas_click = self.canvas.clone();
         let target_id = layer.id;
-        gesture_left.connect_pressed(move |g, _, _, _| {
+        let last_click_c = self.last_click.clone();
+        let start_edit_c = start_edit.clone();
+        let is_editing_c = is_editing.clone();
+
+        gesture_left.connect_pressed(move |g, n_press, _, _| {
+            if is_editing_c.get() {
+                return;
+            }
             let state = g.current_event_state();
             let is_ctrl = state.contains(gdk::ModifierType::CONTROL_MASK)
                 || state.contains(gdk::ModifierType::SHIFT_MASK);
-            canvas_click.select_layer(target_id, is_ctrl);
+
+            let now = std::time::Instant::now();
+            let mut last = last_click_c.borrow_mut();
+            let is_double_click = if let Some((prev_id, prev_time)) = *last {
+                prev_id == target_id && now.duration_since(prev_time) < std::time::Duration::from_millis(450)
+            } else {
+                false
+            } || n_press == 2;
+
+            if is_double_click && !is_ctrl {
+                *last = None;
+                start_edit_c();
+            } else {
+                *last = Some((target_id, now));
+                canvas_click.select_layer(target_id, is_ctrl);
+            }
         });
         content_box.add_controller(gesture_left);
 

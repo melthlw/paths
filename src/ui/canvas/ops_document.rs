@@ -574,6 +574,18 @@ impl CanvasWidget {
         self.drawing_area.queue_draw();
     }
 
+    pub fn rename_element(&self, id: ElementId, name: String) {
+        let mut state = self.state.borrow_mut();
+        let name_opt = if name.trim().is_empty() {
+            None
+        } else {
+            Some(name.trim().to_string())
+        };
+        state.document.set_element_name(id, name_opt);
+        state.notify_status();
+        self.drawing_area.queue_draw();
+    }
+
     pub fn move_layer_up(&self, id: ElementId) {
         let mut state = self.state.borrow_mut();
         state.document.move_layer_up(id);
@@ -1241,7 +1253,18 @@ impl CanvasWidget {
             style,
             state.active_stroke_width,
             smoothing,
-        )
+        );
+    }
+
+    pub fn is_image_selected(&self) -> bool {
+        let Ok(state) = self.state.try_borrow() else {
+            return false;
+        };
+        state
+            .document
+            .selected_ids
+            .iter()
+            .any(|&id| matches!(state.document.find_element(id), Some(crate::core::Element::Image(_))))
     }
 
     pub fn replace_selected_image(&self, path: &str) -> Result<(), String> {

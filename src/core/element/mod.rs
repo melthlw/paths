@@ -1162,6 +1162,26 @@ impl Element {
         }
     }
 
+    pub fn set_name(&mut self, name: Option<String>) {
+        let normalized = name.and_then(|s| {
+            let t = s.trim();
+            if t.is_empty() {
+                None
+            } else {
+                Some(t.to_string())
+            }
+        });
+        match self {
+            Element::Rect(r) => r.name = normalized,
+            Element::Brush(b) => b.name = normalized,
+            Element::Path(p) => p.name = normalized,
+            Element::Text(t) => t.name = normalized,
+            Element::Group(g) => g.name = normalized,
+            Element::Image(i) => i.name = normalized,
+            Element::Clone(c) => c.name = normalized,
+        }
+    }
+
     pub fn visible(&self) -> bool {
         match self {
             Element::Rect(r) => r.visible,

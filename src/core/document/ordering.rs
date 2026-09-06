@@ -96,6 +96,13 @@ impl Document {
         }
     }
 
+    pub fn set_element_name(&mut self, id: ElementId, name: Option<String>) {
+        self.snapshot();
+        if let Some(el) = Self::find_element_mut_recursive(&mut self.elements, id) {
+            el.set_name(name);
+        }
+    }
+
     pub fn set_selected_opacity(&mut self, opacity: f32) {
         if self.selected_ids.is_empty() {
             return;
@@ -492,5 +499,33 @@ mod tests {
         assert_eq!(doc.elements[0].id(), id1);
         assert_eq!(doc.elements[1].id(), id2);
         assert_eq!(doc.elements[2].id(), id3);
+    }
+
+    #[test]
+    fn test_set_element_name_and_get_layers_info() {
+        let mut doc = Document::new();
+        let e1 = Element::Path(PathElement::new(Vec::new(), false, None, None, 1.0));
+        let id1 = e1.id();
+        doc.elements = vec![e1];
+
+        // Default name in layer info
+        let layers = doc.get_layers_info();
+        assert_eq!(layers[0].id, id1);
+        let default_name = layers[0].name.clone();
+
+        // Rename element
+        doc.set_element_name(id1, Some("Custom Vector Path".to_string()));
+        let layers_renamed = doc.get_layers_info();
+        assert_eq!(layers_renamed[0].name, "Custom Vector Path");
+
+        // Undo restores original name
+        assert!(doc.undo());
+        let layers_undone = doc.get_layers_info();
+        assert_eq!(layers_undone[0].name, default_name);
+
+        // Setting empty name normalizes to None and resets to default name
+        doc.set_element_name(id1, Some("   ".to_string()));
+        let layers_reset = doc.get_layers_info();
+        assert_eq!(layers_reset[0].name, default_name);
     }
 }

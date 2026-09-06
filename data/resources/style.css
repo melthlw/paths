@@ -608,6 +608,24 @@
     border-radius: 4px;
 }
 
+.layer-name-edit {
+    padding: 0 6px;
+    font-size: 13px;
+    font-weight: 500;
+    min-height: 24px;
+    border-radius: 4px;
+    border: 1px solid alpha(currentColor, 0.22);
+    background: alpha(currentColor, 0.07);
+    color: inherit;
+    outline: none;
+}
+
+.layer-name-edit:focus {
+    border-color: @accent_color;
+    box-shadow: 0 0 0 1px @accent_color;
+    background: alpha(currentColor, 0.12);
+}
+
 .layer-badge {
     font-size: 10px;
     font-weight: 700;
