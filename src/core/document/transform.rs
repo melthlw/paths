@@ -103,6 +103,7 @@ impl Document {
                         let cur_x = i.rect.x;
                         let w = i.rect.width;
                         i.rect.x = 2.0 * center_x - (cur_x + w);
+                        i.rotation = -i.rotation;
                     }
                     Element::Clone(c) => {
                         let b = c.bounds();
@@ -159,6 +160,7 @@ impl Document {
                         let cur_y = i.rect.y;
                         let h = i.rect.height;
                         i.rect.y = 2.0 * center_y - (cur_y + h);
+                        i.rotation = -i.rotation;
                     }
                     Element::Clone(c) => {
                         let b = c.bounds();

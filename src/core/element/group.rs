@@ -177,6 +177,8 @@ pub struct ImageElement {
     #[serde(default)]
     pub sepia: bool,
     #[serde(default)]
+    pub rotation: f32,
+    #[serde(default)]
     pub modifiers: Vec<crate::core::modifier::Modifier>,
 }
 
@@ -199,6 +201,7 @@ impl ImageElement {
             invert: false,
             grayscale: false,
             sepia: false,
+            rotation: 0.0,
             modifiers: Vec::new(),
         }
     }
@@ -212,7 +215,40 @@ impl ImageElement {
     }
 
     pub fn bounds(&self) -> Rect {
-        self.rect.normalize()
+        let r = self.rect.normalize();
+        if self.rotation.abs() < 0.0001 {
+            r
+        } else {
+            let cx = r.x + r.width * 0.5;
+            let cy = r.y + r.height * 0.5;
+            let hw = r.width * 0.5;
+            let hh = r.height * 0.5;
+            let cos_a = self.rotation.cos();
+            let sin_a = self.rotation.sin();
+
+            let corners = [
+                (-hw, -hh),
+                (hw, -hh),
+                (hw, hh),
+                (-hw, hh),
+            ];
+
+            let mut min_x = f32::MAX;
+            let mut max_x = f32::MIN;
+            let mut min_y = f32::MAX;
+            let mut max_y = f32::MIN;
+
+            for (x, y) in corners {
+                let rx = cx + (x * cos_a - y * sin_a);
+                let ry = cy + (x * sin_a + y * cos_a);
+                min_x = min_x.min(rx);
+                max_x = max_x.max(rx);
+                min_y = min_y.min(ry);
+                max_y = max_y.max(ry);
+            }
+
+            Rect::new(min_x, min_y, (max_x - min_x).max(1.0), (max_y - min_y).max(1.0))
+        }
     }
 
     pub fn intrinsic_size(&self) -> Option<(f32, f32)> {
@@ -227,7 +263,34 @@ impl ImageElement {
     }
 
     pub fn hit_test(&self, p: Point) -> bool {
-        self.bounds().contains(p)
+        let r = self.rect.normalize();
+        if self.rotation.abs() < 0.0001 {
+            r.contains(p)
+        } else {
+            let cx = r.x + r.width * 0.5;
+            let cy = r.y + r.height * 0.5;
+            let dx = p.x - cx;
+            let dy = p.y - cy;
+            let cos_a = (-self.rotation).cos();
+            let sin_a = (-self.rotation).sin();
+            let unrot_x = cx + (dx * cos_a - dy * sin_a);
+            let unrot_y = cy + (dx * sin_a + dy * cos_a);
+            r.contains(Point::new(unrot_x, unrot_y))
+        }
+    }
+
+    pub fn rotate(&mut self, center: Point, angle_rad: f32) {
+        let cur_center = Point::new(self.rect.x + self.rect.width * 0.5, self.rect.y + self.rect.height * 0.5);
+        let dx = cur_center.x - center.x;
+        let dy = cur_center.y - center.y;
+        let cos_a = angle_rad.cos();
+        let sin_a = angle_rad.sin();
+        let new_center_x = center.x + (dx * cos_a - dy * sin_a);
+        let new_center_y = center.y + (dx * sin_a + dy * cos_a);
+
+        self.rect.x = new_center_x - self.rect.width * 0.5;
+        self.rect.y = new_center_y - self.rect.height * 0.5;
+        self.rotation += angle_rad;
     }
 
     pub fn translate(&mut self, dx: f32, dy: f32) {
@@ -362,6 +425,13 @@ impl ImageElement {
 
         let r = self.rect.normalize();
         let dst = skia::Rect::from_xywh(r.x, r.y, r.width, r.height);
+        let should_rotate = self.rotation.abs() > 0.0001;
+        if should_rotate {
+            canvas.save();
+            let cx = r.x + r.width * 0.5;
+            let cy = r.y + r.height * 0.5;
+            canvas.rotate(self.rotation.to_degrees(), Some(skia::Point::new(cx, cy)));
+        }
 
         if !self.image_data.is_empty() {
             if let Some(image) = skia::Image::from_encoded(skia::Data::new_copy(&self.image_data)) {
@@ -396,6 +466,9 @@ impl ImageElement {
                     skia::SamplingOptions::default(),
                     &paint,
                 );
+                if should_rotate {
+                    canvas.restore();
+                }
                 return;
             }
         }
@@ -481,6 +554,10 @@ impl ImageElement {
         border_paint.set_stroke_width(1.5);
         border_paint.set_anti_alias(true);
         canvas.draw_rect(dst, &border_paint);
+
+        if should_rotate {
+            canvas.restore();
+        }
     }
 }
 
@@ -743,5 +820,24 @@ mod tests {
             &bytes[0..8],
             &[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
         );
+    }
+
+    #[test]
+    fn test_image_element_rotation() {
+        let mut img = ImageElement::new_placeholder(Rect::new(100.0, 100.0, 200.0, 100.0), None);
+        assert_eq!(img.rotation, 0.0);
+        assert_eq!(img.bounds(), Rect::new(100.0, 100.0, 200.0, 100.0));
+
+        // Rotate 90 degrees around center
+        let center = Point::new(200.0, 150.0);
+        let angle = std::f32::consts::FRAC_PI_2;
+        img.rotate(center, angle);
+
+        assert!((img.rotation - angle).abs() < 1e-4);
+        let b = img.bounds();
+        assert!((b.x - 150.0).abs() < 1.0);
+        assert!((b.y - 50.0).abs() < 1.0);
+        assert!((b.width - 100.0).abs() < 1.0);
+        assert!((b.height - 200.0).abs() < 1.0);
     }
 }

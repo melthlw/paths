@@ -102,12 +102,66 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
     preview_card.append(&drawing_area);
     preview_box.append(&preview_card);
 
+    let preview_controls = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Horizontal)
+        .spacing(12)
+        .halign(gtk4::Align::Fill)
+        .valign(gtk4::Align::Center)
+        .build();
+
     let stats_label = gtk4::Label::builder()
         .css_classes(["caption", "dim-label"])
-        .halign(gtk4::Align::Center)
+        .halign(gtk4::Align::Start)
+        .hexpand(true)
         .label(&crate::core::gettext("Generating preview..."))
         .build();
-    preview_box.append(&stats_label);
+    preview_controls.append(&stats_label);
+
+    let btn_box = gtk4::Box::builder()
+        .orientation(gtk4::Orientation::Horizontal)
+        .spacing(4)
+        .halign(gtk4::Align::End)
+        .build();
+
+    let toggle_wireframe_btn = gtk4::ToggleButton::builder()
+        .icon_name("format-stroke-symbolic")
+        .tooltip_text(crate::core::gettext("Toggle Vector Outlines / Wireframe"))
+        .css_classes(["flat"])
+        .focus_on_click(false)
+        .build();
+
+    let toggle_bg_btn = gtk4::ToggleButton::builder()
+        .icon_name("weather-clear-symbolic")
+        .tooltip_text(crate::core::gettext("Toggle Light / Dark Preview Background"))
+        .css_classes(["flat"])
+        .focus_on_click(false)
+        .build();
+
+    btn_box.append(&toggle_wireframe_btn);
+    btn_box.append(&toggle_bg_btn);
+    preview_controls.append(&btn_box);
+
+    preview_box.append(&preview_controls);
+
+    let is_wireframe = std::rc::Rc::new(std::cell::Cell::new(false));
+    let is_light_bg = std::rc::Rc::new(std::cell::Cell::new(false));
+
+    {
+        let wire_c = is_wireframe.clone();
+        let draw_c = drawing_area.clone();
+        toggle_wireframe_btn.connect_toggled(move |btn| {
+            wire_c.set(btn.is_active());
+            draw_c.queue_draw();
+        });
+    }
+    {
+        let bg_c = is_light_bg.clone();
+        let draw_c = drawing_area.clone();
+        toggle_bg_btn.connect_toggled(move |btn| {
+            bg_c.set(btn.is_active());
+            draw_c.queue_draw();
+        });
+    }
 
     main_paned.set_start_child(Some(&preview_box));
 
@@ -411,16 +465,24 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
     {
         let latest_draw = latest_traced.clone();
         let target_img_draw = target_img_rc.clone();
+        let wire_draw = is_wireframe.clone();
+        let bg_draw = is_light_bg.clone();
         drawing_area.set_draw_func(move |_, cr, width, height| {
             let w = width as f64;
             let h = height as f64;
+            let light = bg_draw.get();
+            let wire = wire_draw.get();
 
-            // Draw clean dark background
-            cr.set_source_rgb(0.12, 0.12, 0.14);
-            let _ = cr.paint();
+            if light {
+                cr.set_source_rgb(0.91, 0.91, 0.93);
+                let _ = cr.paint();
+                cr.set_source_rgb(0.98, 0.98, 1.0);
+            } else {
+                cr.set_source_rgb(0.18, 0.18, 0.22);
+                let _ = cr.paint();
+                cr.set_source_rgb(0.26, 0.26, 0.32);
+            }
 
-            // Draw subtle checkerboard for transparency
-            cr.set_source_rgb(0.15, 0.15, 0.18);
             let check_size = 16.0;
             let mut y = 0.0;
             while y < h {
@@ -457,7 +519,7 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
             // Render traced elements
             if let Ok(l) = latest_draw.try_borrow() {
                 if let Some(ref elem) = *l {
-                    render_element_cairo(cr, elem);
+                    render_element_cairo(cr, elem, wire, light, scale);
                 }
             }
 
@@ -637,21 +699,33 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
 }
 
 /// Helper function to draw vector `Element` to Cairo context for the preview area
-fn render_element_cairo(cr: &cairo::Context, elem: &crate::core::Element) {
+fn render_element_cairo(
+    cr: &cairo::Context,
+    elem: &crate::core::Element,
+    wireframe: bool,
+    light_bg: bool,
+    scale: f64,
+) {
     match elem {
         crate::core::Element::Path(p) => {
-            render_path_cairo(cr, p);
+            render_path_cairo(cr, p, wireframe, light_bg, scale);
         }
         crate::core::Element::Group(g) => {
             for child in &g.children {
-                render_element_cairo(cr, child);
+                render_element_cairo(cr, child, wireframe, light_bg, scale);
             }
         }
         _ => {}
     }
 }
 
-fn render_path_cairo(cr: &cairo::Context, p: &crate::core::PathElement) {
+fn render_path_cairo(
+    cr: &cairo::Context,
+    p: &crate::core::PathElement,
+    wireframe: bool,
+    light_bg: bool,
+    scale: f64,
+) {
     if p.nodes.is_empty() {
         return;
     }
@@ -662,14 +736,6 @@ fn render_path_cairo(cr: &cairo::Context, p: &crate::core::PathElement) {
         .or_else(|| p.fills.first().map(|f| &f.color))
         .cloned()
         .unwrap_or_else(|| crate::core::Color::new(0.9, 0.9, 0.9, 1.0));
-
-    cr.set_fill_rule(cairo::FillRule::EvenOdd);
-    cr.set_source_rgba(
-        color.r as f64,
-        color.g as f64,
-        color.b as f64,
-        color.a as f64,
-    );
 
     let subpaths = if p.subpath_lengths.is_empty() {
         vec![p.nodes.len()]
@@ -730,7 +796,37 @@ fn render_path_cairo(cr: &cairo::Context, p: &crate::core::PathElement) {
         cr.close_path();
     }
 
-    let _ = cr.fill();
+    if wireframe {
+        cr.set_source_rgba(0.208, 0.518, 0.894, 0.95);
+        cr.set_line_width((1.2 / scale).max(0.75));
+        let _ = cr.stroke();
+    } else {
+        cr.set_fill_rule(cairo::FillRule::EvenOdd);
+        cr.set_source_rgba(
+            color.r as f64,
+            color.g as f64,
+            color.b as f64,
+            color.a as f64,
+        );
+
+        let lum = color.r * 0.299 + color.g * 0.587 + color.b * 0.114;
+        let is_dark_color = lum < 0.3;
+
+        if is_dark_color && !light_bg {
+            let _ = cr.fill_preserve();
+            // High-contrast vibrant GNOME blue outline for dark shapes on dark bg!
+            cr.set_source_rgba(0.208, 0.518, 0.894, 0.85);
+            cr.set_line_width((1.2 / scale).max(0.75));
+            let _ = cr.stroke();
+        } else if lum > 0.85 && light_bg {
+            let _ = cr.fill_preserve();
+            cr.set_source_rgba(0.2, 0.2, 0.25, 0.85);
+            cr.set_line_width((1.2 / scale).max(0.75));
+            let _ = cr.stroke();
+        } else {
+            let _ = cr.fill();
+        }
+    }
 }
 
 #[cfg(test)]

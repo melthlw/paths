@@ -280,7 +280,7 @@ impl TransformHandle {
             TransformHandle::TopRight | TransformHandle::BottomLeft => "nesw-resize",
             TransformHandle::Top | TransformHandle::Bottom => "ns-resize",
             TransformHandle::Left | TransformHandle::Right => "ew-resize",
-            TransformHandle::Rotate => "crosshair",
+            TransformHandle::Rotate => "tool:rotate",
         }
     }
 

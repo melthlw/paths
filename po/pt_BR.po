@@ -3060,3 +3060,57 @@ msgstr "3D Avançado e Materiais"
 msgid "Replace Image..."
 msgstr "Substituir imagem..."
 
+msgid "Mode"
+msgstr "Modo"
+
+msgid "Vectorization algorithm"
+msgstr "Algoritmo de vetorização"
+
+msgid "Parameters"
+msgstr "Parâmetros"
+
+msgid "Threshold"
+msgstr "Limiar"
+
+msgid "Luminance cutoff level"
+msgstr "Nível de corte de luminância"
+
+msgid "Number of quantized colors"
+msgstr "Número de cores quantizadas"
+
+msgid "Polygon node reduction (RDP)"
+msgstr "Redução de nós por polígono (RDP)"
+
+msgid "Curve Smoothness"
+msgstr "Suavidade de Curvas"
+
+msgid "Bézier handle curve tension"
+msgstr "Tensão das alças Bézier"
+
+msgid "Noise Filter"
+msgstr "Filtro de Ruído"
+
+msgid "Minimum speck area to ignore"
+msgstr "Área mínima de ruído a ignorar"
+
+msgid "Options"
+msgstr "Opções"
+
+msgid "Invert"
+msgstr "Inverter"
+
+msgid "Invert foreground/background selection"
+msgstr "Inverter seleção de primeiro plano/fundo"
+
+msgid "Generating preview..."
+msgstr "Gerando pré-visualização..."
+
+msgid "Toggle Vector Outlines / Wireframe"
+msgstr "Alternar Contornos Vetoriais / Wireframe"
+
+msgid "Toggle Light / Dark Preview Background"
+msgstr "Alternar Fundo Claro / Escuro da Pré-visualização"
+
+msgid "Rotate"
+msgstr "Girar"
+

@@ -331,9 +331,7 @@ impl Element {
             Element::Path(p) => p.rotate(center, angle_rad),
             Element::Text(t) => t.rotate(center, angle_rad),
             Element::Group(g) => g.rotate(center, angle_rad),
-            Element::Image(i) => {
-                i.translate(center.x - i.rect.x, center.y - i.rect.y);
-            }
+            Element::Image(i) => i.rotate(center, angle_rad),
             Element::Clone(c) => c.rotate(center, angle_rad),
         }
     }

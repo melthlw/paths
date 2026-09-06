@@ -203,6 +203,8 @@ pub fn render_dock_sections(
                 }
             }
 
+            let many_tabs = tabs_in_sec.len() > 3;
+
             // Build tab buttons
             for &tab_i in &tabs_in_sec {
                 let (ref title, icon_res, icon_name) = tab_info[tab_i];
@@ -215,6 +217,8 @@ pub fn render_dock_sections(
 
                 if tab_i == cur_active {
                     tab_box.add_css_class("active");
+                } else if many_tabs {
+                    tab_box.add_css_class("compact");
                 }
 
                 let btn = gtk4::Button::builder()
@@ -229,8 +233,8 @@ pub fn render_dock_sections(
                 let btn_content = gtk4::Box::builder()
                     .orientation(gtk4::Orientation::Horizontal)
                     .spacing(6)
-                    .margin_start(4)
-                    .margin_end(2)
+                    .margin_start(if many_tabs && tab_i != cur_active { 2 } else { 4 })
+                    .margin_end(if many_tabs && tab_i != cur_active { 2 } else { 2 })
                     .valign(gtk4::Align::Center)
                     .build();
                 let icon_img = if let Some(res) = icon_res {
@@ -238,9 +242,11 @@ pub fn render_dock_sections(
                 } else {
                     crate::ui::icons::make_symbolic_image(icon_name, 14)
                 };
-                let lbl = gtk4::Label::new(Some(title.as_str()));
                 btn_content.append(&icon_img);
-                btn_content.append(&lbl);
+                if !many_tabs || tab_i == cur_active {
+                    let lbl = gtk4::Label::new(Some(title.as_str()));
+                    btn_content.append(&lbl);
+                }
                 btn.set_child(Some(&btn_content));
 
                 // Close button directly on tab
@@ -594,9 +600,20 @@ pub fn render_dock_sections(
                 sec_tab_bar.append(&tab_box);
             }
 
-            // Add button at the end of section tab bar
-            let spacer = gtk4::Box::builder().hexpand(true).build();
-            sec_tab_bar.append(&spacer);
+            let tab_header_row = gtk4::Box::builder()
+                .orientation(gtk4::Orientation::Horizontal)
+                .css_classes(["studio-tab-header-row"])
+                .valign(gtk4::Align::Center)
+                .build();
+
+            let tab_scrolled = gtk4::ScrolledWindow::builder()
+                .hscrollbar_policy(gtk4::PolicyType::Automatic)
+                .vscrollbar_policy(gtk4::PolicyType::Never)
+                .propagate_natural_width(false)
+                .hexpand(true)
+                .css_classes(["studio-tab-scrolled"])
+                .child(&sec_tab_bar)
+                .build();
 
             let add_sec_btn = gtk4::MenuButton::builder()
                 .icon_name("list-add-symbolic")
@@ -613,9 +630,11 @@ pub fn render_dock_sections(
                 refresh_fn.clone(),
             );
             add_sec_btn.set_popover(Some(&add_sec_pop));
-            sec_tab_bar.append(&add_sec_btn);
 
-            sec_box.append(&sec_tab_bar);
+            tab_header_row.append(&tab_scrolled);
+            tab_header_row.append(&add_sec_btn);
+
+            sec_box.append(&tab_header_row);
             sec_box.append(&tab_widgets[cur_active]);
             sections_container.append(&sec_box);
         }
