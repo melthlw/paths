@@ -3,9 +3,9 @@ use libadwaita as adw;
 use libadwaita::prelude::*;
 use std::rc::Rc;
 
+use crate::ui::DesignWindow;
 use crate::ui::canvas::CanvasWidget;
 use crate::ui::window::file_ops::WindowFileOps;
-use crate::ui::DesignWindow;
 
 #[derive(Clone, Copy)]
 pub struct PresetTemplate {
@@ -160,12 +160,8 @@ pub fn show_welcome_app_window(app: &adw::Application) {
             LaunchAction::Preset(preset) => {
                 DesignWindow::new_with_preset(&app_clone, preset.width as f32, preset.height as f32)
             }
-            LaunchAction::OpenPath(path) => {
-                DesignWindow::new_with_file(&app_clone, &path)
-            }
-            LaunchAction::NewDoc => {
-                DesignWindow::new(&app_clone)
-            }
+            LaunchAction::OpenPath(path) => DesignWindow::new_with_file(&app_clone, &path),
+            LaunchAction::NewDoc => DesignWindow::new(&app_clone),
         };
         design_win.present();
         win_clone.close();
@@ -280,13 +276,17 @@ fn build_welcome_ui(
             file_dialog.set_filters(Some(&filters));
 
             let ol = on_launch_open.clone();
-            file_dialog.open(gtk4::Window::NONE, gtk4::gio::Cancellable::NONE, move |res| {
-                if let Ok(file) = res {
-                    if let Some(path) = file.path() {
-                        ol(LaunchAction::OpenPath(path));
+            file_dialog.open(
+                gtk4::Window::NONE,
+                gtk4::gio::Cancellable::NONE,
+                move |res| {
+                    if let Ok(file) = res {
+                        if let Some(path) = file.path() {
+                            ol(LaunchAction::OpenPath(path));
+                        }
                     }
-                }
-            });
+                },
+            );
         }
     });
 
@@ -321,9 +321,17 @@ fn build_welcome_ui(
         .build();
 
     // Option 0: Time to draw
-    add_sidebar_row(&top_sidebar_list, "edit-symbolic", &crate::core::gettext("Time to draw"));
+    add_sidebar_row(
+        &top_sidebar_list,
+        "edit-symbolic",
+        &crate::core::gettext("Time to draw"),
+    );
     // Option 1: Quick Start
-    add_sidebar_row(&top_sidebar_list, "insert-image-symbolic", &crate::core::gettext("Quick Start"));
+    add_sidebar_row(
+        &top_sidebar_list,
+        "insert-image-symbolic",
+        &crate::core::gettext("Quick Start"),
+    );
 
     sidebar_box.append(&top_sidebar_list);
 
@@ -340,15 +348,21 @@ fn build_welcome_ui(
         .build();
 
     // Option 2: Quick Setup
-    add_sidebar_row(&bottom_sidebar_list, "preferences-system-symbolic", &crate::core::gettext("Quick Setup"));
+    add_sidebar_row(
+        &bottom_sidebar_list,
+        "preferences-system-symbolic",
+        &crate::core::gettext("Quick Setup"),
+    );
     // Option 3: About and Get Involved
-    add_sidebar_row(&bottom_sidebar_list, "help-about-symbolic", &crate::core::gettext("About and Get Involved"));
+    add_sidebar_row(
+        &bottom_sidebar_list,
+        "help-about-symbolic",
+        &crate::core::gettext("About and Get Involved"),
+    );
 
     sidebar_box.append(&bottom_sidebar_list);
 
-    let sidebar_toolbar = adw::ToolbarView::builder()
-        .content(&sidebar_box)
-        .build();
+    let sidebar_toolbar = adw::ToolbarView::builder().content(&sidebar_box).build();
     sidebar_toolbar.add_top_bar(&sidebar_header_bar);
 
     let sidebar_page = adw::NavigationPage::builder()
@@ -365,7 +379,9 @@ fn build_welcome_ui(
         .build();
 
     let search_entry = gtk4::SearchEntry::builder()
-        .placeholder_text(&crate::core::gettext("Search all designs, files, and presets..."))
+        .placeholder_text(&crate::core::gettext(
+            "Search all designs, files, and presets...",
+        ))
         .hexpand(true)
         .max_width_chars(36)
         .build();
@@ -384,7 +400,11 @@ fn build_welcome_ui(
         .build();
 
     // Page 0: Time to draw
-    let page_time_to_draw = build_page_time_to_draw(on_launch_rc.clone(), existing_file_ops, search_entry.clone());
+    let page_time_to_draw = build_page_time_to_draw(
+        on_launch_rc.clone(),
+        existing_file_ops,
+        search_entry.clone(),
+    );
     main_stack.add_named(&page_time_to_draw, Some("time_to_draw"));
 
     // Page 1: Quick Start
@@ -399,9 +419,7 @@ fn build_welcome_ui(
     let page_about = build_page_about();
     main_stack.add_named(&page_about, Some("about"));
 
-    let content_toolbar = adw::ToolbarView::builder()
-        .content(&main_stack)
-        .build();
+    let content_toolbar = adw::ToolbarView::builder().content(&main_stack).build();
     content_toolbar.add_top_bar(&content_header_bar);
 
     let content_page = adw::NavigationPage::builder()
@@ -507,7 +525,9 @@ fn create_hero_banner_widget() -> gtk4::Widget {
         .build();
 
     let sub_lbl = gtk4::Label::builder()
-        .label(&crate::core::gettext("Create vector illustrations, social posts, stories and wallpapers"))
+        .label(&crate::core::gettext(
+            "Create vector illustrations, social posts, stories and wallpapers",
+        ))
         .css_classes(["caption", "dim-label"])
         .build();
 
@@ -598,7 +618,7 @@ fn build_page_time_to_draw(
     let recent_files_c = recent_files.clone();
     search_entry.connect_search_changed(move |entry| {
         let query = entry.text().to_lowercase();
-        
+
         let mut r_idx = 1;
         for file_path in &recent_files_c {
             let matches = query.is_empty() || file_path.to_lowercase().contains(&query);
@@ -808,7 +828,11 @@ fn create_visual_thumbnail_card(
     preview_box.append(&aspect_inner);
 
     let is_fav = crate::core::AppSettings::is_favorite_preset(preset.id);
-    let star_icon = if is_fav { "starred-symbolic" } else { "non-starred-symbolic" };
+    let star_icon = if is_fav {
+        "starred-symbolic"
+    } else {
+        "non-starred-symbolic"
+    };
     let fav_btn = gtk4::Button::builder()
         .icon_name(star_icon)
         .tooltip_text(&crate::core::gettext("Toggle Favorite"))
@@ -876,7 +900,9 @@ fn build_page_quick_start(on_launch: Rc<Box<dyn Fn(LaunchAction)>>) -> gtk4::Wid
     // Section 1: Social Post
     let group_social = adw::PreferencesGroup::builder()
         .title(&crate::core::gettext("Social Post"))
-        .description(&crate::core::gettext("Standard dimensions for social media feeds &amp; graphics"))
+        .description(&crate::core::gettext(
+            "Standard dimensions for social media feeds &amp; graphics",
+        ))
         .build();
 
     let flow_social = create_preset_grid_flowbox("social", on_launch.clone());
@@ -886,7 +912,9 @@ fn build_page_quick_start(on_launch: Rc<Box<dyn Fn(LaunchAction)>>) -> gtk4::Wid
     // Section 2: Wallpaper
     let group_wallpaper = adw::PreferencesGroup::builder()
         .title(&crate::core::gettext("Wallpaper"))
-        .description(&crate::core::gettext("High-resolution desktop and mobile display wallpapers"))
+        .description(&crate::core::gettext(
+            "High-resolution desktop and mobile display wallpapers",
+        ))
         .build();
 
     let flow_wallpaper = create_preset_grid_flowbox("wallpaper", on_launch.clone());
@@ -896,7 +924,9 @@ fn build_page_quick_start(on_launch: Rc<Box<dyn Fn(LaunchAction)>>) -> gtk4::Wid
     // Section 3: Stories
     let group_stories = adw::PreferencesGroup::builder()
         .title(&crate::core::gettext("Stories"))
-        .description(&crate::core::gettext("9:16 Vertical Portrait layouts for Instagram, TikTok &amp; Snapchat"))
+        .description(&crate::core::gettext(
+            "9:16 Vertical Portrait layouts for Instagram, TikTok &amp; Snapchat",
+        ))
         .build();
 
     let flow_stories = create_preset_grid_flowbox("stories", on_launch.clone());
@@ -913,7 +943,10 @@ fn build_page_quick_start(on_launch: Rc<Box<dyn Fn(LaunchAction)>>) -> gtk4::Wid
     scroll.upcast()
 }
 
-fn create_preset_grid_flowbox(category: &str, on_launch: Rc<Box<dyn Fn(LaunchAction)>>) -> gtk4::FlowBox {
+fn create_preset_grid_flowbox(
+    category: &str,
+    on_launch: Rc<Box<dyn Fn(LaunchAction)>>,
+) -> gtk4::FlowBox {
     let flow_box = gtk4::FlowBox::builder()
         .selection_mode(gtk4::SelectionMode::None)
         .max_children_per_line(3)
@@ -943,7 +976,9 @@ fn build_page_quick_setup(canvas: Option<CanvasWidget>) -> gtk4::Widget {
 
     let group = adw::PreferencesGroup::builder()
         .title(&crate::core::gettext("Workspace Preferences"))
-        .description(&crate::core::gettext("Configure theme, units, grid, and shortcut presets"))
+        .description(&crate::core::gettext(
+            "Configure theme, units, grid, and shortcut presets",
+        ))
         .build();
 
     // Color Scheme
@@ -1010,7 +1045,9 @@ fn build_page_quick_setup(canvas: Option<CanvasWidget>) -> gtk4::Widget {
 
     let row_unit = adw::ActionRow::builder()
         .title(&crate::core::gettext("Canvas Unit"))
-        .subtitle(&crate::core::gettext("Default measurement unit for canvas and rulers"))
+        .subtitle(&crate::core::gettext(
+            "Default measurement unit for canvas and rulers",
+        ))
         .build();
     row_unit.add_suffix(&unit_combo);
     group.add(&row_unit);
@@ -1090,12 +1127,16 @@ fn build_page_about() -> gtk4::Widget {
 
     let group_info = adw::PreferencesGroup::builder()
         .title(&crate::core::gettext("About Paths"))
-        .description(&crate::core::gettext("Paths v0.3.1 - Modern vector design editor accelerated by Skia GPU"))
+        .description(&crate::core::gettext(
+            "Paths v0.4.5 - Modern vector design editor accelerated by Skia GPU",
+        ))
         .build();
 
     let row_app = adw::ActionRow::builder()
-        .title("Paths v0.3.1")
-        .subtitle(&crate::core::gettext("Built with GTK4, Libadwaita, Skia GPU Acceleration &amp; Rust"))
+        .title("Paths v0.4.5")
+        .subtitle(&crate::core::gettext(
+            "Built with GTK4, Libadwaita, Skia GPU Acceleration &amp; Rust",
+        ))
         .build();
     let app_icon = gtk4::Image::from_icon_name("io.gitlab.lewisHeart.Paths");
     app_icon.set_pixel_size(32);
@@ -1106,7 +1147,9 @@ fn build_page_about() -> gtk4::Widget {
 
     let group_community = adw::PreferencesGroup::builder()
         .title(&crate::core::gettext("Community &amp; Source"))
-        .description(&crate::core::gettext("Get involved, report bugs, or contribute code"))
+        .description(&crate::core::gettext(
+            "Get involved, report bugs, or contribute code",
+        ))
         .build();
 
     let row_repo = adw::ActionRow::builder()

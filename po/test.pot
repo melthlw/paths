@@ -927,7 +927,7 @@ msgid "About Paths"
 msgstr ""
 
 #: src/ui/welcome.rs:1093
-msgid "Paths v0.3.1 - Modern vector design editor accelerated by Skia GPU"
+msgid "Paths v0.4.5 - Modern vector design editor accelerated by Skia GPU"
 msgstr ""
 
 #: src/ui/welcome.rs:1098

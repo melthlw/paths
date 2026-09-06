@@ -95,7 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Tool Options Toolbar Integration (`src/ui/tool_options/image.rs`)**:
   - Quick access HUD bar for image replacement, aspect ratio restoration, opacity adjustment, and file name badge.
 
-## [0.3.1] - 2026-08-25
+## [0.4.5] - 2026-08-25
 
 ### Added
 - **3D Vector Extrusion & Vector FX Suite (`Extrude3DModifier`)**:
