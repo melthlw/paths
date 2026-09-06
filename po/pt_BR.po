@@ -3081,14 +3081,8 @@ msgstr "Número de cores quantizadas"
 msgid "Polygon node reduction (RDP)"
 msgstr "Redução de nós por polígono (RDP)"
 
-msgid "Curve Smoothness"
-msgstr "Suavidade de Curvas"
-
 msgid "Bézier handle curve tension"
 msgstr "Tensão das alças Bézier"
-
-msgid "Noise Filter"
-msgstr "Filtro de Ruído"
 
 msgid "Minimum speck area to ignore"
 msgstr "Área mínima de ruído a ignorar"
