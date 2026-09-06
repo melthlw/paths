@@ -569,6 +569,9 @@ macro_rules! i18n {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Mutex;
+
+    static I18N_TEST_MUTEX: Mutex<()> = Mutex::new(());
 
     #[test]
     fn test_po_parser() {
@@ -593,6 +596,7 @@ msgstr "Multi "
 
     #[test]
     fn test_embedded_catalogs_and_switching() {
+        let _guard = I18N_TEST_MUTEX.lock().unwrap();
         init();
 
         set_language(Language::PtBr);
@@ -620,6 +624,7 @@ msgstr "Multi "
 
     #[test]
     fn test_missing_key_fallback() {
+        let _guard = I18N_TEST_MUTEX.lock().unwrap();
         init();
         let unknown = "Some completely unknown string 12345";
         assert_eq!(gettext(unknown), unknown);
@@ -646,6 +651,7 @@ msgstr "Aberto"
 
     #[test]
     fn test_ngettext() {
+        let _guard = I18N_TEST_MUTEX.lock().unwrap();
         init();
         set_language(Language::PtBr);
         assert_eq!(ngettext("Save", "Save", 1), "Salvar");
@@ -654,6 +660,7 @@ msgstr "Aberto"
 
     #[test]
     fn test_spanish_catalog() {
+        let _guard = I18N_TEST_MUTEX.lock().unwrap();
         init();
         set_language(Language::Es);
         assert_eq!(gettext("File"), "Archivo");
