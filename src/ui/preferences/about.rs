@@ -48,7 +48,7 @@ pub fn build_about_page() -> gtk4::ScrolledWindow {
 
     let version_row = adw::ActionRow::builder()
         .title(crate::core::gettext("Version"))
-        .subtitle("0.4.5-alpha (Modern Skia Engine)")
+        .subtitle("0.4.5-alpha")
         .build();
     app_info_group.add(&version_row);
 
@@ -60,7 +60,7 @@ pub fn build_about_page() -> gtk4::ScrolledWindow {
 
     let tech_row = adw::ActionRow::builder()
         .title(crate::core::gettext("Technologies"))
-        .subtitle("Rust • GTK4 • Libadwaita • Skia 2D • GPU Acceleration • Cairo • GIO")
+        .subtitle("Rust • GTK4 • Libadwaita • Skia • GPU Acceleration • Cairo • GIO")
         .build();
     app_info_group.add(&tech_row);
 

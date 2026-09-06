@@ -236,14 +236,14 @@
     {
         "type": "archive",
         "archive-type": "tar-gzip",
-        "url": "https://static.crates.io/crates/errno/errno-0.4.54.crate",
+        "url": "https://static.crates.io/crates/errno/errno-0.3.14.crate",
         "sha256": "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb",
-        "dest": "cargo/vendor/errno-0.4.54"
+        "dest": "cargo/vendor/errno-0.3.14"
     },
     {
         "type": "inline",
         "contents": "{\"package\": \"39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb\", \"files\": {}}",
-        "dest": "cargo/vendor/errno-0.4.54",
+        "dest": "cargo/vendor/errno-0.3.14",
         "dest-filename": ".cargo-checksum.json"
     },
     {
@@ -652,14 +652,14 @@
     {
         "type": "archive",
         "archive-type": "tar-gzip",
-        "url": "https://static.crates.io/crates/hash32/hash32-0.4.5.crate",
+        "url": "https://static.crates.io/crates/hash32/hash32-0.3.1.crate",
         "sha256": "47d60b12902ba28e2730cd37e95b8c9223af2808df9e902d4df49588d1470606",
-        "dest": "cargo/vendor/hash32-0.4.5"
+        "dest": "cargo/vendor/hash32-0.3.1"
     },
     {
         "type": "inline",
         "contents": "{\"package\": \"47d60b12902ba28e2730cd37e95b8c9223af2808df9e902d4df49588d1470606\", \"files\": {}}",
-        "dest": "cargo/vendor/hash32-0.4.5",
+        "dest": "cargo/vendor/hash32-0.3.1",
         "dest-filename": ".cargo-checksum.json"
     },
     {
@@ -1263,14 +1263,14 @@
     {
         "type": "archive",
         "archive-type": "tar-gzip",
-        "url": "https://static.crates.io/crates/simd-adler32/simd-adler32-0.4.50.crate",
+        "url": "https://static.crates.io/crates/simd-adler32/simd-adler32-0.3.10.crate",
         "sha256": "3a219298ac11a56ea9a6d2120044824d6f01aeb034955e7af7bc16858527deea",
-        "dest": "cargo/vendor/simd-adler32-0.4.50"
+        "dest": "cargo/vendor/simd-adler32-0.3.10"
     },
     {
         "type": "inline",
         "contents": "{\"package\": \"3a219298ac11a56ea9a6d2120044824d6f01aeb034955e7af7bc16858527deea\", \"files\": {}}",
-        "dest": "cargo/vendor/simd-adler32-0.4.50",
+        "dest": "cargo/vendor/simd-adler32-0.3.10",
         "dest-filename": ".cargo-checksum.json"
     },
     {
