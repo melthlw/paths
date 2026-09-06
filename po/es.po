@@ -3070,3 +3070,18 @@ msgstr "Crear Marco de Imagen"
 msgid "Import Image File..."
 msgstr "Importar Archivo de Imagen..."
 
+msgid "Solid Color"
+msgstr "Color Sólido"
+
+msgid "Pattern Color 1"
+msgstr "Color 1 del Patrón"
+
+msgid "Pattern Color 2"
+msgstr "Color 2 del Patrón"
+
+msgid "Pattern Foreground Color"
+msgstr "Color de Primer Plano del Patrón"
+
+msgid "Pattern Background Color"
+msgstr "Color de Fondo del Patrón"
+

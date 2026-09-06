@@ -261,11 +261,10 @@ pub fn build_pattern_controls(
             let cv_apply = cv_c1.clone();
             let c_upd = c1_cell_cl.clone();
             let da_upd = c1_da_cl.clone();
-            let pop = ColorPickerPopover::with_mode_switcher(
+            let pop = ColorPickerPopover::standalone_with_title(
                 cv_c1.clone(),
                 cur,
-                3, // Pattern mode
-                true,
+                Some(&crate::core::gettext("Pattern Foreground Color")),
             );
             pop.on_color_changed(move |new_col| {
                 c_upd.set(new_col);
@@ -312,11 +311,10 @@ pub fn build_pattern_controls(
             let cv_apply = cv_c2.clone();
             let c_upd = c2_cell_cl.clone();
             let da_upd = c2_da_cl.clone();
-            let pop = ColorPickerPopover::with_mode_switcher(
+            let pop = ColorPickerPopover::standalone_with_title(
                 cv_c2.clone(),
                 cur,
-                3, // Pattern mode
-                true,
+                Some(&crate::core::gettext("Pattern Background Color")),
             );
             pop.on_color_changed(move |new_col| {
                 c_upd.set(new_col);

@@ -201,7 +201,11 @@ impl FillRow {
         match entry.style {
             FillStyle::Solid => {
                 let (color_btn1, swatch1_area, col1_cell) = create_swatch_button(entry.color);
-                let picker1 = ColorPickerPopover::with_mode_switcher(canvas.clone(), entry.color, 0, false);
+                let picker1 = ColorPickerPopover::standalone_with_title(
+                    canvas.clone(),
+                    entry.color,
+                    Some(&crate::core::gettext("Solid Color")),
+                );
                 popovers_to_cleanup.borrow_mut().push(picker1.popover().clone());
                 picker1.attach_to(&color_btn1);
                 let p1_open = picker1.clone();
@@ -720,7 +724,11 @@ impl FillRow {
             }
             FillStyle::Pattern => {
                 let (color_btn1, swatch1_area, col1_cell) = create_swatch_button(entry.color);
-                let picker1 = ColorPickerPopover::with_mode_switcher(canvas.clone(), entry.color, 0, false);
+                let picker1 = ColorPickerPopover::standalone_with_title(
+                    canvas.clone(),
+                    entry.color,
+                    Some(&crate::core::gettext("Pattern Color 1")),
+                );
                 popovers_to_cleanup.borrow_mut().push(picker1.popover().clone());
                 picker1.attach_to(&color_btn1);
                 let p1_open = picker1.clone();
@@ -738,7 +746,11 @@ impl FillRow {
                     .build();
 
                 let (color_btn2, swatch2_area, col2_cell) = create_swatch_button(entry.secondary_color);
-                let picker2 = ColorPickerPopover::with_mode_switcher(canvas.clone(), entry.secondary_color, 0, false);
+                let picker2 = ColorPickerPopover::standalone_with_title(
+                    canvas.clone(),
+                    entry.secondary_color,
+                    Some(&crate::core::gettext("Pattern Color 2")),
+                );
                 popovers_to_cleanup.borrow_mut().push(picker2.popover().clone());
                 picker2.attach_to(&color_btn2);
                 let p2_open = picker2.clone();

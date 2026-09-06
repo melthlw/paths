@@ -3126,3 +3126,18 @@ msgstr "Criar Quadro de Imagem"
 msgid "Import Image File..."
 msgstr "Importar Arquivo de Imagem..."
 
+msgid "Solid Color"
+msgstr "Cor Sólida"
+
+msgid "Pattern Color 1"
+msgstr "Cor 1 do Padrão"
+
+msgid "Pattern Color 2"
+msgstr "Cor 2 do Padrão"
+
+msgid "Pattern Foreground Color"
+msgstr "Cor de Primeiro Plano do Padrão"
+
+msgid "Pattern Background Color"
+msgstr "Cor de Fundo do Padrão"
+

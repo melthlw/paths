@@ -288,6 +288,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     let trans_row = adw::ActionRow::builder()
         .title(&crate::core::gettext("Transform"))
         .subtitle(&crate::core::gettext("Rotation & Flip"))
+        .use_markup(false)
         .build();
     trans_row.add_prefix(&gtk4::Image::from_icon_name("object-rotate-right-symbolic"));
 
@@ -462,6 +463,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
 
     let grayscale_switch_row = adw::SwitchRow::builder()
         .title(&crate::core::gettext("Black & White (Grayscale)"))
+        .use_markup(false)
         .subtitle(&crate::core::gettext("Converts image to monochrome grayscale"))
         .build();
     adj_group.add(&grayscale_switch_row);

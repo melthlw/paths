@@ -143,7 +143,15 @@ impl ColorPickerPopover {
     }
 
     pub fn standalone(canvas: CanvasWidget, initial_color: Color) -> Self {
-        Self::with_target(canvas, initial_color, 0, false, ColorPickerTarget::Standalone)
+        Self::with_target_and_title(canvas, initial_color, 0, false, ColorPickerTarget::Standalone, None)
+    }
+
+    pub fn standalone_with_title(
+        canvas: CanvasWidget,
+        initial_color: Color,
+        title: Option<&str>,
+    ) -> Self {
+        Self::with_target_and_title(canvas, initial_color, 0, false, ColorPickerTarget::Standalone, title)
     }
 
     pub fn with_target(
@@ -152,6 +160,17 @@ impl ColorPickerPopover {
         initial_mode: usize,
         show_mode_switcher: bool,
         target: ColorPickerTarget,
+    ) -> Self {
+        Self::with_target_and_title(canvas, initial_color, initial_mode, show_mode_switcher, target, None)
+    }
+
+    pub fn with_target_and_title(
+        canvas: CanvasWidget,
+        initial_color: Color,
+        initial_mode: usize,
+        show_mode_switcher: bool,
+        target: ColorPickerTarget,
+        custom_title: Option<&str>,
     ) -> Self {
         let initial_mesh_info = if target == ColorPickerTarget::Fill { canvas.get_active_mesh_info() } else { None };
         let init_mesh_node = initial_mesh_info.as_ref().map(|(n, _, _, _, _)| *n).unwrap_or(0);
@@ -284,16 +303,20 @@ impl ColorPickerPopover {
             .valign(gtk4::Align::Center)
             .build();
 
-        let initial_title = match target {
-            ColorPickerTarget::Stroke => crate::core::gettext("Stroke Color"),
-            ColorPickerTarget::Fill => match initial_mode {
-                0 => crate::core::gettext("Flat Color"),
-                1 => crate::core::gettext("Gradient"),
-                2 => crate::core::gettext("Mesh Gradient"),
-                3 => crate::core::gettext("Patterns"),
-                _ => crate::core::gettext("Flat Color"),
-            },
-            ColorPickerTarget::Standalone => crate::core::gettext("Flat Color"),
+        let initial_title = if let Some(t) = custom_title {
+            t.to_string()
+        } else {
+            match target {
+                ColorPickerTarget::Stroke => crate::core::gettext("Stroke Color"),
+                ColorPickerTarget::Fill => match initial_mode {
+                    0 => crate::core::gettext("Flat Color"),
+                    1 => crate::core::gettext("Gradient"),
+                    2 => crate::core::gettext("Mesh Gradient"),
+                    3 => crate::core::gettext("Patterns"),
+                    _ => crate::core::gettext("Flat Color"),
+                },
+                ColorPickerTarget::Standalone => crate::core::gettext("Color"),
+            }
         };
 
         let title_lbl = gtk4::Label::builder()
