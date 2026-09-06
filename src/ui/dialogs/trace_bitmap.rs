@@ -140,12 +140,12 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
         crate::core::gettext("Colors"),
         crate::core::gettext("Outlines"),
     ];
-    let mode_dropdown = gtk4::DropDown::from_strings(&modes.iter().map(|s| s.as_str()).collect::<Vec<_>>());
-    let mode_row = adw::ActionRow::builder()
+    let mode_model = gtk4::StringList::new(&modes.iter().map(|s| s.as_str()).collect::<Vec<_>>());
+    let mode_row = adw::ComboRow::builder()
         .title(&crate::core::gettext("Mode"))
         .subtitle(&crate::core::gettext("Vectorization algorithm"))
+        .model(&mode_model)
         .build();
-    mode_row.add_suffix(&mode_dropdown);
     mode_group.add(&mode_row);
     settings_box.append(&mode_group);
 
@@ -471,8 +471,8 @@ pub fn show_trace_bitmap_dialog(parent: &impl IsA<gtk4::Widget>, canvas: CanvasW
         let trig = trigger_update.clone();
         let colors_r = colors_row.clone();
         let thresh_r = thresh_row.clone();
-        mode_dropdown.connect_selected_notify(move |dd| {
-            let idx = dd.selected();
+        mode_row.connect_selected_notify(move |row| {
+            let idx = row.selected();
             if let Ok(mut c) = cfg.try_borrow_mut() {
                 match idx {
                     0 => c.mode = TraceMode::BrightnessCutoff,

@@ -782,10 +782,24 @@ impl CanvasWidget {
 
     // Clipboard & Clones
     pub fn has_clipboard(&self) -> bool {
-        self.state
-            .try_borrow()
-            .map(|s| !s.document.clipboard.is_empty())
-            .unwrap_or(false)
+        if let Ok(state) = self.state.try_borrow() {
+            if !state.document.clipboard.is_empty() {
+                return true;
+            }
+        }
+        if let Some(display) = gdk::Display::default() {
+            let clipboard = display.clipboard();
+            let formats = clipboard.formats();
+            if formats.contains_type(gdk::Texture::static_type())
+                || formats.contains_type(glib::types::Type::STRING)
+                || formats.mime_types().iter().any(|m| {
+                    m.starts_with("image/") || m.starts_with("text/") || m.contains("svg")
+                })
+            {
+                return true;
+            }
+        }
+        false
     }
 
     pub fn copy_selected(&self) {

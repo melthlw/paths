@@ -109,7 +109,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
 
     let btn_activate_tool = gtk4::Button::builder()
         .label(&crate::core::gettext("Create Image Frame"))
-        .css_classes(["suggested-action", "pill"])
+        .css_classes(["suggested-action"])
         .halign(gtk4::Align::Center)
         .build();
     {
@@ -122,7 +122,6 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
 
     let btn_rasterize = gtk4::Button::builder()
         .label(&crate::core::gettext("Rasterize Selection to Bitmap"))
-        .css_classes(["pill"])
         .halign(gtk4::Align::Center)
         .build();
     let btn_rasterize_c = btn_rasterize.clone();
@@ -136,7 +135,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
 
     let btn_import = gtk4::Button::builder()
         .label(&crate::core::gettext("Import Image File..."))
-        .css_classes(["flat", "pill"])
+        .css_classes(["flat"])
         .halign(gtk4::Align::Center)
         .build();
     {
@@ -394,12 +393,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     }
     adj_group.set_header_suffix(Some(&btn_reset_adjustments));
 
-    // Preset DropDown Row
-    let preset_row = adw::ActionRow::builder()
-        .title(&crate::core::gettext("Preset"))
-        .build();
-    preset_row.add_prefix(&gtk4::Image::from_icon_name("applications-graphics-symbolic"));
-
+    // Preset ComboRow (Native Libadwaita)
     let preset_names = [
         crate::core::gettext("Normal"),
         crate::core::gettext("Vibrant"),
@@ -408,9 +402,12 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         crate::core::gettext("Warm"),
         crate::core::gettext("Cool"),
     ];
-    let preset_dropdown = gtk4::DropDown::from_strings(&preset_names.iter().map(|s| s.as_str()).collect::<Vec<_>>());
-    preset_dropdown.set_valign(gtk4::Align::Center);
-    preset_row.add_suffix(&preset_dropdown);
+    let preset_model = gtk4::StringList::new(&preset_names.iter().map(|s| s.as_str()).collect::<Vec<_>>());
+    let preset_row = adw::ComboRow::builder()
+        .title(&crate::core::gettext("Preset"))
+        .model(&preset_model)
+        .build();
+    preset_row.add_prefix(&gtk4::Image::from_icon_name("applications-graphics-symbolic"));
     adj_group.add(&preset_row);
 
     // High Density Sliders (using expansive tracks that fill the card)
@@ -493,8 +490,8 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     // Preset selection logic
     {
         let cv = canvas.clone();
-        preset_dropdown.connect_selected_notify(move |dd| {
-            let (br, ct, st, hr, bl, inv, gs, sp) = match dd.selected() {
+        preset_row.connect_selected_notify(move |row| {
+            let (br, ct, st, hr, bl, inv, gs, sp) = match row.selected() {
                 1 => (0.04, 1.18, 1.45, 0.0, 0.0, false, false, false), // Vibrant
                 2 => (-0.02, 1.35, 0.0, 0.0, 0.0, false, true, false),  // B&W
                 3 => (-0.04, 1.12, 0.85, 0.0, 0.0, false, false, true), // Vintage
@@ -525,21 +522,19 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         .title(&crate::core::gettext("Bitmap Vectorization"))
         .build();
 
-    // Mode Row
-    let mode_row = adw::ActionRow::builder()
-        .title(&crate::core::gettext("Mode"))
-        .subtitle(&crate::core::gettext("Vectorization algorithm"))
-        .build();
-    mode_row.add_prefix(&gtk4::Image::from_icon_name("object-to-path-symbolic"));
-
+    // Mode ComboRow (Native Libadwaita)
     let trace_mode_names = [
         crate::core::gettext("Monochrome"),
         crate::core::gettext("Colors"),
         crate::core::gettext("Outlines"),
     ];
-    let trace_mode_dd = gtk4::DropDown::from_strings(&trace_mode_names.iter().map(|s| s.as_str()).collect::<Vec<_>>());
-    trace_mode_dd.set_valign(gtk4::Align::Center);
-    mode_row.add_suffix(&trace_mode_dd);
+    let trace_mode_model = gtk4::StringList::new(&trace_mode_names.iter().map(|s| s.as_str()).collect::<Vec<_>>());
+    let mode_row = adw::ComboRow::builder()
+        .title(&crate::core::gettext("Mode"))
+        .subtitle(&crate::core::gettext("Vectorization algorithm"))
+        .model(&trace_mode_model)
+        .build();
+    mode_row.add_prefix(&gtk4::Image::from_icon_name("object-to-path-symbolic"));
     trace_group.add(&mode_row);
 
     // Parameter: Threshold Slider (Monochrome / Outlines)
@@ -610,12 +605,12 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
         .build();
     trace_group.add(&keep_trace_sw);
 
-    // Mode dropdown listener to toggle threshold vs colors row
+    // Mode ComboRow listener to toggle threshold vs colors row
     {
         let r_thresh = thresh_row.clone();
         let r_colors = colors_row.clone();
-        trace_mode_dd.connect_selected_notify(move |dd| {
-            match dd.selected() {
+        mode_row.connect_selected_notify(move |row| {
+            match row.selected() {
                 1 => {
                     // Color Quantization
                     r_thresh.set_visible(false);
@@ -651,12 +646,12 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // Action Buttons: Clear, prominent, fully labeled actions
+    // Action Buttons: Clear, prominent, compact native GNOME actions
     // ─────────────────────────────────────────────────────────────
     let action_box = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Vertical)
-        .spacing(8)
-        .margin_top(12)
+        .spacing(6)
+        .margin_top(8)
         .margin_bottom(6)
         .margin_start(4)
         .margin_end(4)
@@ -664,7 +659,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
 
     let btn_trace_direct = gtk4::Button::builder()
         .tooltip_text(&crate::core::gettext("Vectorize raster image into editable paths"))
-        .css_classes(["suggested-action", "pill"])
+        .css_classes(["suggested-action"])
         .halign(gtk4::Align::Fill)
         .build();
     let direct_box = gtk4::Box::builder()
@@ -678,7 +673,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
 
     {
         let cv = canvas.clone();
-        let m_dd = trace_mode_dd.clone();
+        let m_row = mode_row.clone();
         let sc_th = thresh_scale.clone();
         let row_col = colors_row.clone();
         let sc_de = detail_scale.clone();
@@ -690,7 +685,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
             let Some(img) = cv.get_selected_image_element() else {
                 return;
             };
-            let mode = match m_dd.selected() {
+            let mode = match m_row.selected() {
                 1 => crate::core::trace::TraceMode::ColorQuantization,
                 2 => crate::core::trace::TraceMode::EdgeDetection,
                 _ => crate::core::trace::TraceMode::BrightnessCutoff,
@@ -715,7 +710,7 @@ pub fn build_image_section(canvas: &CanvasWidget) -> ImageSection {
 
     let btn_trace_dialog = gtk4::Button::builder()
         .tooltip_text(&crate::core::gettext("Open advanced interactive live preview dialog"))
-        .css_classes(["pill"])
+        .css_classes(["flat"])
         .halign(gtk4::Align::Fill)
         .build();
     let dialog_box = gtk4::Box::builder()

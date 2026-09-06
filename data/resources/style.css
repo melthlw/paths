@@ -992,3 +992,13 @@
     font-weight: bold;
     color: @accent_color;
 }
+
+/* GNOME HIG Compact DropDown Styling */
+dropdown > button {
+    min-height: 28px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: normal;
+}
+

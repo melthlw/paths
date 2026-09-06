@@ -40,21 +40,6 @@ pub fn build_header_bar(
         .spacing(4)
         .build();
 
-    let welcome_btn = gtk4::Button::builder()
-        .icon_name("window-new-symbolic")
-        .tooltip_text(&crate::core::gettext("Start Screen / Welcome"))
-        .css_classes(["flat"])
-        .focus_on_click(false)
-        .build();
-    let canvas_w = canvas.clone();
-    let file_ops_w = file_ops.clone();
-    let main_win_w = main_win_holder.clone();
-    welcome_btn.connect_clicked(move |_| {
-        let parent = main_win_w.borrow().clone();
-        crate::ui::welcome::show_welcome_window(parent.as_ref(), canvas_w.clone(), file_ops_w.clone());
-    });
-    start_box.append(&welcome_btn);
-
     let toggle_layers_btn = gtk4::ToggleButton::builder()
         .icon_name("sidebar-layers-symbolic")
         .tooltip_text(&crate::core::gettext("Layers Panel"))
